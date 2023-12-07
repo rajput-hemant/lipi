@@ -13,7 +13,7 @@
     "fmt:check": "prettier --check \"**/*.{ts,tsx,mdx,json}\" --cache",
     "prepare": "husky install",
     "db:generate": "drizzle-kit generate:pg",
-    "db:migrate": "bunx lib/db/migrate.ts",
+    "db:migrate": "bun lib/db/migrate.ts",
     "db:drop": "drizzle-kit drop",
     "db:pull": "drizzle-kit introspect:pg",
     "db:studio": "drizzle-kit studio",
