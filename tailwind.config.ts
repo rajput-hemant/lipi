@@ -60,6 +60,8 @@ const config = {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
         mono: ["var(--font-mono)", ...fontFamily.mono],
+        heading: ["var(--font-heading)", ...fontFamily.sans],
+        handwriting: ["var(--font-handwriting)", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {

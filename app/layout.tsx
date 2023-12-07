@@ -3,7 +3,7 @@ import "@/app/globals.css";
 import type { Metadata, Viewport } from "next";
 
 import { siteConfig } from "@/config/site";
-import { fontMono, fontSans } from "@/lib/fonts";
+import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
 import { absoluteUrl, cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
@@ -68,6 +68,8 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
         className={cn(
           fontSans.variable,
           fontMono.variable,
+          fontHeading.variable,
+          fontHandwriting.variable,
           "min-h-screen scroll-smooth font-sans antialiased"
         )}
       >
