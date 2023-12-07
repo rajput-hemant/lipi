@@ -1,34 +1,17 @@
-import { Inter, Overpass, Poppins } from "next/font/google";
-import { GeistMono } from "geist/font/mono";
-import { GeistSans } from "geist/font/sans";
-
-/* -----------------------------------------------------------------------------------------------
- * Geist Fonts (https://vercel.com/font / https://www.npmjs.com/package/geist)
- * -----------------------------------------------------------------------------------------------*/
-
-export const fontSans = GeistSans;
-
-export const fontMono = GeistMono;
+import { Inter, JetBrains_Mono } from "next/font/google";
 
 /* -----------------------------------------------------------------------------------------------
  * Google Fonts
  * -----------------------------------------------------------------------------------------------*/
 
-export const fontInter = Inter({
-  variable: "--font-inter",
+export const fontSans = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-export const poppins = Poppins({
-  variable: "--font-poppins",
+export const fontMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-});
-
-export const overpass = Overpass({
-  variable: "--font-overpass",
-  subsets: ["latin"],
-  display: "swap",
 });
 
 /* -----------------------------------------------------------------------------------------------

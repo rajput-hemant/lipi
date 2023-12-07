@@ -26,8 +26,8 @@
   },
   "settings": {
     "tailwindcss": {
-      "callees": ["cn"],
-      "config": "tailwind.config.js"
+      "callees": ["cn", "cva"],
+      "config": "tailwind.config.ts"
     },
     "next": {
       "rootDir": ["./"]
