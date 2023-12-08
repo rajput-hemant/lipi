@@ -7,7 +7,9 @@ const nextConfig = {
     remotePatterns: [],
     // unoptimized: true,
   },
-  experimental: {},
+  experimental: {
+    typedRoutes: true,
+  },
   // ...
 };
 

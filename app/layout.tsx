@@ -70,7 +70,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           fontMono.variable,
           fontHeading.variable,
           fontHandwriting.variable,
-          "min-h-screen scroll-smooth font-sans antialiased"
+          "min-h-screen scroll-smooth font-sans antialiased selection:bg-foreground selection:text-background"
         )}
       >
         <Providers>
