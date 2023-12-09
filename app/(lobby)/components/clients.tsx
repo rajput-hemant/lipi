@@ -36,6 +36,7 @@ export function Clients() {
                 <Image
                   src={logo}
                   alt={alt}
+                  height={200}
                   width={200}
                   className="max-w-none object-contain grayscale"
                 />

@@ -10,14 +10,14 @@ export function LobbyNavbar() {
       <nav className="container flex h-full items-center justify-between">
         <Link
           href="/"
-          className="px-4 font-handwriting text-xl font-bold lowercase"
+          className="px-4 font-handwriting text-xl font-bold lowercase [text-shadow:_0_2px_0_#e1e1e1] dark:[text-shadow:none]"
         >
           {siteConfig.name}
         </Link>
 
         <div className="hidden space-x-4 px-10 text-sm font-medium text-muted-foreground md:inline-block">
           <Link
-            href="#features"
+            href="/#features"
             className="transition-colors hover:text-foreground"
           >
             Features

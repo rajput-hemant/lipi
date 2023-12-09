@@ -1,15 +1,9 @@
-import client1 from "@/public/placeholders/client-1.png";
-import client2 from "@/public/placeholders/client-2.png";
-import client3 from "@/public/placeholders/client-3.png";
-import client4 from "@/public/placeholders/client-4.png";
-import client5 from "@/public/placeholders/client-5.png";
-
 export const CLIENTS = [
-  { alt: "client1", logo: client1 },
-  { alt: "client2", logo: client2 },
-  { alt: "client3", logo: client3 },
-  { alt: "client4", logo: client4 },
-  { alt: "client5", logo: client5 },
+  { alt: "client1", logo: "/placeholders/client-1.png" },
+  { alt: "client2", logo: "/placeholders/client-2.png" },
+  { alt: "client3", logo: "/placeholders/client-3.png" },
+  { alt: "client4", logo: "/placeholders/client-4.png" },
+  { alt: "client5", logo: "/placeholders/client-5.png" },
 ];
 
 export const USERS = [
@@ -109,3 +103,34 @@ export const USERS = [
       "Cypress is a fantastic tool that has revolutionized our workflow. Our productivity and collaboration have reached new heights.",
   },
 ];
+
+export const PRICING_CARDS = [
+  {
+    planType: "Free Plan",
+    price: "0",
+    description: "Limited block trials for teams",
+    highlightFeature: "",
+    features: [
+      "Unlimited blocks for teams",
+      "Unlimited file uploads",
+      "30 day page history",
+      "Invite 2 guests",
+    ],
+  },
+  {
+    planType: "Pro Plan",
+    price: "499",
+    description: "Billed annually. $17 billed monthly",
+    highlightFeature: "Everything in free +",
+    features: [
+      "Unlimited blocks for teams",
+      "Unlimited file uploads",
+      "1 year day page history",
+      "Invite 10 guests",
+    ],
+  },
+];
+
+export const PRICING_PLANS = { proplan: "Pro Plan", freeplan: "Free Plan" };
+
+export const MAX_FOLDERS_FREE_PLAN = 3;

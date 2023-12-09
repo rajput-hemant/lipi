@@ -81,3 +81,18 @@ export async function getGitHubStars(): Promise<string | null> {
     return null;
   }
 }
+
+/**
+ * Formats the given amount to the given currency
+ * @param amount The amount to format
+ * @param currency The currency to format the amount to
+ * @returns The formatted amount
+ */
+export const formatCurrency = (amount: number, currency: string | null) => {
+  return amount.toLocaleString("en-US", {
+    style: "currency",
+    currency: currency ?? "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
