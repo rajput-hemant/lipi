@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/icons";
 import { buttonVariants } from "@/components/ui/button";
 
 export function LobbyNavbar() {
@@ -10,12 +11,13 @@ export function LobbyNavbar() {
       <nav className="container flex h-full items-center justify-between">
         <Link
           href="/"
-          className="px-4 font-handwriting text-xl font-bold lowercase [text-shadow:_0_2px_0_#e1e1e1] dark:[text-shadow:none]"
+          className="flex gap-2 px-4 font-handwriting text-xl lowercase [text-shadow:_0_2px_0_#e1e1e1] dark:[text-shadow:none]"
         >
+          <Logo size={28} />
           {siteConfig.name}
         </Link>
 
-        <div className="hidden space-x-4 px-10 text-sm font-medium text-muted-foreground md:inline-block">
+        <div className="hidden space-x-4 px-5 text-sm font-medium text-muted-foreground md:inline-block">
           <Link
             href="/#features"
             className="transition-colors hover:text-foreground"

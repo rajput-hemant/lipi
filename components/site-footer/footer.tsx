@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { siteConfig } from "@/config/site";
-import { GitHub, X } from "../icons";
+import { GitHub, Logo, X } from "../icons";
 import { Separator } from "../ui/separator";
 import { NewsletterSubscriptionForm } from "./newsletter-subscription-form";
 import { ThemeToggleGroup } from "./theme-toggle-group";
@@ -32,8 +32,9 @@ export function SiteFooter() {
           <div className="col-span-full">
             <Link
               href="/"
-              className="flex items-center font-handwriting text-3xl font-semibold lowercase"
+              className="flex gap-2 px-4 font-handwriting text-xl lowercase [text-shadow:_0_2px_0_#e1e1e1] dark:[text-shadow:none]"
             >
+              <Logo size={28} />
               {siteConfig.name}
             </Link>
           </div>
