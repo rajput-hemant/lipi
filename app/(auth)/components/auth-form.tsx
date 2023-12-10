@@ -3,11 +3,20 @@
 import React from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Key, Loader2, Mail } from "lucide-react";
+import {
+  AtSign,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  Key,
+  Loader2,
+  Mail,
+} from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import type * as z from "zod";
 
+import { createNewAccount, resetPassword } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { authSchema } from "@/lib/validations";
 import { toast } from "@/hooks/use-toast";
@@ -32,27 +41,56 @@ type FormData = z.infer<typeof authSchema>;
 type AuthFormProps = { mode: "login" | "signup" | "reset" };
 
 export function AuthForm({ mode }: AuthFormProps) {
+  const [isEmailMode, setIsEmailMode] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isConfirmPassVisible, setIsConfirmPassVisible] = React.useState(false);
 
   const form = useForm<FormData>({ resolver: zodResolver(authSchema) });
 
-  function onSubmit(values: FormData) {
-    console.log(values);
+  function signInToaster() {
+    toast({
+      title: "Signing in...",
+      description: "Please wait while we sign you in",
+    });
+  }
+
+  function onSubmit({ username, email, password }: FormData) {
+    setIsSubmitting(true);
+    try {
+      if (mode === "login") {
+        signInToaster();
+        signIn("credentials", { username, email, password });
+      } else if (mode === "signup") {
+        toast({
+          title: "Creating account...",
+          description: "Please wait while we create your account",
+        });
+        createNewAccount({ mode: "email", email, password });
+      } else {
+        toast({
+          title: "Resetting password...",
+          description: "Please wait while we reset your password",
+        });
+        resetPassword({ mode: "email", email, password });
+      }
+    } catch (error) {
+      const err = error as Error;
+      console.error(err.message);
+    }
+
+    setIsSubmitting(false);
   }
 
   async function googleSignInHandler() {
     setIsSubmitting(true);
 
     try {
-      toast({
-        title: "Signing in...",
-        description: "Please wait while we sign you in",
-      });
+      signInToaster();
       await signIn("google");
     } catch (error) {
-      // ...
+      const err = error as Error;
+      console.error(err.message);
     }
 
     setIsSubmitting(false);
@@ -62,18 +100,17 @@ export function AuthForm({ mode }: AuthFormProps) {
     setIsSubmitting(true);
 
     try {
-      toast({
-        title: "Signing in...",
-        description: "Please wait while we sign you in",
-      });
+      signInToaster();
       await signIn("github");
     } catch (error) {
-      // ...
+      const err = error as Error;
+      console.error(err.message);
     }
 
     setIsSubmitting(false);
   }
 
+  const toggleCredentialMode = () => setIsEmailMode(!isEmailMode);
   const togglePassVisibility = () => setIsPassVisible(!isPassVisible);
   const toggleConfirmPassVisibility = () =>
     setIsConfirmPassVisible(!isConfirmPassVisible);
@@ -92,19 +129,46 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-2">
         <FormField
-          name="email"
+          name={isEmailMode ? "email" : "username"}
           control={form.control}
           render={({ field }) => (
             <FormItem className="space-y-1">
-              <FormLabel className="sr-only">Email</FormLabel>
+              <FormLabel className="sr-only">
+                {isEmailMode ? "Email" : "Username"}
+              </FormLabel>
               <FormControl>
-                <Input
-                  type="email"
-                  disabled={isSubmitting}
-                  placeholder="you@domain.com"
-                  className="shadow-sm"
-                  {...field}
-                />
+                <div className="relative">
+                  <Input
+                    type={isEmailMode ? "email" : "text"}
+                    disabled={isSubmitting}
+                    placeholder={isEmailMode ? "you@domain.com" : "@username"}
+                    className={cn("shadow-sm", mode === "login" && "pr-8")}
+                    {...field}
+                  />
+                  {mode === "login" && (
+                    <Tooltip delayDuration={150}>
+                      <TooltipTrigger
+                        type="button"
+                        onClick={toggleCredentialMode}
+                        className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        {isEmailMode ? (
+                          <AtSign className="h-5 w-5" />
+                        ) : (
+                          <Mail className="h-5 w-5" />
+                        )}
+                      </TooltipTrigger>
+
+                      <TooltipContent>
+                        <p className="text-xs">
+                          {isEmailMode
+                            ? "Use Username instead"
+                            : "Use Email instead"}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -210,12 +274,18 @@ export function AuthForm({ mode }: AuthFormProps) {
               {mode === "reset" ? (
                 <Key className="mr-2 h-4 w-4" />
               ) : (
-                <Mail className="mr-2 h-4 w-4" />
+                <>
+                  {isEmailMode ? (
+                    <Mail className="mr-2 h-4 w-4" />
+                  ) : (
+                    <Fingerprint className="mr-2 h-4 w-4" />
+                  )}
+                </>
               )}
             </>
           )}
           {mode === "reset" && "Reset Password"}
-          {mode === "login" && "Login with Email"}
+          {mode === "login" && isEmailMode ? "Login with Email" : "Login"}
           {mode === "signup" && "Sign Up with Email"}
         </Button>
       </form>

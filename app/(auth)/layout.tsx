@@ -11,9 +11,11 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
       <div className="relative hidden h-full flex-col justify-between border-r p-10 lg:flex">
         <div className="absolute inset-0 bg-zinc-900" />
 
-        <div className="z-10 flex items-center gap-2 font-handwriting text-2xl font-medium lowercase text-background dark:text-foreground">
-          <Logo size={32} />
-          {siteConfig.name}
+        <div className="z-10 font-handwriting text-2xl font-medium lowercase text-background dark:text-foreground">
+          <Link href="/" className="flex items-center gap-2">
+            <Logo size={32} />
+            {siteConfig.name}
+          </Link>
         </div>
 
         <div className="m-auto">

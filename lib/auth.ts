@@ -98,7 +98,7 @@ export const authOptions: NextAuthOptions = {
       return { id, name, email, picture };
     },
 
-    redirect: () => "/",
+    redirect: () => "/dashboard",
   },
 };
 

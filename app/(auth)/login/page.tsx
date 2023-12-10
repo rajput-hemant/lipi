@@ -13,7 +13,7 @@ export default function LoginPage() {
       </h1>
 
       <p className="text-sm text-muted-foreground">
-        Enter your email below to login
+        Enter your credentials below to login
       </p>
 
       <div className="px-8 sm:mx-auto sm:w-[350px] sm:px-0">
