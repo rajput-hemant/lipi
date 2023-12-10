@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { createTable } from "../table-creator";
+import { users } from "./auth";
 import { pricingPlanInterval, pricingType, subscriptionStatus } from "./enums";
 
 export const workspaces = createTable("workspaces", {
@@ -64,14 +65,13 @@ export const files = createTable("files", {
   }),
 });
 
-export const users = createTable("users", {
-  id: uuid("id").primaryKey().notNull(),
-  fullName: text("full_name"),
-  avatarUrl: text("avatar_url"),
+export const accounts = createTable("accounts", {
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
   billingAddress: jsonb("billing_address"),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
   paymentMethod: jsonb("payment_method"),
-  email: text("email"),
 });
 
 export const customers = createTable("customers", {

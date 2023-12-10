@@ -4,6 +4,7 @@ import { CheckCircle } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -20,7 +21,18 @@ export function NewsletterSubscriptionForm() {
     subscribed: false,
   };
 
+  const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
+
+  // TODO: Add newsletter subscription logic here.
   async function subscribeToNewsletter(_: Form, _formData: FormData) {
+    // simulate a 1s delay
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    toast({
+      title: "Subscribed!",
+      description: "You have successfully subscribed to our newsletter.",
+    });
+
     return {
       errors: [],
       message: null,
@@ -28,11 +40,9 @@ export function NewsletterSubscriptionForm() {
     };
   }
 
-  const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
-
   return (
     <form action={formAction}>
-      <div className={cn("relative", state?.subscribed && "hidden")}>
+      <div className={cn("relative", state.subscribed && "hidden")}>
         <Input
           name="email"
           placeholder="you@domain.com"
@@ -46,17 +56,17 @@ export function NewsletterSubscriptionForm() {
       </div>
 
       <div id="email-validation" aria-live="polite">
-        {state?.errors?.map((error: string) => (
+        {state.errors?.map((error: string) => (
           <p key={error} className="ml-1 mt-1 text-sm text-destructive">
             {error}
           </p>
         ))}
 
-        {state?.message && (
+        {state.message && (
           <p className="ml-1 mt-1 text-sm text-destructive">{state.message}</p>
         )}
 
-        {state?.subscribed && (
+        {state.subscribed && (
           <p className="mt-2 flex flex-row items-center gap-1.5 text-sm duration-300 animate-in slide-in-from-right-full">
             <CheckCircle className="h-5 text-green-600" aria-hidden="true" />
             Thanks for subscribing!
