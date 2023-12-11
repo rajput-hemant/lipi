@@ -6,11 +6,15 @@ export const authSchema = z
       .string()
       .min(1, "Username is Required")
       .regex(/^(?=.{8,15}$)/, "Username must be 8-15 characters long.")
-      .regex(/^[a-zA-Z0-9]+$/, "Username must be alphanumeric."),
+      .regex(/^[a-zA-Z0-9]+$/, "Username must be alphanumeric.")
+      // TODO: conditionally add optional if email is present
+      .optional(),
     email: z
       .string()
       .min(1, "Email is Required")
-      .email("Please enter a valid email"),
+      .email("Please enter a valid email")
+      // TODO: conditionally add optional if username is present
+      .optional(),
     password: z
       .string()
       .min(1, "Password is Required")
@@ -29,9 +33,13 @@ export const authSchema = z
         "Password must contain at least one special character."
       )
       .min(8, "Password must be at least 8 characters long."),
-    confirmPassword: z.string(),
+    confirmPassword: z.string().optional(),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+  .refine(
+    ({ password, confirmPassword }) =>
+      !confirmPassword || password === confirmPassword,
+    {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    }
+  );

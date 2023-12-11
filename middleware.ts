@@ -18,20 +18,7 @@ export default withAuth(
      * Rate limiting middleware
      * -----------------------------------------------------------------------------------------------*/
 
-    if (
-      env.ENABLE_RATE_LIMITING &&
-      env.NODE_ENV === "production" &&
-      /*
-       * Match all request paths except for the ones starting with:
-       * - api (API routes)
-       * - _next/static (static files)
-       * - _next/image (image optimization files)
-       * - favicon.ico (favicon file)
-       */
-      !req.nextUrl.pathname.match(
-        /^\/(api|_next\/static|_next\/image|favicon\.ico)/
-      )
-    ) {
+    if (env.ENABLE_RATE_LIMITING && env.NODE_ENV === "production") {
       const id = req.ip ?? "anonymous";
       const { limit, pending, remaining, reset, success } =
         await ratelimit.limit(id);
@@ -69,8 +56,9 @@ export default withAuth(
     const isAuthPage = (
       ["/login", "/signup", "/reset-password"] as Route[]
     ).some((route) => req.nextUrl.pathname.startsWith(route));
+    const isHomePage = req.nextUrl.pathname === "/";
 
-    if (isAuthPage) {
+    if (isAuthPage || isHomePage) {
       if (isAuth) {
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
@@ -102,5 +90,19 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/login", "/signup", "/reset-password", "/dashboard/:path*"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+
+    "/login",
+    "/signup",
+    "/reset-password",
+    "/dashboard/:path*",
+  ],
 };

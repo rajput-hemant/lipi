@@ -20,6 +20,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
 
         <div className="m-auto">
           <Image
+            priority
             src="/illustrations/success.svg"
             alt="Get started"
             width={500}

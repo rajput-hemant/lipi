@@ -40,13 +40,23 @@ import {
 type FormData = z.infer<typeof authSchema>;
 type AuthFormProps = { mode: "login" | "signup" | "reset" };
 
+const defaultValues: FormData = {
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
+
 export function AuthForm({ mode }: AuthFormProps) {
   const [isEmailMode, setIsEmailMode] = React.useState(true);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isConfirmPassVisible, setIsConfirmPassVisible] = React.useState(false);
+  const [oauthLoading, setOauthLoading] = React.useState<"google" | "github">();
 
-  const form = useForm<FormData>({ resolver: zodResolver(authSchema) });
+  const form = useForm<FormData>({
+    resolver: zodResolver(authSchema),
+    defaultValues,
+    mode: "onChange",
+  });
 
   function signInToaster() {
     toast({
@@ -55,35 +65,32 @@ export function AuthForm({ mode }: AuthFormProps) {
     });
   }
 
-  function onSubmit({ username, email, password }: FormData) {
-    setIsSubmitting(true);
+  async function onSubmit({ email, username, password }: FormData) {
     try {
       if (mode === "login") {
         signInToaster();
-        signIn("credentials", { username, email, password });
+        await signIn("credentials", { username, email, password });
       } else if (mode === "signup") {
         toast({
           title: "Creating account...",
           description: "Please wait while we create your account",
         });
-        createNewAccount({ mode: "email", email, password });
+        await createNewAccount({ mode: "email", email: email!, password });
       } else {
         toast({
           title: "Resetting password...",
           description: "Please wait while we reset your password",
         });
-        resetPassword({ mode: "email", email, password });
+        await resetPassword({ mode: "email", email: email!, password });
       }
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
     }
-
-    setIsSubmitting(false);
   }
 
   async function googleSignInHandler() {
-    setIsSubmitting(true);
+    setOauthLoading("google");
 
     try {
       signInToaster();
@@ -93,11 +100,11 @@ export function AuthForm({ mode }: AuthFormProps) {
       console.error(err.message);
     }
 
-    setIsSubmitting(false);
+    setOauthLoading(undefined);
   }
 
   async function githubSignInHandler() {
-    setIsSubmitting(true);
+    setOauthLoading("github");
 
     try {
       signInToaster();
@@ -107,13 +114,15 @@ export function AuthForm({ mode }: AuthFormProps) {
       console.error(err.message);
     }
 
-    setIsSubmitting(false);
+    setOauthLoading(undefined);
   }
 
   const toggleCredentialMode = () => setIsEmailMode(!isEmailMode);
   const togglePassVisibility = () => setIsPassVisible(!isPassVisible);
   const toggleConfirmPassVisibility = () =>
     setIsConfirmPassVisible(!isConfirmPassVisible);
+
+  const isFormDisabled = !!oauthLoading || form.formState.isSubmitting;
 
   return (
     <Form {...form}>
@@ -140,7 +149,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 <div className="relative">
                   <Input
                     type={isEmailMode ? "email" : "text"}
-                    disabled={isSubmitting}
+                    disabled={isFormDisabled}
                     placeholder={isEmailMode ? "you@domain.com" : "@username"}
                     className={cn("shadow-sm", mode === "login" && "pr-8")}
                     {...field}
@@ -184,7 +193,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                 <div className="relative">
                   <Input
                     type={isPassVisible ? "text" : "password"}
-                    disabled={isSubmitting}
+                    disabled={isFormDisabled}
                     placeholder="••••••••••"
                     className="pr-8 shadow-sm"
                     {...field}
@@ -227,7 +236,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   <div className="relative">
                     <Input
                       type={isConfirmPassVisible ? "text" : "password"}
-                      disabled={isSubmitting}
+                      disabled={isFormDisabled}
                       placeholder="••••••••••"
                       className="pr-8 shadow-sm"
                       {...field}
@@ -264,10 +273,10 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         <Button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isFormDisabled}
           className="w-full shadow-md"
         >
-          {isSubmitting ? (
+          {form.formState.isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <>
@@ -285,7 +294,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             </>
           )}
           {mode === "reset" && "Reset Password"}
-          {mode === "login" && isEmailMode ? "Login with Email" : "Login"}
+          {mode === "login" && (isEmailMode ? "Login with Email" : "Login")}
           {mode === "signup" && "Sign Up with Email"}
         </Button>
       </form>
@@ -307,10 +316,10 @@ export function AuthForm({ mode }: AuthFormProps) {
       <div className="mt-6 flex w-full flex-col space-y-2 text-white">
         <Button
           onClick={googleSignInHandler}
-          disabled={isSubmitting}
+          disabled={isFormDisabled}
           className="w-full shadow-md"
         >
-          {isSubmitting ? (
+          {oauthLoading === "google" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Google className="mr-2 h-4 w-4" />
@@ -320,10 +329,10 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         <Button
           onClick={githubSignInHandler}
-          disabled={isSubmitting}
+          disabled={isFormDisabled}
           className="w-full shadow-md"
         >
-          {isSubmitting ? (
+          {oauthLoading === "github" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <GitHub className="mr-2 h-4 w-4" />

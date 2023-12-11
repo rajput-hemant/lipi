@@ -58,6 +58,7 @@ export function Hero() {
       </div>
 
       <Image
+        priority
         src="/illustrations/home-office.svg"
         alt="Home Office"
         width={500}
