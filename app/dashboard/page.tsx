@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   }
 
   const workspace = await db.query.workspaces.findFirst({
-    where: (workspace, { eq }) => eq(workspace.id, user.id),
+    where: (workspace, { eq }) => eq(workspace.workspaceOwnerId, user.id),
   });
 
   if (!workspace) {
