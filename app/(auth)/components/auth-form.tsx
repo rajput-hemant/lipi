@@ -157,6 +157,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   {mode === "login" && (
                     <Tooltip delayDuration={150}>
                       <TooltipTrigger
+                        tabIndex={-1}
                         type="button"
                         onClick={toggleCredentialMode}
                         className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
@@ -200,6 +201,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                   />
                   <Tooltip delayDuration={150}>
                     <TooltipTrigger
+                      tabIndex={-1}
                       type="button"
                       disabled={!field.value}
                       onClick={togglePassVisibility}
@@ -243,6 +245,7 @@ export function AuthForm({ mode }: AuthFormProps) {
                     />
                     <Tooltip delayDuration={150}>
                       <TooltipTrigger
+                        tabIndex={-1}
                         type="button"
                         disabled={!field.value}
                         onClick={toggleConfirmPassVisibility}
@@ -300,8 +303,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       </form>
 
       {mode === "login" && (
-        <p className="mt-2 text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-          <Link href="/reset-password">Forgot password?</Link>
+        <p className="mt-2 text-xs text-muted-foreground hover:text-foreground">
+          <Link
+            href="/reset-password"
+            className="underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+          >
+            Forgot password?
+          </Link>
         </p>
       )}
 

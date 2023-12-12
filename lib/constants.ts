@@ -134,3 +134,10 @@ export const PRICING_CARDS = [
 export const PRICING_PLANS = { proplan: "Pro Plan", freeplan: "Free Plan" };
 
 export const MAX_FOLDERS_FREE_PLAN = 3;
+
+export const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
