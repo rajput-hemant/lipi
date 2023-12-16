@@ -1,8 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { LayoutGrid, LogOut, Plus, Settings, Trash2 } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 import { Logo } from "../icons";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button, buttonVariants } from "../ui/button";
@@ -10,12 +14,19 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { FolderAccordion } from "./folder-accordion";
 
-type DashboardSidebarProps = React.ComponentProps<"aside">;
+type SidebarProps = React.ComponentProps<"aside">;
 
-export function DashboardSidebar({
-  className,
-  ...props
-}: DashboardSidebarProps) {
+export function DashboardSidebar({ className, ...props }: SidebarProps) {
+  async function signOutHandler() {
+    const { dismiss } = toast({
+      title: "Signing out...",
+      description: "Please wait while we sign you out.",
+    });
+
+    await signOut();
+    dismiss();
+  }
+
   return (
     <aside
       className={cn(
@@ -99,8 +110,13 @@ export function DashboardSidebar({
             {siteConfig.author.name}
           </p>
 
-          <Button size="icon" variant="ghost" className="ml-auto">
-            <LogOut className="h-5 w-5" />
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={signOutHandler}
+            className="ml-auto"
+          >
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>

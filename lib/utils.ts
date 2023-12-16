@@ -37,7 +37,8 @@ export function absoluteUrl(path: string) {
       case "production":
         return `${siteConfig.url}${path}`;
 
-      case "deploy-preview" || "branch-deploy":
+      case "deploy-preview":
+      case "branch-deploy":
         return `https://${process.env.DEPLOY_PRIME_URL}${path}`;
 
       default:

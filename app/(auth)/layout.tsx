@@ -56,14 +56,14 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
             By clicking continue, you agree to our{" "}
             <Link
               href="/terms"
-              className="underline-offset-4 hover:text-foreground hover:underline focus-visible:underline focus-visible:outline-none"
+              className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
             >
               Terms of Service
             </Link>{" "}
             and{" "}
             <Link
               href="/privacy"
-              className="underline-offset-4 hover:text-foreground hover:underline focus-visible:underline focus-visible:outline-none"
+              className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
             >
               Privacy Policy
             </Link>

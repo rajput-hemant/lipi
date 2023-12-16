@@ -59,17 +59,20 @@ export function AuthForm({ mode }: AuthFormProps) {
   });
 
   function signInToaster() {
-    toast({
+    const { dismiss } = toast({
       title: "Signing in...",
       description: "Please wait while we sign you in",
     });
+
+    return { dismiss };
   }
 
   async function onSubmit({ email, username, password }: FormData) {
     try {
       if (mode === "login") {
-        signInToaster();
+        const { dismiss } = signInToaster();
         await signIn("credentials", { username, email, password });
+        dismiss();
       } else if (mode === "signup") {
         toast({
           title: "Creating account...",
@@ -93,8 +96,9 @@ export function AuthForm({ mode }: AuthFormProps) {
     setOauthLoading("google");
 
     try {
-      signInToaster();
+      const { dismiss } = signInToaster();
       await signIn("google");
+      dismiss();
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
@@ -107,8 +111,9 @@ export function AuthForm({ mode }: AuthFormProps) {
     setOauthLoading("github");
 
     try {
-      signInToaster();
+      const { dismiss } = signInToaster();
       await signIn("github");
+      dismiss();
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
@@ -281,20 +286,12 @@ export function AuthForm({ mode }: AuthFormProps) {
         >
           {form.formState.isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : mode === "reset" ? (
+            <Key className="mr-2 h-4 w-4" />
+          ) : isEmailMode ? (
+            <Mail className="mr-2 h-4 w-4" />
           ) : (
-            <>
-              {mode === "reset" ? (
-                <Key className="mr-2 h-4 w-4" />
-              ) : (
-                <>
-                  {isEmailMode ? (
-                    <Mail className="mr-2 h-4 w-4" />
-                  ) : (
-                    <Fingerprint className="mr-2 h-4 w-4" />
-                  )}
-                </>
-              )}
-            </>
+            <Fingerprint className="mr-2 h-4 w-4" />
           )}
           {mode === "reset" && "Reset Password"}
           {mode === "login" && (isEmailMode ? "Login with Email" : "Login")}
