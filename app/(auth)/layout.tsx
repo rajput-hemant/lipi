@@ -2,7 +2,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { siteConfig } from "@/config/site";
 import { Logo } from "@/components/icons";
 
 export default function AuthLayout({ children }: React.PropsWithChildren) {
@@ -16,8 +15,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
             href="/"
             className="flex items-center gap-2 rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <Logo size={32} />
-            {siteConfig.name}
+            <Logo size={48} />
           </Link>
         </div>
 
@@ -37,7 +35,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
             Illustrations by{" "}
             <a
               href="https://popsy.co/"
-              className="underline-offset-4 transition-colors hover:text-background hover:underline focus-visible:underline focus-visible:outline-none dark:hover:text-foreground"
+              className="underline underline-offset-4 transition-colors hover:text-background focus-visible:underline focus-visible:outline-none dark:hover:text-foreground"
             >
               Popsy
             </a>

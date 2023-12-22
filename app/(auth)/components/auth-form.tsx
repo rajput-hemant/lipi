@@ -134,8 +134,8 @@ export function AuthForm({ mode }: AuthFormProps) {
       <Link
         href={mode === "login" ? "/signup" : "/login"}
         className={cn(
-          buttonVariants({ variant: "secondary" }),
-          "absolute right-4 top-4 md:right-8 md:top-8"
+          buttonVariants({ size: "sm", variant: "outline" }),
+          "absolute right-4 top-4 w-20 transition-all duration-200 hover:ring-2 hover:ring-border hover:ring-offset-2 hover:ring-offset-background md:right-8 md:top-8"
         )}
       >
         {mode === "login" ? "Sign Up" : "Login"}
@@ -282,7 +282,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           type="submit"
           disabled={isFormDisabled}
-          className="w-full shadow-md"
+          className="w-full font-semibold shadow-md"
         >
           {form.formState.isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -322,7 +322,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           onClick={googleSignInHandler}
           disabled={isFormDisabled}
-          className="w-full shadow-md"
+          className="w-full font-semibold shadow-md"
         >
           {oauthLoading === "google" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -335,7 +335,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <Button
           onClick={githubSignInHandler}
           disabled={isFormDisabled}
-          className="w-full shadow-md"
+          className="w-full font-semibold shadow-md"
         >
           {oauthLoading === "github" ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

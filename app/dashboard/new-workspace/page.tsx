@@ -14,8 +14,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { WorkspaceForm } from "./workspace-form";
 
-export async function WorkspaceSetup() {
+export const metadata = {
+  title: "Create a workspace",
+  description: "Create a new workspace to organize your projects.",
+};
+
+export default async function WorkspaceSetupPage() {
   const user = await getCurrentUser();
+
   if (!user) redirect("/login");
 
   const { data: status, error } = await getUserSubscriptionStatus(user.id);
@@ -46,7 +52,7 @@ export async function WorkspaceSetup() {
       <Separator orientation="vertical" />
 
       <section className="flex h-full w-full flex-col items-center justify-center gap-14 px-4">
-        <h1 className="text-center font-heading text-4xl font-bold [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-foreground dark:to-gray-500 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] sm:text-5xl md:text-6xl">
+        <h1 className="text-center font-heading text-4xl font-bold [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] sm:text-5xl md:text-6xl">
           Create your first
           <br />
           workspace

@@ -2,7 +2,11 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { WorkspaceSetup } from "./components/workspace-setup";
+
+export const metadata = {
+  title: "Dashboard",
+  description: "Your workspaces",
+};
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -16,7 +20,7 @@ export default async function DashboardPage() {
   });
 
   if (!workspace) {
-    return <WorkspaceSetup />;
+    redirect(`/dashboard/new-workspace`);
   }
 
   redirect(`/dashboard/${workspace.id}`);
