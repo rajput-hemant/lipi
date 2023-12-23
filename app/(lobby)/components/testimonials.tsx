@@ -13,9 +13,9 @@ import {
 
 export function Testimonials() {
   return (
-    <section id="testimonials" className="container space-y-6">
+    <section id="testimonials" className="container">
       <div className="mx-auto flex max-w-3xl flex-col items-center space-y-4 text-center">
-        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-foreground dark:to-gray-500 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
+        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
           Trusted by all
         </h2>
 
@@ -27,9 +27,9 @@ export function Testimonials() {
 
       <div
         className={cn(
-          "relative flex flex-col overflow-hidden",
-          "before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-40 before:bg-gradient-to-r before:from-background md:before:w-72",
-          "after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-40 after:bg-gradient-to-l after:from-background md:after:w-72"
+          "relative -mx-10 flex flex-col overflow-hidden pb-10 md:mx-0",
+          "before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-20 before:bg-gradient-to-r before:from-background md:before:w-72",
+          "after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-20 after:bg-gradient-to-l after:from-background md:after:w-72"
         )}
       >
         {[...Array(2)].map((_, i) => (
@@ -49,7 +49,7 @@ export function Testimonials() {
             {USERS.map(({ name, message }, i) => (
               <Card
                 key={name}
-                className="w-[28rem] shrink-0 rounded-xl dark:bg-gradient-to-br dark:from-border/50 dark:to-background"
+                className="w-[28rem] shrink-0 rounded-xl duration-300 hover:shadow-md dark:bg-gradient-to-br dark:from-border/50 dark:to-background"
               >
                 <CardHeader>
                   <div className="flex items-center gap-4">
@@ -61,7 +61,7 @@ export function Testimonials() {
                     </Avatar>
 
                     <div>
-                      <CardTitle>{name}</CardTitle>
+                      <CardTitle className="drop-shadow-2xl">{name}</CardTitle>
                       <CardDescription>
                         @{name.toLocaleLowerCase()}
                       </CardDescription>
@@ -70,7 +70,7 @@ export function Testimonials() {
                 </CardHeader>
 
                 <CardContent>
-                  <p className="text-[15px]">{message}</p>
+                  <p className="text-[15px] leading-5">{message}</p>
                 </CardContent>
               </Card>
             ))}

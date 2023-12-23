@@ -117,8 +117,8 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
             </ScrollArea>
           </div>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
-            <FolderX size={36} />
+          <div className="mb-10 flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
+            <FolderX size={32} />
             <p className="text-center text-sm">
               You don&apos;t have any folders yet.
             </p>

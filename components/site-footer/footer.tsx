@@ -29,14 +29,36 @@ export function SiteFooter() {
     <footer className="border-t py-10">
       <div className="mx-auto w-full max-w-none px-5 text-sm sm:max-w-[90%] sm:px-0 2xl:max-w-7xl">
         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] items-stretch justify-between gap-y-10 sm:gap-x-6 md:flex md:flex-wrap">
-          <div className="col-span-full">
+          <div className="col-span-full flex items-center justify-between gap-4 md:flex-col">
             <Link
               href="/"
-              className="flex gap-2 px-4 font-handwriting text-xl lowercase [text-shadow:_0_2px_0_#e1e1e1] dark:[text-shadow:none]"
+              className="flex gap-2 font-handwriting text-xl lowercase [text-shadow:_0_2px_0_#e1e1e1] dark:[text-shadow:none]"
             >
               <Logo size={28} />
               {siteConfig.name}
             </Link>
+
+            <div className="flex justify-center gap-3 text-muted-foreground">
+              <a
+                href={siteConfig.links.github}
+                target="_blank"
+                rel="noreferrer"
+                className="duration-200 hover:text-foreground"
+              >
+                <GitHub className="h-4 w-4 shrink-0" />
+              </a>
+
+              <Separator orientation="vertical" className="h-4" />
+
+              <a
+                href={siteConfig.links.x}
+                target="_blank"
+                rel="noreferrer"
+                className="duration-200 hover:text-foreground"
+              >
+                <X className="h-4 w-4 shrink-0" />
+              </a>
+            </div>
           </div>
 
           {footerLinks.map((section) => (
@@ -71,44 +93,20 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-8 flex items-center justify-between lg:mt-12">
-          <div className="flex flex-col text-muted-foreground">
-            <div className="hidden gap-3 md:flex">
+          <p className="mt-4 text-muted-foreground">
+            <span>
+              &copy; {new Date().getFullYear()} {siteConfig.name}.
+            </span>{" "}
+            <span>
+              Illustrations by{" "}
               <a
-                href={siteConfig.links.github}
-                target="_blank"
-                rel="noreferrer"
-                className="duration-200 hover:text-foreground"
+                href="https://popsy.co/"
+                className="underline underline-offset-4 transition-colors hover:text-foreground"
               >
-                <GitHub className="h-4 w-4 shrink-0" />
+                Popsy.
               </a>
-
-              <Separator orientation="vertical" className="h-4" />
-
-              <a
-                href={siteConfig.links.x}
-                target="_blank"
-                rel="noreferrer"
-                className="duration-200 hover:text-foreground"
-              >
-                <X className="h-4 w-4 shrink-0" />
-              </a>
-            </div>
-
-            <p className="mt-4">
-              <span>
-                &copy; {new Date().getFullYear()} {siteConfig.name}.
-              </span>{" "}
-              <span>
-                Illustrations by{" "}
-                <a
-                  href="https://popsy.co/"
-                  className="underline underline-offset-4 transition-colors hover:text-foreground"
-                >
-                  Popsy.
-                </a>
-              </span>
-            </p>
-          </div>
+            </span>
+          </p>
 
           <ThemeToggleGroup />
         </div>

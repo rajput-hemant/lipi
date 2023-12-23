@@ -36,18 +36,18 @@ export function LobbyNavbar() {
           <Link
             href="/login"
             className={cn(
-              buttonVariants({ variant: "ghost" }),
-              "hidden h-8 rounded-full px-5 font-semibold sm:inline-flex"
+              buttonVariants({ variant: "outline" }),
+              "hidden h-8 rounded-full px-5 font-semibold transition-all duration-200 hover:ring-2 hover:ring-border hover:ring-offset-2 hover:ring-offset-background sm:inline-flex"
             )}
           >
             Login
           </Link>
 
           <Link
-            href="/signup"
+            href="/"
             className={cn(
               buttonVariants(),
-              "h-8 rounded-full px-3 font-semibold shadow-xl"
+              "h-8 rounded-full px-3 font-semibold transition-all duration-200 hover:ring-2 hover:ring-foreground hover:ring-offset-2 hover:ring-offset-background"
             )}
           >
             Sign Up

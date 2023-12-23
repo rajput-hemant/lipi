@@ -7,7 +7,7 @@ export function Clients() {
   return (
     <section id="clients" className="space-y-6">
       <div className="mx-auto flex max-w-3xl flex-col items-center space-y-4 text-center">
-        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-foreground dark:to-gray-500 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
+        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
           Our Valued Clients
         </h2>
 
@@ -19,8 +19,8 @@ export function Clients() {
       <div
         className={cn(
           "relative flex h-24 items-center overflow-hidden whitespace-nowrap",
-          "before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-40 before:bg-gradient-to-r before:from-background md:before:w-96",
-          "after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-40 after:bg-gradient-to-l after:from-background md:after:w-96"
+          "before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-20 before:bg-gradient-to-r before:from-background md:before:w-96",
+          "after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-20 after:bg-gradient-to-l after:from-background md:after:w-96"
         )}
       >
         {[...Array(2)].map((_, i) => (

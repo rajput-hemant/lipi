@@ -281,6 +281,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
         <Button
           type="submit"
+          size="sm"
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
         >
@@ -320,6 +321,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       <div className="mt-6 flex w-full flex-col space-y-2 text-white">
         <Button
+          size="sm"
           onClick={googleSignInHandler}
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
@@ -333,6 +335,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         </Button>
 
         <Button
+          size="sm"
           onClick={githubSignInHandler}
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
