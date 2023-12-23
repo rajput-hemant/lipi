@@ -9,8 +9,11 @@ import type {
   prices,
   products,
   subscriptions,
+  users,
   workspaces,
 } from "@/lib/db/schema";
+
+export type User = InferInsertModel<typeof users>;
 
 export type Workspace = InferInsertModel<typeof workspaces>;
 export type Folder = InferInsertModel<typeof folders>;

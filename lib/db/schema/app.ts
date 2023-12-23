@@ -25,7 +25,9 @@ export const workspaces = createTable("workspaces", {
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
-  }),
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const folders = createTable("folders", {
@@ -42,7 +44,9 @@ export const folders = createTable("folders", {
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
-  }),
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const files = createTable("files", {
@@ -62,7 +66,9 @@ export const files = createTable("files", {
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
-  }),
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const accounts = createTable("accounts", {
