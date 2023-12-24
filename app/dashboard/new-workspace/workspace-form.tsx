@@ -6,11 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import type { User } from "next-auth";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import type { Subscription } from "@/types/db";
 import { createWorkspace } from "@/lib/db/queries";
-import { toast } from "@/hooks/use-toast";
 import { EmojiPicker } from "@/components/emoji-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,8 +57,7 @@ export function WorkspaceForm({
     });
 
     if (data) {
-      toast({
-        title: "Workspace created",
+      toast.success("Workspace created", {
         description: `Your workspace "${name}" was created successfully.`,
       });
 
@@ -67,9 +66,8 @@ export function WorkspaceForm({
 
     if (error) {
       console.log(error, "Error");
-      toast({
-        variant: "destructive",
-        title: "Could not create your workspace",
+
+      toast.error("Could not create your workspace", {
         description:
           "Oops! Something went wrong, and we couldn't create your workspace. Try again or come back later.",
       });

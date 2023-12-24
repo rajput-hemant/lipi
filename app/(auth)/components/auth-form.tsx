@@ -14,12 +14,12 @@ import {
 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type * as z from "zod";
 
 import { createNewAccount, resetPassword } from "@/lib/actions";
 import { cn } from "@/lib/utils";
 import { authSchema } from "@/lib/validations";
-import { toast } from "@/hooks/use-toast";
 import { GitHub, Google } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -58,33 +58,32 @@ export function AuthForm({ mode }: AuthFormProps) {
     mode: "onChange",
   });
 
-  function signInToaster() {
-    const { dismiss } = toast({
-      title: "Signing in...",
-      description: "Please wait while we sign you in",
+  function signInToaster(promise: Promise<unknown>) {
+    toast.promise(promise, {
+      loading: "Signing in...",
+      success: "You have been signed in.",
+      error: "Something went wrong.",
     });
-
-    return { dismiss };
   }
 
   async function onSubmit({ email, username, password }: FormData) {
     try {
       if (mode === "login") {
-        const { dismiss } = signInToaster();
-        await signIn("credentials", { username, email, password });
-        dismiss();
+        signInToaster(signIn("credentials", { username, email, password }));
       } else if (mode === "signup") {
-        toast({
-          title: "Creating account...",
-          description: "Please wait while we create your account",
+        // @ts-expect-error eslint-disable-line @typescript-eslint/ban-ts-comment
+        toast.promise(createNewAccount({ mode: "email", email, password }), {
+          loading: "Creating account...",
+          success: "You have successfully created your account.",
+          error: "Something went wrong.",
         });
-        await createNewAccount({ mode: "email", email: email!, password });
       } else {
-        toast({
-          title: "Resetting password...",
-          description: "Please wait while we reset your password",
+        // @ts-expect-error eslint-disable-line @typescript-eslint/ban-ts-comment
+        toast.promise(resetPassword({ mode: "email", email, password }), {
+          loading: "Resetting password...",
+          success: "You have successfully reset your password.",
+          error: "Something went wrong.",
         });
-        await resetPassword({ mode: "email", email: email!, password });
       }
     } catch (error) {
       const err = error as Error;
@@ -96,9 +95,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setOauthLoading("google");
 
     try {
-      const { dismiss } = signInToaster();
-      await signIn("google");
-      dismiss();
+      signInToaster(signIn("google"));
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
@@ -111,9 +108,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setOauthLoading("github");
 
     try {
-      const { dismiss } = signInToaster();
-      await signIn("github");
-      dismiss();
+      signInToaster(signIn("github"));
     } catch (error) {
       const err = error as Error;
       console.error(err.message);

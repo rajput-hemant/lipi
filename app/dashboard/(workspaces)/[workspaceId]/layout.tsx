@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 import { getCurrentUser } from "@/lib/auth";
 import { getFolders } from "@/lib/db/queries";
-import { toast } from "@/hooks/use-toast";
 import { ResizableLayout } from "../components/resizable-layout";
 
 type WorkspaceLayoutProps = React.PropsWithChildren<{
@@ -29,8 +29,7 @@ export default async function WorkspaceLayout({
   const { data: folders, error } = await getFolders(workspaceId);
 
   if (error) {
-    toast({
-      title: "Something went wrong",
+    toast.error("Something went wrong", {
       description: "Unable to fetch folders for this workspace.",
     });
   }

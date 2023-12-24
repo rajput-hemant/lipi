@@ -12,11 +12,11 @@ import {
 } from "lucide-react";
 import type { User } from "next-auth";
 import { signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 import type { Folder } from "@/types/db";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
 import { Logo } from "../icons";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button, buttonVariants } from "../ui/button";
@@ -30,13 +30,16 @@ type SidebarProps = React.ComponentProps<"aside"> & {
 
 export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
   async function signOutHandler() {
-    const { dismiss } = toast({
-      title: "Signing out...",
-      description: "Please wait while we sign you out.",
-    });
+    // const { dismiss } = toast({
+    //   title: "Signing out...",
+    //   description: "Please wait while we sign you out.",
+    // });
 
-    await signOut();
-    dismiss();
+    toast.promise(signOut, {
+      loading: "Signing out...",
+      success: "You have been signed out.",
+      error: "Something went wrong.",
+    });
   }
 
   return (

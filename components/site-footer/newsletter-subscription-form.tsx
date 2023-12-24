@@ -2,9 +2,9 @@
 
 import { CheckCircle } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -23,14 +23,12 @@ export function NewsletterSubscriptionForm() {
 
   const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
 
-  // TODO: Add newsletter subscription logic here.
   async function subscribeToNewsletter(_: Form, _formData: FormData) {
-    // simulate a 1s delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    toast({
-      title: "Subscribed!",
-      description: "You have successfully subscribed to our newsletter.",
+    // TODO: Add newsletter subscription logic here.
+    toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), {
+      loading: "Subscribing...",
+      error: "Something went wrong.",
+      success: "You have successfully subscribed to our newsletter.",
     });
 
     return {

@@ -7,7 +7,7 @@ import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
 import { absoluteUrl, cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 
 export const viewport: Viewport = {
   viewportFit: "cover",

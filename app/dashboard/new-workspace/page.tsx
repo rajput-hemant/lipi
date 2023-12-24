@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
 
 import { getCurrentUser } from "@/lib/auth";
 import { getUserSubscriptionStatus } from "@/lib/db/queries";
-import { toast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -27,8 +27,9 @@ export default async function WorkspaceSetupPage() {
   const { data: status, error } = await getUserSubscriptionStatus(user.id);
 
   if (error) {
-    toast({
-      title: "An unexpected error occurred",
+    console.error(error);
+
+    toast.error("An unexpected error occurred", {
       description:
         "Unable to fetch your subscription status. Please try again later.",
     });
