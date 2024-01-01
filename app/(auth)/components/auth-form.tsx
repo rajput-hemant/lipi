@@ -162,18 +162,16 @@ export function AuthForm({ mode }: AuthFormProps) {
                         onClick={toggleCredentialMode}
                         className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                       >
-                        {isEmailMode ? (
+                        {isEmailMode ?
                           <AtSign className="h-5 w-5" />
-                        ) : (
-                          <Mail className="h-5 w-5" />
-                        )}
+                        : <Mail className="h-5 w-5" />}
                       </TooltipTrigger>
 
                       <TooltipContent>
                         <p className="text-xs">
-                          {isEmailMode
-                            ? "Use Username instead"
-                            : "Use Email instead"}
+                          {isEmailMode ?
+                            "Use Username instead"
+                          : "Use Email instead"}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -207,11 +205,9 @@ export function AuthForm({ mode }: AuthFormProps) {
                       onClick={togglePassVisibility}
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
-                      {isPassVisible ? (
+                      {isPassVisible ?
                         <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
+                      : <Eye className="h-5 w-5" />}
                     </TooltipTrigger>
 
                     <TooltipContent>
@@ -251,18 +247,16 @@ export function AuthForm({ mode }: AuthFormProps) {
                         onClick={toggleConfirmPassVisibility}
                         className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                       >
-                        {isConfirmPassVisible ? (
+                        {isConfirmPassVisible ?
                           <EyeOff className="h-5 w-5" />
-                        ) : (
-                          <Eye className="h-5 w-5" />
-                        )}
+                        : <Eye className="h-5 w-5" />}
                       </TooltipTrigger>
 
                       <TooltipContent>
                         <p className="text-xs">
-                          {isConfirmPassVisible
-                            ? "Hide Password"
-                            : "Show Password"}
+                          {isConfirmPassVisible ?
+                            "Hide Password"
+                          : "Show Password"}
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -280,18 +274,21 @@ export function AuthForm({ mode }: AuthFormProps) {
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
         >
-          {form.formState.isSubmitting ? (
+          {form.formState.isSubmitting ?
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : mode === "reset" ? (
+          : mode === "reset" ?
             <Key className="mr-2 h-4 w-4" />
-          ) : isEmailMode ? (
+          : isEmailMode ?
             <Mail className="mr-2 h-4 w-4" />
-          ) : (
-            <Fingerprint className="mr-2 h-4 w-4" />
-          )}
-          {mode === "reset" && "Reset Password"}
-          {mode === "login" && (isEmailMode ? "Login with Email" : "Login")}
-          {mode === "signup" && "Sign Up with Email"}
+          : <Fingerprint className="mr-2 h-4 w-4" />}
+
+          {mode === "login" ?
+            isEmailMode ?
+              "Login with Email"
+            : "Login"
+          : mode === "signup" ?
+            "Sign Up with Email"
+          : "Reset Password"}
         </Button>
       </form>
 
@@ -321,11 +318,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
         >
-          {oauthLoading === "google" ? (
+          {oauthLoading === "google" ?
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Google className="mr-2 h-4 w-4" />
-          )}
+          : <Google className="mr-2 h-4 w-4" />}
           Google
         </Button>
 
@@ -335,11 +330,9 @@ export function AuthForm({ mode }: AuthFormProps) {
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
         >
-          {oauthLoading === "github" ? (
+          {oauthLoading === "github" ?
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <GitHub className="mr-2 h-4 w-4" />
-          )}
+          : <GitHub className="mr-2 h-4 w-4" />}
           GitHub
         </Button>
       </div>

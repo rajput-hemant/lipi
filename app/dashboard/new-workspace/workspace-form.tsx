@@ -31,13 +31,10 @@ type FormData = z.infer<typeof workspaceSchema>;
 
 type WorkspaceFormProps = {
   user: User;
-  subscriptionStatus: Subscription["status"];
+  subscription: Subscription;
 };
 
-export function WorkspaceForm({
-  user,
-  subscriptionStatus,
-}: WorkspaceFormProps) {
+export function WorkspaceForm({ user, subscription }: WorkspaceFormProps) {
   const router = useRouter();
   const [selectedEmoji, setSelectedEmoji] = React.useState("💼");
 
@@ -106,7 +103,7 @@ export function WorkspaceForm({
           )}
         />
 
-        {subscriptionStatus !== "active" && (
+        {subscription.status !== "active" && (
           <small className="block pt-4 text-center text-xs text-muted-foreground">
             To customize your workspace, you need to be on a Pro Plan
           </small>
@@ -117,11 +114,9 @@ export function WorkspaceForm({
             disabled={form.formState.isSubmitting}
             className="ml-auto w-40 shadow-md"
           >
-            {form.formState.isSubmitting ? (
+            {form.formState.isSubmitting ?
               <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Create workspace"
-            )}
+            : "Create workspace"}
           </Button>
         </div>
       </form>

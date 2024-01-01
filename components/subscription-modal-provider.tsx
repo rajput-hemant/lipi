@@ -7,6 +7,7 @@ import type { Subscription } from "@/types/db";
 import { Button } from "./ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -17,7 +18,7 @@ import {
 type SubscriptionModalContext = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  subscription: Omit<Subscription, "prices"> | null;
+  subscription: Subscription | null;
 };
 
 const SubscriptionModalContext = React.createContext<SubscriptionModalContext>({
@@ -31,7 +32,7 @@ export const useSubscriptionModal = () => {
 };
 
 type SubscriptionModalProviderProps = {
-  subscription: Omit<Subscription, "prices"> | null;
+  subscription: Subscription | null;
   children: React.ReactNode;
 };
 
@@ -52,10 +53,9 @@ export const SubscriptionModalProvider = ({
       {children}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        {subscription?.status === "active" ? (
+        {subscription?.status === "active" ?
           <DialogContent>Already on a paid plan!</DialogContent>
-        ) : (
-          <DialogContent>
+        : <DialogContent>
             <DialogHeader>
               <DialogTitle>Upgrade to a Pro Plan</DialogTitle>
             </DialogHeader>
@@ -64,15 +64,18 @@ export const SubscriptionModalProvider = ({
             </DialogDescription>
 
             <DialogFooter>
-              <Button size="sm" variant="secondary">
-                Cancel
-              </Button>
+              <DialogClose asChild>
+                <Button size="sm" variant="secondary">
+                  Cancel
+                </Button>
+              </DialogClose>
+
               <Button size="sm" onClick={onClickHandler}>
                 Upgrade
               </Button>
             </DialogFooter>
           </DialogContent>
-        )}
+        }
       </Dialog>
     </SubscriptionModalContext.Provider>
   );

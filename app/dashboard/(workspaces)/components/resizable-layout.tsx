@@ -64,11 +64,9 @@ export function ResizableLayout({
             "min-w-[3.5rem] transition-all duration-300 ease-in-out"
         )}
       >
-        {isCollapsed ? (
+        {isCollapsed ?
           <SidebarCollapsed user={user} folders={folders} />
-        ) : (
-          <Sidebar user={user} folders={folders} />
-        )}
+        : <Sidebar user={user} folders={folders} />}
       </ResizablePanel>
 
       <ResizableHandle withHandle className="hidden lg:flex" />

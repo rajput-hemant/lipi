@@ -1,4 +1,4 @@
-import React, { useOptimistic } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -47,7 +47,7 @@ export function FolderAccordion(props: FolderAccordionProps) {
   const [folderName, setFolderName] = React.useState("Untitled");
   const [selectedEmoji, setSelectedEmoji] = React.useState("");
 
-  const [optimisticFolders, setOptimisticFolders] = useOptimistic(
+  const [optimisticFolders, setOptimisticFolders] = React.useOptimistic(
     folders,
     (state, newFolder: Folder) => [newFolder, ...state]
   );
@@ -91,11 +91,9 @@ export function FolderAccordion(props: FolderAccordionProps) {
             getValue={setSelectedEmoji}
             className="absolute inset-y-0 left-3"
           >
-            {!selectedEmoji ? (
+            {!selectedEmoji ?
               <FolderIcon className="h-4 w-4" />
-            ) : (
-              selectedEmoji
-            )}
+            : selectedEmoji}
           </EmojiPicker>
 
           <Input
@@ -127,11 +125,9 @@ export function FolderAccordion(props: FolderAccordionProps) {
                   "justify-start border-none hover:no-underline data-[state=open]:bg-secondary"
                 )}
               >
-                {openedFolders.includes(id!) ? (
+                {openedFolders.includes(id!) ?
                   <FolderOpen className="mr-2 h-4 w-4 shrink-0" />
-                ) : (
-                  <FolderIcon className="mr-2 h-4 w-4 shrink-0" />
-                )}
+                : <FolderIcon className="mr-2 h-4 w-4 shrink-0" />}
 
                 {title}
 

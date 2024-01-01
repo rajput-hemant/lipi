@@ -23,6 +23,4 @@ export type Customer = InferInsertModel<typeof customers>;
 export type Product = InferInsertModel<typeof products>;
 export type Collaborator = InferInsertModel<typeof collaborators>;
 export type Price = InferInsertModel<typeof prices> & { products: Product[] };
-export type Subscription = InferInsertModel<typeof subscriptions> & {
-  prices: Price[];
-};
+export type Subscription = InferInsertModel<typeof subscriptions>;

@@ -9,16 +9,16 @@
     "preview": "next build && next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "fmt": "prettier --write \"**/*.{ts,tsx,mdx,json}\" --cache",
+    "fmt": "prettier --write \"**/*.{ts,tsx,mdx,json}\" --cache --experimental-ternaries",
     "fmt:check": "prettier --check \"**/*.{ts,tsx,mdx,json}\" --cache",
-    "prepare": "husky install",
     "db:generate": "drizzle-kit generate:pg",
     "db:migrate": "bun lib/db/migrate.ts",
     "db:drop": "drizzle-kit drop",
     "db:pull": "drizzle-kit introspect:pg",
     "db:studio": "drizzle-kit studio",
     "db:check": "drizzle-kit check:pg",
-    "ui": "bunx shadcn-ui"
+    "ui": "bunx shadcn-ui",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@auth/core": "^0.18.6",
@@ -91,7 +91,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,md,mdx}": [
-      "prettier --write \"**/*.{ts,tsx,mdx}\" --cache"
+      "prettier --write \"**/*.{ts,tsx,mdx}\" --cache --experimental-ternaries"
     ],
     "*.{ts,tsx,mdx}": [
       "eslint --fix ."

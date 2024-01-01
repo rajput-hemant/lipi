@@ -116,16 +116,15 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
             onClick={createFolderHandler}
             className="h-7 w-7 text-muted-foreground"
           >
-            {isCreatingFolder ? (
+            {isCreatingFolder ?
               <X className="h-4 w-4 duration-300 animate-in spin-in-90" />
-            ) : (
-              <Plus className="h-[18px] w-[18px] duration-300 animate-out spin-out-90" />
-            )}
+            : <Plus className="h-[18px] w-[18px] duration-300 animate-out spin-out-90" />
+            }
           </Button>
         </div>
 
         <div className="-mb-2 flex grow flex-col gap-1 overflow-hidden">
-          {folders?.length ? (
+          {folders?.length ?
             <ScrollArea>
               <FolderAccordion
                 folders={folders}
@@ -134,14 +133,13 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
               />
               <ScrollBar orientation="vertical" />
             </ScrollArea>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
+          : <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
               <FolderX size={32} />
               <p className="text-center text-sm">
                 You don&apos;t have any folders yet.
               </p>
             </div>
-          )}
+          }
         </div>
 
         <div

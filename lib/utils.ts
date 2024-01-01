@@ -106,8 +106,8 @@ export const formatCurrency = (amount: number, currency: string | null) => {
  * @see https://github.com/adobe/react-spectrum/blob/5e49ce79094a90839cec20fc5ce788a34bf4b085/packages/%40react-aria/utils/src/platform.ts#L23C1-L50C1
  */
 function testPlatform(re: RegExp) {
-  return typeof window !== "undefined" && window.navigator != null
-    ? re.test(
+  return typeof window !== "undefined" && window.navigator != null ?
+      re.test(
         // @ts-expect-error - navigator["userAgentData"]
         window.navigator["userAgentData"]?.platform || window.navigator.platform
       )

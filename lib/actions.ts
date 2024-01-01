@@ -60,9 +60,9 @@ export async function resetPassword(credentials: Credentials) {
       .update(users)
       .set({ password: hashedPassword })
       .where(
-        credentials.mode === "email"
-          ? eq(users.email, credentials.email)
-          : eq(users.username, credentials.username)
+        credentials.mode === "email" ?
+          eq(users.email, credentials.email)
+        : eq(users.username, credentials.username)
       )
       .returning({ updatedPass: users.password });
 

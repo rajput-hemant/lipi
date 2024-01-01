@@ -45,9 +45,9 @@ export const authOptions: NextAuthOptions = {
             .select()
             .from(users)
             .where(
-              credentials.email
-                ? eq(users.email, credentials.email)
-                : eq(users.username, credentials.username)
+              credentials.email ?
+                eq(users.email, credentials.email)
+              : eq(users.username, credentials.username)
             )
             .limit(1);
 

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { toast } from "sonner";
 
 import { getCurrentUser } from "@/lib/auth";
-import { getUserSubscriptionStatus } from "@/lib/db/queries";
+import { getUserSubscription } from "@/lib/db/queries";
 import {
   Card,
   CardContent,
@@ -24,9 +24,9 @@ export default async function WorkspaceSetupPage() {
 
   if (!user) redirect("/login");
 
-  const { data: status, error } = await getUserSubscriptionStatus(user.id);
+  const { data: subscription, error } = await getUserSubscription(user.id);
 
-  if (error) {
+  if (error != null) {
     console.error(error);
 
     toast.error("An unexpected error occurred", {
@@ -69,7 +69,7 @@ export default async function WorkspaceSetupPage() {
           </CardHeader>
 
           <CardContent>
-            <WorkspaceForm user={user} subscriptionStatus={status} />
+            <WorkspaceForm user={user} subscription={subscription!} />
           </CardContent>
         </Card>
       </section>
