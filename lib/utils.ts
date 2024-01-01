@@ -97,3 +97,63 @@ export const formatCurrency = (amount: number, currency: string | null) => {
     maximumFractionDigits: 0,
   });
 };
+
+/**
+ * Tests the current platform against the given regular expression.
+ * @param re The regular expression to test against.
+ * @returns True if the platform matches the regular expression, false otherwise.
+ *
+ * @see https://github.com/adobe/react-spectrum/blob/5e49ce79094a90839cec20fc5ce788a34bf4b085/packages/%40react-aria/utils/src/platform.ts#L23C1-L50C1
+ */
+function testPlatform(re: RegExp) {
+  return typeof window !== "undefined" && window.navigator != null
+    ? re.test(
+        // @ts-expect-error - navigator["userAgentData"]
+        window.navigator["userAgentData"]?.platform || window.navigator.platform
+      )
+    : false;
+}
+
+/**
+ * Checks if the current platform is Mac.
+ * @returns True if the platform is Mac, false otherwise.
+ */
+export function isMac() {
+  return testPlatform(/^Mac/i);
+}
+
+/**
+ * Checks if the current platform is Windows.
+ * @returns True if the platform is Windows, false otherwise.
+ */
+export function isIPhone() {
+  return testPlatform(/^iPhone/i);
+}
+
+/**
+ * Checks if the current platform is iPad.
+ * @returns True if the platform is iPad, false otherwise.
+ */
+export function isIPad() {
+  return (
+    testPlatform(/^iPad/i) ||
+    // iPadOS 13 lies and says it's a Mac, but we can distinguish by detecting touch support.
+    (isMac() && navigator.maxTouchPoints > 1)
+  );
+}
+
+/**
+ * Checks if the current platform is iOS.
+ * @returns True if the platform is iOS, false otherwise.
+ */
+export function isIOS() {
+  return isIPhone() || isIPad();
+}
+
+/**
+ * Checks if the current platform is Apple.
+ * @returns True if the platform is Apple, false otherwise.
+ */
+export function isAppleDevice() {
+  return isMac() || isIOS();
+}

@@ -8,13 +8,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 const Picker = dynamic(() => import("emoji-picker-react"));
 
-type EmojiPickerProps = {
-  children: React.ReactNode;
+type EmojiPickerProps = React.HTMLAttributes<HTMLButtonElement> & {
   getValue?: (emoji: string) => void;
+  children: React.ReactNode;
 };
 
-export function EmojiPicker({ children, getValue }: EmojiPickerProps) {
-  const { theme } = useTheme();
+export function EmojiPicker({ getValue, ...props }: EmojiPickerProps) {
+  const { resolvedTheme } = useTheme();
 
   function onEmojiClick({ emoji }: EmojiClickData) {
     if (getValue) getValue(emoji);
@@ -22,11 +22,11 @@ export function EmojiPicker({ children, getValue }: EmojiPickerProps) {
 
   return (
     <Popover>
-      <PopoverTrigger>{children}</PopoverTrigger>
+      <PopoverTrigger {...props}>{props.children}</PopoverTrigger>
 
       <PopoverContent className="border-none p-0">
         <Picker
-          theme={theme === "dark" ? Theme.DARK : Theme.LIGHT}
+          theme={resolvedTheme === "dark" ? Theme.DARK : Theme.LIGHT}
           onEmojiClick={onEmojiClick}
         />
       </PopoverContent>

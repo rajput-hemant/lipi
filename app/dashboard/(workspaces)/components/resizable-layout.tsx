@@ -16,7 +16,7 @@ import {
 
 type ResizableLayoutProps = {
   user: User;
-  folders: Folder[] | null;
+  folders: Folder[];
   defaultLayout: number[];
   defaultCollapsed: boolean;
   children: React.ReactNode;
@@ -44,7 +44,7 @@ export function ResizableLayout({
         defaultSize={defaultLayout[0]}
         collapsedSize={3}
         collapsible={true}
-        minSize={10}
+        minSize={14}
         maxSize={20}
         onExpand={() => {
           setIsCollapsed(false);

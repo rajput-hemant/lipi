@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import {
   FolderX,
@@ -9,6 +10,7 @@ import {
   Settings,
   Trash2,
   User2,
+  X,
 } from "lucide-react";
 import type { User } from "next-auth";
 import { signOut } from "next-auth/react";
@@ -18,23 +20,36 @@ import type { Folder } from "@/types/db";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Logo } from "../icons";
+import { useSubscriptionModal } from "../subscription-modal-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Button, buttonVariants } from "../ui/button";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { FolderAccordion } from "./folder-accordion";
 
 type SidebarProps = React.ComponentProps<"aside"> & {
-  folders: Folder[] | null;
   user: User;
+  folders: Folder[];
 };
 
 export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
-  async function signOutHandler() {
-    // const { dismiss } = toast({
-    //   title: "Signing out...",
-    //   description: "Please wait while we sign you out.",
-    // });
+  const [isCreatingFolder, setIsCreatingFolder] = React.useState(false);
 
+  const { setOpen, subscription } = useSubscriptionModal();
+
+  async function createFolderHandler() {
+    if (subscription?.status !== "active" && folders.length >= 3) {
+      toast.error("Something went wrong", {
+        description: "You have reached the maximum number of folders.",
+      });
+
+      setOpen(true);
+      return;
+    }
+
+    setIsCreatingFolder((prev) => !prev);
+  }
+
+  async function signOutHandler() {
     toast.promise(signOut, {
       loading: "Signing out...",
       success: "You have been signed out.",
@@ -61,10 +76,7 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
           <Link
             href="/dashboard"
             className={cn(
-              buttonVariants({
-                size: "sm",
-                variant: "ghost",
-              }),
+              buttonVariants({ size: "sm", variant: "ghost" }),
               "w-full justify-start"
             )}
           >
@@ -75,10 +87,7 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
           <Link
             href="/dashboard"
             className={cn(
-              buttonVariants({
-                size: "sm",
-                variant: "ghost",
-              }),
+              buttonVariants({ size: "sm", variant: "ghost" }),
               "w-full justify-start"
             )}
           >
@@ -89,10 +98,7 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
           <Link
             href="/dashboard"
             className={cn(
-              buttonVariants({
-                size: "sm",
-                variant: "ghost",
-              }),
+              buttonVariants({ size: "sm", variant: "ghost" }),
               "w-full justify-start"
             )}
           >
@@ -104,29 +110,39 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
         <div className="flex items-center justify-between px-4">
           <p className="text-sm font-medium text-muted-foreground">Folders</p>
           <Button
+            title={isCreatingFolder ? "Cancel" : "Create New folder"}
             size="icon"
             variant="ghost"
-            className="h-8 w-8 text-muted-foreground"
+            onClick={createFolderHandler}
+            className="h-7 w-7 text-muted-foreground"
           >
-            <Plus className="h-4 w-4" />
+            {isCreatingFolder ? (
+              <X className="h-4 w-4 duration-300 animate-in spin-in-90" />
+            ) : (
+              <Plus className="h-[18px] w-[18px] duration-300 animate-out spin-out-90" />
+            )}
           </Button>
         </div>
 
-        {folders?.length ? (
-          <div className="-mb-2 flex grow flex-col gap-1 overflow-hidden">
+        <div className="-mb-2 flex grow flex-col gap-1 overflow-hidden">
+          {folders?.length ? (
             <ScrollArea>
-              <FolderAccordion folders={folders} />
+              <FolderAccordion
+                folders={folders}
+                isCreatingFolder={isCreatingFolder}
+                setIsCreatingFolder={setIsCreatingFolder}
+              />
               <ScrollBar orientation="vertical" />
             </ScrollArea>
-          </div>
-        ) : (
-          <div className="mb-10 flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
-            <FolderX size={32} />
-            <p className="text-center text-sm">
-              You don&apos;t have any folders yet.
-            </p>
-          </div>
-        )}
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
+              <FolderX size={32} />
+              <p className="text-center text-sm">
+                You don&apos;t have any folders yet.
+              </p>
+            </div>
+          )}
+        </div>
 
         <div
           className={cn(
@@ -134,7 +150,7 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
           )}
         >
           <Avatar className="m-auto">
-            <AvatarImage src={user.image ?? ""} />
+            <AvatarImage src={user.image ?? undefined} />
             <AvatarFallback>
               <User2 className="h-6 w-6 text-muted-foreground" />
             </AvatarFallback>
@@ -144,7 +160,9 @@ export function Sidebar({ user, folders, className, ...props }: SidebarProps) {
             <p className="line-clamp-1 text-sm">
               {user.name ?? "Update your profile"}
             </p>
-            <p className="text-xs text-muted-foreground">Free plan</p>
+            <p className="line-clamp-1 text-xs text-muted-foreground">
+              Free plan
+            </p>
           </div>
 
           <Button

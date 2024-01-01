@@ -13,19 +13,17 @@ import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type SidebarCollapsedProps = React.ComponentProps<"aside"> & {
-  folders: Folder[] | null;
   user: User;
+  folders: Folder[];
 };
 
-export function SidebarCollapsed({
-  user,
-  className,
-  ...props
-}: SidebarCollapsedProps) {
+export function SidebarCollapsed(props: SidebarCollapsedProps) {
+  const { user, className, ...restProps } = props;
+
   return (
     <aside
       className={cn("relative z-40 hidden lg:block", className)}
-      {...props}
+      {...restProps}
     >
       <div className="sticky inset-y-0 flex h-screen flex-col gap-2 overflow-hidden">
         <div className="my-px flex h-14 border-b">

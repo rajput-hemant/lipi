@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { and, eq, notExists } from "drizzle-orm";
 import { validate } from "uuid";
 
@@ -14,19 +15,21 @@ type DBResponse<T> = { data: T; error: null } | { data: null; error: string };
  * -----------------------------------------------------------------------------------------------*/
 
 /**
- * Get user subscription status
+ * Get user subscription
  * @param userId User ID
- * @returns Subscription status
+ * @returns Subscription
  */
-export async function getUserSubscriptionStatus(
+export async function getUserSubscription(
   userId: string
-): Promise<DBResponse<Subscription["status"]>> {
+): Promise<DBResponse<Omit<Subscription, "prices">>> {
   try {
     const data = await db.query.subscriptions.findFirst({
       where: (s, { eq }) => eq(s.userId, userId),
     });
 
-    return { data: data?.status ?? null, error: null };
+    if (!data) return { data: null, error: "Subscription not found" };
+
+    return { data, error: null };
   } catch (error) {
     return { error: (error as Error).message, data: null };
   }
@@ -53,6 +56,10 @@ export async function createWorkspace(
   }
 }
 
+/**
+ * @param userID User ID
+ * @returns Private workspaces
+ */
 export async function getPrivateWorkspaces(
   userID: string
 ): Promise<DBResponse<Workspace[]>> {
@@ -78,6 +85,10 @@ export async function getPrivateWorkspaces(
   }
 }
 
+/**
+ * @param userId User ID
+ * @returns Collaborating workspaces
+ */
 export async function getCollaboratingWorkspaces(
   userId: string
 ): Promise<DBResponse<Workspace[]>> {
@@ -95,6 +106,10 @@ export async function getCollaboratingWorkspaces(
   }
 }
 
+/**
+ * @param userId User ID
+ * @returns Shared workspaces
+ */
 export async function getSharedWorkspaces(
   userId: string
 ): Promise<DBResponse<Workspace[]>> {
@@ -138,5 +153,23 @@ export const getFolders = async (
     return { data, error: null };
   } catch (error) {
     return { error: (error as Error).message, data: null };
+  }
+};
+
+/**
+ * @param folder Folder
+ * @returns Created folder
+ */
+export const createFolder = async (
+  folder: Folder
+): Promise<DBResponse<Folder>> => {
+  try {
+    const [data] = await db.insert(folders).values(folder).returning();
+
+    return { data, error: null };
+  } catch (error) {
+    return { error: (error as Error).message, data: null };
+  } finally {
+    revalidatePath(`/dashboard/${folder.workspaceId}`);
   }
 };

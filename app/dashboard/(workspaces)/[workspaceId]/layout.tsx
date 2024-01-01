@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { toast } from "sonner";
 
 import { getCurrentUser } from "@/lib/auth";
-import { getFolders } from "@/lib/db/queries";
+import { getFolders, getUserSubscription } from "@/lib/db/queries";
+import { SubscriptionModalProvider } from "@/components/subscription-modal-provider";
 import { ResizableLayout } from "../components/resizable-layout";
 
 type WorkspaceLayoutProps = React.PropsWithChildren<{
@@ -26,22 +27,37 @@ export default async function WorkspaceLayout({
     redirect("/login");
   }
 
-  const { data: folders, error } = await getFolders(workspaceId);
+  const [
+    { data: folders, error: foldersError },
+    { data: subscription, error: _subscriptionError },
+  ] = await Promise.all([
+    getFolders(workspaceId),
+    getUserSubscription(user.id),
+  ]);
 
-  if (error) {
+  if (foldersError || !folders) {
     toast.error("Something went wrong", {
       description: "Unable to fetch folders for this workspace.",
     });
   }
 
+  // TODO: ...
+  // if (subscriptionError || !subscription) {
+  //   toast.error("Something went wrong", {
+  //     description: "Unable to fetch your subscription status.",
+  //   });
+  // }
+
   return (
-    <ResizableLayout
-      user={user}
-      folders={folders}
-      defaultLayout={defaultLayout as number[]}
-      defaultCollapsed={defaultCollapsed as boolean}
-    >
-      {children}
-    </ResizableLayout>
+    <SubscriptionModalProvider subscription={subscription}>
+      <ResizableLayout
+        user={user}
+        folders={folders!}
+        defaultLayout={defaultLayout as number[]}
+        defaultCollapsed={defaultCollapsed as boolean}
+      >
+        {children}
+      </ResizableLayout>
+    </SubscriptionModalProvider>
   );
 }
