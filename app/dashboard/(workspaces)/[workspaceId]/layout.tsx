@@ -36,14 +36,14 @@ export default async function WorkspaceLayout({
   ]);
 
   if (foldersError || !folders) {
-    toast.error("Something went wrong", {
+    toast.warning("Something went wrong", {
       description: "Unable to fetch folders for this workspace.",
     });
   }
 
   // TODO: ...
   // if (subscriptionError || !subscription) {
-  //   toast.error("Something went wrong", {
+  //   toast.warning("Something went wrong", {
   //     description: "Unable to fetch your subscription status.",
   //   });
   // }

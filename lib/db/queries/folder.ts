@@ -35,6 +35,7 @@ export const getFolders = async (
 };
 
 /**
+ * Create a new folder
  * @param folder Folder
  * @returns Created folder
  */
@@ -49,5 +50,25 @@ export const createFolder = async (
     return { error: (error as Error).message, data: null };
   } finally {
     revalidatePath(`/dashboard/${folder.workspaceId}`);
+  }
+};
+
+/**
+ * Delete folder by ID
+ * @param folderId Folder ID
+ * @returns Deleted folder
+ */
+export const deleteFolder = async (
+  folderId: string
+): Promise<DBResponse<Folder>> => {
+  try {
+    const [deletedFolder] = await db
+      .delete(folders)
+      .where(eq(folders.id, folderId))
+      .returning();
+
+    return { data: deletedFolder, error: null };
+  } catch (error) {
+    return { error: (error as Error).message, data: null };
   }
 };

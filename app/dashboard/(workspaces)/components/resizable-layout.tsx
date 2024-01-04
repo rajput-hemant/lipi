@@ -6,7 +6,6 @@ import type { User } from "next-auth";
 import type { Folder } from "@/types/db";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "@/components/sidebar/sidebar";
-import { SidebarCollapsed } from "@/components/sidebar/sidebar-collapsed";
 import { Navbar } from "@/components/site-header/navbar";
 import {
   ResizableHandle,
@@ -64,9 +63,7 @@ export function ResizableLayout({
             "min-w-[3.5rem] transition-all duration-300 ease-in-out"
         )}
       >
-        {isCollapsed ?
-          <SidebarCollapsed user={user} folders={folders} />
-        : <Sidebar user={user} folders={folders} />}
+        <Sidebar user={user} folders={folders} isCollapsed={isCollapsed} />
       </ResizablePanel>
 
       <ResizableHandle withHandle className="hidden lg:flex" />
