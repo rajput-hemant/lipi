@@ -1,9 +1,6 @@
 import Image from "next/image";
-import { redirect } from "next/navigation";
-import { toast } from "sonner";
 
 import { getCurrentUser } from "@/lib/auth";
-import { getUserSubscription } from "@/lib/db/queries";
 import {
   Card,
   CardContent,
@@ -21,19 +18,6 @@ export const metadata = {
 
 export default async function WorkspaceSetupPage() {
   const user = await getCurrentUser();
-
-  if (!user) redirect("/login");
-
-  const { data: subscription, error } = await getUserSubscription(user.id);
-
-  if (error != null) {
-    console.error(error);
-
-    toast.error("An unexpected error occurred", {
-      description:
-        "Unable to fetch your subscription status. Please try again later.",
-    });
-  }
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -53,7 +37,7 @@ export default async function WorkspaceSetupPage() {
       <Separator orientation="vertical" />
 
       <section className="flex h-full w-full flex-col items-center justify-center gap-14 px-4">
-        <h1 className="text-center font-heading text-4xl font-bold [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] sm:text-5xl md:text-6xl">
+        <h1 className="text-center font-heading text-4xl font-bold [text-shadow:_0_4px_0_#e1e1e1] sm:text-5xl md:text-6xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none]">
           Create your first
           <br />
           workspace
@@ -69,7 +53,7 @@ export default async function WorkspaceSetupPage() {
           </CardHeader>
 
           <CardContent>
-            <WorkspaceForm user={user} subscription={subscription!} />
+            <WorkspaceForm user={user!} />
           </CardContent>
         </Card>
       </section>

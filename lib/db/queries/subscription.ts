@@ -11,15 +11,13 @@ import { db } from "..";
  */
 export async function getUserSubscription(
   userId: string
-): Promise<DBResponse<Subscription>> {
+): Promise<DBResponse<Subscription | null>> {
   try {
     const data = await db.query.subscriptions.findFirst({
       where: (s, { eq }) => eq(s.userId, userId),
     });
 
-    if (!data) return { data: null, error: "Subscription not found" };
-
-    return { data, error: null };
+    return { data: data ?? null, error: null };
   } catch (error) {
     return { error: (error as Error).message, data: null };
   }

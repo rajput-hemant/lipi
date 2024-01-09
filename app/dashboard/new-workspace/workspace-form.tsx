@@ -9,9 +9,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import type { Subscription } from "@/types/db";
 import { createWorkspace } from "@/lib/db/queries";
 import { EmojiPicker } from "@/components/emoji-picker";
+import { useSubscriptionModal } from "@/components/subscription-modal-provider";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,13 +29,12 @@ const workspaceSchema = z.object({
 
 type FormData = z.infer<typeof workspaceSchema>;
 
-type WorkspaceFormProps = {
-  user: User;
-  subscription: Subscription;
-};
+type WorkspaceFormProps = { user: User };
 
-export function WorkspaceForm({ user, subscription }: WorkspaceFormProps) {
+export function WorkspaceForm({ user }: WorkspaceFormProps) {
   const router = useRouter();
+  const { subscription } = useSubscriptionModal();
+
   const [selectedEmoji, setSelectedEmoji] = React.useState("💼");
 
   const form = useForm<FormData>({
@@ -45,30 +44,26 @@ export function WorkspaceForm({ user, subscription }: WorkspaceFormProps) {
   });
 
   async function submitHandler({ name }: FormData) {
-    console.log({ name });
-
     const { data, error } = await createWorkspace({
       title: name,
       iconId: selectedEmoji,
       workspaceOwnerId: user.id,
     });
 
-    if (data) {
-      toast.success("Workspace created", {
-        description: `Your workspace "${name}" was created successfully.`,
-      });
-
-      router.replace(`/dashboard/${data.id}`);
-    }
-
-    if (error) {
-      console.log(error, "Error");
-
+    if (error || !data) {
       toast.error("Could not create your workspace", {
         description:
           "Oops! Something went wrong, and we couldn't create your workspace. Try again or come back later.",
       });
+
+      return;
     }
+
+    toast.success("Workspace created", {
+      description: `Your workspace "${name}" was created successfully.`,
+    });
+
+    router.replace(`/dashboard/${data.id}`);
   }
 
   return (
@@ -103,7 +98,7 @@ export function WorkspaceForm({ user, subscription }: WorkspaceFormProps) {
           )}
         />
 
-        {subscription.status !== "active" && (
+        {subscription?.status !== "active" && (
           <small className="block pt-4 text-center text-xs text-muted-foreground">
             To customize your workspace, you need to be on a Pro Plan
           </small>

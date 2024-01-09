@@ -31,16 +31,24 @@ export const useSubscriptionModal = () => {
   return React.useContext(SubscriptionModalContext);
 };
 
-type SubscriptionModalProviderProps = {
+type Props = React.PropsWithChildren<{
   subscription: Subscription | null;
-  children: React.ReactNode;
-};
+  hasErrored?: boolean;
+}>;
 
-export const SubscriptionModalProvider = ({
-  subscription,
-  children,
-}: SubscriptionModalProviderProps) => {
+export const SubscriptionModalProvider = (props: Props) => {
+  const { subscription, hasErrored, children } = props;
+
   const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (hasErrored) {
+      toast.error("An unexpected error occurred", {
+        description:
+          "Unable to fetch your subscription status. Please try again later.",
+      });
+    }
+  }, [hasErrored]);
 
   function onClickHandler() {
     toast("This feature is not available yet.", {
