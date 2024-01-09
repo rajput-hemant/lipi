@@ -82,7 +82,6 @@
     "eslint-plugin-tailwindcss": "^3.13.1",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
-    "oxlint": "^0.1.2",
     "pg": "^8.11.3",
     "postcss": "8.4.33",
     "prettier": "^3.1.1",
@@ -96,7 +95,7 @@
       "prettier --write \"**/*.{ts,tsx,mdx}\" --cache --experimental-ternaries"
     ],
     "*.{ts,tsx,mdx}": [
-      "oxlint --fix ."
+      "eslint --fix ."
     ]
   },
   "commitlint": {
