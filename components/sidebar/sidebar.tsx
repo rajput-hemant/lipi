@@ -1,11 +1,12 @@
 import React from "react";
-import type { Route } from "next";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
 import { LayoutGrid, Settings, Trash2, User2 } from "lucide-react";
-import type { User } from "next-auth";
 
-import type { Folder } from "@/types/db";
+import type { LucideIcon } from "lucide-react";
+import type { Route } from "next";
+import type { User } from "next-auth";
+import type { File, Folder } from "@/types/db";
+
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Logo } from "../icons";
@@ -20,6 +21,7 @@ import { FoldersCollapsed } from "./folders-collapsed";
 
 type SidebarProps = React.ComponentProps<"aside"> & {
   user: User;
+  files: File[];
   folders: Folder[];
   isCollapsed: boolean;
 };
@@ -52,7 +54,7 @@ const navItems: NavItem[] = [
 ];
 
 export function Sidebar(props: SidebarProps) {
-  const { user, folders, isCollapsed, className, ...restProps } = props;
+  const { user, files, folders, isCollapsed, className, ...restProps } = props;
 
   return (
     <aside
@@ -102,8 +104,8 @@ export function Sidebar(props: SidebarProps) {
         <Separator className={isCollapsed ? "block" : "hidden"} />
 
         {isCollapsed ?
-          <FoldersCollapsed folders={folders} />
-        : <Folders folders={folders} />}
+          <FoldersCollapsed files={files} folders={folders} />
+        : <Folders files={files} folders={folders} />}
 
         <div
           className={cn(
@@ -115,9 +117,12 @@ export function Sidebar(props: SidebarProps) {
         >
           {isCollapsed ?
             <Popover>
-              <PopoverTrigger asChild>
-                <Avatar className="mx-auto flex h-12 w-12 rounded-full border shadow hover:shadow-xl">
-                  <AvatarImage src={user.image ?? undefined} />
+              <PopoverTrigger className="mx-auto flex rounded-full border p-0.5 shadow hover:shadow-xl">
+                <Avatar>
+                  <AvatarImage
+                    src={user.image ?? undefined}
+                    className="rounded-full"
+                  />
 
                   <AvatarFallback className="cursor-pointer bg-background hover:bg-muted">
                     <User2 className="h-5 w-5" />

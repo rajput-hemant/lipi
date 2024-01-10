@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import type { User } from "next-auth";
 
-import type { Folder } from "@/types/db";
-import { cn } from "@/lib/utils";
+import type { User } from "next-auth";
+import type { File, Folder } from "@/types/db";
+
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { Navbar } from "@/components/site-header/navbar";
 import {
@@ -12,22 +12,27 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import { cn } from "@/lib/utils";
 
 type ResizableLayoutProps = {
   user: User;
+  files: File[];
   folders: Folder[];
   defaultLayout: number[];
   defaultCollapsed: boolean;
   children: React.ReactNode;
 };
 
-export function ResizableLayout({
-  user,
-  folders,
-  defaultLayout = [16, 84],
-  defaultCollapsed = false,
-  children,
-}: ResizableLayoutProps) {
+export function ResizableLayout(props: ResizableLayoutProps) {
+  const {
+    user,
+    files,
+    folders,
+    defaultLayout = [16, 84],
+    defaultCollapsed = false,
+    children,
+  } = props;
+
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed);
 
   return (
@@ -63,7 +68,12 @@ export function ResizableLayout({
             "min-w-[3.5rem] transition-all duration-300 ease-in-out"
         )}
       >
-        <Sidebar user={user} folders={folders} isCollapsed={isCollapsed} />
+        <Sidebar
+          user={user}
+          files={files}
+          folders={folders}
+          isCollapsed={isCollapsed}
+        />
       </ResizablePanel>
 
       <ResizableHandle withHandle className="hidden lg:flex" />

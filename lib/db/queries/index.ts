@@ -4,4 +4,5 @@ export type DBResponse<T> =
 
 export * from "./workspace";
 export * from "./folder";
+export * from "./file";
 export * from "./subscription";

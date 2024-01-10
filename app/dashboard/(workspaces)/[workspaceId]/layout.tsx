@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
-import { getFolders } from "@/lib/db/queries";
+import { getFiles, getFolders } from "@/lib/db/queries";
 import { ResizableLayout } from "../components/resizable-layout";
 
 type WorkspaceLayoutProps = React.PropsWithChildren<{
@@ -23,13 +23,17 @@ export default async function WorkspaceLayout({
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
   const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;
 
-  const { data: folders, error: _ } = await getFolders(workspaceId);
+  const [{ data: files }, { data: folders }] = await Promise.all([
+    getFiles(workspaceId),
+    getFolders(workspaceId),
+  ]);
 
   // TODO: Handle error case
 
   return (
     <ResizableLayout
       user={user}
+      files={files!}
       folders={folders!}
       defaultLayout={defaultLayout as number[]}
       defaultCollapsed={defaultCollapsed as boolean}
