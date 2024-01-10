@@ -1,6 +1,7 @@
-import type { ClassValue } from "clsx";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+
+import type { ClassValue } from "clsx";
 
 import { siteConfig } from "@/config/site";
 import { env } from "./env.mjs";

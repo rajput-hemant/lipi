@@ -1,7 +1,8 @@
 "use server";
 
-import type { Subscription } from "@/types/db";
 import type { DBResponse } from ".";
+import type { Subscription } from "@/types/db";
+
 import { db } from "..";
 
 /**

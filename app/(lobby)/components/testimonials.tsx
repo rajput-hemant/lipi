@@ -1,7 +1,5 @@
 import { randomUUID } from "crypto";
 
-import { USERS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -10,6 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { USERS } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 export function Testimonials() {
   return (

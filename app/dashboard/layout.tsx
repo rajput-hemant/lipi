@@ -1,9 +1,10 @@
-import type { PropsWithChildren } from "react";
 import { redirect } from "next/navigation";
 
+import type { PropsWithChildren } from "react";
+
+import { SubscriptionModalProvider } from "@/components/subscription-modal-provider";
 import { getCurrentUser } from "@/lib/auth";
 import { getUserSubscription } from "@/lib/db/queries";
-import { SubscriptionModalProvider } from "@/components/subscription-modal-provider";
 
 export default async function DashboardLayout({ children }: PropsWithChildren) {
   const user = await getCurrentUser();

@@ -1,8 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { EmojiClickData, Theme } from "emoji-picker-react";
 import { useTheme } from "next-themes";
+
+import type { EmojiClickData, Theme } from "emoji-picker-react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 

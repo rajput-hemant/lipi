@@ -1,8 +1,8 @@
 import Image from "next/image";
 
+import { GitHub } from "@/components/icons";
 import { siteConfig } from "@/config/site";
 import { getGitHubStars } from "@/lib/utils";
-import { GitHub } from "@/components/icons";
 
 export async function OpenSource() {
   const stars = await getGitHubStars();

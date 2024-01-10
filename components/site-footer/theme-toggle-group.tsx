@@ -4,9 +4,9 @@ import React from "react";
 import { Monitor, Moon, SunMedium } from "lucide-react";
 import { useTheme } from "next-themes";
 
-import { cn } from "@/lib/utils";
-import { useIsMounted } from "@/hooks/use-is-mounted";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useIsMounted } from "@/hooks/use-is-mounted";
+import { cn } from "@/lib/utils";
 
 type ThemeToggleGroupProps = {
   className?: string;

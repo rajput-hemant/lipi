@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { siteConfig } from "@/config/site";
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils";
 
 export function Hero() {
   return (

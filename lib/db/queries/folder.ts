@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { eq } from "drizzle-orm";
 import { validate } from "uuid";
 
-import type { Folder } from "@/types/db";
 import type { DBResponse } from ".";
+import type { Folder } from "@/types/db";
+
 import { db } from "..";
 import { folders } from "../schema";
 

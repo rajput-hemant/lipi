@@ -1,9 +1,10 @@
-import type { Route } from "next";
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { getToken } from "next-auth/jwt";
 import { withAuth } from "next-auth/middleware";
+
+import type { Route } from "next";
 
 import { env } from "./lib/env.mjs";
 

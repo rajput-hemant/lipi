@@ -4,12 +4,12 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import type { User } from "next-auth";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { createWorkspace } from "@/lib/db/queries";
+import type { User } from "next-auth";
+
 import { EmojiPicker } from "@/components/emoji-picker";
 import { useSubscriptionModal } from "@/components/subscription-modal-provider";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createWorkspace } from "@/lib/db/queries";
 
 const workspaceSchema = z.object({
   name: z.string().min(3, "Workspace name must be at least 3 characters long"),

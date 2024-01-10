@@ -10,14 +10,11 @@
     "^(next/(.*)$)|^(next$)",
     "<THIRD_PARTY_MODULES>",
     "",
-    "^types$",
-    "^@/types/(.*)$",
-    "^@/store/?(.*)$",
-    "^@/config/(.*)$",
-    "^@/lib/(.*)$",
-    "^@/hooks/?(.*)$",
-    "^@/components/(.*)$",
-    "^[./]"
+    "<TYPES>",
+    "<TYPES>^[@~]/(?!$).*$",
+    "",
+    "^[@~]/.*$",
+    "^[.]"
   ],
   "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"]
 }

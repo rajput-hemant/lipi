@@ -1,5 +1,5 @@
-import { LEGAL } from "@/lib/constants";
 import { Separator } from "@/components/ui/separator";
+import { LEGAL } from "@/lib/constants";
 
 export const metadata = {
   title: "Privacy Policy",

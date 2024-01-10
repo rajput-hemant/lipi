@@ -1,6 +1,5 @@
 import Image from "next/image";
 
-import { getCurrentUser } from "@/lib/auth";
 import {
   Card,
   CardContent,
@@ -9,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getCurrentUser } from "@/lib/auth";
 import { WorkspaceForm } from "./workspace-form";
 
 export const metadata = {

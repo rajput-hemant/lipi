@@ -1,4 +1,3 @@
-import type { AdapterAccount } from "@auth/core/adapters";
 import {
   integer,
   pgTable,
@@ -7,6 +6,8 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+
+import type { AdapterAccount } from "@auth/core/adapters";
 
 /* -----------------------------------------------------------------------------------------------
  * Auth tables

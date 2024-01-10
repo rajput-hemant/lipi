@@ -1,5 +1,4 @@
 import type { InferInsertModel } from "drizzle-orm";
-
 import type {
   accounts,
   collaborators,

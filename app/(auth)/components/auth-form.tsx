@@ -15,11 +15,9 @@ import {
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
 import type * as z from "zod";
 
-import { createNewAccount, resetPassword } from "@/lib/actions";
-import { cn } from "@/lib/utils";
-import { authSchema } from "@/lib/validations";
 import { GitHub, Google } from "@/components/icons";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -36,6 +34,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { createNewAccount, resetPassword } from "@/lib/actions";
+import { cn } from "@/lib/utils";
+import { authSchema } from "@/lib/validations";
 
 type FormData = z.infer<typeof authSchema>;
 type AuthFormProps = { mode: "login" | "signup" | "reset" };

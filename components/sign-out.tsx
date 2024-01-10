@@ -5,6 +5,7 @@ import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 
 import type { ButtonProps } from "./ui/button";
+
 import { Button } from "./ui/button";
 
 export function SignOut(props: ButtonProps) {

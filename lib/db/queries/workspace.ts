@@ -2,8 +2,9 @@
 
 import { and, eq, notExists } from "drizzle-orm";
 
-import type { Workspace } from "@/types/db";
 import type { DBResponse } from ".";
+import type { Workspace } from "@/types/db";
+
 import { db } from "..";
 import { collaborators, users, workspaces } from "../schema";
 

@@ -2,12 +2,12 @@ import "@/app/globals.css";
 
 import type { Metadata, Viewport } from "next";
 
-import { siteConfig } from "@/config/site";
-import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
-import { absoluteUrl, cn } from "@/lib/utils";
 import { Providers } from "@/components/providers";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
+import { siteConfig } from "@/config/site";
+import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
+import { absoluteUrl, cn } from "@/lib/utils";
 
 export const viewport: Viewport = {
   viewportFit: "cover",

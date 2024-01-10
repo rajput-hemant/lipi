@@ -1,11 +1,11 @@
 import { CheckIcon } from "lucide-react";
 
-import { siteConfig } from "@/config/site";
-import { PRICING_CARDS, PRICING_PLANS } from "@/lib/constants";
-import { cn, formatCurrency } from "@/lib/utils";
 import { Diamond } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { siteConfig } from "@/config/site";
+import { PRICING_CARDS, PRICING_PLANS } from "@/lib/constants";
+import { cn, formatCurrency } from "@/lib/utils";
 
 export const metadata = {
   title: "Pricing",
