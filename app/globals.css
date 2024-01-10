@@ -69,7 +69,8 @@
 
 @layer base {
   * {
-    @apply border-border;
+    /* min-width: https://twitter.com/adamwathan/status/1734696245015494711/ */
+    @apply border-border min-w-0;
   }
   body {
     @apply bg-background text-foreground;

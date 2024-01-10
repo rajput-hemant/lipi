@@ -35,7 +35,6 @@ export const folders = createTable("folders", {
   title: text("title").notNull(),
   iconId: text("icon_id").notNull(),
   data: text("data"),
-  logo: text("logo"),
   bannerUrl: text("banner_url"),
   workspaceId: uuid("workspace_id").references(() => workspaces.id, {
     onDelete: "cascade",
@@ -54,7 +53,6 @@ export const files = createTable("files", {
   title: text("title").notNull(),
   iconId: text("icon_id").notNull(),
   data: text("data"),
-  logo: text("logo"),
   bannerUrl: text("banner_url"),
   workspaceId: uuid("workspace_id").references(() => workspaces.id, {
     onDelete: "cascade",
