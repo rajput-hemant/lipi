@@ -61,7 +61,12 @@ export function Sidebar(props: SidebarProps) {
       className={cn("relative z-40 hidden lg:block", className)}
       {...restProps}
     >
-      <div className="sticky inset-y-0 flex h-screen flex-col gap-2 overflow-hidden">
+      <div
+        className={cn(
+          "sticky inset-y-0 flex h-screen flex-col gap-2",
+          !isCollapsed && "overflow-hidden"
+        )}
+      >
         <div
           className={cn(
             "flex",

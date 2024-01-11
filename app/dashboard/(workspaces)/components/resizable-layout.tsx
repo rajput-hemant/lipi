@@ -65,7 +65,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
         className={cn(
           "hidden lg:block",
           isCollapsed &&
-            "min-w-[3.5rem] transition-all duration-300 ease-in-out"
+            "min-w-[3.5rem] !overflow-visible transition-all duration-300 ease-in-out"
         )}
       >
         <Sidebar
