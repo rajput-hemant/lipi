@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useOptimistic, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -27,6 +27,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { useAppState } from "@/hooks/use-app-state";
 import {
   createFile,
   createFolder,
@@ -48,14 +49,12 @@ import { Kbd } from "../ui/kbd";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
-type FoldersProps = {
-  files: File[];
-  folders: Folder[];
-};
-
-export function Folders({ files, folders }: FoldersProps) {
+export function Folders() {
   const pathname = usePathname();
   const { setOpen, subscription } = useSubscriptionModal();
+
+  const { files, addFile, removeFile, folders, addFolder, removeFolder } =
+    useAppState();
 
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [isCreatingFile, setIsCreatingFile] = useState(false);
@@ -64,11 +63,8 @@ export function Folders({ files, folders }: FoldersProps) {
   const [fileName, setFileName] = useState("Untitled");
   const [selectedEmoji, setSelectedEmoji] = useState("");
 
-  const [optimisticFolders, setOptimisticFolders] = useOptimistic(folders);
-  const [optimisticFiles, setOptimisticFiles] = useOptimistic(files);
-
   function createFolderToggle() {
-    if (subscription?.status !== "active" && optimisticFolders.length >= 3) {
+    if (subscription?.status !== "active" && folders.length >= 3) {
       toast.error("Something went wrong", {
         description: "You have reached the maximum number of folders.",
       });
@@ -83,7 +79,7 @@ export function Folders({ files, folders }: FoldersProps) {
   function createFileToggle(folderId: string) {
     if (
       subscription?.status !== "active" &&
-      optimisticFiles.filter((f) => f.folderId === folderId).length >= 3
+      files.filter((f) => f.folderId === folderId).length >= 3
     ) {
       toast.error("Something went wrong", {
         description: "You have reached the maximum number of files.",
@@ -111,7 +107,7 @@ export function Folders({ files, folders }: FoldersProps) {
       workspaceId: pathname.split("/")[2],
     };
 
-    setOptimisticFolders((state) => [...state, newFolder]);
+    addFolder(newFolder);
 
     toast.promise(createFolder(newFolder), {
       loading: "Creating folder...",
@@ -143,7 +139,7 @@ export function Folders({ files, folders }: FoldersProps) {
       workspaceId: pathname.split("/")[2],
     };
 
-    setOptimisticFiles((state) => [...state, newFile]);
+    addFile(newFile);
 
     toast.promise(createFile(newFile), {
       loading: "Creating file...",
@@ -163,8 +159,7 @@ export function Folders({ files, folders }: FoldersProps) {
   }
 
   async function deleteFolderHandler(folderId: string) {
-    // TODO: ui not updating as expected
-    setOptimisticFolders((state) => state.filter((f) => f.id !== folderId));
+    removeFolder(folderId);
 
     toast.promise(deleteFolder(folderId), {
       loading: "Deleting folder...",
@@ -174,8 +169,7 @@ export function Folders({ files, folders }: FoldersProps) {
   }
 
   async function deleteFileHandler(fileId: string) {
-    // TODO: ui not updating as expected
-    setOptimisticFiles((state) => state.filter((f) => f.id !== fileId));
+    removeFile(fileId);
 
     toast.promise(deleteFile(fileId), {
       loading: "Deleting file...",
@@ -194,11 +188,11 @@ export function Folders({ files, folders }: FoldersProps) {
               size="icon"
               variant="ghost"
               onClick={createFolderToggle}
-              className="h-7 w-7 text-muted-foreground"
+              className="size-7 text-muted-foreground"
             >
               {isCreatingFolder ?
-                <X className="h-4 w-4 duration-300 animate-in spin-in-90" />
-              : <Plus className="h-[18px] w-[18px] duration-300 animate-out spin-out-90" />
+                <X className="size-4 duration-300 animate-in spin-in-90" />
+              : <Plus className="size-[18px] duration-300 animate-out spin-out-90" />
               }
             </Button>
           </TooltipTrigger>
@@ -225,10 +219,10 @@ export function Folders({ files, folders }: FoldersProps) {
                     side="right"
                     align="start"
                     getValue={setSelectedEmoji}
-                    className="absolute inset-y-0 left-1 my-auto inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted"
+                    className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                   >
                     {!selectedEmoji ?
-                      <FolderIcon className="h-4 w-4" />
+                      <FolderIcon className="size-4" />
                     : selectedEmoji}
                   </EmojiPicker>
 
@@ -245,17 +239,15 @@ export function Folders({ files, folders }: FoldersProps) {
                   <Button
                     size="icon"
                     variant="ghost"
-                    className="absolute inset-y-0 right-1 my-auto h-7 w-7 text-muted-foreground"
+                    className="absolute inset-y-0 right-1 my-auto size-7 text-muted-foreground"
                   >
-                    <Check className="h-4 w-4" />
+                    <Check className="size-4" />
                   </Button>
                 </form>
               )}
 
-              {optimisticFolders.map(({ id, title, iconId }) => {
-                const folderFiles = optimisticFiles.filter(
-                  (f) => f.folderId === id
-                );
+              {folders.map(({ id, title, iconId }) => {
+                const folderFiles = files.filter((f) => f.folderId === id);
 
                 return (
                   <AccordionItem
@@ -276,13 +268,13 @@ export function Folders({ files, folders }: FoldersProps) {
                             {iconId ?
                               iconId
                             : openedFolders.includes(id!) ?
-                              <FolderOpen className="h-4 w-4 shrink-0" />
-                            : <FolderIcon className="h-4 w-4 shrink-0" />}
+                              <FolderOpen className="size-4 shrink-0" />
+                            : <FolderIcon className="size-4 shrink-0" />}
                           </span>
 
                           {title}
 
-                          <ChevronDown className="invisible ml-auto h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/trigger:visible group-data-[state=open]/trigger:visible group-data-[state=open]/trigger:rotate-180" />
+                          <ChevronDown className="invisible ml-auto size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/trigger:visible group-data-[state=open]/trigger:visible group-data-[state=open]/trigger:rotate-180" />
                         </AccordionTrigger>
                       </ContextMenuTrigger>
 
@@ -291,7 +283,7 @@ export function Folders({ files, folders }: FoldersProps) {
                           onClick={() => createFileToggle(id!)}
                           className="cursor-pointer"
                         >
-                          <FileIcon className="mr-2 h-4 w-4 shrink-0" />
+                          <FileIcon className="mr-2 size-4 shrink-0" />
                           New File
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"} N
@@ -302,7 +294,7 @@ export function Folders({ files, folders }: FoldersProps) {
                           onClick={currentlyInDev}
                           className="cursor-pointer"
                         >
-                          <Edit2 className="mr-2 h-4 w-4 shrink-0" />
+                          <Edit2 className="mr-2 size-4 shrink-0" />
                           Rename
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"} E
@@ -320,7 +312,7 @@ export function Folders({ files, folders }: FoldersProps) {
                           onClick={() => deleteFolderHandler(id!)}
                           className="cursor-pointer !text-red-500"
                         >
-                          <Trash className="mr-2 h-4 w-4 shrink-0" />
+                          <Trash className="mr-2 size-4 shrink-0" />
                           Delete
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"} D
@@ -340,10 +332,10 @@ export function Folders({ files, folders }: FoldersProps) {
                             side="right"
                             align="start"
                             getValue={setSelectedEmoji}
-                            className="absolute inset-y-0 left-1 my-auto inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted"
+                            className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                           >
                             {!selectedEmoji ?
-                              <FileIcon className="h-4 w-4" />
+                              <FileIcon className="size-4" />
                             : selectedEmoji}
                           </EmojiPicker>
 
@@ -360,9 +352,9 @@ export function Folders({ files, folders }: FoldersProps) {
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="absolute inset-y-0 right-1 my-auto h-7 w-7 text-muted-foreground"
+                            className="absolute inset-y-0 right-1 my-auto size-7 text-muted-foreground"
                           >
-                            <Check className="h-4 w-4" />
+                            <Check className="size-4" />
                           </Button>
                         </form>
                       )}
@@ -384,7 +376,7 @@ export function Folders({ files, folders }: FoldersProps) {
                                 <span className="mr-2 shrink-0">
                                   {iconId ?
                                     iconId
-                                  : <FileIcon className="h-4 w-4" />}
+                                  : <FileIcon className="size-4" />}
                                 </span>
                                 {title}
                               </Link>
@@ -393,18 +385,18 @@ export function Folders({ files, folders }: FoldersProps) {
                                 size="icon"
                                 variant="ghost"
                                 onClick={currentlyInDev}
-                                className="invisible z-10 ml-auto h-7 w-7 shrink-0 text-muted-foreground group-hover:visible"
+                                className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
                               >
-                                <Edit2 className="h-4 w-4" />
+                                <Edit2 className="size-4" />
                               </Button>
 
                               <Button
                                 size="icon"
                                 variant="ghost"
                                 onClick={() => deleteFileHandler(id!)}
-                                className="invisible z-10 h-7 w-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
+                                className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
                               >
-                                <Trash className="h-4 w-4" />
+                                <Trash className="size-4" />
                               </Button>
                             </div>
                           )

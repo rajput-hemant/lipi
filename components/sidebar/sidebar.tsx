@@ -4,10 +4,9 @@ import { LayoutGrid, Settings, Trash2, User2 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
 import type { Route } from "next";
-import type { User } from "next-auth";
-import type { File, Folder } from "@/types/db";
 
 import { siteConfig } from "@/config/site";
+import { useAppState } from "@/hooks/use-app-state";
 import { cn } from "@/lib/utils";
 import { Logo } from "../icons";
 import { SignOut } from "../sign-out";
@@ -20,9 +19,6 @@ import { Folders } from "./folders";
 import { FoldersCollapsed } from "./folders-collapsed";
 
 type SidebarProps = React.ComponentProps<"aside"> & {
-  user: User;
-  files: File[];
-  folders: Folder[];
   isCollapsed: boolean;
 };
 
@@ -53,13 +49,13 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function Sidebar(props: SidebarProps) {
-  const { user, files, folders, isCollapsed, className, ...restProps } = props;
+export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
+  const { user } = useAppState();
 
   return (
     <aside
       className={cn("relative z-40 hidden lg:block", className)}
-      {...restProps}
+      {...props}
     >
       <div
         className={cn(
@@ -91,7 +87,7 @@ export function Sidebar(props: SidebarProps) {
                   <NavLink
                     title={title}
                     href={href}
-                    icon={<Icon className="h-5 w-5" />}
+                    icon={<Icon className="size-5" />}
                     isCollapsed
                   />
                 </TooltipTrigger>
@@ -101,7 +97,7 @@ export function Sidebar(props: SidebarProps) {
                 key={title}
                 title={title}
                 href={href}
-                icon={<Icon className="mr-2 h-4 w-4 shrink-0" />}
+                icon={<Icon className="mr-2 size-4 shrink-0" />}
               />
           )}
         </nav>
@@ -109,8 +105,8 @@ export function Sidebar(props: SidebarProps) {
         <Separator className={isCollapsed ? "block" : "hidden"} />
 
         {isCollapsed ?
-          <FoldersCollapsed files={files} folders={folders} />
-        : <Folders files={files} folders={folders} />}
+          <FoldersCollapsed />
+        : <Folders />}
 
         <div
           className={cn(
@@ -125,12 +121,12 @@ export function Sidebar(props: SidebarProps) {
               <PopoverTrigger className="mx-auto flex rounded-full border p-0.5 shadow hover:shadow-xl">
                 <Avatar>
                   <AvatarImage
-                    src={user.image ?? undefined}
+                    src={user?.image ?? undefined}
                     className="rounded-full"
                   />
 
                   <AvatarFallback className="cursor-pointer bg-background hover:bg-muted">
-                    <User2 className="h-5 w-5" />
+                    <User2 className="size-5" />
                   </AvatarFallback>
                 </Avatar>
               </PopoverTrigger>
@@ -138,7 +134,7 @@ export function Sidebar(props: SidebarProps) {
               <PopoverContent side="right" className="flex justify-between">
                 <div className="w-full font-medium">
                   <p className="line-clamp-1 text-sm">
-                    {user.name ?? "Update your profile"}
+                    {user?.name ?? "Update your profile"}
                   </p>
                   <p className="line-clamp-1 text-xs text-muted-foreground">
                     Free plan
@@ -154,15 +150,15 @@ export function Sidebar(props: SidebarProps) {
             </Popover>
           : <>
               <Avatar className="m-auto">
-                <AvatarImage src={user.image ?? undefined} />
+                <AvatarImage src={user?.image ?? undefined} />
                 <AvatarFallback>
-                  <User2 className="h-6 w-6 text-muted-foreground" />
+                  <User2 className="size-6 text-muted-foreground" />
                 </AvatarFallback>
               </Avatar>
 
               <div className="w-full font-medium">
                 <p className="line-clamp-1 text-sm">
-                  {user.name ?? "Update your profile"}
+                  {user?.name ?? "Update your profile"}
                 </p>
                 <p className="line-clamp-1 text-xs text-muted-foreground">
                   Free plan

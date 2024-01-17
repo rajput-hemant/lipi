@@ -2,9 +2,6 @@
 
 import React from "react";
 
-import type { User } from "next-auth";
-import type { File, Folder } from "@/types/db";
-
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { Navbar } from "@/components/site-header/navbar";
 import {
@@ -15,9 +12,6 @@ import {
 import { cn } from "@/lib/utils";
 
 type ResizableLayoutProps = {
-  user: User;
-  files: File[];
-  folders: Folder[];
   defaultLayout: number[];
   defaultCollapsed: boolean;
   children: React.ReactNode;
@@ -25,9 +19,6 @@ type ResizableLayoutProps = {
 
 export function ResizableLayout(props: ResizableLayoutProps) {
   const {
-    user,
-    files,
-    folders,
     defaultLayout = [16, 84],
     defaultCollapsed = false,
     children,
@@ -68,12 +59,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
             "min-w-[3.5rem] !overflow-visible transition-all duration-300 ease-in-out"
         )}
       >
-        <Sidebar
-          user={user}
-          files={files}
-          folders={folders}
-          isCollapsed={isCollapsed}
-        />
+        <Sidebar isCollapsed={isCollapsed} />
       </ResizablePanel>
 
       <ResizableHandle withHandle className="hidden lg:flex" />

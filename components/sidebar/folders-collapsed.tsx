@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useOptimistic, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -18,6 +18,7 @@ import { v4 as uuid } from "uuid";
 
 import type { File, Folder } from "@/types/db";
 
+import { useAppState } from "@/hooks/use-app-state";
 import {
   createFile,
   createFolder,
@@ -38,25 +39,20 @@ import {
 } from "../ui/navigation-menu";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
-type FoldersCollapsedProps = {
-  files: File[];
-  folders: Folder[];
-};
-
-export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
+export function FoldersCollapsed() {
   const pathname = usePathname();
   const { setOpen, subscription } = useSubscriptionModal();
+
+  const { files, addFile, removeFile, folders, addFolder, removeFolder } =
+    useAppState();
 
   const [isCreatingFile, setIsCreatingFile] = useState(false);
   const [folderName, setFolderName] = useState("Untitled");
   const [fileName, setFileName] = useState("Untitled");
   const [selectedEmoji, setSelectedEmoji] = useState("");
 
-  const [optimisticFolders, setOptimisticFolders] = useOptimistic(folders);
-  const [optimisticFiles, setOptimisticFiles] = useOptimistic(files);
-
   function createFolderToggle() {
-    if (subscription?.status !== "active" && optimisticFolders.length >= 3) {
+    if (subscription?.status !== "active" && folders.length >= 3) {
       toast.error("Something went wrong", {
         description: "You have reached the maximum number of folders.",
       });
@@ -69,7 +65,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
   function createFileToggle(folderId: string) {
     if (
       subscription?.status !== "active" &&
-      optimisticFiles.filter((f) => f.folderId === folderId).length >= 3
+      files.filter((f) => f.folderId === folderId).length >= 3
     ) {
       toast.error("Something went wrong", {
         description: "You have reached the maximum number of files.",
@@ -92,7 +88,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
       workspaceId: pathname.split("/")[2],
     };
 
-    setOptimisticFolders((prev) => [...prev, newFolder]);
+    addFolder(newFolder);
 
     toast.promise(createFolder(newFolder), {
       loading: "Creating folder...",
@@ -123,7 +119,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
       workspaceId: pathname.split("/")[2],
     };
 
-    setOptimisticFiles((state) => [...state, newFile]);
+    addFile(newFile);
 
     toast.promise(createFile(newFile), {
       loading: "Creating file...",
@@ -143,8 +139,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
   }
 
   async function deleteFolderHandler(folderId: string) {
-    // TODO: ui not updating as expected
-    setOptimisticFolders((state) => state.filter((f) => f.id !== folderId));
+    removeFolder(folderId);
 
     toast.promise(deleteFolder(folderId), {
       loading: "Deleting folder...",
@@ -154,8 +149,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
   }
 
   async function deleteFileHandler(fileId: string) {
-    // TODO: ui not updating as expected
-    setOptimisticFiles((state) => state.filter((f) => f.id !== fileId));
+    removeFile(fileId);
 
     toast.promise(deleteFile(fileId), {
       loading: "Deleting file...",
@@ -168,11 +162,8 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
     <NavigationMenu orientation="vertical" className="max-w-none items-start">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger
-            showIndicator={false}
-            className="h-10 w-10 p-0"
-          >
-            <Plus className="h-5 w-5" />
+          <NavigationMenuTrigger showIndicator={false} className="size-10 p-0">
+            <Plus className="size-5" />
           </NavigationMenuTrigger>
 
           <NavigationMenuContent className="min-w-80 space-y-4 p-4">
@@ -188,7 +179,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                   className={buttonVariants({ size: "sm", variant: "ghost" })}
                 >
                   {!selectedEmoji ?
-                    <FolderIcon className="h-5 w-5" />
+                    <FolderIcon className="size-5" />
                   : selectedEmoji}
                 </EmojiPicker>
 
@@ -216,17 +207,17 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
           </NavigationMenuContent>
         </NavigationMenuItem>
 
-        {optimisticFolders.map(({ id, iconId, title }) => {
-          const folderFiles = optimisticFiles.filter((f) => f.folderId === id);
+        {folders.map(({ id, iconId, title }) => {
+          const folderFiles = files.filter((f) => f.folderId === id);
 
           return (
             <NavigationMenuItem key={id!}>
               <NavigationMenuTrigger
                 showIndicator={false}
-                className="h-10 w-10 p-0"
+                className="size-10 p-0"
               >
                 {!iconId ?
-                  <FolderIcon className="h-5 w-5" />
+                  <FolderIcon className="size-5" />
                 : <span className="text-lg">{iconId}</span>}
               </NavigationMenuTrigger>
 
@@ -235,7 +226,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                   <h3 className="flex text-lg font-semibold leading-none tracking-tight">
                     {iconId ?
                       <span className="text-lg">{iconId}</span>
-                    : <FolderIcon className="h-5 w-5" />}
+                    : <FolderIcon className="size-5" />}
                     <span className="ml-2">{title}</span>
                   </h3>
 
@@ -243,25 +234,25 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                     <Button
                       variant="ghost"
                       onClick={() => createFileToggle(id!)}
-                      className="h-7 w-7 p-0 text-muted-foreground"
+                      className="size-7 p-0 text-muted-foreground"
                     >
-                      <FilePlus2 className="h-4 w-4" />
+                      <FilePlus2 className="size-4" />
                     </Button>
 
                     <Button
                       variant="ghost"
                       onClick={currentlyInDev}
-                      className="h-7 w-7 p-0 text-muted-foreground"
+                      className="size-7 p-0 text-muted-foreground"
                     >
-                      <Edit2 className="h-4 w-4" />
+                      <Edit2 className="size-4" />
                     </Button>
 
                     <Button
                       variant="ghost"
                       onClick={() => deleteFolderHandler(id!)}
-                      className="h-7 w-7 p-0 text-muted-foreground"
+                      className="size-7 p-0 text-muted-foreground"
                     >
-                      <Trash className="h-4 w-4" />
+                      <Trash className="size-4" />
                     </Button>
                   </div>
                 </header>
@@ -278,10 +269,10 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                           side="right"
                           align="start"
                           getValue={setSelectedEmoji}
-                          className="absolute inset-y-0 left-1 my-auto inline-flex h-7 w-7 items-center justify-center rounded-md hover:bg-muted"
+                          className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                         >
                           {!selectedEmoji ?
-                            <FileIcon className="h-4 w-4" />
+                            <FileIcon className="size-4" />
                           : selectedEmoji}
                         </EmojiPicker>
 
@@ -298,9 +289,9 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="absolute inset-y-0 right-1 my-auto h-7 w-7 text-muted-foreground"
+                          className="absolute inset-y-0 right-1 my-auto size-7 text-muted-foreground"
                         >
-                          <Check className="h-4 w-4" />
+                          <Check className="size-4" />
                         </Button>
                       </form>
                     )}
@@ -324,7 +315,7 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                             <span className="mr-2 shrink-0">
                               {iconId ?
                                 iconId
-                              : <FileIcon className="h-4 w-4" />}
+                              : <FileIcon className="size-4" />}
                             </span>
                             {title}
                           </Link>
@@ -333,18 +324,18 @@ export function FoldersCollapsed({ files, folders }: FoldersCollapsedProps) {
                             size="icon"
                             variant="ghost"
                             onClick={currentlyInDev}
-                            className="invisible z-10 ml-auto h-7 w-7 shrink-0 text-muted-foreground group-hover:visible"
+                            className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
                           >
-                            <Edit2 className="h-4 w-4" />
+                            <Edit2 className="size-4" />
                           </Button>
 
                           <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => deleteFileHandler(id!)}
-                            className="invisible z-10 h-7 w-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
+                            className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
                           >
-                            <Trash className="h-4 w-4" />
+                            <Trash className="size-4" />
                           </Button>
                         </div>
                       ))

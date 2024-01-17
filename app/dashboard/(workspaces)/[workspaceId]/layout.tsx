@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { AppStateProvider } from "@/components/app-state-provider";
 import { getCurrentUser } from "@/lib/auth";
 import { getFiles, getFolders } from "@/lib/db/queries";
 import { ResizableLayout } from "../components/resizable-layout";
@@ -31,14 +32,13 @@ export default async function WorkspaceLayout({
   // TODO: Handle error case
 
   return (
-    <ResizableLayout
-      user={user}
-      files={files!}
-      folders={folders!}
-      defaultLayout={defaultLayout as number[]}
-      defaultCollapsed={defaultCollapsed as boolean}
-    >
-      {children}
-    </ResizableLayout>
+    <AppStateProvider user={user} files={files!} folders={folders!}>
+      <ResizableLayout
+        defaultLayout={defaultLayout as number[]}
+        defaultCollapsed={defaultCollapsed as boolean}
+      >
+        {children}
+      </ResizableLayout>
+    </AppStateProvider>
   );
 }
