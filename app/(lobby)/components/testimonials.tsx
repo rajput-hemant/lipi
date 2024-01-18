@@ -15,7 +15,7 @@ export function Testimonials() {
   return (
     <section id="testimonials" className="container">
       <div className="mx-auto flex max-w-3xl flex-col items-center space-y-4 text-center">
-        <h2 className="font-heading text-3xl drop-shadow-xl sm:text-3xl md:text-6xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent">
+        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
           Trusted by all
         </h2>
 

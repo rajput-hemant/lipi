@@ -15,7 +15,7 @@ export default function PricingPage() {
   return (
     <section className="container flex flex-col gap-6 py-8 md:gap-10">
       <div className="flex flex-col gap-4 rounded-3xl bg-muted p-6 md:p-10 lg:p-16 xl:p-20">
-        <h1 className="text-center font-heading text-3xl drop-shadow-xl sm:text-3xl md:text-7xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent">
+        <h1 className="text-center font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-7xl">
           Simple, transparent pricing
         </h1>
         <p className="text-center leading-normal text-muted-foreground sm:text-lg sm:leading-7">
@@ -70,7 +70,7 @@ export default function PricingPage() {
 
                     {features.map((feature) => (
                       <li key={feature} className="flex items-center gap-2">
-                        <CheckIcon className="h-4 w-4" />
+                        <CheckIcon className="size-4" />
                         {feature}
                       </li>
                     ))}

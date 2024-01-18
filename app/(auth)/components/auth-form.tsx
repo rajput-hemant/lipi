@@ -164,8 +164,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                         className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                       >
                         {isEmailMode ?
-                          <AtSign className="h-5 w-5" />
-                        : <Mail className="h-5 w-5" />}
+                          <AtSign className="size-5" />
+                        : <Mail className="size-5" />}
                       </TooltipTrigger>
 
                       <TooltipContent>
@@ -207,8 +207,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isPassVisible ?
-                        <EyeOff className="h-5 w-5" />
-                      : <Eye className="h-5 w-5" />}
+                        <EyeOff className="size-5" />
+                      : <Eye className="size-5" />}
                     </TooltipTrigger>
 
                     <TooltipContent>
@@ -249,8 +249,8 @@ export function AuthForm({ mode }: AuthFormProps) {
                         className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                       >
                         {isConfirmPassVisible ?
-                          <EyeOff className="h-5 w-5" />
-                        : <Eye className="h-5 w-5" />}
+                          <EyeOff className="size-5" />
+                        : <Eye className="size-5" />}
                       </TooltipTrigger>
 
                       <TooltipContent>
@@ -276,12 +276,12 @@ export function AuthForm({ mode }: AuthFormProps) {
           className="w-full font-semibold shadow-md"
         >
           {form.formState.isSubmitting ?
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 size-4 animate-spin" />
           : mode === "reset" ?
-            <Key className="mr-2 h-4 w-4" />
+            <Key className="mr-2 size-4" />
           : isEmailMode ?
-            <Mail className="mr-2 h-4 w-4" />
-          : <Fingerprint className="mr-2 h-4 w-4" />}
+            <Mail className="mr-2 size-4" />
+          : <Fingerprint className="mr-2 size-4" />}
 
           {mode === "login" ?
             isEmailMode ?
@@ -320,8 +320,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           className="w-full font-semibold shadow-md"
         >
           {oauthLoading === "google" ?
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          : <Google className="mr-2 h-4 w-4" />}
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          : <Google className="mr-2 size-4" />}
           Google
         </Button>
 
@@ -332,8 +332,8 @@ export function AuthForm({ mode }: AuthFormProps) {
           className="w-full font-semibold shadow-md"
         >
           {oauthLoading === "github" ?
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          : <GitHub className="mr-2 h-4 w-4" />}
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          : <GitHub className="mr-2 size-4" />}
           GitHub
         </Button>
       </div>

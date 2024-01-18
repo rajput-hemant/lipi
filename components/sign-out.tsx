@@ -19,7 +19,7 @@ export function SignOut(props: ButtonProps) {
 
   return (
     <Button title="Sign out" onClick={signOutHandler} {...props}>
-      <LogOut className="h-4 w-4" />
+      <LogOut className="size-4" />
     </Button>
   );
 }

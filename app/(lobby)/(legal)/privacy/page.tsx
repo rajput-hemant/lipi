@@ -9,7 +9,7 @@ export default function PrivacyPage() {
   return (
     <>
       <section className="my-10 rounded-3xl bg-muted p-6 md:p-10 lg:p-16 xl:p-20">
-        <h1 className="text-center font-heading text-3xl drop-shadow-xl sm:text-3xl md:text-7xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent">
+        <h1 className="text-center font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-7xl">
           Privacy Policy
         </h1>
       </section>
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
           <div key={i} className="mb-8 mt-4">
             <h2
               id={`${section.title.toLowerCase().replace(/\s/g, "-")}`}
-              className="font-heading text-lg sm:text-xl md:text-2xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent"
+              className="font-heading text-lg dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-xl md:text-2xl"
             >
               {i + 1}. {section.title}
             </h2>

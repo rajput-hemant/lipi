@@ -14,7 +14,7 @@ export function SidebarMobile() {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden">
-        <Menu className="mr-2 h-5 w-5" />
+        <Menu className="mr-2 size-5" />
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>

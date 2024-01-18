@@ -45,7 +45,7 @@ export function SiteFooter() {
                 rel="noreferrer"
                 className="duration-200 hover:text-foreground"
               >
-                <GitHub className="h-4 w-4 shrink-0" />
+                <GitHub className="size-4 shrink-0" />
               </a>
 
               <Separator orientation="vertical" className="h-4" />
@@ -56,7 +56,7 @@ export function SiteFooter() {
                 rel="noreferrer"
                 className="duration-200 hover:text-foreground"
               >
-                <X className="h-4 w-4 shrink-0" />
+                <X className="size-4 shrink-0" />
               </a>
             </div>
           </div>
