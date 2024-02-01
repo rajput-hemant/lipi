@@ -82,7 +82,7 @@
     "eslint-config-next": "14.1.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-tailwindcss": "^3.14.0",
-    "husky": "^8.0.3",
+    "husky": "^9.0.10",
     "lint-staged": "^15.2.0",
     "pg": "^8.11.3",
     "postcss": "8.4.33",
