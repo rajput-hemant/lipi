@@ -8,21 +8,9 @@ import type { DefaultSession } from "next-auth";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
+    user?: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      // ... other properties
     } & DefaultSession["user"];
-  }
-
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
   }
 }
