@@ -48,7 +48,7 @@ export function WorkspaceForm({ user }: WorkspaceFormProps) {
     const { data, error } = await createWorkspace({
       title: name,
       iconId: selectedEmoji,
-      workspaceOwnerId: user.id,
+      workspaceOwnerId: user.id!,
     });
 
     if (error || !data) {

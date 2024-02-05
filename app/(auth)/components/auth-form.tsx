@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AtSign,
@@ -52,6 +53,15 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isConfirmPassVisible, setIsConfirmPassVisible] = React.useState(false);
   const [oauthLoading, setOauthLoading] = React.useState<"google" | "github">();
+
+  const searchParams = useSearchParams();
+  const authError = searchParams.get("error");
+
+  if (authError === "OAuthAccountNotLinked") {
+    toast.error("OAuth Account Not Linked", {
+      description: "This account is already linked with another provider.",
+    });
+  }
 
   const form = useForm<FormData>({
     resolver: zodResolver(authSchema),

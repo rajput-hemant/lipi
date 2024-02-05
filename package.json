@@ -18,7 +18,7 @@
     "db:studio": "drizzle-kit studio",
     "db:check": "drizzle-kit check:pg",
     "ui": "bunx shadcn-ui",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@auth/core": "^0.25.1",

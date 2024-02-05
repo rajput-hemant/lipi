@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 
 import { authConfig } from "@/config/auth";
 import { db } from "./db";
+import { users } from "./db/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -17,6 +19,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
     newUser: "/signup",
+  },
+
+  events: {
+    linkAccount: async ({ user }) => {
+      await db
+        .update(users)
+        .set({ emailVerified: new Date() })
+        .where(eq(users.id, user.id!));
+    },
   },
 
   callbacks: {
