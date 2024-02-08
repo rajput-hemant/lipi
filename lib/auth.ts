@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 
 import { authConfig } from "@/config/auth";
+import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { db } from "./db";
 import { users } from "./db/schema";
 
@@ -31,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   callbacks: {
-    // @ts-expect-error - The types are incorrect
+    // @ts-expect-error eslint-disable-line @typescript-eslint/ban-ts-comment
     session: async ({ session, token }) => {
       if (token.sub && session.user) {
         session.user.id = token.sub;
@@ -42,7 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     jwt: async ({ token }) => token,
 
-    redirect: () => "/dashboard",
+    redirect: () => DEFAULT_LOGIN_REDIRECT,
   },
 });
 

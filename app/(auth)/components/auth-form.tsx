@@ -53,6 +53,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isConfirmPassVisible, setIsConfirmPassVisible] = React.useState(false);
   const [oauthLoading, setOauthLoading] = React.useState<"google" | "github">();
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const searchParams = useSearchParams();
   const authError = searchParams.get("error");
@@ -66,7 +67,6 @@ export function AuthForm({ mode }: AuthFormProps) {
   const form = useForm<FormData>({
     resolver: zodResolver(authSchema),
     defaultValues,
-    mode: "onChange",
   });
 
   function signInToaster(promise: Promise<unknown>) {
@@ -74,10 +74,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       loading: "Signing in...",
       success: "You have been signed in.",
       error: "Something went wrong.",
+      finally: () => setIsSubmitting(false),
     });
   }
 
   async function onSubmit({ email, username, password }: FormData) {
+    setIsSubmitting(true);
+
     try {
       if (mode === "login") {
         signInToaster(signIn("credentials", { username, email, password }));
@@ -87,6 +90,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           loading: "Creating account...",
           success: "You have successfully created your account.",
           error: "Something went wrong.",
+          finally: () => setIsSubmitting(false),
         });
       } else {
         // @ts-expect-error eslint-disable-line @typescript-eslint/ban-ts-comment
@@ -94,6 +98,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           loading: "Resetting password...",
           success: "You have successfully reset your password.",
           error: "Something went wrong.",
+          finally: () => setIsSubmitting(false),
         });
       }
     } catch (error) {
@@ -133,7 +138,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const toggleConfirmPassVisibility = () =>
     setIsConfirmPassVisible(!isConfirmPassVisible);
 
-  const isFormDisabled = !!oauthLoading || form.formState.isSubmitting;
+  const isFormDisabled = !!oauthLoading || isSubmitting;
 
   return (
     <Form {...form}>
