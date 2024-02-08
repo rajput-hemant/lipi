@@ -221,7 +221,7 @@ export function FoldersCollapsed() {
                 : <span className="text-lg">{iconId}</span>}
               </NavigationMenuTrigger>
 
-              <NavigationMenuContent className="min-h-60 min-w-80 space-y-4 p-4">
+              <NavigationMenuContent className="min-w-80 space-y-4 p-4">
                 <header className="flex items-center justify-between">
                   <h3 className="flex text-lg font-semibold leading-none tracking-tight">
                     {iconId ?

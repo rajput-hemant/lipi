@@ -29,21 +29,17 @@ export async function createNewAccount(credentials: Credentials) {
     try {
       const hashedPassword = await hash(password, 10);
 
-      // check if email already exists
-      // const [user] = await db
-      //   .select()
-      //   .from(users)
-      //   .where(eq(users.email, email))
-      //   .limit(1);
+      const user = await db.query.users.findFirst({
+        where: (u, { eq }) => eq(u.email, email),
+      });
 
-      // if (user) {
-      //   return { error: "Email already exists" };
-      // }
+      if (user) {
+        return { error: "Email already exists, please try logging in" };
+      }
 
-      const username = randomUUID();
       await db
         .insert(users)
-        .values({ username, email, password: hashedPassword });
+        .values({ username: randomUUID(), email, password: hashedPassword });
     } catch (error) {
       throw new Error((error as Error).message);
     }

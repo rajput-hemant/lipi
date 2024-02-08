@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { getToken } from "next-auth/jwt";
-import { withAuth } from "next-auth/middleware";
+import NextAuth from "next-auth";
 
-import type { Route } from "next";
-
+import { authConfig } from "./config/auth";
+import {
+  authRoutes,
+  DEFAULT_LOGIN_REDIRECT,
+  publicRoutes,
+} from "./config/routes";
 import { env } from "./lib/env.mjs";
 
 const ratelimit = new Ratelimit({
@@ -13,96 +16,74 @@ const ratelimit = new Ratelimit({
   limiter: Ratelimit.slidingWindow(env.RATE_LIMITING_REQUESTS_PER_SECOND, "1s"),
 });
 
-export default withAuth(
-  async (req) => {
-    /* -----------------------------------------------------------------------------------------------
-     * Rate limiting middleware
-     * -----------------------------------------------------------------------------------------------*/
+const { auth } = NextAuth(authConfig);
 
-    if (
-      env.ENABLE_RATE_LIMITING &&
-      env.NODE_ENV === "production" &&
-      /*
-       * Match all request paths except for the ones starting with:
-       * - api (API routes)
-       * - _next/static (static files)
-       * - _next/image (image optimization files)
-       * - favicon.ico (favicon file)
-       */
-      !req.nextUrl.pathname.match(
-        /^\/(api|_next\/static|_next\/image|favicon\.ico)/
-      )
-    ) {
-      const id = req.ip ?? "anonymous";
-      const { limit, pending, remaining, reset, success } =
-        await ratelimit.limit(id);
+export default auth(async (req) => {
+  /* -----------------------------------------------------------------------------------------------
+   * Rate limiting middleware
+   * -----------------------------------------------------------------------------------------------*/
 
-      if (!success) {
-        return NextResponse.json(
-          {
-            error: {
-              message: "Too many requests",
-              limit,
-              pending,
-              remaining,
-              reset: `${reset - Date.now()}ms`,
-            },
+  if (env.ENABLE_RATE_LIMITING && env.NODE_ENV === "production") {
+    const id = req.ip ?? "anonymous";
+
+    const { limit, pending, remaining, reset, success } =
+      await ratelimit.limit(id);
+
+    if (!success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: "Too many requests",
+            limit,
+            pending,
+            remaining,
+            reset: `${reset - Date.now()}ms`,
           },
-
-          {
-            status: 429,
-            headers: {
-              "x-ratelimit-limit": limit.toString(),
-              "x-ratelimit-remaining": remaining.toString(),
-            },
-          }
-        );
-      }
+        },
+        {
+          status: 429,
+          headers: {
+            "x-ratelimit-limit": limit.toString(),
+            "x-ratelimit-remaining": remaining.toString(),
+          },
+        }
+      );
     }
 
     /* -----------------------------------------------------------------------------------------------
      * Authentication middleware
      * -----------------------------------------------------------------------------------------------*/
 
-    const token = await getToken({ req });
-    const isAuth = !!token;
+    const { nextUrl } = req;
+    const isLoggedIn = !!req.auth;
 
-    const isAuthPage = (
-      ["/login", "/signup", "/reset-password"] as Route[]
-    ).some((route) => req.nextUrl.pathname.startsWith(route));
-    const isHomePage = req.nextUrl.pathname === "/";
+    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+    const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
 
-    if (isAuthPage || isHomePage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+    if (isAuthRoute) {
+      if (isLoggedIn) {
+        return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
       }
 
       return null;
     }
 
-    if (!isAuth) {
-      let from = req.nextUrl.pathname;
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search;
+    if (!isLoggedIn && !isPublicRoute) {
+      let from = nextUrl.pathname;
+      if (nextUrl.search) {
+        from += nextUrl.search;
       }
 
-      return NextResponse.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, req.url)
+      return Response.redirect(
+        new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)
       );
     }
-  },
-  {
-    callbacks: {
-      async authorized() {
-        // This is a work-around for handling redirect on auth pages.
-        // We return true here so that the middleware function above
-        // is always called.
-        return true;
-      },
-    },
-  }
-);
 
+    return null;
+  }
+});
+
+// @see https://clerk.com/docs/references/nextjs/auth-middleware#usage
 export const config = {
-  matcher: ["/", "/login", "/signup", "/reset-password", "/dashboard/:path*"],
+  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
 };
