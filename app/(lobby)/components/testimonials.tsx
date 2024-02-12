@@ -54,7 +54,11 @@ export function Testimonials() {
                 <CardHeader>
                   <div className="flex items-center gap-4">
                     <Avatar>
-                      <AvatarImage src={`/placeholders/avatar-${i + 1}.png`} />
+                      <AvatarImage
+                        src={`/placeholders/avatar-${i + 1}.png`}
+                        alt={`Avatar of ${name}`}
+                        loading="lazy"
+                      />
                       <AvatarFallback>
                         {name.slice(0, 1).toUpperCase()}
                       </AvatarFallback>

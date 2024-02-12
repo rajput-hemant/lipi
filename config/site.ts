@@ -1,7 +1,8 @@
 export const siteConfig = {
   name: "Lipi",
   url: "https://lipi.rajputhemant.me",
-  description: "",
+  description:
+    "🚀 A SAAS web app, a Notion.so replica, featuring real-time collaboration and customizable workspaces built using ▲ Next.js, shadcn/ui, TailwindCSS",
 
   author: {
     name: "Hemant Rajput",

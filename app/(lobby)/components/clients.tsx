@@ -38,6 +38,7 @@ export function Clients() {
                   alt={alt}
                   height={200}
                   width={200}
+                  loading="lazy"
                   className="max-w-none object-contain grayscale"
                 />
               </div>

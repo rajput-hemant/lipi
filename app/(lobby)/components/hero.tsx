@@ -67,6 +67,8 @@ export function Hero() {
 
       <Image
         priority
+        fetchPriority="high"
+        loading="eager"
         src="/illustrations/home-office.svg"
         alt="Home Office"
         width={500}

@@ -12,6 +12,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
 
         <div className="z-10 w-fit font-handwriting text-2xl font-medium lowercase text-background dark:text-foreground">
           <Link
+            aria-label="Go to home page"
             href="/"
             className="flex items-center gap-2 rounded-md ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >

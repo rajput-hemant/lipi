@@ -44,7 +44,7 @@ export function LobbyNavbar() {
           </Link>
 
           <Link
-            href="/"
+            href="/signup"
             className={cn(
               buttonVariants(),
               "h-8 rounded-full px-3 font-semibold transition-all duration-200 hover:ring-2 hover:ring-foreground hover:ring-offset-2 hover:ring-offset-background"

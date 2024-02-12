@@ -18,9 +18,9 @@ export default function PricingPage() {
         <h1 className="text-center font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-7xl">
           Simple, transparent pricing
         </h1>
-        <p className="text-center leading-normal text-muted-foreground sm:text-lg sm:leading-7">
+        <h2 className="text-center leading-normal text-muted-foreground sm:text-lg sm:leading-7">
           Unlock all features including unlimited posts for your blog.
-        </p>
+        </h2>
       </div>
 
       <div className="mx-auto flex flex-col gap-4 md:flex-row md:gap-10">
@@ -63,18 +63,20 @@ export default function PricingPage() {
                     {isProPlan ? "Go Pro" : "Get Started"}
                   </Button>
 
-                  <ul className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2">
                     <small className="mb-4 text-center text-muted-foreground">
                       {highlightFeature}
                     </small>
 
-                    {features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <CheckIcon className="size-4" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                    <ul className="flex flex-col gap-2">
+                      {features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-2">
+                          <CheckIcon className="size-4" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </CardContent>
               </Card>
             );

@@ -173,6 +173,11 @@ export function AuthForm({ mode }: AuthFormProps) {
                   {mode === "login" && (
                     <Tooltip delayDuration={150}>
                       <TooltipTrigger
+                        aria-label={
+                          isEmailMode ?
+                            "Use Username instead"
+                          : "Use Email instead"
+                        }
                         tabIndex={-1}
                         type="button"
                         onClick={toggleCredentialMode}
@@ -215,6 +220,9 @@ export function AuthForm({ mode }: AuthFormProps) {
                   />
                   <Tooltip delayDuration={150}>
                     <TooltipTrigger
+                      aria-label={
+                        isPassVisible ? "Hide Password" : "Show Password"
+                      }
                       tabIndex={-1}
                       type="button"
                       disabled={!field.value}
@@ -257,6 +265,11 @@ export function AuthForm({ mode }: AuthFormProps) {
                     />
                     <Tooltip delayDuration={150}>
                       <TooltipTrigger
+                        aria-label={
+                          isConfirmPassVisible ? "Hide Password" : (
+                            "Show Password"
+                          )
+                        }
                         tabIndex={-1}
                         type="button"
                         disabled={!field.value}

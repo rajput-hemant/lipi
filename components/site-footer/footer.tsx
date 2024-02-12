@@ -40,6 +40,7 @@ export function SiteFooter() {
 
             <div className="flex justify-center gap-3 text-muted-foreground">
               <a
+                aria-label="GitHub Repository"
                 href={siteConfig.links.github}
                 target="_blank"
                 rel="noreferrer"
@@ -51,6 +52,7 @@ export function SiteFooter() {
               <Separator orientation="vertical" className="h-4" />
 
               <a
+                aria-label="X/Twitter Handle"
                 href={siteConfig.links.x}
                 target="_blank"
                 rel="noreferrer"
