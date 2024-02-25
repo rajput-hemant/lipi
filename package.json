@@ -85,6 +85,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-tailwindcss": "^3.14.1",
     "husky": "^9.0.10",
+    "jiti": "^1.21.0",
     "lint-staged": "^15.2.1",
     "pg": "^8.11.3",
     "postcss": "8.4.33",

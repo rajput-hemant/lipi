@@ -3,7 +3,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 import { siteConfig } from "@/config/site";
-import { env } from "@/lib/env.mjs";
+import { env } from "@/lib/env";
 import * as schema from "./schema";
 
 // NOTE: postgres versions above 3.3.5 are not supported on the edge runtime

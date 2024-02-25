@@ -4,7 +4,7 @@ import { twMerge } from "tailwind-merge";
 import type { ClassValue } from "clsx";
 
 import { siteConfig } from "@/config/site";
-import { env } from "./env.mjs";
+import { env } from "./env";
 
 /**
  * Merges the given class names with the tailwind classes

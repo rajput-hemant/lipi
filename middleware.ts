@@ -9,7 +9,7 @@ import {
   DEFAULT_LOGIN_REDIRECT,
   publicRoutes,
 } from "./config/routes";
-import { env } from "./lib/env.mjs";
+import { env } from "./lib/env";
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -49,38 +49,38 @@ export default auth(async (req) => {
         }
       );
     }
-
-    /* -----------------------------------------------------------------------------------------------
-     * Authentication middleware
-     * -----------------------------------------------------------------------------------------------*/
-
-    const { nextUrl } = req;
-    const isLoggedIn = !!req.auth;
-
-    const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-    const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
-
-    if (isAuthRoute) {
-      if (isLoggedIn) {
-        return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
-      }
-
-      return null;
-    }
-
-    if (!isLoggedIn && !isPublicRoute) {
-      let from = nextUrl.pathname;
-      if (nextUrl.search) {
-        from += nextUrl.search;
-      }
-
-      return Response.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)
-      );
-    }
-
-    return null;
   }
+
+  /* -----------------------------------------------------------------------------------------------
+   * Authentication middleware
+   * -----------------------------------------------------------------------------------------------*/
+
+  const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
+
+    return NextResponse.next();
+  }
+
+  if (!isLoggedIn && !isPublicRoute) {
+    let from = nextUrl.pathname;
+    if (nextUrl.search) {
+      from += nextUrl.search;
+    }
+
+    return Response.redirect(
+      new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)
+    );
+  }
+
+  return NextResponse.next();
 });
 
 // @see https://clerk.com/docs/references/nextjs/auth-middleware#usage

@@ -6,7 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 import type { NextAuthConfig } from "next-auth";
 
 import { db } from "@/lib/db";
-import { env } from "@/lib/env.mjs";
+import { env } from "@/lib/env";
 import { authSchema } from "@/lib/validations";
 
 const LoginSchema = authSchema.innerType().omit({ confirmPassword: true });
