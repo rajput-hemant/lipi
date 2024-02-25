@@ -12,6 +12,7 @@ import {
   FolderIcon,
   Plus,
   Trash,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
@@ -22,12 +23,25 @@ import { useAppState } from "@/hooks/use-app-state";
 import {
   createFile,
   createFolder,
-  deleteFile,
-  deleteFolder,
+  deleteFile as deleteFileFromDb,
+  deleteFolder as deleteFolderFromDb,
+  updateFile as updateFileFromDb,
+  updateFolder as updateFolderFromDb,
 } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 import { Button, buttonVariants } from "../ui/button";
 import { Input } from "../ui/input";
 import {
@@ -38,18 +52,33 @@ import {
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function FoldersCollapsed() {
   const pathname = usePathname();
   const { setOpen, subscription } = useSubscriptionModal();
 
-  const { files, addFile, removeFile, folders, addFolder, removeFolder } =
-    useAppState();
+  const {
+    files,
+    folders,
+    addFile,
+    deleteFile,
+    updateFile,
+    addFolder,
+    deleteFolder,
+    updateFolder,
+  } = useAppState();
 
-  const [isCreatingFile, setIsCreatingFile] = useState(false);
   const [folderName, setFolderName] = useState("Untitled");
   const [fileName, setFileName] = useState("Untitled");
   const [selectedEmoji, setSelectedEmoji] = useState("");
+  const [creatingFiles, setCreatingFiles] = useState<string[]>([]);
+
+  function currentlyInDev() {
+    toast.info("This feature is currently in development.", {
+      description: "We're working on it and it'll be available soon.",
+    });
+  }
 
   function createFolderToggle() {
     if (subscription?.status !== "active" && folders.length >= 3) {
@@ -75,7 +104,13 @@ export function FoldersCollapsed() {
       return;
     }
 
-    setIsCreatingFile(true);
+    setCreatingFiles((prev) => {
+      if (prev.includes(folderId)) {
+        return prev.filter((id) => id !== folderId);
+      }
+
+      return [...prev, folderId];
+    });
   }
 
   async function createFolderHandler(e: React.FormEvent<HTMLFormElement>) {
@@ -129,19 +164,50 @@ export function FoldersCollapsed() {
 
     setSelectedEmoji("");
     setFileName("Untitled");
-    setIsCreatingFile(false);
+
+    setCreatingFiles((prev) => prev.filter((id) => id !== folderId));
   }
 
-  function currentlyInDev() {
-    toast.info("This feature is currently in development.", {
-      description: "We're working on it and it'll be available soon.",
+  async function moveFileToTrash(fileId: string) {
+    const file = files.find((f) => f.id === fileId);
+
+    if (!file) {
+      toast.error("Something went wrong", { description: "File not found." });
+      return;
+    }
+
+    const updatedFile: File = { ...file, inTrash: true };
+    updateFile(updatedFile);
+
+    toast.promise(updateFileFromDb(updatedFile), {
+      loading: "Moving file to trash...",
+      success: "File moved to trash.",
+      error: "Something went wrong! Unable to move file to trash.",
+    });
+  }
+
+  async function moveFolderToTrash(folderId: string) {
+    const folder = folders.find((f) => f.id === folderId);
+
+    if (!folder) {
+      toast.error("Something went wrong", { description: "Folder not found." });
+      return;
+    }
+
+    const updatedFolder: Folder = { ...folder, inTrash: true };
+    updateFolder(updatedFolder);
+
+    toast.promise(updateFolderFromDb(updatedFolder), {
+      loading: "Moving folder to trash...",
+      success: "Folder moved to trash.",
+      error: "Something went wrong! Unable to move folder to trash.",
     });
   }
 
   async function deleteFolderHandler(folderId: string) {
-    removeFolder(folderId);
+    deleteFolder(folderId);
 
-    toast.promise(deleteFolder(folderId), {
+    toast.promise(deleteFolderFromDb(folderId), {
       loading: "Deleting folder...",
       success: "Folder deleted.",
       error: "Something went wrong! Unable to delete folder.",
@@ -149,9 +215,9 @@ export function FoldersCollapsed() {
   }
 
   async function deleteFileHandler(fileId: string) {
-    removeFile(fileId);
+    deleteFile(fileId);
 
-    toast.promise(deleteFile(fileId), {
+    toast.promise(deleteFileFromDb(fileId), {
       loading: "Deleting file...",
       success: "File deleted.",
       error: "Something went wrong! Unable to delete file.",
@@ -231,35 +297,89 @@ export function FoldersCollapsed() {
                   </h3>
 
                   <div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => createFileToggle(id!)}
-                      className="size-7 p-0 text-muted-foreground"
-                    >
-                      <FilePlus2 className="size-4" />
-                    </Button>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={() => createFileToggle(id!)}
+                          className="size-7 p-0 text-muted-foreground"
+                        >
+                          {creatingFiles.includes(id!) ?
+                            <X className="size-4" />
+                          : <FilePlus2 className="size-4" />}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {creatingFiles.includes(id!) ?
+                          "Cancel creating file"
+                        : "Create file"}
+                      </TooltipContent>
+                    </Tooltip>
 
-                    <Button
-                      variant="ghost"
-                      onClick={currentlyInDev}
-                      className="size-7 p-0 text-muted-foreground"
-                    >
-                      <Edit2 className="size-4" />
-                    </Button>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          onClick={currentlyInDev}
+                          className="size-7 p-0 text-muted-foreground"
+                        >
+                          <Edit2 className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Edit folder</TooltipContent>
+                    </Tooltip>
 
-                    <Button
-                      variant="ghost"
-                      onClick={() => deleteFolderHandler(id!)}
-                      className="size-7 p-0 text-muted-foreground"
-                    >
-                      <Trash className="size-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="size-7 p-0 text-muted-foreground hover:text-red-500"
+                            >
+                              <Trash className="size-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>Delete folder</TooltipContent>
+                        </Tooltip>
+                      </AlertDialogTrigger>
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Are you absolutely sure?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete the file.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => moveFolderToTrash(id!)}
+                            className="bg-destructive/10 text-destructive hover:bg-destructive/15"
+                          >
+                            Move to trash
+                          </AlertDialogAction>
+                          <AlertDialogAction
+                            onClick={() => deleteFolderHandler(id!)}
+                            className={buttonVariants({
+                              variant: "destructive",
+                            })}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </header>
 
                 <ScrollArea>
                   <div className="max-h-[320px]">
-                    {isCreatingFile && (
+                    {creatingFiles.includes(id!) && (
                       <form
                         onSubmit={(e) => createFileHandler(e, id!)}
                         className="relative mx-1 mb-1"
@@ -296,7 +416,7 @@ export function FoldersCollapsed() {
                       </form>
                     )}
 
-                    {isCreatingFile || folderFiles.length ?
+                    {creatingFiles.includes(id!) || folderFiles.length ?
                       folderFiles.map(({ id, title, iconId, workspaceId }) => (
                         <div
                           key={id}
@@ -320,23 +440,66 @@ export function FoldersCollapsed() {
                             {title}
                           </Link>
 
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={currentlyInDev}
-                            className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
-                          >
-                            <Edit2 className="size-4" />
-                          </Button>
+                          <Tooltip delayDuration={0}>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={currentlyInDev}
+                                className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
+                              >
+                                <Edit2 className="size-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Edit file</TooltipContent>
+                          </Tooltip>
 
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => deleteFileHandler(id!)}
-                            className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
-                          >
-                            <Trash className="size-4" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              <Tooltip delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
+                                  >
+                                    <Trash className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Delete file</TooltipContent>
+                              </Tooltip>
+                            </AlertDialogTrigger>
+
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you absolutely sure?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete the file.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => moveFileToTrash(id!)}
+                                  className="bg-destructive/10 text-destructive hover:bg-destructive/15"
+                                >
+                                  Move to trash
+                                </AlertDialogAction>
+                                <AlertDialogAction
+                                  onClick={() => deleteFileHandler(id!)}
+                                  className={buttonVariants({
+                                    variant: "destructive",
+                                  })}
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       ))
                     : <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-4 text-muted-foreground">

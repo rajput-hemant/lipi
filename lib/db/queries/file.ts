@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { validate } from "uuid";
 
 import type { DBResponse } from ".";
@@ -16,7 +16,8 @@ import { files } from "../schema";
  * @returns List of files in the workspace
  */
 export async function getFiles(
-  workspaceId: string
+  workspaceId: string,
+  inTrash = false
 ): Promise<DBResponse<File[]>> {
   const isValid = validate(workspaceId);
 
@@ -27,7 +28,9 @@ export async function getFiles(
       .select()
       .from(files)
       .orderBy(files.createdAt)
-      .where(eq(files.workspaceId, workspaceId));
+      .where(
+        and(eq(files.workspaceId, workspaceId), eq(files.inTrash, inTrash))
+      );
 
     return { data, error: null };
   } catch (error) {
@@ -74,6 +77,20 @@ export async function createFile(file: File): Promise<DBResponse<File>> {
     return { error: (error as Error).message, data: null };
   } finally {
     revalidatePath(`/dashboard/${file.workspaceId}`);
+  }
+}
+
+export async function updateFile(file: File) {
+  try {
+    const [updatedFile] = await db
+      .update(files)
+      .set(file)
+      .where(eq(files.id, file.id!))
+      .returning();
+
+    return { data: updatedFile, error: null };
+  } catch (error) {
+    return { error: (error as Error).message, data: null };
   }
 }
 

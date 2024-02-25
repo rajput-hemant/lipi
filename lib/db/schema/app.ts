@@ -21,7 +21,7 @@ export const workspaces = createTable("workspaces", {
   logo: text("logo"),
   bannerUrl: text("banner_url"),
   workspaceOwnerId: uuid("workspace_owner_id").notNull(),
-  inTrash: text("in_trash").notNull().default("false"),
+  inTrash: boolean("in_trash").notNull().default(false),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
@@ -39,7 +39,7 @@ export const folders = createTable("folders", {
   workspaceId: uuid("workspace_id").references(() => workspaces.id, {
     onDelete: "cascade",
   }),
-  inTrash: text("in_trash").notNull().default("false"),
+  inTrash: boolean("in_trash").notNull().default(false),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
@@ -60,7 +60,7 @@ export const files = createTable("files", {
   folderId: uuid("folder_id").references(() => folders.id, {
     onDelete: "cascade",
   }),
-  inTrash: text("in_trash").notNull().default("false"),
+  inTrash: boolean("in_trash").notNull().default(false),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",

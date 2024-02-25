@@ -1,51 +1,51 @@
 import React from "react";
-import Link from "next/link";
 import { LayoutGrid, Settings, Trash2, User2 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
-import type { Route } from "next";
 
 import { siteConfig } from "@/config/site";
 import { useAppState } from "@/hooks/use-app-state";
 import { cn } from "@/lib/utils";
 import { Logo } from "../icons";
 import { SignOut } from "../sign-out";
+import { Trash } from "../trash";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { buttonVariants } from "../ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Folders } from "./folders";
 import { FoldersCollapsed } from "./folders-collapsed";
+import { NavDialog } from "./nav-dialog";
 
 type SidebarProps = React.ComponentProps<"aside"> & {
   isCollapsed: boolean;
 };
 
-type NavLinkProps = {
+type NavItem = {
   title: string;
-  href: Route;
-  icon: React.ReactNode;
-  isCollapsed?: boolean;
+  description: string;
+  icon: LucideIcon;
+  content: React.FC;
 };
-
-type NavItem = { title: string; icon: LucideIcon; href: Route };
 
 const navItems: NavItem[] = [
   {
     title: "My Workspaces",
+    description: "Manage your workspaces",
     icon: LayoutGrid,
-    href: "/dashboard",
+    content: Trash,
   },
   {
     title: "Settings",
+    description: "Manage your settings",
     icon: Settings,
-    href: "/dashboard",
+    content: Trash,
   },
   {
     title: "Trash",
+    description: "Manage your trash",
     icon: Trash2,
-    href: "/dashboard",
+    content: Trash,
   },
 ];
 
@@ -80,25 +80,29 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
         </div>
 
         <nav className="flex flex-col items-center justify-center gap-1 px-4">
-          {navItems.map(({ title, href, icon: Icon }) =>
+          {navItems.map(({ title, description, icon, content: Content }) =>
             isCollapsed ?
               <Tooltip key={title} delayDuration={0}>
-                <TooltipTrigger>
-                  <NavLink
+                <TooltipTrigger asChild>
+                  <NavDialog
                     title={title}
-                    href={href}
-                    icon={<Icon className="size-5" />}
+                    icon={icon}
+                    description={description}
                     isCollapsed
-                  />
+                  >
+                    <Content />
+                  </NavDialog>
                 </TooltipTrigger>
                 <TooltipContent side="right">{title}</TooltipContent>
               </Tooltip>
-            : <NavLink
+            : <NavDialog
                 key={title}
                 title={title}
-                href={href}
-                icon={<Icon className="mr-2 size-4 shrink-0" />}
-              />
+                icon={icon}
+                description={description}
+              >
+                <Content />
+              </NavDialog>
           )}
         </nav>
 
@@ -175,21 +179,5 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
         </div>
       </div>
     </aside>
-  );
-}
-
-function NavLink({ title, href, icon, isCollapsed }: NavLinkProps) {
-  return (
-    <Link
-      key={title}
-      href={href}
-      className={cn(
-        buttonVariants({ size: isCollapsed ? "icon" : "sm", variant: "ghost" }),
-        !isCollapsed && "w-full justify-start"
-      )}
-    >
-      {icon}
-      {!isCollapsed && title}
-    </Link>
   );
 }

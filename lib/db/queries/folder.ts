@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { validate } from "uuid";
 
 import type { DBResponse } from ".";
@@ -16,7 +16,8 @@ import { folders } from "../schema";
  * @returns Workspace folders
  */
 export const getFolders = async (
-  workspaceId: string
+  workspaceId: string,
+  inTrash = false
 ): Promise<DBResponse<Folder[]>> => {
   const isValid = validate(workspaceId);
 
@@ -27,7 +28,9 @@ export const getFolders = async (
       .select()
       .from(folders)
       .orderBy(folders.createdAt)
-      .where(eq(folders.workspaceId, workspaceId));
+      .where(
+        and(eq(folders.workspaceId, workspaceId), eq(folders.inTrash, inTrash))
+      );
 
     return { data, error: null };
   } catch (error) {
@@ -45,6 +48,29 @@ export const createFolder = async (
 ): Promise<DBResponse<Folder>> => {
   try {
     const [data] = await db.insert(folders).values(folder).returning();
+
+    return { data, error: null };
+  } catch (error) {
+    return { error: (error as Error).message, data: null };
+  } finally {
+    revalidatePath(`/dashboard/${folder.workspaceId}`);
+  }
+};
+
+/**
+ * Update folder
+ * @param folder Folder
+ * @returns Updated folder
+ */
+export const updateFolder = async (
+  folder: Folder
+): Promise<DBResponse<Folder>> => {
+  try {
+    const [data] = await db
+      .update(folders)
+      .set(folder)
+      .where(eq(folders.id, folder.id!))
+      .returning();
 
     return { data, error: null };
   } catch (error) {

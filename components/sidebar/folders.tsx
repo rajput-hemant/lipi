@@ -14,6 +14,7 @@ import {
   FolderX,
   Plus,
   Trash,
+  Trash2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -31,8 +32,10 @@ import { useAppState } from "@/hooks/use-app-state";
 import {
   createFile,
   createFolder,
-  deleteFile,
-  deleteFolder,
+  deleteFile as deleteFileFromDb,
+  deleteFolder as deleteFolderFromDb,
+  updateFile as updateFileFromDb,
+  updateFolder as updateFolderFromDb,
 } from "@/lib/db/queries";
 import { cn, isAppleDevice } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
@@ -43,6 +46,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 import { Button, buttonVariants } from "../ui/button";
 import { Input } from "../ui/input";
 import { Kbd } from "../ui/kbd";
@@ -53,11 +67,19 @@ export function Folders() {
   const pathname = usePathname();
   const { setOpen, subscription } = useSubscriptionModal();
 
-  const { files, addFile, removeFile, folders, addFolder, removeFolder } =
-    useAppState();
+  const {
+    files,
+    folders,
+    addFile,
+    deleteFile,
+    updateFile,
+    addFolder,
+    deleteFolder,
+    updateFolder,
+  } = useAppState();
 
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [isCreatingFile, setIsCreatingFile] = useState(false);
+  const [creatingFiles, setCreatingFiles] = useState<string[]>([]);
   const [openedFolders, setOpenedFolders] = useState<string[]>([]);
   const [folderName, setFolderName] = useState("Untitled");
   const [fileName, setFileName] = useState("Untitled");
@@ -89,7 +111,13 @@ export function Folders() {
       return;
     }
 
-    setIsCreatingFile(true);
+    setCreatingFiles((prev) => {
+      if (prev.includes(folderId)) {
+        return prev.filter((id) => id !== folderId);
+      }
+
+      return [...prev, folderId];
+    });
   }
 
   async function createFolderHandler(e: React.FormEvent<HTMLFormElement>) {
@@ -149,7 +177,8 @@ export function Folders() {
 
     setSelectedEmoji("");
     setFileName("Untitled");
-    setIsCreatingFile(false);
+
+    setCreatingFiles((prev) => prev.filter((id) => id !== folderId));
   }
 
   function currentlyInDev() {
@@ -158,23 +187,55 @@ export function Folders() {
     });
   }
 
-  async function deleteFolderHandler(folderId: string) {
-    removeFolder(folderId);
+  async function moveFileToTrash(fileId: string) {
+    const file = files.find((f) => f.id === fileId);
 
-    toast.promise(deleteFolder(folderId), {
-      loading: "Deleting folder...",
-      success: "Folder deleted.",
-      error: "Something went wrong! Unable to delete folder.",
+    if (!file) {
+      toast.error("Something went wrong", { description: "File not found." });
+      return;
+    }
+
+    const updatedFile: File = { ...file, inTrash: true };
+    updateFile(updatedFile);
+
+    toast.promise(updateFileFromDb(updatedFile), {
+      loading: "Moving file to trash...",
+      success: "File moved to trash.",
+      error: "Something went wrong! Unable to move file to trash.",
+    });
+  }
+
+  async function moveFolderToTrash(folderId: string) {
+    const folder = folders.find((f) => f.id === folderId);
+
+    if (!folder) return;
+
+    updateFolder({ ...folder, inTrash: true });
+
+    toast.promise(updateFolderFromDb({ ...folder, inTrash: true }), {
+      loading: "Moving folder to trash...",
+      success: "Folder moved to trash.",
+      error: "Something went wrong! Unable to move folder to trash.",
     });
   }
 
   async function deleteFileHandler(fileId: string) {
-    removeFile(fileId);
+    deleteFile(fileId);
 
-    toast.promise(deleteFile(fileId), {
+    toast.promise(deleteFileFromDb(fileId), {
       loading: "Deleting file...",
       success: "File deleted.",
       error: "Something went wrong! Unable to delete file.",
+    });
+  }
+
+  async function deleteFolderHandler(folderId: string) {
+    deleteFolder(folderId);
+
+    toast.promise(deleteFolderFromDb(folderId), {
+      loading: "Deleting folder...",
+      success: "Folder deleted.",
+      error: "Something went wrong! Unable to delete folder.",
     });
   }
 
@@ -278,7 +339,7 @@ export function Folders() {
                         </AccordionTrigger>
                       </ContextMenuTrigger>
 
-                      <ContextMenuContent className="w-48">
+                      <ContextMenuContent className="w-56">
                         <ContextMenuItem
                           onClick={() => createFileToggle(id!)}
                           className="cursor-pointer"
@@ -286,7 +347,7 @@ export function Folders() {
                           <FileIcon className="mr-2 size-4 shrink-0" />
                           New File
                           <Kbd className="ml-auto">
-                            {isAppleDevice() ? "⌘" : "Ctrl"} N
+                            {isAppleDevice() ? "⌘" : "Ctrl"}+N
                           </Kbd>
                         </ContextMenuItem>
 
@@ -297,7 +358,7 @@ export function Folders() {
                           <Edit2 className="mr-2 size-4 shrink-0" />
                           Rename
                           <Kbd className="ml-auto">
-                            {isAppleDevice() ? "⌘" : "Ctrl"} E
+                            {isAppleDevice() ? "⌘" : "Ctrl"}+E
                           </Kbd>
                         </ContextMenuItem>
 
@@ -306,6 +367,28 @@ export function Folders() {
                             e.preventDefault();
 
                             if (e.ctrlKey && e.key.toLowerCase() === "d") {
+                              moveFolderToTrash(id!);
+                            }
+                          }}
+                          onClick={() => moveFolderToTrash(id!)}
+                          className="cursor-pointer !text-red-500"
+                        >
+                          <Trash2 className="mr-2 size-4 shrink-0" />
+                          Move to Trash
+                          <Kbd className="ml-auto">
+                            {isAppleDevice() ? "⌘" : "Ctrl"}+D
+                          </Kbd>
+                        </ContextMenuItem>
+
+                        <ContextMenuItem
+                          onKeyDown={(e) => {
+                            e.preventDefault();
+
+                            if (
+                              e.ctrlKey &&
+                              e.shiftKey &&
+                              e.key.toLowerCase() === "d"
+                            ) {
                               deleteFolderHandler(id!);
                             }
                           }}
@@ -315,14 +398,14 @@ export function Folders() {
                           <Trash className="mr-2 size-4 shrink-0" />
                           Delete
                           <Kbd className="ml-auto">
-                            {isAppleDevice() ? "⌘" : "Ctrl"} D
+                            {isAppleDevice() ? "⌘" : "Ctrl"}+Shift+D
                           </Kbd>
                         </ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
 
                     <AccordionContent className="pb-2 pl-2 pt-1">
-                      {isCreatingFile && (
+                      {creatingFiles.includes(id!) && (
                         <form
                           onSubmit={(e) => createFileHandler(e, id!)}
                           className="relative mb-1 mr-1"
@@ -359,7 +442,7 @@ export function Folders() {
                         </form>
                       )}
 
-                      {isCreatingFile || folderFiles.length ?
+                      {creatingFiles.includes(id!) || folderFiles.length ?
                         folderFiles.map(
                           ({ id, title, iconId, workspaceId }) => (
                             <div
@@ -381,23 +464,66 @@ export function Folders() {
                                 {title}
                               </Link>
 
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={currentlyInDev}
-                                className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
-                              >
-                                <Edit2 className="size-4" />
-                              </Button>
+                              <Tooltip delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    onClick={currentlyInDev}
+                                    className="size-7 p-0 text-muted-foreground"
+                                  >
+                                    <Edit2 className="size-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit file</TooltipContent>
+                              </Tooltip>
 
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={() => deleteFileHandler(id!)}
-                                className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
-                              >
-                                <Trash className="size-4" />
-                              </Button>
+                              <AlertDialog>
+                                <AlertDialogTrigger>
+                                  <Tooltip delayDuration={0}>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        className="size-7 p-0 text-muted-foreground hover:text-red-500"
+                                      >
+                                        <Trash className="size-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Delete file</TooltipContent>
+                                  </Tooltip>
+                                </AlertDialogTrigger>
+
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                      Are you absolutely sure?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This action cannot be undone. This will
+                                      permanently delete the file.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                      Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => moveFileToTrash(id!)}
+                                      className="bg-destructive/10 text-destructive hover:bg-destructive/15"
+                                    >
+                                      Move to trash
+                                    </AlertDialogAction>
+                                    <AlertDialogAction
+                                      onClick={() => deleteFileHandler(id!)}
+                                      className={buttonVariants({
+                                        variant: "destructive",
+                                      })}
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             </div>
                           )
                         )

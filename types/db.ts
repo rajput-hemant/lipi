@@ -1,4 +1,3 @@
-import type { InferInsertModel } from "drizzle-orm";
 import type {
   accounts,
   collaborators,
@@ -12,14 +11,13 @@ import type {
   workspaces,
 } from "@/lib/db/schema";
 
-export type User = InferInsertModel<typeof users>;
-
-export type Workspace = InferInsertModel<typeof workspaces>;
-export type Folder = InferInsertModel<typeof folders>;
-export type File = InferInsertModel<typeof files>;
-export type Account = InferInsertModel<typeof accounts>;
-export type Customer = InferInsertModel<typeof customers>;
-export type Product = InferInsertModel<typeof products>;
-export type Collaborator = InferInsertModel<typeof collaborators>;
-export type Price = InferInsertModel<typeof prices> & { products: Product[] };
-export type Subscription = InferInsertModel<typeof subscriptions>;
+export type User = typeof users.$inferInsert;
+export type Workspace = typeof workspaces.$inferInsert;
+export type Folder = typeof folders.$inferInsert;
+export type File = typeof files.$inferInsert;
+export type Account = typeof accounts.$inferInsert;
+export type Customer = typeof customers.$inferInsert;
+export type Product = typeof products.$inferInsert;
+export type Collaborator = typeof collaborators.$inferInsert;
+export type Price = typeof prices.$inferInsert & { products: Product[] };
+export type Subscription = typeof subscriptions.$inferInsert;

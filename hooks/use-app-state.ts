@@ -13,11 +13,11 @@ export type AppState = {
 export type AppAction = {
   addFile: (file: File) => void;
   updateFile: (file: File) => void;
-  removeFile: (fileId: string) => void;
+  deleteFile: (fileId: string) => void;
 
   addFolder: (folder: Folder) => void;
   updateFolder: (folder: Folder) => void;
-  removeFolder: (folderId: string) => void;
+  deleteFolder: (folderId: string) => void;
 };
 
 export const store = proxy<AppState & AppAction>({
@@ -31,7 +31,7 @@ export const store = proxy<AppState & AppAction>({
   updateFile(file) {
     store.files = store.files.map((f) => (f.id === file.id ? file : f));
   },
-  removeFile(id) {
+  deleteFile(id) {
     store.files = store.files.filter((f) => f.id !== id);
   },
 
@@ -43,7 +43,7 @@ export const store = proxy<AppState & AppAction>({
       f.id === folder.id ? { ...f, ...folder } : f
     );
   },
-  removeFolder(id) {
+  deleteFolder(id) {
     store.folders = store.folders.filter((f) => f.id !== id);
   },
 });
