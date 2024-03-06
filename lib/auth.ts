@@ -32,7 +32,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
 
   callbacks: {
-    // @ts-expect-error eslint-disable-line @typescript-eslint/ban-ts-comment
     session: async ({ session, token }) => {
       if (token.sub && session.user) {
         session.user.id = token.sub;
