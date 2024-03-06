@@ -83,7 +83,7 @@ export default auth(async (req) => {
   return NextResponse.next();
 });
 
-// @see https://clerk.com/docs/references/nextjs/auth-middleware#usage
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
+  // match all routes except static files, _next and api/auth
+  matcher: ["/((?!.+\\.[\\w]+$|_next|api/auth).*)"],
 };
