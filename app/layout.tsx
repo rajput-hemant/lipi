@@ -1,5 +1,7 @@
 import "@/app/globals.css";
 
+import { Analytics } from "@vercel/analytics/react";
+
 import type { Metadata, Viewport } from "next";
 
 import { Providers } from "@/components/providers";
@@ -76,6 +78,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           <Toaster />
         </Providers>
 
+        <Analytics />
         <TailwindIndicator />
       </body>
     </html>

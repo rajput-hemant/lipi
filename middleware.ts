@@ -23,7 +23,7 @@ export default auth(async (req) => {
    * Rate limiting middleware
    * -----------------------------------------------------------------------------------------------*/
 
-  if (env.ENABLE_RATE_LIMITING && env.NODE_ENV === "production") {
+  if (env.ENABLE_RATE_LIMITING === "true" && env.NODE_ENV === "production") {
     const id = req.ip ?? "anonymous";
 
     const { limit, pending, remaining, reset, success } =
@@ -63,7 +63,7 @@ export default auth(async (req) => {
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
     }
 
     return NextResponse.next();
@@ -75,7 +75,7 @@ export default auth(async (req) => {
       from += nextUrl.search;
     }
 
-    return Response.redirect(
+    return NextResponse.redirect(
       new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)
     );
   }
