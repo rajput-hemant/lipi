@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { validate } from "uuid";
 
 import type { DBResponse } from ".";
@@ -16,8 +16,7 @@ import { folders } from "../schema";
  * @returns Workspace folders
  */
 export const getFolders = async (
-  workspaceId: string,
-  inTrash = false
+  workspaceId: string
 ): Promise<DBResponse<Folder[]>> => {
   const isValid = validate(workspaceId);
 
@@ -28,15 +27,15 @@ export const getFolders = async (
       .select()
       .from(folders)
       .orderBy(folders.createdAt)
-      .where(
-        and(eq(folders.workspaceId, workspaceId), eq(folders.inTrash, inTrash))
-      );
+      .where(eq(folders.workspaceId, workspaceId));
 
     return { data, error: null };
   } catch (error) {
     return { error: (error as Error).message, data: null };
   }
 };
+
+export const getFoldersFromDb = getFolders;
 
 /**
  * Create a new folder
@@ -56,6 +55,8 @@ export const createFolder = async (
     revalidatePath(`/dashboard/${folder.workspaceId}`);
   }
 };
+
+export const createFolderInDb = createFolder;
 
 /**
  * Update folder
@@ -80,6 +81,8 @@ export const updateFolder = async (
   }
 };
 
+export const updateFolderInDb = updateFolder;
+
 /**
  * Delete folder by ID
  * @param folderId Folder ID
@@ -99,3 +102,5 @@ export const deleteFolder = async (
     return { error: (error as Error).message, data: null };
   }
 };
+
+export const deleteFolderFromDb = deleteFolder;

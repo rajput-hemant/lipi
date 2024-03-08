@@ -39,9 +39,7 @@ export const store = proxy<AppState & AppAction>({
     store.folders.push(folder);
   },
   updateFolder(folder: Folder) {
-    store.folders = store.folders.map((f) =>
-      f.id === folder.id ? { ...f, ...folder } : f
-    );
+    store.folders = store.folders.map((f) => (f.id === folder.id ? folder : f));
   },
   deleteFolder(id) {
     store.folders = store.folders.filter((f) => f.id !== id);

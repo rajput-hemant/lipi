@@ -32,10 +32,10 @@ import { useAppState } from "@/hooks/use-app-state";
 import {
   createFile,
   createFolder,
-  deleteFile as deleteFileFromDb,
-  deleteFolder as deleteFolderFromDb,
-  updateFile as updateFileFromDb,
-  updateFolder as updateFolderFromDb,
+  deleteFileFromDb,
+  deleteFolderFromDb,
+  updateFileInDb,
+  updateFolderInDb,
 } from "@/lib/db/queries";
 import { cn, isAppleDevice } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
@@ -68,8 +68,8 @@ export function Folders() {
   const { setOpen, subscription } = useSubscriptionModal();
 
   const {
-    files,
-    folders,
+    files: stateFiles,
+    folders: stateFolders,
     addFile,
     deleteFile,
     updateFile,
@@ -77,6 +77,9 @@ export function Folders() {
     deleteFolder,
     updateFolder,
   } = useAppState();
+
+  const files = stateFiles.filter((file) => !file.inTrash);
+  const folders = stateFolders.filter((folder) => !folder.inTrash);
 
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [creatingFiles, setCreatingFiles] = useState<string[]>([]);
@@ -86,10 +89,13 @@ export function Folders() {
   const [selectedEmoji, setSelectedEmoji] = useState("");
 
   function createFolderToggle() {
-    if (subscription?.status !== "active" && folders.length >= 3) {
-      toast.error("Something went wrong", {
-        description: "You have reached the maximum number of folders.",
-      });
+    if (subscription?.status !== "active" && stateFolders.length >= 3) {
+      const description =
+        stateFolders.length === folders.length ?
+          "You have reached the maximum number of folders."
+        : "You have reached the maximum number of folders. Try clearing the trash to create more folders.";
+
+      toast.error("Something went wrong", { description });
 
       setOpen(true);
       return;
@@ -198,7 +204,7 @@ export function Folders() {
     const updatedFile: File = { ...file, inTrash: true };
     updateFile(updatedFile);
 
-    toast.promise(updateFileFromDb(updatedFile), {
+    toast.promise(updateFileInDb(updatedFile), {
       loading: "Moving file to trash...",
       success: "File moved to trash.",
       error: "Something went wrong! Unable to move file to trash.",
@@ -208,11 +214,14 @@ export function Folders() {
   async function moveFolderToTrash(folderId: string) {
     const folder = folders.find((f) => f.id === folderId);
 
-    if (!folder) return;
+    if (!folder) {
+      toast.error("Something went wrong", { description: "Folder not found." });
+      return;
+    }
 
-    updateFolder({ ...folder, inTrash: true });
-
-    toast.promise(updateFolderFromDb({ ...folder, inTrash: true }), {
+    const updatedFolder: Folder = { ...folder, inTrash: true };
+    updateFolder(updatedFolder);
+    toast.promise(updateFolderInDb({ ...folder, inTrash: true }), {
       loading: "Moving folder to trash...",
       success: "Folder moved to trash.",
       error: "Something went wrong! Unable to move folder to trash.",
