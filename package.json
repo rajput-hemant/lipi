@@ -22,8 +22,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@auth/core": "^0.28.1",
-    "@auth/drizzle-adapter": "^0.8.1",
+    "@auth/core": "^0.28.2",
+    "@auth/drizzle-adapter": "^0.8.2",
     "@hookform/resolvers": "^3.3.4",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
@@ -73,7 +73,7 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.2.1",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "20.11.30",
+    "@types/node": "20.12.2",
     "@types/react": "18.2.73",
     "@types/react-dom": "18.2.23",
     "@types/uuid": "^9.0.8",
@@ -88,7 +88,7 @@
     "husky": "^9.0.11",
     "jiti": "^1.21.0",
     "lint-staged": "^15.2.2",
-    "pg": "^8.11.3",
+    "pg": "^8.11.4",
     "postcss": "8.4.38",
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.13",
