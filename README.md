@@ -1,117 +1,85 @@
 <div align=center>
 
-[![ntl-badge]][ntl-link] ![views] ![stars] ![forks] ![issues] ![license] ![repo-size]
+<!-- labels -->
+
+![][ci] ![][views] ![][stars] ![][forks] ![][issues] ![][license] ![][repo-size]
+
+<!-- title -->
+
+# Lipi
+
+### [WIP] 🚀 A SAAS web app, a Notion.so replica, featuring real-time collaboration and customizable workspaces built using ▲ Next.js, shadcn/ui, TailwindCSS
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/nextjs-light.svg">
-  <source media="(prefers-color-scheme: light)" srcset="public/nextjs-dark.svg">
-  <img alt="Next.js">
+  <source media="(prefers-color-scheme: light)" srcset="https://graph.org/file/93d7d38ec83bc4e9ba1d3.png">
+  <source media="(prefers-color-scheme: dark)" srcset="https://graph.org/file/ad59213e3b1ece0bdc95e.png">
+  <img src="https://graph.org/file/93d7d38ec83bc4e9ba1d3.png" alt="lipi">
 </picture>
 
-# Next.js Starter Template
+**[<kbd> <br> &nbsp;**Live Demo**&nbsp; <br> </kbd>][site]**
 
-### A Minimal Next.js Starter Template with TypeScript, Tailwind CSS, and pre-configured with ESLint, Prettier, and Husky.
+## Building from Source
 
 </div>
 
-## Features
+- Fetch latest source code from master branch.
 
-- ⚡ **[Next.js](https://nextjs.org/)** - A React Framework for Production
-- 🔥 **[App Router](https://nextjs.org/docs/app)** - It is a new paradigm for building applications using React's latest features.
-- 🎨 **[Tailwind CSS](https://tailwindcss.com/)** - A Utility-First CSS Framework for Rapid UI Development
-- 📦 **[TypeScript](https://www.typescriptlang.org/)** - A typed superset of JavaScript that compiles to plain JavaScript
-- 📝 **[ESLint](https://eslint.org/)** - The pluggable linting utility for JavaScript and JSX
-- 🛠 **[Prettier](https://prettier.io/)** - An opinionated code formatter
-- 🐶 **[Husky](https://typicode.github.io/husky/#/)** - A tool that makes Git hooks easy
-- 🚫 **[lint-staged](https://github.com/okonet/lint-staged)** - Run linters against staged git files
-- 📄 **[commitlint](https://commitlint.js.org/#/)** - Lint commit messages
-- 📦 **[bun](https://bun.sh)** - A JavaScript runtime w/ Fast, disk space efficient package manager
-
-## Getting Started
-
-```bash
-bun create next-app -e "https://github.com/rajput-hemant/nextjs-template" <project-name>
-
-npx create-next-app -e "https://github.com/rajput-hemant/nextjs-template" <project-name>
+```
+git clone https://github.com/rajput-hemant/lipi
+cd lipi
 ```
 
-<p align="center" style="font-weight: bold;">OR</p>
+- Rename **.env.example** => **.env.local**, add your own environment variables.
 
-**Install `degit` globally**
+- Run the app with VS Code or the command line:
 
-```bash
-bun i -g degit || pnpm i -g degit || yarn global add degit || npm i -g degit
+```
+bun i || pnpm i || npm i || yarn
+bun dev || pnpm dev || npm run dev || yarn dev
 ```
 
-**Create a new project from this template**
+<div align=center>
 
-```bash
-degit rajput-hemant/nextjs-template <project-name>
-cd <project-name>
+### Docker and Makefile
+
+</div>
+
+- Build the Docker Image and start the container:
+
+```
+make build
+make start
 ```
 
-**Install dependencies**
+- Stop the Docker container:
 
-```bash
-bun i || pnpm i || yarn || npm i
+```
+make stop
 ```
 
-**Initialize a new git repository _(Optional)_:**
+<div align=center>
 
-```bash
-git init
-git add .
-git commit --no-verify -m "init"
-```
+### Deploy Your Own
 
-## Integrations
+You can deploy your own hosted version of `lipi`. Just click the link below to deploy a ready-to-go version to Vercel.
 
-[Kirimase](https://kirimase.dev) is a Next.js CLI tool that accelerates full-stack app development. It seamlessly integrates packages like ORM (Prisma or Drizzle), authentication (Auth.js, Clerk, Lucia, Kinde), UI components (Shadcn-UI), payments (Stripe), and email (Resend), following best practices.
+[![Deploy with Vercel](https://vercel.com/button)][deploy]
 
-To add integrations to your project, run:
+## Star History
 
-```bash
-kirimase init
-```
-
-## Available Scripts
-
-In the project directory, you can run:
-
-| **Script**   | **Description**                                      |
-| ------------ | ---------------------------------------------------- |
-| `dev`        | Runs the app in the development mode.                |
-| `build`      | Builds the app for production to the `.next` folder. |
-| `start`      | Runs the built app in the production mode.           |
-| `preview`    | Builds and serves the app in the production mode.    |
-| `lint`       | Runs next lint on the project.                       |
-| `type-check` | Runs TypeScript type checker.                        |
-| `fmt`        | Formats the code with Prettier.                      |
-| `fmt:check`  | Checks if the code is formatted with Prettier.       |
-| `prepare`    | Installs husky git hooks.                            |
-
-## After Installation Checklist
-
-- [ ] Update `package.json` with your project details.
-- [ ] Update `README.md` with your project details.
-- [ ] Update `LICENSE` with your name and year.
-
-## Switching Package Manager
-
-This template uses [bun](https://bun.sh/docs/cli/install) as the default package manager. If you want to use `pnpm`, `npm` or `yarn`, you need to remove the `bun.lockb` file and run `pnpm i`, `npm i` or `yarn` to generate the lock file for the respective package manager.
-
-## Deployments
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/rajput-hemant/nextjs-template)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/rajput-hemant/nextjs-template)
+<a href="https://star-history.com/#rajput-hemant/lipi">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=rajput-hemant/lipi&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=rajput-hemant/lipi" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=rajput-hemant/lipi" />
+ </picture>
+</a>
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributors:
-
-<div align=center>
 
 [![][contributors]][contributors-graph]
 
@@ -121,14 +89,18 @@ _Note: It may take up to 24h for the [contrib.rocks][contrib-rocks] plugin to up
 
 <!----------------------------------{ Labels }--------------------------------->
 
-[views]: https://komarev.com/ghpvc/?username=nextjs-template&label=view%20counter&color=red&style=flat
-[repo-size]: https://img.shields.io/github/repo-size/rajput-hemant/nextjs-template
-[issues]: https://img.shields.io/github/issues-raw/rajput-hemant/nextjs-template
-[license]: https://img.shields.io/github/license/rajput-hemant/nextjs-template
-[forks]: https://img.shields.io/github/forks/rajput-hemant/nextjs-template?style=flat
-[stars]: https://img.shields.io/github/stars/rajput-hemant/nextjs-template
-[contributors]: https://contrib.rocks/image?repo=rajput-hemant/nextjs-template&max=500
-[contributors-graph]: https://github.com/rajput-hemant/nextjs-template/graphs/contributors
-[contrib-rocks]: https://contrib.rocks/preview?repo=rajput-hemant%2Fnextjs-template
-[ntl-badge]: https://api.netlify.com/api/v1/badges/6955f80c-0747-4947-a344-e7c647012cbe/deploy-status
-[ntl-link]: https://app.netlify.com/sites/react-template-vite/deploys
+[views]: https://komarev.com/ghpvc/?username=lipi&label=view%20counter&color=red&style=flat
+[repo-size]: https://img.shields.io/github/repo-size/rajput-hemant/lipi
+[issues]: https://img.shields.io/github/issues-raw/rajput-hemant/lipi
+[license]: https://img.shields.io/github/license/rajput-hemant/lipi
+[forks]: https://img.shields.io/github/forks/rajput-hemant/lipi?style=flat
+[stars]: https://img.shields.io/github/stars/rajput-hemant/lipi
+[contributors]: https://contrib.rocks/image?repo=rajput-hemant/lipi&max=500
+[contributors-graph]: https://github.com/rajput-hemant/lipi/graphs/contributors
+[contrib-rocks]: https://contrib.rocks/preview?repo=rajput-hemant%2Flipi
+[ci]: https://github.com/rajput-hemant/lipi/actions/workflows/ci.yml/badge.svg
+
+<!-----------------------------------{ Links }---------------------------------->
+
+[site]: https://lipi.rajputhemant.me
+[deploy]: https://vercel.com/new/clone?repository-url=https://github.com/rajput-hemant/lipi&project-name=lipi&repo-name=lipi&env=SKIP_ENV_VALIDATION,AUTH_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,GITHUB_ACCESS_TOKEN,DATABASE_URL,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,ENABLE_RATE_LIMITING,RATE_LIMITING_REQUESTS_PER_SECOND
