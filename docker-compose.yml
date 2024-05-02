@@ -1,0 +1,7 @@
+services:
+  lipi:
+    build:
+      dockerfile: Dockerfile
+    image: lipi
+    ports:
+      - "3000:3000"

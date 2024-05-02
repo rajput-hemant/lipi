@@ -13,6 +13,7 @@ const nextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  output: "standalone",
   // ...
 };
 
