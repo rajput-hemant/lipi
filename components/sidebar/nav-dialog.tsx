@@ -4,10 +4,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -49,12 +47,6 @@ export function NavDialog(props: NavDialogProps) {
         </DialogHeader>
 
         {children}
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button size="sm">Close</Button>
-          </DialogClose>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

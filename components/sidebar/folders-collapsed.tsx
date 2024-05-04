@@ -28,7 +28,7 @@ import {
   updateFileInDb,
   updateFolderInDb,
 } from "@/lib/db/queries";
-import { cn } from "@/lib/utils";
+import { cn, currentlyInDev } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
 import {
@@ -76,12 +76,6 @@ export function FoldersCollapsed() {
   const [fileName, setFileName] = useState("Untitled");
   const [selectedEmoji, setSelectedEmoji] = useState("");
   const [creatingFiles, setCreatingFiles] = useState<string[]>([]);
-
-  function currentlyInDev() {
-    toast.info("This feature is currently in development.", {
-      description: "We're working on it and it'll be available soon.",
-    });
-  }
 
   function createFolderToggle() {
     if (subscription?.status !== "active" && stateFolders.length >= 3) {
@@ -134,7 +128,10 @@ export function FoldersCollapsed() {
     toast.promise(createFolder(newFolder), {
       loading: "Creating folder...",
       success: "Folder created.",
-      error: "Something went wrong! Unable to create folder.",
+      error: () => {
+        deleteFolder(newFolder.id!);
+        return "Something went wrong! Unable to create folder.";
+      },
     });
 
     setSelectedEmoji("");
@@ -210,23 +207,31 @@ export function FoldersCollapsed() {
     });
   }
 
-  async function deleteFolderHandler(folderId: string) {
-    deleteFolder(folderId);
-
-    toast.promise(deleteFolderFromDb(folderId), {
-      loading: "Deleting folder...",
-      success: "Folder deleted.",
-      error: "Something went wrong! Unable to delete folder.",
-    });
-  }
-
   async function deleteFileHandler(fileId: string) {
+    const file = files.find((f) => f.id === fileId);
     deleteFile(fileId);
 
     toast.promise(deleteFileFromDb(fileId), {
       loading: "Deleting file...",
-      success: "File deleted.",
-      error: "Something went wrong! Unable to delete file.",
+      success: "File deleted permanently.",
+      error: () => {
+        addFile(file!);
+        return "Something went wrong! Unable to delete file.";
+      },
+    });
+  }
+
+  async function deleteFolderHandler(folderId: string) {
+    const folder = folders.find((f) => f.id === folderId);
+    deleteFolder(folderId);
+
+    toast.promise(deleteFolderFromDb(folderId), {
+      loading: "Deleting folder...",
+      success: "Folder deleted permanently.",
+      error: () => {
+        addFolder(folder!);
+        return "Something went wrong! Unable to delete folder.";
+      },
     });
   }
 

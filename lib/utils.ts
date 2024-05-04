@@ -1,4 +1,5 @@
 import { clsx } from "clsx";
+import { toast } from "sonner";
 import { twMerge } from "tailwind-merge";
 
 import type { ClassValue } from "clsx";
@@ -157,4 +158,10 @@ export function isIOS() {
  */
 export function isAppleDevice() {
   return isMac() || isIOS();
+}
+
+export function currentlyInDev() {
+  toast.info("This feature is currently in development.", {
+    description: "We're working on it and it'll be available soon.",
+  });
 }

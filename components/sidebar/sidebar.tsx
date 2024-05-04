@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutGrid, Settings, Trash2, User2 } from "lucide-react";
+import { LayoutGrid, SettingsIcon, Trash2, User2 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
 
@@ -7,12 +7,14 @@ import { siteConfig } from "@/config/site";
 import { useAppState } from "@/hooks/use-app-state";
 import { cn } from "@/lib/utils";
 import { Logo } from "../icons";
+import { Settings } from "../settings";
 import { SignOut } from "../sign-out";
 import { Trash } from "../trash";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Workspaces } from "../workspaces";
 import { Folders } from "./folders";
 import { FoldersCollapsed } from "./folders-collapsed";
 import { NavDialog } from "./nav-dialog";
@@ -33,13 +35,13 @@ const navItems: NavItem[] = [
     title: "My Workspaces",
     description: "Manage your workspaces",
     icon: LayoutGrid,
-    content: Trash,
+    content: Workspaces,
   },
   {
     title: "Settings",
     description: "Manage your settings",
-    icon: Settings,
-    content: Trash,
+    icon: SettingsIcon,
+    content: Settings,
   },
   {
     title: "Trash",

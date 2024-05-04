@@ -37,7 +37,7 @@ import {
   updateFileInDb,
   updateFolderInDb,
 } from "@/lib/db/queries";
-import { cn, isAppleDevice } from "@/lib/utils";
+import { cn, currentlyInDev, isAppleDevice } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
 import {
@@ -185,12 +185,6 @@ export function Folders() {
     setFileName("Untitled");
 
     setCreatingFiles((prev) => prev.filter((id) => id !== folderId));
-  }
-
-  function currentlyInDev() {
-    toast.info("This feature is currently in development.", {
-      description: "We're working on it and it'll be available soon.",
-    });
   }
 
   async function moveFileToTrash(fileId: string) {

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   FileIcon,
   Folder,
@@ -18,11 +19,21 @@ import {
   updateFolderInDb,
 } from "@/lib/db/queries";
 import { Button } from "./ui/button";
+import { DialogClose, DialogFooter } from "./ui/dialog";
+import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function Trash() {
-  const { files, folders, updateFile, updateFolder, deleteFile, deleteFolder } =
-    useAppState();
+  const {
+    files,
+    addFile,
+    updateFile,
+    deleteFile,
+    folders,
+    addFolder,
+    updateFolder,
+    deleteFolder,
+  } = useAppState();
 
   const trashedFiles = files.filter((file) => file.inTrash);
   const trashedFolders = folders.filter((folder) => folder.inTrash);
@@ -64,22 +75,30 @@ export function Trash() {
   }
 
   async function deleteFileHandler(fileId: string) {
+    const file = files.find((f) => f.id === fileId);
     deleteFile(fileId);
 
     toast.promise(deleteFileFromDb(fileId), {
       loading: "Deleting file...",
       success: "File deleted permanently.",
-      error: "Something went wrong! Unable to delete file.",
+      error: () => {
+        addFile(file!);
+        return "Something went wrong! Unable to delete file.";
+      },
     });
   }
 
   async function deleteFolderHandler(folderId: string) {
+    const folder = folders.find((f) => f.id === folderId);
     deleteFolder(folderId);
 
     toast.promise(deleteFolderFromDb(folderId), {
       loading: "Deleting folder...",
       success: "Folder deleted permanently.",
-      error: "Something went wrong! Unable to delete folder.",
+      error: () => {
+        addFolder(folder!);
+        return "Something went wrong! Unable to delete folder.";
+      },
     });
   }
 
@@ -89,123 +108,147 @@ export function Trash() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <h3 className="font-heading text-3xl drop-shadow-md">Trashed Folders</h3>
+    <React.Fragment>
+      <div className="flex flex-col gap-4 p-4">
+        <h3 className="font-heading text-3xl drop-shadow-md">
+          Trashed Folders
+        </h3>
 
-      {trashedFolders.length > 0 ?
-        <div className="flex flex-wrap gap-4">
-          {trashedFolders.map((folder) => (
-            <div
-              key={folder.id}
-              title={folder.title}
-              className="size-44 space-y-4"
-            >
-              <div className="group relative rounded-md border shadow">
-                <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
-                  {folder.iconId ? folder.iconId : <Folder size={56} />}
+        {trashedFolders.length > 0 ?
+          <ScrollArea>
+            <div className="mb-6 flex h-full gap-4">
+              {trashedFolders.map((folder) => (
+                <div
+                  key={folder.id}
+                  title={folder.title}
+                  className="size-44 space-y-4"
+                >
+                  <div className="group relative rounded-md border shadow">
+                    <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
+                      {folder.iconId ? folder.iconId : <Folder size={56} />}
+                    </div>
+
+                    <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => restoreFolder(folder.id!)}
+                          >
+                            <Undo2 size={20} />
+                          </Button>
+                        </TooltipTrigger>
+
+                        <TooltipContent>Restore</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => deleteFolderHandler(folder.id!)}
+                          >
+                            <Trash2 size={20} />
+                          </Button>
+                        </TooltipTrigger>
+
+                        <TooltipContent>Delete Permanently</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  <p className="truncate text-center font-medium">
+                    {folder.title}
+                  </p>
                 </div>
-
-                <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => restoreFolder(folder.id!)}
-                      >
-                        <Undo2 size={20} />
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>Restore</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => deleteFolderHandler(folder.id!)}
-                      >
-                        <Trash2 size={20} />
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>Delete Permanently</TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-
-              <p className="truncate text-center font-medium">{folder.title}</p>
+              ))}
             </div>
-          ))}
-        </div>
-      : <div className="flex flex-col items-center gap-2 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
-          <Ghost size={32} className="drop-shadow" />
-          <span className="drop-shadow-sm">Nothing to show here!</span>
-        </div>
-      }
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        : <div className="flex flex-col items-center gap-4 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
+            <Ghost size={32} className="drop-shadow" />
+            <span className="drop-shadow-sm">Nothing to show here!</span>
+          </div>
+        }
 
-      <h3 className="font-heading text-3xl drop-shadow-md">Trashed Files</h3>
+        <h3 className="font-heading text-3xl drop-shadow-md">Trashed Files</h3>
 
-      {trashedFiles.length > 0 ?
-        <div className="flex flex-wrap gap-4">
-          {trashedFiles.map((file) => (
-            <div key={file.id} title={file.title} className="size-44 space-y-4">
-              <div className="group relative rounded-md border shadow">
-                <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
-                  {file.iconId ? file.iconId : <FileIcon size={56} />}
+        {trashedFiles.length > 0 ?
+          <ScrollArea>
+            <div className="mb-6 flex h-full gap-4">
+              {trashedFiles.map((file) => (
+                <div
+                  key={file.id}
+                  title={file.title}
+                  className="size-44 space-y-4"
+                >
+                  <div className="group relative rounded-md border shadow">
+                    <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
+                      {file.iconId ? file.iconId : <FileIcon size={56} />}
+                    </div>
+
+                    <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => restoreFile(file.id!)}
+                          >
+                            <Undo2 size={20} />
+                          </Button>
+                        </TooltipTrigger>
+
+                        <TooltipContent>Restore</TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip delayDuration={0}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            size="icon"
+                            variant="destructive"
+                            onClick={() => deleteFileHandler(file.id!)}
+                          >
+                            <Trash2 size={20} />
+                          </Button>
+                        </TooltipTrigger>
+
+                        <TooltipContent>Delete Permanently</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  <p className="truncate text-center font-medium">
+                    {file.title}
+                  </p>
                 </div>
-
-                <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => restoreFile(file.id!)}
-                      >
-                        <Undo2 size={20} />
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>Restore</TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        onClick={() => deleteFileHandler(file.id!)}
-                      >
-                        <Trash2 size={20} />
-                      </Button>
-                    </TooltipTrigger>
-
-                    <TooltipContent>Delete Permanently</TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-
-              <p className="truncate text-center font-medium">{file.title}</p>
+              ))}
             </div>
-          ))}
-        </div>
-      : <div className="flex flex-col items-center gap-2 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
-          <Ghost size={32} className="drop-shadow" />
-          <span className="drop-shadow-sm">Nothing to show here!</span>
-        </div>
-      }
+            <ScrollBar orientation="vertical" />
+          </ScrollArea>
+        : <div className="flex flex-col items-center gap-4 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
+            <Ghost size={32} className="drop-shadow" />
+            <span className="drop-shadow-sm">Nothing to show here!</span>
+          </div>
+        }
+      </div>
 
-      <Button
-        variant="destructive"
-        onClick={clearTrash}
-        disabled={!trashedFiles.length && !trashedFolders.length}
-        className="mx-auto mt-10 gap-2"
-      >
-        <TrashIcon size={20} /> Clear Trash
-      </Button>
-    </div>
+      <DialogFooter>
+        <Button
+          size="sm"
+          variant="destructive"
+          onClick={clearTrash}
+          disabled={!trashedFiles.length && !trashedFolders.length}
+        >
+          <TrashIcon className="mr-1 size-4" /> Clear Trash
+        </Button>
+
+        <DialogClose asChild>
+          <Button size="sm">Close</Button>
+        </DialogClose>
+      </DialogFooter>
+    </React.Fragment>
   );
 }

@@ -12,7 +12,7 @@ export function Features() {
         </p>
       </div>
 
-      <div className="relative mx-auto h-[24rem] rounded-md border-2 border-dashed md:w-[44rem]">
+      <div className="relative mx-auto h-96 rounded-md border-2 border-dashed md:w-[44rem]">
         <div className="absolute inset-2 flex items-center justify-center rounded-md bg-muted text-center font-handwriting text-2xl md:text-4xl">
           A Planner goes here!
         </div>
