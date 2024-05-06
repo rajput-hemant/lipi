@@ -24,12 +24,10 @@ export default async function WorkspaceLayout({
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
   const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;
 
-  const [{ data: files }, { data: folders }] = await Promise.all([
+  const [files, folders] = await Promise.all([
     getFiles(workspaceId),
     getFolders(workspaceId),
   ]);
-
-  // TODO: Handle error case
 
   return (
     <AppStateProvider user={user} files={files!} folders={folders!}>

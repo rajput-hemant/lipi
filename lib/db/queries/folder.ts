@@ -1,71 +1,72 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { unstable_cache as cache, revalidateTag } from "next/cache";
 import { eq } from "drizzle-orm";
 import { validate } from "uuid";
 
-import type { DBResponse } from ".";
 import type { Folder } from "@/types/db";
 
 import { db } from "..";
 import { folders } from "../schema";
 
 /**
- * Get workspace folders
- * @param workspaceId Workspace ID
- * @returns Workspace folders
- */
-export const getFolders = async (
-  workspaceId: string
-): Promise<DBResponse<Folder[]>> => {
-  const isValid = validate(workspaceId);
-
-  if (!isValid) return { error: "Invalid workspace ID", data: null };
-
-  try {
-    const data = await db
-      .select()
-      .from(folders)
-      .orderBy(folders.createdAt)
-      .where(eq(folders.workspaceId, workspaceId));
-
-    return { data, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
-  }
-};
-
-export const getFoldersFromDb = getFolders;
-
-/**
  * Create a new folder
  * @param folder Folder
  * @returns Created folder
  */
-export const createFolder = async (
-  folder: Folder
-): Promise<DBResponse<Folder>> => {
+export async function createFolder(folder: Folder) {
   try {
     const [data] = await db.insert(folders).values(folder).returning();
 
-    return { data, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
+    return data;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw new Error("Failed to create folders");
   } finally {
-    revalidatePath(`/dashboard/${folder.workspaceId}`);
+    revalidateTag("get_folders");
   }
-};
+}
 
 export const createFolderInDb = createFolder;
+
+/**
+ * Get workspace folders
+ * @param workspaceId Workspace ID
+ * @returns Workspace folders
+ */
+export const getFolders = cache(
+  async (workspaceId: string) => {
+    const isValid = validate(workspaceId);
+
+    if (!isValid) {
+      throw new Error("Invalid workspace ID");
+    }
+
+    try {
+      const data = await db
+        .select()
+        .from(folders)
+        .orderBy(folders.createdAt)
+        .where(eq(folders.workspaceId, workspaceId));
+
+      return data;
+    } catch (e) {
+      console.error((e as Error).message);
+      throw new Error("Failed to fetch folders from the database");
+    }
+  },
+  ["get_folders"],
+  { tags: ["get_folders"] }
+);
+
+export const getFoldersFromDb = getFolders;
 
 /**
  * Update folder
  * @param folder Folder
  * @returns Updated folder
  */
-export const updateFolder = async (
-  folder: Folder
-): Promise<DBResponse<Folder>> => {
+export async function updateFolder(folder: Folder) {
   try {
     const [data] = await db
       .update(folders)
@@ -73,13 +74,14 @@ export const updateFolder = async (
       .where(eq(folders.id, folder.id!))
       .returning();
 
-    return { data, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
+    return data;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw new Error("Failed to update folder.");
   } finally {
-    revalidatePath(`/dashboard/${folder.workspaceId}`);
+    revalidateTag("get_folders");
   }
-};
+}
 
 export const updateFolderInDb = updateFolder;
 
@@ -88,19 +90,18 @@ export const updateFolderInDb = updateFolder;
  * @param folderId Folder ID
  * @returns Deleted folder
  */
-export const deleteFolder = async (
-  folderId: string
-): Promise<DBResponse<Folder>> => {
+export async function deleteFolder(folderId: string) {
   try {
     const [deletedFolder] = await db
       .delete(folders)
       .where(eq(folders.id, folderId))
       .returning();
 
-    return { data: deletedFolder, error: null };
+    return deletedFolder;
   } catch (error) {
-    return { error: (error as Error).message, data: null };
+    console.error((error as Error).message);
+    throw new Error("Failed to delete folder.");
   }
-};
+}
 
 export const deleteFolderFromDb = deleteFolder;

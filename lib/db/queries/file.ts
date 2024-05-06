@@ -1,86 +1,69 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { unstable_cache as cache, revalidateTag } from "next/cache";
 import { eq } from "drizzle-orm";
 import { validate } from "uuid";
 
-import type { DBResponse } from ".";
 import type { File } from "@/types/db";
 
 import { db } from "..";
 import { files } from "../schema";
 
 /**
+ * Create a new file
+ * @param file - File object
+ * @returns Created file
+ */
+export async function createFile(file: File) {
+  try {
+    const [data] = await db.insert(files).values(file).returning();
+
+    return data;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw new Error("Failed to create file");
+  } finally {
+    revalidateTag("get_files");
+  }
+}
+
+/**
  * Get all files in a workspace
  * @param workspaceId - ID of the workspace
  * @returns List of files in the workspace
  */
-export async function getFiles(
-  workspaceId: string
-): Promise<DBResponse<File[]>> {
-  const isValid = validate(workspaceId);
+export const getFiles = cache(
+  async (workspaceId: string) => {
+    const isValid = validate(workspaceId);
 
-  if (!isValid) return { error: "Invalid workspace ID", data: null };
+    if (!isValid) {
+      throw new Error("Invalid workspace ID");
+    }
 
-  try {
-    const data = await db
-      .select()
-      .from(files)
-      .orderBy(files.createdAt)
-      .where(eq(files.workspaceId, workspaceId));
+    try {
+      const data = await db
+        .select()
+        .from(files)
+        .orderBy(files.createdAt)
+        .where(eq(files.workspaceId, workspaceId));
 
-    return { data, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
-  }
-}
+      return data;
+    } catch (e) {
+      console.error((e as Error).message);
+      throw new Error("Failed to fetch files from the database");
+    }
+  },
+  ["get_files"],
+  { tags: ["get_files"] }
+);
 
 export const getFilesFromDb = getFiles;
 
-// /**
-//  * Get all files in a folder
-//  * @param folderId - ID of the folder
-//  * @returns - Array of files
-//  */
-// export async function getFiles (
-//   folderId: string
-// ): Promise<DBResponse<File[]>> {
-//   const isValid = validate(folderId);
-
-//   if (!isValid) return { error: "Invalid Folder ID", data: null };
-
-//   try {
-//     const data = await db
-//       .select()
-//       .from(files)
-//       .orderBy(files.createdAt)
-//       .where(eq(files.folderId, folderId));
-
-//     return { data, error: null };
-//   } catch (error) {
-//     return { error: (error as Error).message, data: null };
-//   }
-// };
-
 /**
- * Create a new folder
- * @param folder Folder
- * @returns Created folder
+ * Update a file
+ * @param file - File object
+ * @returns Updated file
  */
-export async function createFile(file: File): Promise<DBResponse<File>> {
-  try {
-    const [data] = await db.insert(files).values(file).returning();
-
-    return { data, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
-  } finally {
-    revalidatePath(`/dashboard/${file.workspaceId}`);
-  }
-}
-
-export const createFileInDb = createFile;
-
 export async function updateFile(file: File) {
   try {
     const [updatedFile] = await db
@@ -89,9 +72,12 @@ export async function updateFile(file: File) {
       .where(eq(files.id, file.id!))
       .returning();
 
-    return { data: updatedFile, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
+    return updatedFile;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw new Error("Failed to update file");
+  } finally {
+    revalidateTag("get_files");
   }
 }
 
@@ -102,16 +88,17 @@ export const updateFileInDb = updateFile;
  * @param fileId Folder ID
  * @returns Deleted file
  */
-export async function deleteFile(fileId: string): Promise<DBResponse<File>> {
+export async function deleteFile(fileId: string) {
   try {
     const [deletedFile] = await db
       .delete(files)
       .where(eq(files.id, fileId))
       .returning();
 
-    return { data: deletedFile, error: null };
-  } catch (error) {
-    return { error: (error as Error).message, data: null };
+    return deletedFile;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw new Error("Failed to delete file");
   }
 }
 
