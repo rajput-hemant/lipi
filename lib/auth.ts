@@ -35,12 +35,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session: async ({ session, token }) => {
       if (token.sub && session.user) {
         session.user.id = token.sub;
+        session.user.username = token.username;
       }
 
       return session;
     },
 
-    jwt: async ({ token }) => token,
+    jwt: async ({ token }) => {
+      const user = await db.query.users.findFirst({
+        where: (u, { eq }) => eq(u.id, token.sub!),
+      });
+
+      if (user) {
+        token.username = user.username;
+      }
+
+      return token;
+    },
 
     redirect: () => DEFAULT_LOGIN_REDIRECT,
   },
@@ -51,10 +62,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
  *
  * @returns The current user
  */
-export async function getCurrentUser() {
+export const getCurrentUser = async () => {
   const session = await auth();
   return session?.user;
-}
+};
 
 /**
  * Checks if the current user is authenticated

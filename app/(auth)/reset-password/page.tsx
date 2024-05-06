@@ -1,4 +1,4 @@
-import { AuthForm } from "../components/auth-form";
+import { ResetPasswordForm } from "../components/reset-password-form";
 
 export const metadata = {
   title: "Reset Password",
@@ -15,9 +15,7 @@ export default function ResetPasswordPage() {
         Enter your new password below.
       </p>
 
-      <div className="px-8 sm:mx-auto sm:w-[350px] sm:px-0">
-        <AuthForm mode="reset" />
-      </div>
+      <ResetPasswordForm />
     </div>
   );
 }

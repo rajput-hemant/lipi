@@ -1,4 +1,4 @@
-import { AuthForm } from "../components/auth-form";
+import { SignUpForm } from "../components/signup-form";
 
 export const metadata = {
   title: "Sign Up",
@@ -15,9 +15,7 @@ export default function SignupPage() {
         Enter your email below to create your account
       </p>
 
-      <div className="px-8 sm:mx-auto sm:w-[350px] sm:px-0">
-        <AuthForm mode="signup" />
-      </div>
+      <SignUpForm />
     </div>
   );
 }

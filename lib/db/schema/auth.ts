@@ -25,7 +25,7 @@ export const users = pgTable("user", {
   image: text("image"),
 });
 
-const _accounts = pgTable(
+export const dbAccounts = pgTable(
   "account",
   {
     userId: uuid("userId")
@@ -49,15 +49,7 @@ const _accounts = pgTable(
   })
 );
 
-const _sessions = pgTable("session", {
-  sessionToken: text("sessionToken").notNull().primaryKey(),
-  userId: uuid("userId")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expires: timestamp("expires", { mode: "date" }).notNull(),
-});
-
-const _verificationTokens = pgTable(
+export const verificationTokens = pgTable(
   "verificationToken",
   {
     identifier: text("identifier").notNull(),

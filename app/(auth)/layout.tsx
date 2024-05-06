@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { Logo } from "@/components/icons";
+import { AuthModeToggle } from "./components/auth-mode-toggle";
 
 export default function AuthLayout({ children }: React.PropsWithChildren) {
   return (
@@ -45,30 +46,28 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
         </div>
       </div>
 
-      <div className="relative my-auto flex h-full lg:p-8">
-        <div className="z-10 mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[550px]">
-          <Logo size={56} className="mx-auto" />
+      <AuthModeToggle />
 
-          {children}
-
-          <p className="mx-auto w-[350px] px-8 text-center text-sm text-muted-foreground">
-            By clicking continue, you agree to our{" "}
-            <Link
-              href="/terms"
-              className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
-            >
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link
-              href="/privacy"
-              className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
-            >
-              Privacy Policy
-            </Link>
-            .
-          </p>
-        </div>
+      <div className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0">
+        <Logo className="mx-auto size-14 drop-shadow" />
+        {children}
+        <p className="mx-auto px-10 text-center text-sm text-muted-foreground">
+          By clicking continue, you agree to our{" "}
+          <Link
+            href="/terms"
+            className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

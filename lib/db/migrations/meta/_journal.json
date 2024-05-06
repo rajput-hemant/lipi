@@ -36,6 +36,13 @@
       "when": 1708840984391,
       "tag": "0004_minor_micromacro",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1714991011079,
+      "tag": "0005_broken_the_professor",
+      "breakpoints": true
     }
   ]
 }

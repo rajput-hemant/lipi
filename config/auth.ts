@@ -7,9 +7,7 @@ import type { NextAuthConfig } from "next-auth";
 
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
-import { authSchema } from "@/lib/validations";
-
-const LoginSchema = authSchema.innerType().omit({ confirmPassword: true });
+import { loginSchema } from "@/lib/validations";
 
 export const authConfig: NextAuthConfig = {
   providers: [
@@ -23,18 +21,20 @@ export const authConfig: NextAuthConfig = {
     }),
     CredentialsProvider({
       async authorize(credentials) {
-        const validatedFields = LoginSchema.safeParse(credentials);
+        const validatedFields = loginSchema.safeParse(credentials);
 
         if (validatedFields.success) {
-          const { email, username, password } = validatedFields.data;
+          const user = validatedFields.data;
 
           const dbUser = await db.query.users.findFirst({
             where: (u, { eq }) =>
-              email ? eq(u.email, email) : eq(u.username, username!),
+              user.type === "email" ?
+                eq(u.email, user.email!)
+              : eq(u.username, user.username!),
           });
 
           if (dbUser && dbUser.password) {
-            const isValid = await compare(password, dbUser.password);
+            const isValid = await compare(user.password, dbUser.password);
 
             if (isValid) {
               return dbUser;
