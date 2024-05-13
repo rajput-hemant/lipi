@@ -1,10 +1,8 @@
 {
-  "id": "f42adebf-9b0d-4c24-9c6c-5d0fec467ceb",
-  "prevId": "7f0f5f61-949d-466c-b439-8fb1fd64a289",
-  "version": "5",
-  "dialect": "pg",
+  "version": "6",
+  "dialect": "postgresql",
   "tables": {
-    "lipi_accounts": {
+    "public.lipi_accounts": {
       "name": "lipi_accounts",
       "schema": "",
       "columns": {
@@ -38,21 +36,21 @@
         "lipi_accounts_user_id_user_id_fk": {
           "name": "lipi_accounts_user_id_user_id_fk",
           "tableFrom": "lipi_accounts",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_collaborators": {
+    "public.lipi_collaborators": {
       "name": "lipi_collaborators",
       "schema": "",
       "columns": {
@@ -88,34 +86,34 @@
         "lipi_collaborators_workspace_id_lipi_workspaces_id_fk": {
           "name": "lipi_collaborators_workspace_id_lipi_workspaces_id_fk",
           "tableFrom": "lipi_collaborators",
-          "tableTo": "lipi_workspaces",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "lipi_workspaces",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "lipi_collaborators_user_id_user_id_fk": {
           "name": "lipi_collaborators_user_id_user_id_fk",
           "tableFrom": "lipi_collaborators",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_customers": {
+    "public.lipi_customers": {
       "name": "lipi_customers",
       "schema": "",
       "columns": {
@@ -137,7 +135,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_files": {
+    "public.lipi_files": {
       "name": "lipi_files",
       "schema": "",
       "columns": {
@@ -204,34 +202,34 @@
         "lipi_files_workspace_id_lipi_workspaces_id_fk": {
           "name": "lipi_files_workspace_id_lipi_workspaces_id_fk",
           "tableFrom": "lipi_files",
-          "tableTo": "lipi_workspaces",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "lipi_workspaces",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "lipi_files_folder_id_lipi_folders_id_fk": {
           "name": "lipi_files_folder_id_lipi_folders_id_fk",
           "tableFrom": "lipi_files",
-          "tableTo": "lipi_folders",
           "columnsFrom": [
             "folder_id"
           ],
+          "tableTo": "lipi_folders",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_folders": {
+    "public.lipi_folders": {
       "name": "lipi_folders",
       "schema": "",
       "columns": {
@@ -292,21 +290,21 @@
         "lipi_folders_workspace_id_lipi_workspaces_id_fk": {
           "name": "lipi_folders_workspace_id_lipi_workspaces_id_fk",
           "tableFrom": "lipi_folders",
-          "tableTo": "lipi_workspaces",
           "columnsFrom": [
             "workspace_id"
           ],
+          "tableTo": "lipi_workspaces",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_prices": {
+    "public.lipi_prices": {
       "name": "lipi_prices",
       "schema": "",
       "columns": {
@@ -382,21 +380,21 @@
         "lipi_prices_product_id_lipi_products_id_fk": {
           "name": "lipi_prices_product_id_lipi_products_id_fk",
           "tableFrom": "lipi_prices",
-          "tableTo": "lipi_products",
           "columnsFrom": [
             "product_id"
           ],
+          "tableTo": "lipi_products",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_products": {
+    "public.lipi_products": {
       "name": "lipi_products",
       "schema": "",
       "columns": {
@@ -442,7 +440,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_subscriptions": {
+    "public.lipi_subscriptions": {
       "name": "lipi_subscriptions",
       "schema": "",
       "columns": {
@@ -550,21 +548,21 @@
         "lipi_subscriptions_price_id_lipi_prices_id_fk": {
           "name": "lipi_subscriptions_price_id_lipi_prices_id_fk",
           "tableFrom": "lipi_subscriptions",
-          "tableTo": "lipi_prices",
           "columnsFrom": [
             "price_id"
           ],
+          "tableTo": "lipi_prices",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "lipi_workspaces": {
+    "public.lipi_workspaces": {
       "name": "lipi_workspaces",
       "schema": "",
       "columns": {
@@ -631,7 +629,7 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "user": {
+    "public.user": {
       "name": "user",
       "schema": "",
       "columns": {
@@ -685,49 +683,52 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         },
         "user_username_unique": {
           "name": "user_username_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "username"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       }
     }
   },
   "enums": {
-    "pricing_plan_interval": {
+    "public.pricing_plan_interval": {
       "name": "pricing_plan_interval",
-      "values": {
-        "year": "year",
-        "month": "month",
-        "week": "week",
-        "day": "day"
-      }
+      "schema": "public",
+      "values": [
+        "year",
+        "month",
+        "week",
+        "day"
+      ]
     },
-    "pricing_type": {
+    "public.pricing_type": {
       "name": "pricing_type",
-      "values": {
-        "recurring": "recurring",
-        "one_time": "one_time"
-      }
+      "schema": "public",
+      "values": [
+        "recurring",
+        "one_time"
+      ]
     },
-    "subscription_status": {
+    "public.subscription_status": {
       "name": "subscription_status",
-      "values": {
-        "unpaid": "unpaid",
-        "past_due": "past_due",
-        "incomplete_expired": "incomplete_expired",
-        "incomplete": "incomplete",
-        "canceled": "canceled",
-        "active": "active",
-        "trialing": "trialing"
-      }
+      "schema": "public",
+      "values": [
+        "unpaid",
+        "past_due",
+        "incomplete_expired",
+        "incomplete",
+        "canceled",
+        "active",
+        "trialing"
+      ]
     }
   },
   "schemas": {},
@@ -735,5 +736,7 @@
     "schemas": {},
     "tables": {},
     "columns": {}
-  }
+  },
+  "id": "f42adebf-9b0d-4c24-9c6c-5d0fec467ceb",
+  "prevId": "7f0f5f61-949d-466c-b439-8fb1fd64a289"
 }

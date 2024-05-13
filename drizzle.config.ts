@@ -1,14 +1,21 @@
+import { cwd } from "process";
+import { loadEnvConfig } from "@next/env";
+
 import type { Config } from "drizzle-kit";
 
-import { env } from "@/lib/env";
-import { siteConfig } from "./config/site";
+import { siteConfig } from "@/config/site";
 
+loadEnvConfig(cwd());
+
+if (!process.env.DATABASE_URL) {
+  console.error("'DATABASE_URL' is not set in the environment variables");
+  process.exit(1);
+}
 export default {
   schema: "./lib/db/schema",
   out: "./lib/db/migrations",
-  driver: "pg",
-  dbCredentials: {
-    connectionString: env.DATABASE_URL,
-  },
+  dialect: "postgresql",
+  verbose: true,
+  dbCredentials: { url: process.env.DATABASE_URL },
   tablesFilter: [`${siteConfig.name.toLowerCase().replace(/\s/g, "_")}_*`],
 } satisfies Config;
