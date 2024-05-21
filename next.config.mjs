@@ -4,17 +4,21 @@ import createJiti from "jiti";
 const jiti = createJiti(new URL(import.meta.url).pathname);
 jiti("./lib/env");
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const isProd = process.env.NODE_ENV === "production";
+
+/** @type {import("next").NextConfig} */
+const config = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [],
     // unoptimized: true,
   },
   experimental: {
-    typedRoutes: true,
+    reactCompiler: isProd,
+    // ...
   },
   output: "standalone",
-  // ...
+  /* ... */
 };
 
-export default nextConfig;
+export default config;

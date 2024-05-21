@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 
+import React from "react";
 import { Analytics } from "@vercel/analytics/react";
 
 import type { Metadata, Viewport } from "next";
@@ -63,24 +64,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: React.PropsWithChildren) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(
-          fontSans.variable,
-          fontMono.variable,
-          fontHeading.variable,
-          fontHandwriting.variable,
-          "min-h-screen scroll-smooth font-sans antialiased selection:bg-foreground selection:text-background"
-        )}
-      >
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+    <React.StrictMode>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={cn(
+            fontSans.variable,
+            fontMono.variable,
+            fontHeading.variable,
+            fontHandwriting.variable,
+            "min-h-screen scroll-smooth font-sans antialiased selection:bg-foreground selection:text-background"
+          )}
+        >
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
 
-        <Analytics />
-        <TailwindIndicator />
-      </body>
-    </html>
+          <Analytics />
+          <TailwindIndicator />
+        </body>
+      </html>
+    </React.StrictMode>
   );
 }

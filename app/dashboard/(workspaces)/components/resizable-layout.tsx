@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { setCookie } from "cookies-next";
 
 import { Sidebar } from "@/components/sidebar/sidebar";
 import { Navbar } from "@/components/site-header/navbar";
@@ -30,9 +31,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
     <ResizablePanelGroup
       direction="horizontal"
       onLayout={(sizes) => {
-        document.cookie = `react-resizable-panels:layout=${JSON.stringify(
-          sizes
-        )}`;
+        setCookie("react-resizable-panels:layout", JSON.stringify(sizes));
       }}
     >
       <ResizablePanel
@@ -43,15 +42,11 @@ export function ResizableLayout(props: ResizableLayoutProps) {
         maxSize={20}
         onExpand={() => {
           setIsCollapsed(false);
-          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-            false
-          )}`;
+          setCookie("react-resizable-panels:collapsed", false);
         }}
         onCollapse={() => {
           setIsCollapsed(true);
-          document.cookie = `react-resizable-panels:collapsed=${JSON.stringify(
-            true
-          )}`;
+          setCookie("react-resizable-panels:collapsed", true);
         }}
         className={cn(
           "hidden lg:block",

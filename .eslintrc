@@ -8,10 +8,11 @@
     "plugin:tailwindcss/recommended",
     "plugin:@typescript-eslint/recommended"
   ],
-  "plugins": ["tailwindcss"],
+  "plugins": ["tailwindcss", "eslint-plugin-react-compiler"],
   "rules": {
     "@next/next/no-html-link-for-pages": "off",
     "react/jsx-key": "warn",
+    "react-compiler/react-compiler": "error",
     "tailwindcss/no-custom-classname": "off",
     "tailwindcss/classnames-order": "warn",
     "@typescript-eslint/consistent-type-imports": "warn",
