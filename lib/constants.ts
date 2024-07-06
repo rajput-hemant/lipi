@@ -122,12 +122,12 @@ export const PRICING_CARDS = [
   {
     planType: "Pro Plan",
     price: "499",
-    description: "Billed annually. $17 billed monthly",
+    description: "Billed annually. ₹555 billed monthly",
     highlightFeature: "Everything in free +",
     features: [
       "Unlimited blocks for teams",
       "Unlimited file uploads",
-      "1 year day page history",
+      "1 year page history",
       "Invite 10 guests",
     ],
   },
