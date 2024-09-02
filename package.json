@@ -68,7 +68,7 @@
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
-    "valtio": "^1.13.2",
+    "valtio": "^2.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
