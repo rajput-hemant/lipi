@@ -91,7 +91,7 @@
     "eslint-plugin-react-compiler": "^0.0.0-experimental-ca16900-20240916",
     "eslint-plugin-tailwindcss": "^3.17.4",
     "husky": "^9.1.6",
-    "jiti": "^1.21.6",
+    "jiti": "^2.0.0",
     "lint-staged": "^15.2.10",
     "pg": "^8.13.0",
     "postcss": "8.4.47",
