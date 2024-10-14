@@ -24,8 +24,8 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@auth/core": "^0.35.3",
-    "@auth/drizzle-adapter": "^1.5.3",
+    "@auth/core": "^0.37.0",
+    "@auth/drizzle-adapter": "^1.7.0",
     "@hookform/resolvers": "^3.9.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -46,16 +46,16 @@
     "@radix-ui/react-tooltip": "^1.1.3",
     "@t3-oss/env-nextjs": "^0.11.1",
     "@upstash/ratelimit": "^2.0.3",
-    "@upstash/redis": "^1.34.1",
+    "@upstash/redis": "^1.34.3",
     "@vercel/analytics": "^1.3.1",
-    "babel-plugin-react-compiler": "^0.0.0-experimental-b4db8c3-20241001",
+    "babel-plugin-react-compiler": "^0.0.0-experimental-fa06e2c-20241014",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "cookies-next": "^4.2.0",
-    "drizzle-orm": "^0.33.0",
+    "cookies-next": "^4.3.0",
+    "drizzle-orm": "^0.34.1",
     "emoji-picker-react": "^4.12.0",
-    "lucide-react": "^0.447.0",
+    "lucide-react": "^0.452.0",
     "next": "^14.3.0-canary.87",
     "next-auth": "5.0.0-beta.22",
     "next-themes": "^0.3.0",
@@ -65,7 +65,7 @@
     "react-hook-form": "^7.53.0",
     "react-resizable-panels": "^2.1.4",
     "sonner": "^1.5.0",
-    "tailwind-merge": "^2.5.2",
+    "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
     "valtio": "^2.0.0",
@@ -77,21 +77,21 @@
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "22.7.4",
+    "@types/node": "22.7.5",
     "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.0",
+    "@types/react-dom": "18.3.1",
     "@types/uuid": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.8.0",
-    "@typescript-eslint/parser": "^8.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.9.0",
+    "@typescript-eslint/parser": "^8.9.0",
     "autoprefixer": "10.4.20",
-    "drizzle-kit": "^0.24.2",
+    "drizzle-kit": "^0.25.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "14.2.14",
+    "eslint-config-next": "14.2.15",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react-compiler": "^0.0.0-experimental-42acc6a-20241001",
-    "eslint-plugin-tailwindcss": "^3.17.4",
+    "eslint-plugin-react-compiler": "^0.0.0-experimental-fa06e2c-20241014",
+    "eslint-plugin-tailwindcss": "^3.17.5",
     "husky": "^9.1.6",
-    "jiti": "^2.1.0",
+    "jiti": "^2.3.3",
     "lint-staged": "^15.2.10",
     "pg": "^8.13.0",
     "postcss": "8.4.47",
@@ -99,7 +99,7 @@
     "prettier-plugin-tailwindcss": "^0.6.8",
     "sharp": "^0.33.5",
     "tailwindcss": "3.4.13",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   },
   "lint-staged": {
     "*.{ts,tsx,md,mdx}": [
@@ -115,6 +115,6 @@
     ]
   },
   "engines": {
-    "node": ">=20.17.0"
+    "node": ">=20.18.0"
   }
 }
