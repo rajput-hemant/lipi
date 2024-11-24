@@ -4,16 +4,13 @@ import * as React from "react";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 
-import type { ThemeProviderProps } from "next-themes/dist/types";
+import type { ThemeProviderProps } from "next-themes";
 
 import { TooltipProvider } from "./ui/tooltip";
 
-type Props = {
+export const Providers: React.FCC<{
   theme?: ThemeProviderProps;
-  children: React.ReactNode;
-};
-
-export function Providers({ children, theme }: Props) {
+}> = ({ children, theme }) => {
   return (
     <ThemeProvider
       attribute="class"
@@ -27,4 +24,4 @@ export function Providers({ children, theme }: Props) {
       </SessionProvider>
     </ThemeProvider>
   );
-}
+};
