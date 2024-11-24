@@ -40,3 +40,5 @@ export const WorkspaceLayout: React.FCC<{
     </AppStateProvider>
   );
 };
+
+export default WorkspaceLayout;
