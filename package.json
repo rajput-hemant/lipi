@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "preview": "next build && next start",
@@ -56,12 +56,12 @@
     "drizzle-orm": "^0.34.1",
     "emoji-picker-react": "^4.12.0",
     "lucide-react": "^0.452.0",
-    "next": "^14.3.0-canary.87",
+    "next": "^15.0.4-canary.25",
     "next-auth": "5.0.0-beta.22",
     "next-themes": "^0.3.0",
     "postgres": "3.3.5",
-    "react": "^19.0.0-rc-fb9a90fa48-20240614",
-    "react-dom": "^19.0.0-rc-fb9a90fa48-20240614",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106",
     "react-hook-form": "^7.53.0",
     "react-resizable-panels": "^2.1.4",
     "sonner": "^1.5.0",
@@ -78,17 +78,17 @@
     "@total-typescript/ts-reset": "^0.6.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "22.7.5",
-    "@types/react": "18.3.11",
-    "@types/react-dom": "18.3.1",
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.9.0",
     "@typescript-eslint/parser": "^8.9.0",
     "autoprefixer": "10.4.20",
     "drizzle-kit": "^0.25.0",
     "eslint": "8.57.1",
-    "eslint-config-next": "14.2.15",
+    "eslint-config-next": "15.0.3",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react-compiler": "^0.0.0-experimental-fa06e2c-20241014",
+    "eslint-plugin-react-compiler": "^19.0.0-beta-0dec889-20241115",
     "eslint-plugin-tailwindcss": "^3.17.5",
     "husky": "^9.1.6",
     "jiti": "^2.3.3",
@@ -116,5 +116,9 @@
   },
   "engines": {
     "node": ">=20.18.0"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@19.0.0-rc.1",
+    "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1"
   }
 }

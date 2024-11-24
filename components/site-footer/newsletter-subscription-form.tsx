@@ -1,7 +1,8 @@
 "use client";
 
+import { useActionState } from "react";
 import { CheckCircle } from "lucide-react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -21,7 +22,10 @@ export function NewsletterSubscriptionForm() {
     subscribed: false,
   };
 
-  const [state, formAction] = useFormState(subscribeToNewsletter, initialState);
+  const [state, formAction] = useActionState(
+    subscribeToNewsletter,
+    initialState
+  );
 
   async function subscribeToNewsletter(_: Form, _formData: FormData) {
     // TODO: Add newsletter subscription logic here.

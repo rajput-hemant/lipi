@@ -3,6 +3,8 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import NextAuth from "next-auth";
 
+import type { NextRequest } from "next/server";
+
 import { authConfig } from "./config/auth";
 import {
   authRoutes,
@@ -24,8 +26,7 @@ export default auth(async (req) => {
    * -----------------------------------------------------------------------------------------------*/
 
   if (env.ENABLE_RATE_LIMITING === "true" && env.NODE_ENV === "production") {
-    const id = req.ip ?? "anonymous";
-
+    const id = getIP(req) || "anonymous";
     const { limit, pending, remaining, reset, success } =
       await ratelimit.limit(id);
 
@@ -87,3 +88,13 @@ export const config = {
   // match all routes except static files, _next and api/auth
   matcher: ["/((?!.+\\.[\\w]+$|_next|api/auth).*)"],
 };
+
+function getIP(req: NextRequest): string {
+  // @ts-expect-error ip is not available in NextRequest
+  let ip = req.ip ?? req.headers.get("x-real-ip");
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (!ip && forwardedFor) {
+    ip = forwardedFor.split(",").at(0) ?? "";
+  }
+  return ip;
+}
