@@ -28,7 +28,7 @@ export function Hero() {
           </ExternalLink>
           ,{" "}
           <ExternalLink href="https://www.typescriptlang.org/">
-            Typescipt
+            Typescript
           </ExternalLink>
           ,{" "}
           <ExternalLink href="https://tailwindcss.com/">
