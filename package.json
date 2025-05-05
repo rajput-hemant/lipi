@@ -63,7 +63,7 @@
     "react": "19.0.0-rc-fb9a90fa48-20240614",
     "react-dom": "19.0.0-rc-fb9a90fa48-20240614",
     "react-hook-form": "^7.53.2",
-    "react-resizable-panels": "^2.1.7",
+    "react-resizable-panels": "^3.0.1",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
