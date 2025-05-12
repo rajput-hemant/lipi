@@ -92,7 +92,7 @@
     "eslint-plugin-tailwindcss": "^3.17.5",
     "husky": "^9.1.7",
     "jiti": "^2.4.1",
-    "lint-staged": "^15.2.10",
+    "lint-staged": "^16.0.0",
     "pg": "^8.13.1",
     "postcss": "8.4.49",
     "prettier": "^3.4.1",
