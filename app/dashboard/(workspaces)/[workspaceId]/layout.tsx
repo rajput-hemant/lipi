@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AppStateProvider } from "@/components/app-state-provider";
 import { getCurrentUser } from "@/lib/auth";
 import { getDocuments } from "@/lib/db/queries";
+import { assertWorkspaceAccess } from "@/lib/db/queries/mutation-auth";
 import { ResizableLayout } from "../components/resizable-layout";
 
 export const WorkspaceLayout: React.FCC<{
@@ -15,6 +16,8 @@ export const WorkspaceLayout: React.FCC<{
   const user = await getCurrentUser();
 
   if (!user) redirect("/login");
+
+  await assertWorkspaceAccess(user.id, workspaceId);
 
   const cookieStore = await cookies();
 

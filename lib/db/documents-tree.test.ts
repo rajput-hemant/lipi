@@ -57,6 +57,18 @@ describe("getDocumentAncestors", () => {
   });
 });
 
+describe("getDocumentAncestors", () => {
+  it("stops on a cycle instead of looping forever", () => {
+    const cyclic = [
+      doc({ id: "a", title: "A", parentId: "c" }),
+      doc({ id: "b", title: "B", parentId: "a" }),
+      doc({ id: "c", title: "C", parentId: "b" }),
+    ];
+
+    expect(getDocumentAncestors(cyclic, "a").length).toBeLessThan(3);
+  });
+});
+
 describe("collectDescendantIds", () => {
   it("includes all nested children", () => {
     const flat = [
@@ -67,5 +79,15 @@ describe("collectDescendantIds", () => {
     ];
 
     expect(collectDescendantIds(flat, "a").sort()).toEqual(["b", "c"]);
+  });
+
+  it("stops on a cycle", () => {
+    const cyclic = [
+      doc({ id: "a", title: "A", parentId: "c" }),
+      doc({ id: "b", title: "B", parentId: "a" }),
+      doc({ id: "c", title: "C", parentId: "b" }),
+    ];
+
+    expect(collectDescendantIds(cyclic, "a").length).toBeLessThan(3);
   });
 });

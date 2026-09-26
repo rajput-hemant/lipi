@@ -3,9 +3,18 @@
 import { unstable_cache as cache, revalidateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { validate as validateUuid } from "uuid";
+import { v4 as uuid } from "uuid";
 
 import type { Document } from "@/types/db";
 
+import {
+  assertPermanentDeleteAllowed,
+  assertRootPageQuota,
+  collectRestoreTargetIds,
+  DocumentOperationError,
+  planDeepDuplicate,
+  validateParentAssignment,
+} from "@/lib/db/document-operations";
 import {
   collectDescendantIds,
   type DocumentRecord,
@@ -20,20 +29,70 @@ import { db } from "..";
 import { documents } from "../schema";
 import {
   assertDocumentAccess,
+  assertWorkspaceAccess,
   authorizeWorkspaceMutation,
   MutationAuthError,
   requireAuthenticatedUser,
 } from "./mutation-auth";
+import { getUserSubscription } from "./subscription";
 
 function revalidateDocuments() {
   revalidateTag("get_documents", "max");
+}
+
+function toRecords(rows: Document[]): DocumentRecord[] {
+  return rows.map((row) => ({
+    id: row.id!,
+    workspaceId: row.workspaceId,
+    parentId: row.parentId ?? null,
+    title: row.title,
+    icon: row.icon ?? "",
+    bannerUrl: row.bannerUrl ?? null,
+    content: row.content ?? null,
+    inTrash: row.inTrash ?? false,
+    createdAt: row.createdAt ?? new Date(0).toISOString(),
+    updatedAt: row.updatedAt ?? new Date(0).toISOString(),
+  }));
+}
+
+function rethrowKnownErrors(error: unknown) {
+  if (error instanceof MutationAuthError) throw error;
+  if (error instanceof DocumentOperationError) {
+    throw new MutationAuthError(error.message);
+  }
+}
+
+async function loadWorkspaceDocuments(workspaceId: string) {
+  const rows = await db
+    .select()
+    .from(documents)
+    .where(eq(documents.workspaceId, workspaceId));
+  return toRecords(rows);
+}
+
+async function userHasActiveSubscription(userId: string) {
+  const { data } = await getUserSubscription(userId);
+  return data?.status === "active";
 }
 
 export async function createDocument(input: unknown) {
   const parsed = createDocumentSchema.parse(input);
 
   try {
-    await authorizeWorkspaceMutation(parsed.workspaceId);
+    const user = await authorizeWorkspaceMutation(parsed.workspaceId);
+    const workspaceDocs = await loadWorkspaceDocuments(parsed.workspaceId);
+    const hasSubscription = await userHasActiveSubscription(user.id);
+
+    assertRootPageQuota(
+      workspaceDocs,
+      parsed.workspaceId,
+      hasSubscription,
+      parsed.parentId ?? null,
+    );
+    validateParentAssignment(workspaceDocs, {
+      workspaceId: parsed.workspaceId,
+      parentId: parsed.parentId ?? null,
+    });
 
     const [data] = await db
       .insert(documents)
@@ -48,6 +107,7 @@ export async function createDocument(input: unknown) {
 
     return data;
   } catch (e) {
+    rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to create document");
   } finally {
@@ -62,12 +122,16 @@ export const getDocuments = cache(
     }
 
     try {
+      const user = await requireAuthenticatedUser();
+      await assertWorkspaceAccess(user.id, workspaceId);
+
       return await db
         .select()
         .from(documents)
         .where(eq(documents.workspaceId, workspaceId))
         .orderBy(documents.createdAt);
     } catch (e) {
+      if (e instanceof MutationAuthError) throw e;
       console.error((e as Error).message);
       throw new Error("Failed to fetch documents from the database");
     }
@@ -87,7 +151,16 @@ export async function updateDocument(input: unknown) {
     }
 
     const user = await requireAuthenticatedUser();
-    await assertDocumentAccess(user.id, parsed.id);
+    const existing = await assertDocumentAccess(user.id, parsed.id);
+    const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
+
+    if (parsed.parentId !== undefined) {
+      validateParentAssignment(workspaceDocs, {
+        workspaceId: existing.workspaceId,
+        parentId: parsed.parentId,
+        documentId: parsed.id,
+      });
+    }
 
     const { id, ...patch } = parsed;
 
@@ -99,6 +172,7 @@ export async function updateDocument(input: unknown) {
 
     return data;
   } catch (e) {
+    rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to update document");
   } finally {
@@ -113,15 +187,9 @@ export async function softDeleteDocumentTree(documentId: string) {
     const user = await requireAuthenticatedUser();
     const root = await assertDocumentAccess(user.id, documentId);
 
-    const workspaceDocs = await db
-      .select()
-      .from(documents)
-      .where(eq(documents.workspaceId, root.workspaceId));
+    const workspaceDocs = await loadWorkspaceDocuments(root.workspaceId);
 
-    const descendantIds = collectDescendantIds(
-      workspaceDocs as DocumentRecord[],
-      documentId,
-    );
+    const descendantIds = collectDescendantIds(workspaceDocs, documentId);
     const ids = [documentId, ...descendantIds];
 
     await db
@@ -139,21 +207,38 @@ export async function softDeleteDocumentTree(documentId: string) {
 }
 
 export async function restoreDocument(documentId: string) {
-  return updateDocument({ id: documentId, inTrash: false });
+  try {
+    const user = await requireAuthenticatedUser();
+    const existing = await assertDocumentAccess(user.id, documentId);
+    const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
+    const ids = collectRestoreTargetIds(workspaceDocs, documentId);
+
+    await db
+      .update(documents)
+      .set({ inTrash: false, updatedAt: new Date().toISOString() })
+      .where(inArray(documents.id, ids));
+
+    return ids.length;
+  } catch (e) {
+    console.error((e as Error).message);
+    throw new Error("Failed to restore document");
+  } finally {
+    revalidateDocuments();
+  }
 }
 
 export async function deleteDocumentPermanently(documentId: string) {
   try {
     const user = await requireAuthenticatedUser();
-    await assertDocumentAccess(user.id, documentId);
+    const existing = await assertDocumentAccess(user.id, documentId);
+    const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
+    const ids = assertPermanentDeleteAllowed(workspaceDocs, documentId);
 
-    const [deleted] = await db
-      .delete(documents)
-      .where(eq(documents.id, documentId))
-      .returning();
+    await db.delete(documents).where(inArray(documents.id, ids));
 
-    return deleted;
+    return ids.length;
   } catch (e) {
+    rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to delete document");
   } finally {
@@ -167,22 +252,27 @@ export async function duplicateDocument(input: unknown) {
   try {
     const user = await requireAuthenticatedUser();
     const source = await assertDocumentAccess(user.id, sourceId);
+    const workspaceDocs = await loadWorkspaceDocuments(source.workspaceId);
+    const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);
 
-    const [copy] = await db
-      .insert(documents)
-      .values({
-        id: newId,
-        workspaceId: source.workspaceId,
-        parentId: source.parentId,
-        title: `${source.title} copy`,
-        icon: source.icon,
-        bannerUrl: source.bannerUrl,
-        content: source.content,
-      })
-      .returning();
+    const now = new Date().toISOString();
+    const rows = plan.map((node) => ({
+      id: node.id,
+      workspaceId: source.workspaceId,
+      parentId: node.parentId,
+      title: node.title,
+      icon: node.icon,
+      bannerUrl: node.bannerUrl,
+      content: node.content,
+      createdAt: now,
+      updatedAt: now,
+    }));
 
-    return copy;
+    const inserted = await db.insert(documents).values(rows).returning();
+
+    return inserted.find((row) => row.id === newId) ?? inserted[0];
   } catch (e) {
+    rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to duplicate document");
   } finally {
@@ -198,14 +288,20 @@ export async function getDocumentBreadcrumbs(
     return [];
   }
 
+  const user = await requireAuthenticatedUser();
+  await assertWorkspaceAccess(user.id, workspaceId);
+
   const rows = await getDocuments(workspaceId);
   const byId = new Map(rows.map((row) => [row.id, row]));
   const chain: Document[] = [];
   let current = byId.get(documentId);
+  const visited = new Set<string>();
 
   while (current) {
     chain.unshift(current);
     if (!current.parentId) break;
+    if (visited.has(current.parentId)) break;
+    visited.add(current.parentId);
     current = byId.get(current.parentId);
   }
 

@@ -47,9 +47,15 @@ export function getDocumentAncestors(
   const ancestors: DocumentRecord[] = [];
   let current = byId.get(documentId);
 
+  const visited = new Set<string>();
+
   while (current?.parentId) {
+    if (visited.has(current.parentId)) break;
+
     const parent = byId.get(current.parentId);
-    if (!parent) break;
+    if (!parent || parent.id === documentId) break;
+
+    visited.add(current.parentId);
     ancestors.unshift(parent);
     current = parent;
   }
@@ -73,8 +79,12 @@ export function collectDescendantIds(
   }
 
   const ids: string[] = [];
+  const visited = new Set<string>([rootId]);
+
   const walk = (parentId: string) => {
     for (const child of byParent.get(parentId) ?? []) {
+      if (visited.has(child.id)) continue;
+      visited.add(child.id);
       ids.push(child.id);
       walk(child.id);
     }
