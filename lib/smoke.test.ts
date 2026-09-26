@@ -1,12 +1,36 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createAppStore } from "@/hooks/use-app-state";
+import { createAppStore, syncAppStore } from "@/hooks/use-app-state";
 import { getGitHubStars } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 describe("smoke", () => {
   it("merges class names", () => {
     expect(cn("a", false && "b", "c")).toBe("a c");
+  });
+
+  it("syncAppStore replaces workspace data", () => {
+    const store = createAppStore({
+      user: null,
+      files: [
+        {
+          id: "old-file",
+          title: "Old",
+          iconId: "icon",
+          data: null,
+          bannerUrl: null,
+          workspaceId: "ws-a",
+          folderId: "folder",
+          inTrash: false,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+      folders: [],
+    });
+
+    syncAppStore(store, { user: null, files: [], folders: [] });
+
+    expect(store.files).toHaveLength(0);
   });
 
   it("creates isolated valtio stores", () => {
