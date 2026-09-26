@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { resetPassword } from "@/lib/actions";
-import { getClientRedirectBaseURL } from "@/lib/auth/redirect-base-url";
+import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { resetPasswordSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
@@ -49,7 +49,7 @@ export function ResetPasswordForm() {
   const callbackURL = getSafeRedirectPath(
     searchParams.get("from"),
     DEFAULT_LOGIN_REDIRECT,
-    getClientRedirectBaseURL(),
+    getRedirectBaseURL(),
   );
 
   if (authError === "OAuthAccountNotLinked") {

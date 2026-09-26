@@ -16,7 +16,7 @@ export default async function ResetPasswordPage({
   searchParams,
 }: ResetPasswordPageProps) {
   const params = await searchParams;
-  await redirectIfAuthenticated(params.from);
+  await redirectIfAuthenticated(params.from, "/reset-password");
 
   return (
     <div className="flex flex-col space-y-2 text-center">

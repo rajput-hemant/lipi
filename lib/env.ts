@@ -1,6 +1,8 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+import { ensureHttpsUrl } from "@/lib/auth/ensure-https-url";
+
 const isProduction = process.env.NODE_ENV === "production";
 
 function requiredInProduction(message: string) {
@@ -23,7 +25,7 @@ export const env = createEnv({
       : z.string().optional(),
 
     AUTH_URL: z.preprocess(
-      (str) => process.env.VERCEL_URL ?? str,
+      (str) => ensureHttpsUrl(process.env.VERCEL_URL) ?? str,
       process.env.VERCEL ? z.string() : z.string().url().optional(),
     ),
 

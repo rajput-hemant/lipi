@@ -1,8 +1,13 @@
 import { env } from "@/lib/env";
 
+import { ensureHttpsUrl } from "./ensure-https-url";
+
 export function resolveAuthBaseURL() {
   const configured =
-    process.env.BETTER_AUTH_URL || env.AUTH_URL || process.env.AUTH_URL;
+    ensureHttpsUrl(process.env.BETTER_AUTH_URL) ||
+    ensureHttpsUrl(env.AUTH_URL) ||
+    ensureHttpsUrl(process.env.AUTH_URL) ||
+    ensureHttpsUrl(process.env.VERCEL_URL);
 
   if (configured) return configured;
 

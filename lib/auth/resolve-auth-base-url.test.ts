@@ -17,6 +17,15 @@ describe("resolveAuthBaseURL", () => {
     expect(resolveAuthBaseURL()).toBe("https://auth.example");
   });
 
+  it("prefixes VERCEL_URL with https when no explicit auth URL is set", () => {
+    vi.stubEnv("BETTER_AUTH_URL", "");
+    vi.stubEnv("AUTH_URL", "");
+    vi.stubEnv("VERCEL_URL", "lipi-preview.vercel.app");
+    vi.stubEnv("SKIP_ENV_VALIDATION", "true");
+
+    expect(resolveAuthBaseURL()).toBe("https://lipi-preview.vercel.app");
+  });
+
   it("throws in validated production when no URL is configured", () => {
     vi.stubEnv("BETTER_AUTH_URL", "");
     vi.stubEnv("AUTH_URL", "");
