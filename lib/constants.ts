@@ -113,10 +113,10 @@ export const PRICING_CARDS = [
     description: "Limited block trials for teams",
     highlightFeature: "",
     features: [
-      "Unlimited blocks for teams",
-      "Unlimited file uploads",
-      "30 day page history",
-      "Invite 2 guests",
+      "1 workspace",
+      "Up to 500 blocks",
+      "2 collaborators",
+      "Core editing features",
     ],
   },
   {
@@ -125,10 +125,10 @@ export const PRICING_CARDS = [
     description: "Billed annually. ₹555 billed monthly",
     highlightFeature: "Everything in free +",
     features: [
-      "Unlimited blocks for teams",
-      "Unlimited file uploads",
-      "1 year page history",
-      "Invite 10 guests",
+      "Unlimited workspaces",
+      "Unlimited blocks",
+      "Unlimited collaborators",
+      "Priority support",
     ],
   },
 ];

@@ -5,9 +5,13 @@ import { and, eq, notExists } from "drizzle-orm";
 
 import type { Workspace } from "@/types/db";
 
+import { assertUserCanCreateWorkspace } from "@/lib/billing/enforce-quotas";
+import { PlanQuotaError } from "@/lib/billing/errors";
+
 import { db } from "..";
 import { collaborators, users, workspaces } from "../schema";
-import { MutationAuthError, requireAuthenticatedUser } from "./mutation-auth";
+import { MutationAuthError } from "./mutation-auth-core";
+import { requireAuthenticatedUser } from "./mutation-auth";
 
 /**
  * Create workspace
@@ -22,10 +26,15 @@ export async function createWorkspace(workspace: Workspace) {
       throw new MutationAuthError("Forbidden");
     }
 
+    await assertUserCanCreateWorkspace(user.id);
+
     const [data] = await db.insert(workspaces).values(workspace).returning();
 
     return data;
   } catch (e) {
+    if (e instanceof PlanQuotaError) {
+      throw e;
+    }
     console.error((e as Error).message);
     throw new Error("Failed to create Workspace.");
   } finally {

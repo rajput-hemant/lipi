@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 import type { Subscription } from "@/types/db";
 
+import { StripeCheckoutButton } from "@/components/billing/stripe-checkout-button";
+
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -51,19 +53,34 @@ export const SubscriptionModalProvider = (props: Props) => {
     }
   }, [hasErrored]);
 
-  function onClickHandler() {
-    toast("This feature is not available yet.", {
-      description: "Please try again later.",
-    });
-  }
-
   return (
     <SubscriptionModalContext.Provider value={{ open, setOpen, subscription }}>
       {children}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        {subscription?.status === "active" ?
-          <DialogContent>Already on a paid plan!</DialogContent>
+        {subscription?.status === "active" ||
+        subscription?.status === "trialing" ?
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Pro plan active</DialogTitle>
+            </DialogHeader>
+            <DialogDescription>
+              Manage payment method, invoices, or cancel in the Stripe billing
+              portal.
+            </DialogDescription>
+            <DialogFooter>
+              <DialogClose
+                render={
+                  <Button size="sm" variant="secondary">
+                    Close
+                  </Button>
+                }
+              />
+              <StripeCheckoutButton mode="portal" variant="default">
+                Manage billing
+              </StripeCheckoutButton>
+            </DialogFooter>
+          </DialogContent>
         : <DialogContent>
             <DialogHeader>
               <DialogTitle>Upgrade to a Pro Plan</DialogTitle>
@@ -81,9 +98,9 @@ export const SubscriptionModalProvider = (props: Props) => {
                 }
               />
 
-              <Button size="sm" onClick={onClickHandler}>
+              <StripeCheckoutButton mode="checkout" variant="default">
                 Upgrade
-              </Button>
+              </StripeCheckoutButton>
             </DialogFooter>
           </DialogContent>
         }
