@@ -1,0 +1,79 @@
+{
+  "source": "infinitunes migration/bun-monorepo @ 57b18d03293e313dc2e2bb3a750c6f1cb4736e6e",
+  "refresh": "git -C <infinitunes> show migration/bun-monorepo:packages/db/src/schema.ts, update shared tables in lib/db/schema/auth.ts to match, then re-run lib/db/shared-auth-schema.test.ts and update this snapshot if the test prints a new expected payload.",
+  "tables": {
+    "user": {
+      "columns": [
+        "id",
+        "name",
+        "email",
+        "username",
+        "password",
+        "emailVerified",
+        "image",
+        "betterAuthName",
+        "emailVerifiedBoolean",
+        "displayUsername",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "account": {
+      "columns": [
+        "userId",
+        "type",
+        "provider",
+        "providerAccountId",
+        "refresh_token",
+        "access_token",
+        "expires_at",
+        "token_type",
+        "scope",
+        "id_token",
+        "session_state"
+      ]
+    },
+    "verificationToken": {
+      "columns": ["identifier", "token", "expires"]
+    },
+    "better_auth_account": {
+      "columns": [
+        "id",
+        "userId",
+        "accountId",
+        "providerId",
+        "accessToken",
+        "refreshToken",
+        "accessTokenExpiresAt",
+        "refreshTokenExpiresAt",
+        "scope",
+        "idToken",
+        "password",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "better_auth_session": {
+      "columns": [
+        "id",
+        "userId",
+        "token",
+        "expiresAt",
+        "ipAddress",
+        "userAgent",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "better_auth_verification": {
+      "columns": [
+        "id",
+        "identifier",
+        "value",
+        "expiresAt",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  }
+}

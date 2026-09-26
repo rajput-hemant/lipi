@@ -7,15 +7,13 @@ import { siteConfig } from "@/config/site";
 
 loadEnvConfig(cwd());
 
-if (!process.env.DATABASE_URL) {
-  console.error("'DATABASE_URL' is not set in the environment variables");
-  process.exit(1);
-}
 export default {
   schema: "./lib/db/schema",
   out: "./lib/db/migrations",
   dialect: "postgresql",
   verbose: true,
-  dbCredentials: { url: process.env.DATABASE_URL },
+  dbCredentials: {
+    url: process.env.DATABASE_URL ?? "postgresql://localhost:5432/lipi",
+  },
   tablesFilter: [`${siteConfig.name.toLowerCase().replace(/\s/g, "_")}_*`],
 } satisfies Config;

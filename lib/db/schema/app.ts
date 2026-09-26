@@ -69,7 +69,7 @@ export const files = createTable("files", {
     .notNull(),
 });
 
-export const accounts = createTable("accounts", {
+export const billingAccounts = createTable("accounts", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
