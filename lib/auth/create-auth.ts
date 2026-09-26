@@ -19,6 +19,7 @@ import {
   USERNAME_MIN_LENGTH,
   USERNAME_REGEX,
 } from "./constants";
+import { resolveAuthBaseURL } from "./resolve-auth-base-url";
 
 export function createAuth(
   database: typeof db,
@@ -39,10 +40,7 @@ export function createAuth(
 
   return betterAuth({
     secret: process.env.BETTER_AUTH_SECRET || env.AUTH_SECRET,
-    baseURL:
-      process.env.BETTER_AUTH_URL ||
-      env.AUTH_URL ||
-      "http://localhost:3000",
+    baseURL: resolveAuthBaseURL(),
     database: drizzleAdapter(database, {
       provider: "pg",
       usePlural: false,

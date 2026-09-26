@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { getSessionCookie } from "better-auth/cookies";
 
 import type { NextRequest } from "next/server";
 
 import { authRoutes, publicRoutes } from "./config/routes";
+import { hasValidProxySession } from "./lib/auth/proxy-session";
 import { env } from "./lib/env";
 
 const ratelimit = new Ratelimit({
@@ -42,7 +42,6 @@ export async function proxy(req: NextRequest) {
   }
 
   const { nextUrl } = req;
-  const sessionToken = getSessionCookie(req);
 
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
@@ -51,15 +50,19 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!sessionToken && !isPublicRoute) {
-    let from = nextUrl.pathname;
-    if (nextUrl.search) {
-      from += nextUrl.search;
-    }
+  if (!isPublicRoute) {
+    const isAuthenticated = await hasValidProxySession(req);
 
-    return NextResponse.redirect(
-      new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl),
-    );
+    if (!isAuthenticated) {
+      let from = nextUrl.pathname;
+      if (nextUrl.search) {
+        from += nextUrl.search;
+      }
+
+      return NextResponse.redirect(
+        new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl),
+      );
+    }
   }
 
   return NextResponse.next();

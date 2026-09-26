@@ -1,79 +1,469 @@
 {
   "source": "infinitunes migration/bun-monorepo @ 57b18d03293e313dc2e2bb3a750c6f1cb4736e6e",
-  "refresh": "git -C <infinitunes> show migration/bun-monorepo:packages/db/src/schema.ts, update shared tables in lib/db/schema/auth.ts to match, then re-run lib/db/shared-auth-schema.test.ts and update this snapshot if the test prints a new expected payload.",
+  "refresh": "git show Infinitunes packages/db/src/schema.ts, sync lib/db/schema/auth.ts, run bun -e script in shared-auth-schema.test.ts header or serialize helper, update this file, run bun run test.",
   "tables": {
     "user": {
       "columns": [
-        "id",
-        "name",
-        "email",
-        "username",
-        "password",
-        "emailVerified",
-        "image",
-        "betterAuthName",
-        "emailVerifiedBoolean",
-        "displayUsername",
-        "createdAt",
-        "updatedAt"
-      ]
+        {
+          "name": "betterAuthName",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "createdAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "displayUsername",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "email",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "emailVerified",
+          "dataType": "timestamp",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "emailVerifiedBoolean",
+          "dataType": "boolean",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "id",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": true,
+          "hasDefault": true
+        },
+        {
+          "name": "image",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "name",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "password",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "updatedAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "username",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        }
+      ],
+      "primaryKey": [],
+      "uniqueConstraints": [],
+      "foreignKeys": [],
+      "indexes": []
     },
     "account": {
       "columns": [
-        "userId",
-        "type",
+        {
+          "name": "access_token",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "expires_at",
+          "dataType": "integer",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "id_token",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "provider",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "providerAccountId",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "refresh_token",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "scope",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "session_state",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "token_type",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "type",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "userId",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        }
+      ],
+      "primaryKey": [
         "provider",
-        "providerAccountId",
-        "refresh_token",
-        "access_token",
-        "expires_at",
-        "token_type",
-        "scope",
-        "id_token",
-        "session_state"
-      ]
+        "providerAccountId"
+      ],
+      "uniqueConstraints": [],
+      "foreignKeys": [
+        {
+          "columns": [
+            "userId"
+          ],
+          "referencedTable": "user",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "cascade"
+        }
+      ],
+      "indexes": []
     },
     "verificationToken": {
-      "columns": ["identifier", "token", "expires"]
+      "columns": [
+        {
+          "name": "expires",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "identifier",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "token",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        }
+      ],
+      "primaryKey": [
+        "identifier",
+        "token"
+      ],
+      "uniqueConstraints": [],
+      "foreignKeys": [],
+      "indexes": []
     },
     "better_auth_account": {
       "columns": [
-        "id",
-        "userId",
-        "accountId",
-        "providerId",
-        "accessToken",
-        "refreshToken",
-        "accessTokenExpiresAt",
-        "refreshTokenExpiresAt",
-        "scope",
-        "idToken",
-        "password",
-        "createdAt",
-        "updatedAt"
+        {
+          "name": "accessToken",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "accessTokenExpiresAt",
+          "dataType": "timestamp",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "accountId",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "createdAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "id",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": true,
+          "hasDefault": true
+        },
+        {
+          "name": "idToken",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "password",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "providerId",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "refreshToken",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "refreshTokenExpiresAt",
+          "dataType": "timestamp",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "scope",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "updatedAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "userId",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        }
+      ],
+      "primaryKey": [],
+      "uniqueConstraints": [],
+      "foreignKeys": [
+        {
+          "columns": [
+            "userId"
+          ],
+          "referencedTable": "user",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "cascade"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "better_auth_account_provider_account_unique",
+          "unique": true
+        }
       ]
     },
     "better_auth_session": {
       "columns": [
-        "id",
-        "userId",
-        "token",
-        "expiresAt",
-        "ipAddress",
-        "userAgent",
-        "createdAt",
-        "updatedAt"
-      ]
+        {
+          "name": "createdAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "expiresAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "id",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": true,
+          "hasDefault": true
+        },
+        {
+          "name": "ipAddress",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "token",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "updatedAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "userAgent",
+          "dataType": "text",
+          "notNull": false,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "userId",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        }
+      ],
+      "primaryKey": [],
+      "uniqueConstraints": [],
+      "foreignKeys": [
+        {
+          "columns": [
+            "userId"
+          ],
+          "referencedTable": "user",
+          "referencedColumns": [
+            "id"
+          ],
+          "onDelete": "cascade"
+        }
+      ],
+      "indexes": []
     },
     "better_auth_verification": {
       "columns": [
-        "id",
-        "identifier",
-        "value",
-        "expiresAt",
-        "createdAt",
-        "updatedAt"
-      ]
+        {
+          "name": "createdAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "expiresAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "id",
+          "dataType": "uuid",
+          "notNull": true,
+          "primaryKey": true,
+          "hasDefault": true
+        },
+        {
+          "name": "identifier",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        },
+        {
+          "name": "updatedAt",
+          "dataType": "timestamp",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": true
+        },
+        {
+          "name": "value",
+          "dataType": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "hasDefault": false
+        }
+      ],
+      "primaryKey": [],
+      "uniqueConstraints": [],
+      "foreignKeys": [],
+      "indexes": []
     }
   }
 }

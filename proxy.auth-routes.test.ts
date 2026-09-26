@@ -1,9 +1,16 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import { proxy } from "./proxy";
 
 describe("proxy auth routes", () => {
+  beforeAll(() => {
+    process.env.BETTER_AUTH_SECRET =
+      "test-secret-key-that-is-at-least-32-chars";
+    process.env.BETTER_AUTH_URL = "http://localhost:3000";
+    process.env.SKIP_ENV_VALIDATION = "true";
+  });
+
   it("does not redirect /login when only a session cookie is present", async () => {
     const req = new NextRequest("http://localhost:3000/login", {
       headers: {
@@ -15,6 +22,21 @@ describe("proxy auth routes", () => {
 
     expect(res.status).toBe(200);
     expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("rejects forged session cookies on protected routes", async () => {
+    const req = new NextRequest("http://localhost:3000/dashboard", {
+      headers: {
+        cookie: "better-auth.session_token=forged-token",
+      },
+    });
+
+    const res = await proxy(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost:3000/login?from=%2Fdashboard",
+    );
   });
 
   it("redirects unauthenticated users on protected routes", async () => {

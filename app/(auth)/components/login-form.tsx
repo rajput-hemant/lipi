@@ -63,6 +63,19 @@ export function LoginForm() {
     defaultValues,
   });
 
+  function toggleLoginMode() {
+    const nextIsEmail = !isEmailMode;
+    setIsEmailMode(nextIsEmail);
+
+    const password = form.getValues("password");
+    if (nextIsEmail) {
+      form.reset({ type: "email", email: "", password });
+      return;
+    }
+
+    form.reset({ type: "username", username: "", password });
+  }
+
   async function onSubmit(formData: FormData) {
     setIsSubmitting(true);
 
@@ -126,7 +139,7 @@ export function LoginForm() {
                       }
                       tabIndex={-1}
                       type="button"
-                      onClick={() => setIsEmailMode(!isEmailMode)}
+                      onClick={toggleLoginMode}
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isEmailMode ?

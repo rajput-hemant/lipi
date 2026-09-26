@@ -3,7 +3,7 @@ import { loadEnvConfig } from "@next/env";
 
 import type { Config } from "drizzle-kit";
 
-import { siteConfig } from "@/config/site";
+import { LIPI_TABLE_PREFIX } from "@/lib/db/table-prefix";
 
 loadEnvConfig(cwd());
 
@@ -15,5 +15,5 @@ export default {
   dbCredentials: {
     url: process.env.DATABASE_URL ?? "postgresql://localhost:5432/lipi",
   },
-  tablesFilter: [`${siteConfig.name.toLowerCase().replace(/\s/g, "_")}_*`],
+  tablesFilter: [`${LIPI_TABLE_PREFIX}_*`],
 } satisfies Config;
