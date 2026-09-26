@@ -111,7 +111,7 @@ export function Trash() {
                 </span>
 
                 <div className="flex shrink-0 gap-1">
-                  <Tooltip delayDuration={0}>
+                  <Tooltip>
                     <TooltipTrigger
                       render={
                         <Button
@@ -128,7 +128,7 @@ export function Trash() {
                     <TooltipContent>Restore</TooltipContent>
                   </Tooltip>
 
-                  <Tooltip delayDuration={0}>
+                  <Tooltip>
                     <TooltipTrigger
                       render={
                         <Button

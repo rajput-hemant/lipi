@@ -479,7 +479,7 @@ export function DocumentTree() {
     <>
       <div className="flex items-center justify-between px-4">
         <p className="text-sm font-medium text-muted-foreground">Pages</p>
-        <Tooltip delayDuration={0}>
+        <Tooltip>
           <TooltipTrigger
             render={
               <Button
