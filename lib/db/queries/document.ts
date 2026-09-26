@@ -17,6 +17,7 @@ import {
 } from "@/lib/db/document-operations";
 import {
   collectDescendantIds,
+  getDocumentAncestors,
   type DocumentRecord,
 } from "@/lib/db/documents-tree";
 import {
@@ -36,8 +37,12 @@ import {
 } from "./mutation-auth";
 import { getUserSubscription } from "./subscription";
 
-function revalidateDocuments() {
-  revalidateTag("get_documents", "max");
+function documentsCacheTag(workspaceId: string) {
+  return `documents_${workspaceId}`;
+}
+
+function revalidateDocuments(workspaceId: string) {
+  revalidateTag(documentsCacheTag(workspaceId), "max");
 }
 
 function toRecords(rows: Document[]): DocumentRecord[] {
@@ -111,39 +116,42 @@ export async function createDocument(input: unknown) {
     console.error((e as Error).message);
     throw new Error("Failed to create document");
   } finally {
-    revalidateDocuments();
+    revalidateDocuments(parsed.workspaceId);
   }
 }
 
-export const getDocuments = cache(
-  async (workspaceId: string) => {
-    if (!validateUuid(workspaceId)) {
-      throw new Error("Invalid workspace ID");
-    }
+export async function getDocuments(workspaceId: string) {
+  if (!validateUuid(workspaceId)) {
+    throw new Error("Invalid workspace ID");
+  }
 
-    try {
-      const user = await requireAuthenticatedUser();
-      await assertWorkspaceAccess(user.id, workspaceId);
+  return cache(
+    async () => {
+      try {
+        const user = await requireAuthenticatedUser();
+        await assertWorkspaceAccess(user.id, workspaceId);
 
-      return await db
-        .select()
-        .from(documents)
-        .where(eq(documents.workspaceId, workspaceId))
-        .orderBy(documents.createdAt);
-    } catch (e) {
-      if (e instanceof MutationAuthError) throw e;
-      console.error((e as Error).message);
-      throw new Error("Failed to fetch documents from the database");
-    }
-  },
-  ["get_documents"],
-  { tags: ["get_documents"] },
-);
+        return await db
+          .select()
+          .from(documents)
+          .where(eq(documents.workspaceId, workspaceId))
+          .orderBy(documents.createdAt);
+      } catch (e) {
+        if (e instanceof MutationAuthError) throw e;
+        console.error((e as Error).message);
+        throw new Error("Failed to fetch documents from the database");
+      }
+    },
+    ["get_documents", workspaceId],
+    { tags: [documentsCacheTag(workspaceId)] },
+  )();
+}
 
 export const getDocumentsFromDb = getDocuments;
 
 export async function updateDocument(input: unknown) {
   const parsed = updateDocumentSchema.parse(input);
+  let workspaceIdForRevalidate: string | undefined;
 
   try {
     if (!parsed.id) {
@@ -152,6 +160,7 @@ export async function updateDocument(input: unknown) {
 
     const user = await requireAuthenticatedUser();
     const existing = await assertDocumentAccess(user.id, parsed.id);
+    workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
 
     if (parsed.parentId !== undefined) {
@@ -176,16 +185,21 @@ export async function updateDocument(input: unknown) {
     console.error((e as Error).message);
     throw new Error("Failed to update document");
   } finally {
-    revalidateDocuments();
+    if (workspaceIdForRevalidate) {
+      revalidateDocuments(workspaceIdForRevalidate);
+    }
   }
 }
 
 export const updateDocumentInDb = updateDocument;
 
 export async function softDeleteDocumentTree(documentId: string) {
+  let workspaceIdForRevalidate: string | undefined;
+
   try {
     const user = await requireAuthenticatedUser();
     const root = await assertDocumentAccess(user.id, documentId);
+    workspaceIdForRevalidate = root.workspaceId;
 
     const workspaceDocs = await loadWorkspaceDocuments(root.workspaceId);
 
@@ -202,14 +216,19 @@ export async function softDeleteDocumentTree(documentId: string) {
     console.error((e as Error).message);
     throw new Error("Failed to move document to trash");
   } finally {
-    revalidateDocuments();
+    if (workspaceIdForRevalidate) {
+      revalidateDocuments(workspaceIdForRevalidate);
+    }
   }
 }
 
 export async function restoreDocument(documentId: string) {
+  let workspaceIdForRevalidate: string | undefined;
+
   try {
     const user = await requireAuthenticatedUser();
     const existing = await assertDocumentAccess(user.id, documentId);
+    workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
     const ids = collectRestoreTargetIds(workspaceDocs, documentId);
 
@@ -223,18 +242,30 @@ export async function restoreDocument(documentId: string) {
     console.error((e as Error).message);
     throw new Error("Failed to restore document");
   } finally {
-    revalidateDocuments();
+    if (workspaceIdForRevalidate) {
+      revalidateDocuments(workspaceIdForRevalidate);
+    }
   }
 }
 
 export async function deleteDocumentPermanently(documentId: string) {
+  let workspaceIdForRevalidate: string | undefined;
+
   try {
     const user = await requireAuthenticatedUser();
     const existing = await assertDocumentAccess(user.id, documentId);
+    workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
     const ids = assertPermanentDeleteAllowed(workspaceDocs, documentId);
+    const ordered = [...ids].sort(
+      (a, b) =>
+        getDocumentAncestors(workspaceDocs, b).length -
+        getDocumentAncestors(workspaceDocs, a).length,
+    );
 
-    await db.delete(documents).where(inArray(documents.id, ids));
+    for (const id of ordered) {
+      await db.delete(documents).where(eq(documents.id, id));
+    }
 
     return ids.length;
   } catch (e) {
@@ -242,16 +273,20 @@ export async function deleteDocumentPermanently(documentId: string) {
     console.error((e as Error).message);
     throw new Error("Failed to delete document");
   } finally {
-    revalidateDocuments();
+    if (workspaceIdForRevalidate) {
+      revalidateDocuments(workspaceIdForRevalidate);
+    }
   }
 }
 
 export async function duplicateDocument(input: unknown) {
   const { sourceId, newId } = duplicateDocumentSchema.parse(input);
+  let workspaceIdForRevalidate: string | undefined;
 
   try {
     const user = await requireAuthenticatedUser();
     const source = await assertDocumentAccess(user.id, sourceId);
+    workspaceIdForRevalidate = source.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(source.workspaceId);
     const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);
 
@@ -276,7 +311,9 @@ export async function duplicateDocument(input: unknown) {
     console.error((e as Error).message);
     throw new Error("Failed to duplicate document");
   } finally {
-    revalidateDocuments();
+    if (workspaceIdForRevalidate) {
+      revalidateDocuments(workspaceIdForRevalidate);
+    }
   }
 }
 

@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import {
   Delete01Icon,
   File01Icon,
@@ -12,6 +14,16 @@ import type { Document } from "@/types/db";
 
 import { useAppState } from "@/hooks/use-app-state";
 import { deleteDocumentPermanently, restoreDocument } from "@/lib/db/queries";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import { DialogClose, DialogFooter } from "./ui/dialog";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
@@ -20,8 +32,12 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export function Trash() {
   const { documents, addDocument, updateDocument, deleteDocument } =
     useAppState();
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const trashed = documents.filter((document) => document.inTrash);
+  const pendingDocument = trashed.find(
+    (document) => document.id === pendingDeleteId,
+  );
 
   async function restore(documentId: string) {
     const document = documents.find((entry) => entry.id === documentId);
@@ -41,9 +57,12 @@ export function Trash() {
     });
   }
 
-  async function deletePermanently(documentId: string) {
+  async function confirmPermanentDelete() {
+    if (!pendingDeleteId) return;
+    const documentId = pendingDeleteId;
     const document = documents.find((entry) => entry.id === documentId);
     deleteDocument(documentId);
+    setPendingDeleteId(null);
 
     toast.promise(deleteDocumentPermanently(documentId), {
       loading: "Deleting page...",
@@ -83,7 +102,8 @@ export function Trash() {
                           size="icon"
                           variant="ghost"
                           className="size-7"
-                          onClick={() => restore(document.id!)}
+                          aria-label="Restore document"
+                          onClick={() => restore(document.id)}
                         >
                           <HugeiconsIcon icon={Undo02Icon} strokeWidth={2} className="size-4" />
                         </Button>
@@ -99,7 +119,8 @@ export function Trash() {
                           size="icon"
                           variant="ghost"
                           className="size-7 text-destructive"
-                          onClick={() => deletePermanently(document.id!)}
+                          aria-label="Delete document permanently"
+                          onClick={() => setPendingDeleteId(document.id)}
                         >
                           <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} className="size-4" />
                         </Button>
@@ -118,6 +139,29 @@ export function Trash() {
           <p className="text-center text-sm">Trash is empty.</p>
         </div>
       }
+
+      <AlertDialog
+        open={!!pendingDeleteId}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeleteId(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete permanently?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This cannot be undone. &quot;{pendingDocument?.title}&quot; will be
+              removed forever.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPermanentDelete}>
+              Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <DialogFooter className="px-4">
         <DialogClose render={<Button variant="outline">Close</Button>} />

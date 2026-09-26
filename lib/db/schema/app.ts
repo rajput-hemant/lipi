@@ -3,6 +3,7 @@ import {
   bigint,
   boolean,
   foreignKey,
+  index,
   integer,
   jsonb,
   text,
@@ -58,11 +59,20 @@ export const documents = createTable(
       .notNull(),
   },
   (table) => ({
+    documentsWorkspaceIdIdx: index("lipi_documents_workspace_id_idx").on(
+      table.workspaceId,
+    ),
+    documentsParentIdIdx: index("lipi_documents_parent_id_idx").on(
+      table.parentId,
+    ),
+    documentsWorkspaceParentIdx: index(
+      "lipi_documents_workspace_parent_idx",
+    ).on(table.workspaceId, table.parentId),
     documentsParentIdFkey: foreignKey({
       columns: [table.parentId],
       foreignColumns: [table.id],
       name: "lipi_documents_parent_id_lipi_documents_id_fk",
-    }).onDelete("cascade"),
+    }).onDelete("restrict"),
   }),
 );
 

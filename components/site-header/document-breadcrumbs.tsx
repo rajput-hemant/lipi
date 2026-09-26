@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { toDocumentRecords } from "@/components/sidebar/document-tree-utils";
 import { useAppState } from "@/hooks/use-app-state";
 import { getDocumentAncestors } from "@/lib/db/documents-tree";
-import type { DocumentRecord } from "@/lib/db/documents-tree";
 
 export function DocumentBreadcrumbs() {
   const pathname = usePathname();
@@ -32,7 +32,7 @@ export function DocumentBreadcrumbs() {
   }
 
   const ancestors = getDocumentAncestors(
-    activeDocuments as DocumentRecord[],
+    toDocumentRecords(activeDocuments),
     documentId,
   );
   const chain = [...ancestors, current];

@@ -1,3 +1,5 @@
+import { validate as isUuid } from "uuid";
+
 import type { DocumentRecord } from "./documents-tree";
 
 export type LegacyFolderRow = {
@@ -15,6 +17,25 @@ export type LegacyFileRow = LegacyFolderRow & {
   folderId: string | null;
 };
 
+export class LegacyMigrationValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "LegacyMigrationValidationError";
+  }
+}
+
+function assertMigrationUuid(value: string, field: string) {
+  if (!isUuid(value)) {
+    throw new LegacyMigrationValidationError(`Invalid ${field} UUID`);
+  }
+}
+
+export function assertLegacyDocumentRow(row: DocumentRecord) {
+  assertMigrationUuid(row.id, "document id");
+  assertMigrationUuid(row.workspaceId, "workspace id");
+  if (row.parentId) assertMigrationUuid(row.parentId, "parent id");
+}
+
 export function mapLegacyFoldersAndFilesToDocuments(
   folders: LegacyFolderRow[],
   files: LegacyFileRow[],
@@ -25,7 +46,7 @@ export function mapLegacyFoldersAndFilesToDocuments(
   for (const folder of folders) {
     if (!folder.workspaceId) continue;
     const createdAt = folder.createdAt ?? fallbackTimestamp;
-    documents.push({
+    const row: DocumentRecord = {
       id: folder.id,
       workspaceId: folder.workspaceId,
       parentId: null,
@@ -36,13 +57,15 @@ export function mapLegacyFoldersAndFilesToDocuments(
       inTrash: folder.inTrash,
       createdAt,
       updatedAt: createdAt,
-    });
+    };
+    assertLegacyDocumentRow(row);
+    documents.push(row);
   }
 
   for (const file of files) {
     if (!file.workspaceId) continue;
     const createdAt = file.createdAt ?? fallbackTimestamp;
-    documents.push({
+    const row: DocumentRecord = {
       id: file.id,
       workspaceId: file.workspaceId,
       parentId: file.folderId,
@@ -53,35 +76,19 @@ export function mapLegacyFoldersAndFilesToDocuments(
       inTrash: file.inTrash,
       createdAt,
       updatedAt: createdAt,
-    });
+    };
+    assertLegacyDocumentRow(row);
+    documents.push(row);
   }
 
   return documents;
 }
 
-export function legacyDocumentMigrationStatements(
+/** Rows ready for Drizzle `db.insert(documents).values(rows)` (no string SQL). */
+export function legacyDocumentMigrationRows(
   folders: LegacyFolderRow[],
   files: LegacyFileRow[],
   fallbackTimestamp: string,
-): string[] {
-  const documents = mapLegacyFoldersAndFilesToDocuments(
-    folders,
-    files,
-    fallbackTimestamp,
-  );
-
-  return documents.map((document) => {
-    const parentSql =
-      document.parentId ? `'${document.parentId}'` : "NULL";
-    const bannerSql =
-      document.bannerUrl ? `'${escapeSql(document.bannerUrl)}'` : "NULL";
-    const contentSql =
-      document.content ? `'${escapeSql(document.content)}'` : "NULL";
-
-    return `INSERT INTO "lipi_documents" ("id", "workspace_id", "parent_id", "title", "icon", "banner_url", "content", "in_trash", "created_at", "updated_at") VALUES ('${document.id}', '${document.workspaceId}', ${parentSql}, '${escapeSql(document.title)}', '${escapeSql(document.icon)}', ${bannerSql}, ${contentSql}, ${document.inTrash}, '${document.createdAt}', '${document.updatedAt}');`;
-  });
-}
-
-function escapeSql(value: string) {
-  return value.replace(/'/g, "''");
+): DocumentRecord[] {
+  return mapLegacyFoldersAndFilesToDocuments(folders, files, fallbackTimestamp);
 }

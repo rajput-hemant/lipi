@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -41,6 +41,10 @@ import { Button, buttonVariants } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import {
+  flattenVisibleTreeNodes,
+  resolveTreeKeyAction,
+} from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
 import {
   countChildren,
@@ -55,7 +59,9 @@ type DocumentTreeItemProps = {
   workspaceId: string;
   expandedIds: Set<string>;
   toggleExpanded: (id: string) => void;
-  onFocusSibling: (direction: 1 | -1) => void;
+  expandNode: (id: string) => void;
+  focusedId: string | null;
+  setFocusedId: (id: string) => void;
 };
 
 function DocumentTreeItem({
@@ -64,6 +70,9 @@ function DocumentTreeItem({
   workspaceId,
   expandedIds,
   toggleExpanded,
+  expandNode,
+  focusedId,
+  setFocusedId,
 }: DocumentTreeItemProps) {
   const pathname = usePathname();
   const {
@@ -123,7 +132,7 @@ function DocumentTreeItem({
     };
 
     addDocument(newDocument);
-    toggleExpanded(node.id);
+    expandNode(node.id);
     setCreatingChild(false);
     setChildTitle("Untitled");
     setChildIcon("");
@@ -176,6 +185,7 @@ function DocumentTreeItem({
   return (
     <li
       role="treeitem"
+      aria-level={depth + 1}
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-selected={isActive}
       className="list-none"
@@ -211,6 +221,13 @@ function DocumentTreeItem({
                   autoFocus
                   value={renameValue}
                   onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      setRenameValue(node.title);
+                      setIsRenaming(false);
+                    }
+                  }}
                   className="h-8"
                 />
                 <Button type="submit" size="icon" variant="ghost" className="size-8">
@@ -219,7 +236,10 @@ function DocumentTreeItem({
               </form>
             : <>
                 <Link
+                  id={`document-tree-item-${node.id}`}
                   href={`/dashboard/${workspaceId}/${node.id}`}
+                  tabIndex={focusedId === node.id ? 0 : -1}
+                  onFocus={() => setFocusedId(node.id)}
                   className="flex min-w-0 flex-1 items-center gap-2 truncate"
                 >
                   <span className="shrink-0">
@@ -291,6 +311,14 @@ function DocumentTreeItem({
             autoFocus
             value={childTitle}
             onChange={(e) => setChildTitle(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                setCreatingChild(false);
+                setChildTitle("Untitled");
+                setChildIcon("");
+              }
+            }}
             className="h-9 pl-9"
           />
         </form>
@@ -306,7 +334,9 @@ function DocumentTreeItem({
               workspaceId={workspaceId}
               expandedIds={expandedIds}
               toggleExpanded={toggleExpanded}
-              onFocusSibling={() => {}}
+              expandNode={expandNode}
+              focusedId={focusedId}
+              setFocusedId={setFocusedId}
             />
           ))}
         </ul>
@@ -327,6 +357,8 @@ export function DocumentTree() {
   const [rootTitle, setRootTitle] = useState("Untitled");
   const [rootIcon, setRootIcon] = useState("");
 
+  const [focusedId, setFocusedId] = useState<string | null>(null);
+
   const toggleExpanded = useCallback((id: string) => {
     setExpandedIds((prev) => {
       const next = new Set(prev);
@@ -335,6 +367,58 @@ export function DocumentTree() {
       return next;
     });
   }, []);
+
+  const expandNode = useCallback((id: string) => {
+    setExpandedIds((prev) => new Set(prev).add(id));
+  }, []);
+
+  const collapseNode = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const visibleNodes = useMemo(
+    () => flattenVisibleTreeNodes(forest, expandedIds),
+    [forest, expandedIds],
+  );
+
+  useEffect(() => {
+    if (!focusedId && visibleNodes[0]) {
+      setFocusedId(visibleNodes[0].id);
+    }
+  }, [focusedId, visibleNodes]);
+
+  useEffect(() => {
+    if (!focusedId) return;
+    document.getElementById(`document-tree-item-${focusedId}`)?.focus();
+  }, [focusedId, expandedIds]);
+
+  const onTreeKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
+    const navigationKeys = [
+      "ArrowDown",
+      "ArrowUp",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "End",
+    ];
+    if (!navigationKeys.includes(event.key)) return;
+
+    event.preventDefault();
+    const action = resolveTreeKeyAction(
+      event.key,
+      focusedId,
+      visibleNodes,
+      expandedIds,
+    );
+
+    if (action.expandId) expandNode(action.expandId);
+    if (action.collapseId) collapseNode(action.collapseId);
+    if (action.nextFocusId) setFocusedId(action.nextFocusId);
+  };
 
   function createRootToggle() {
     const rootCount = countChildren(documents, null);
@@ -415,11 +499,7 @@ export function DocumentTree() {
               role="tree"
               aria-label="Workspace pages"
               className="m-0 px-2 py-1"
-              onKeyDown={(e) => {
-                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                  e.preventDefault();
-                }
-              }}
+              onKeyDown={onTreeKeyDown}
             >
               {isCreatingRoot && (
                 <li className="list-none px-2">
@@ -439,6 +519,14 @@ export function DocumentTree() {
                       autoFocus
                       value={rootTitle}
                       onChange={(e) => setRootTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") {
+                          e.preventDefault();
+                          setIsCreatingRoot(false);
+                          setRootTitle("Untitled");
+                          setRootIcon("");
+                        }
+                      }}
                       className="h-9 px-9"
                     />
                     <Button
@@ -461,7 +549,9 @@ export function DocumentTree() {
                   workspaceId={workspaceId}
                   expandedIds={expandedIds}
                   toggleExpanded={toggleExpanded}
-                  onFocusSibling={() => {}}
+                  expandNode={expandNode}
+                  focusedId={focusedId}
+                  setFocusedId={setFocusedId}
                 />
               ))}
             </ul>

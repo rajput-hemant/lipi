@@ -12,7 +12,8 @@ import type {
 
 export type User = typeof users.$inferInsert;
 export type Workspace = typeof workspaces.$inferInsert;
-export type Document = typeof documents.$inferInsert;
+export type Document = typeof documents.$inferSelect;
+export type NewDocument = typeof documents.$inferInsert;
 export type Account = typeof billingAccounts.$inferInsert;
 export type Customer = typeof customers.$inferInsert;
 export type Product = typeof products.$inferInsert;
