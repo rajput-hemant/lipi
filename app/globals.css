@@ -29,8 +29,8 @@
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono), ui-monospace, monospace;
   --font-heading: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
-  --font-handwriting: var(--font-handwriting), ui-sans-serif, system-ui,
-    sans-serif;
+  --font-handwriting:
+    var(--font-handwriting), ui-sans-serif, system-ui, sans-serif;
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
   --animate-slide: slide 60s linear infinite;
@@ -48,13 +48,13 @@
     height: 0;
   }
   to {
-    height: var(--radix-accordion-content-height);
+    height: var(--accordion-panel-height);
   }
 }
 
 @keyframes accordion-up {
   from {
-    height: var(--radix-accordion-content-height);
+    height: var(--accordion-panel-height);
   }
   to {
     height: 0;
