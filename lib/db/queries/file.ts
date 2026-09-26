@@ -8,6 +8,13 @@ import type { File } from "@/types/db";
 
 import { db } from "..";
 import { files } from "../schema";
+import {
+  assertFileAccess,
+  assertWorkspaceAccess,
+  authorizeWorkspaceMutation,
+  MutationAuthError,
+  requireAuthenticatedUser,
+} from "./mutation-auth";
 
 /**
  * Create a new file
@@ -16,6 +23,8 @@ import { files } from "../schema";
  */
 export async function createFile(file: File) {
   try {
+    await authorizeWorkspaceMutation(file.workspaceId);
+
     const [data] = await db.insert(files).values(file).returning();
 
     return data;
@@ -66,6 +75,17 @@ export const getFilesFromDb = getFiles;
  */
 export async function updateFile(file: File) {
   try {
+    if (!file.id) {
+      throw new MutationAuthError("Invalid file");
+    }
+
+    const user = await requireAuthenticatedUser();
+    const existing = await assertFileAccess(user.id, file.id);
+
+    if (file.workspaceId && file.workspaceId !== existing.workspaceId) {
+      await assertWorkspaceAccess(user.id, file.workspaceId);
+    }
+
     const [updatedFile] = await db
       .update(files)
       .set(file)
@@ -90,6 +110,9 @@ export const updateFileInDb = updateFile;
  */
 export async function deleteFile(fileId: string) {
   try {
+    const user = await requireAuthenticatedUser();
+    await assertFileAccess(user.id, fileId);
+
     const [deletedFile] = await db
       .delete(files)
       .where(eq(files.id, fileId))

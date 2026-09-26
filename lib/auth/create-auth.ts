@@ -14,6 +14,7 @@ import { eq } from "drizzle-orm";
 
 import type { db } from "@/lib/db";
 
+import { credentialAccountWhere } from "./credential-account";
 import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
@@ -27,7 +28,7 @@ export function createAuth(
 ) {
   async function mirrorAccountPassword(userId: string) {
     const account = await database.query.betterAuthAccounts.findFirst({
-      where: eq(betterAuthAccounts.userId, userId),
+      where: credentialAccountWhere(userId),
     });
 
     if (account?.password) {

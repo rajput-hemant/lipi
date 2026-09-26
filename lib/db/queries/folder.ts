@@ -8,6 +8,13 @@ import type { Folder } from "@/types/db";
 
 import { db } from "..";
 import { folders } from "../schema";
+import {
+  assertFolderAccess,
+  assertWorkspaceAccess,
+  authorizeWorkspaceMutation,
+  MutationAuthError,
+  requireAuthenticatedUser,
+} from "./mutation-auth";
 
 /**
  * Create a new folder
@@ -16,6 +23,8 @@ import { folders } from "../schema";
  */
 export async function createFolder(folder: Folder) {
   try {
+    await authorizeWorkspaceMutation(folder.workspaceId);
+
     const [data] = await db.insert(folders).values(folder).returning();
 
     return data;
@@ -68,6 +77,17 @@ export const getFoldersFromDb = getFolders;
  */
 export async function updateFolder(folder: Folder) {
   try {
+    if (!folder.id) {
+      throw new MutationAuthError("Invalid folder");
+    }
+
+    const user = await requireAuthenticatedUser();
+    const existing = await assertFolderAccess(user.id, folder.id);
+
+    if (folder.workspaceId && folder.workspaceId !== existing.workspaceId) {
+      await assertWorkspaceAccess(user.id, folder.workspaceId);
+    }
+
     const [data] = await db
       .update(folders)
       .set(folder)
@@ -92,6 +112,9 @@ export const updateFolderInDb = updateFolder;
  */
 export async function deleteFolder(folderId: string) {
   try {
+    const user = await requireAuthenticatedUser();
+    await assertFolderAccess(user.id, folderId);
+
     const [deletedFolder] = await db
       .delete(folders)
       .where(eq(folders.id, folderId))

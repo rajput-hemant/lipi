@@ -7,6 +7,7 @@ import type { Workspace } from "@/types/db";
 
 import { db } from "..";
 import { collaborators, users, workspaces } from "../schema";
+import { MutationAuthError, requireAuthenticatedUser } from "./mutation-auth";
 
 /**
  * Create workspace
@@ -15,6 +16,12 @@ import { collaborators, users, workspaces } from "../schema";
  */
 export async function createWorkspace(workspace: Workspace) {
   try {
+    const user = await requireAuthenticatedUser();
+
+    if (workspace.workspaceOwnerId !== user.id) {
+      throw new MutationAuthError("Forbidden");
+    }
+
     const [data] = await db.insert(workspaces).values(workspace).returning();
 
     return data;

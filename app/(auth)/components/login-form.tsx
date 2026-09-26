@@ -28,6 +28,7 @@ import {
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signIn } from "@/lib/auth/auth-client";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
+import { buildLoginFormStateAfterToggle } from "@/lib/auth/login-toggle";
 import { loginSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -64,16 +65,10 @@ export function LoginForm() {
   });
 
   function toggleLoginMode() {
-    const nextIsEmail = !isEmailMode;
-    setIsEmailMode(nextIsEmail);
-
     const password = form.getValues("password");
-    if (nextIsEmail) {
-      form.reset({ type: "email", email: "", password });
-      return;
-    }
-
-    form.reset({ type: "username", username: "", password });
+    const nextValues = buildLoginFormStateAfterToggle(isEmailMode, password);
+    setIsEmailMode(nextValues.type === "email");
+    form.reset(nextValues);
   }
 
   async function onSubmit(formData: FormData) {
