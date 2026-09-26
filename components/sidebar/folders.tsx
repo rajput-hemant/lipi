@@ -4,19 +4,20 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Check,
-  ChevronDown,
-  Edit2,
-  FileIcon,
-  FileX,
-  FolderIcon,
-  FolderOpen,
-  FolderX,
-  Plus,
-  Trash,
-  Trash2,
-  X,
-} from "lucide-react";
+  ArrowDown01Icon,
+  Cancel01Icon,
+  Delete01Icon,
+  Delete02Icon,
+  Edit02Icon,
+  File01Icon,
+  FileNotFoundIcon,
+  Folder01Icon,
+  FolderOpenIcon,
+  FolderRemoveIcon,
+  PlusSignIcon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 
@@ -247,19 +248,29 @@ export function Folders() {
       <div className="flex items-center justify-between px-4">
         <p className="text-sm font-medium text-muted-foreground">Folders</p>
         <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={createFolderToggle}
-              className="size-7 text-muted-foreground"
-            >
-              {isCreatingFolder ?
-                <X className="size-4 duration-300 animate-in spin-in-90" />
-              : <Plus className="size-[18px] duration-300 animate-out spin-out-90" />
-              }
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={createFolderToggle}
+                className="size-7 text-muted-foreground"
+              >
+                {isCreatingFolder ?
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    strokeWidth={2}
+                    className="size-4 duration-300 animate-in spin-in-90"
+                  />
+                : <HugeiconsIcon
+                    icon={PlusSignIcon}
+                    strokeWidth={2}
+                    className="size-[18px] duration-300 animate-out spin-out-90"
+                  />
+                }
+              </Button>
+            }
+          />
 
           <TooltipContent>
             {isCreatingFolder ? "Cancel" : "Create New folder"}
@@ -271,7 +282,7 @@ export function Folders() {
         {isCreatingFolder || folders.length ?
           <ScrollArea>
             <Accordion
-              type="multiple"
+              multiple
               value={openedFolders}
               onValueChange={setOpenedFolders}
               className="px-4 py-1"
@@ -286,7 +297,11 @@ export function Folders() {
                     className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                   >
                     {!selectedEmoji ?
-                      <FolderIcon className="size-4" />
+                      <HugeiconsIcon
+                        icon={Folder01Icon}
+                        strokeWidth={2}
+                        className="size-4"
+                      />
                     : selectedEmoji}
                   </EmojiPicker>
 
@@ -305,7 +320,11 @@ export function Folders() {
                     variant="ghost"
                     className="absolute inset-y-0 right-1 my-auto size-7 text-muted-foreground"
                   >
-                    <Check className="size-4" />
+                    <HugeiconsIcon
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
                   </Button>
                 </form>
               )}
@@ -325,20 +344,33 @@ export function Folders() {
                           showIndicator={false}
                           className={cn(
                             buttonVariants({ size: "sm", variant: "ghost" }),
-                            "justify-start border-none hover:no-underline data-[state=open]:bg-secondary"
+                            "justify-start border-none hover:no-underline data-panel-open:bg-secondary"
                           )}
                         >
                           <span className="mr-2">
                             {iconId ?
                               iconId
                             : openedFolders.includes(id!) ?
-                              <FolderOpen className="size-4 shrink-0" />
-                            : <FolderIcon className="size-4 shrink-0" />}
+                              <HugeiconsIcon
+                                icon={FolderOpenIcon}
+                                strokeWidth={2}
+                                className="size-4 shrink-0"
+                              />
+                            : <HugeiconsIcon
+                                icon={Folder01Icon}
+                                strokeWidth={2}
+                                className="size-4 shrink-0"
+                              />
+                            }
                           </span>
 
                           {title}
 
-                          <ChevronDown className="invisible ml-auto size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/trigger:visible group-data-[state=open]/trigger:visible group-data-[state=open]/trigger:rotate-180" />
+                          <HugeiconsIcon
+                            icon={ArrowDown01Icon}
+                            strokeWidth={2}
+                            className="invisible ml-auto size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover/accordion-trigger:visible group-data-panel-open/accordion-trigger:visible group-data-panel-open/accordion-trigger:rotate-180"
+                          />
                         </AccordionTrigger>
                       </ContextMenuTrigger>
 
@@ -347,7 +379,11 @@ export function Folders() {
                           onClick={() => createFileToggle(id!)}
                           className="cursor-pointer"
                         >
-                          <FileIcon className="mr-2 size-4 shrink-0" />
+                          <HugeiconsIcon
+                            icon={File01Icon}
+                            strokeWidth={2}
+                            className="mr-2 size-4 shrink-0"
+                          />
                           New File
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"}+N
@@ -358,7 +394,11 @@ export function Folders() {
                           onClick={currentlyInDev}
                           className="cursor-pointer"
                         >
-                          <Edit2 className="mr-2 size-4 shrink-0" />
+                          <HugeiconsIcon
+                            icon={Edit02Icon}
+                            strokeWidth={2}
+                            className="mr-2 size-4 shrink-0"
+                          />
                           Rename
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"}+E
@@ -376,7 +416,11 @@ export function Folders() {
                           onClick={() => moveFolderToTrash(id!)}
                           className="cursor-pointer !text-red-500"
                         >
-                          <Trash2 className="mr-2 size-4 shrink-0" />
+                          <HugeiconsIcon
+                            icon={Delete02Icon}
+                            strokeWidth={2}
+                            className="mr-2 size-4 shrink-0"
+                          />
                           Move to Trash
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"}+D
@@ -398,7 +442,11 @@ export function Folders() {
                           onClick={() => deleteFolderHandler(id!)}
                           className="cursor-pointer !text-red-500"
                         >
-                          <Trash className="mr-2 size-4 shrink-0" />
+                          <HugeiconsIcon
+                            icon={Delete01Icon}
+                            strokeWidth={2}
+                            className="mr-2 size-4 shrink-0"
+                          />
                           Delete
                           <Kbd className="ml-auto">
                             {isAppleDevice() ? "⌘" : "Ctrl"}+Shift+D
@@ -421,7 +469,11 @@ export function Folders() {
                             className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                           >
                             {!selectedEmoji ?
-                              <FileIcon className="size-4" />
+                              <HugeiconsIcon
+                                icon={File01Icon}
+                                strokeWidth={2}
+                                className="size-4"
+                              />
                             : selectedEmoji}
                           </EmojiPicker>
 
@@ -440,7 +492,11 @@ export function Folders() {
                             variant="ghost"
                             className="absolute inset-y-0 right-1 my-auto size-7 text-muted-foreground"
                           >
-                            <Check className="size-4" />
+                            <HugeiconsIcon
+                              icon={Tick02Icon}
+                              strokeWidth={2}
+                              className="size-4"
+                            />
                           </Button>
                         </form>
                       )}
@@ -462,35 +518,55 @@ export function Folders() {
                                 <span className="mr-2 shrink-0">
                                   {iconId ?
                                     iconId
-                                  : <FileIcon className="size-4" />}
+                                  : <HugeiconsIcon
+                                      icon={File01Icon}
+                                      strokeWidth={2}
+                                      className="size-4"
+                                    />
+                                  }
                                 </span>
                                 {title}
                               </Link>
 
                               <Tooltip delayDuration={0}>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    onClick={currentlyInDev}
-                                    className="size-7 p-0 text-muted-foreground"
-                                  >
-                                    <Edit2 className="size-4" />
-                                  </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      variant="ghost"
+                                      onClick={currentlyInDev}
+                                      className="size-7 p-0 text-muted-foreground"
+                                    >
+                                      <HugeiconsIcon
+                                        icon={Edit02Icon}
+                                        strokeWidth={2}
+                                        className="size-4"
+                                      />
+                                    </Button>
+                                  }
+                                />
                                 <TooltipContent>Edit file</TooltipContent>
                               </Tooltip>
 
                               <AlertDialog>
-                                <AlertDialogTrigger>
+                                <AlertDialogTrigger
+                                  render={<span className="contents" />}
+                                  nativeButton={false}
+                                >
                                   <Tooltip delayDuration={0}>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        className="size-7 p-0 text-muted-foreground hover:text-red-500"
-                                      >
-                                        <Trash className="size-4" />
-                                      </Button>
-                                    </TooltipTrigger>
+                                    <TooltipTrigger
+                                      render={
+                                        <Button
+                                          variant="ghost"
+                                          className="size-7 p-0 text-muted-foreground hover:text-red-500"
+                                        >
+                                          <HugeiconsIcon
+                                            icon={Delete01Icon}
+                                            strokeWidth={2}
+                                            className="size-4"
+                                          />
+                                        </Button>
+                                      }
+                                    />
                                     <TooltipContent>Delete file</TooltipContent>
                                   </Tooltip>
                                 </AlertDialogTrigger>
@@ -531,7 +607,11 @@ export function Folders() {
                           )
                         )
                       : <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-4 text-muted-foreground">
-                          <FileX size={20} />
+                          <HugeiconsIcon
+                            icon={FileNotFoundIcon}
+                            strokeWidth={2}
+                            size={20}
+                          />
 
                           <p className="text-center text-sm">
                             You don&apos;t have any file yet.
@@ -546,7 +626,7 @@ export function Folders() {
             <ScrollBar />
           </ScrollArea>
         : <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
-            <FolderX size={32} />
+            <HugeiconsIcon icon={FolderRemoveIcon} strokeWidth={2} size={32} />
             <p className="text-center text-sm">
               You don&apos;t have any folders yet.
             </p>

@@ -4,16 +4,17 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Check,
-  Edit2,
-  FileIcon,
-  FilePlus2,
-  FileX,
-  FolderIcon,
-  Plus,
-  Trash,
-  X,
-} from "lucide-react";
+  Cancel01Icon,
+  Delete01Icon,
+  Edit02Icon,
+  File01Icon,
+  FileAddIcon,
+  FileNotFoundIcon,
+  Folder01Icon,
+  PlusSignIcon,
+  Tick02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 
@@ -240,7 +241,11 @@ export function FoldersCollapsed() {
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger showIndicator={false} className="size-10 p-0">
-            <Plus className="size-5" />
+            <HugeiconsIcon
+              icon={PlusSignIcon}
+              strokeWidth={2}
+              className="size-5"
+            />
           </NavigationMenuTrigger>
 
           <NavigationMenuContent className="min-w-80 space-y-4 p-4">
@@ -256,7 +261,11 @@ export function FoldersCollapsed() {
                   className={buttonVariants({ size: "sm", variant: "ghost" })}
                 >
                   {!selectedEmoji ?
-                    <FolderIcon className="size-5" />
+                    <HugeiconsIcon
+                      icon={Folder01Icon}
+                      strokeWidth={2}
+                      className="size-5"
+                    />
                   : selectedEmoji}
                 </EmojiPicker>
 
@@ -294,7 +303,11 @@ export function FoldersCollapsed() {
                 className="size-10 p-0"
               >
                 {!iconId ?
-                  <FolderIcon className="size-5" />
+                  <HugeiconsIcon
+                    icon={Folder01Icon}
+                    strokeWidth={2}
+                    className="size-5"
+                  />
                 : <span className="text-lg">{iconId}</span>}
               </NavigationMenuTrigger>
 
@@ -303,23 +316,39 @@ export function FoldersCollapsed() {
                   <h3 className="flex text-lg font-semibold leading-none tracking-tight">
                     {iconId ?
                       <span className="text-lg">{iconId}</span>
-                    : <FolderIcon className="size-5" />}
+                    : <HugeiconsIcon
+                        icon={Folder01Icon}
+                        strokeWidth={2}
+                        className="size-5"
+                      />
+                    }
                     <span className="ml-2">{title}</span>
                   </h3>
 
                   <div>
                     <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          onClick={() => createFileToggle(id!)}
-                          className="size-7 p-0 text-muted-foreground"
-                        >
-                          {creatingFiles.includes(id!) ?
-                            <X className="size-4" />
-                          : <FilePlus2 className="size-4" />}
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            onClick={() => createFileToggle(id!)}
+                            className="size-7 p-0 text-muted-foreground"
+                          >
+                            {creatingFiles.includes(id!) ?
+                              <HugeiconsIcon
+                                icon={Cancel01Icon}
+                                strokeWidth={2}
+                                className="size-4"
+                              />
+                            : <HugeiconsIcon
+                                icon={FileAddIcon}
+                                strokeWidth={2}
+                                className="size-4"
+                              />
+                            }
+                          </Button>
+                        }
+                      />
                       <TooltipContent>
                         {creatingFiles.includes(id!) ?
                           "Cancel creating file"
@@ -328,29 +357,44 @@ export function FoldersCollapsed() {
                     </Tooltip>
 
                     <Tooltip delayDuration={0}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          onClick={currentlyInDev}
-                          className="size-7 p-0 text-muted-foreground"
-                        >
-                          <Edit2 className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            onClick={currentlyInDev}
+                            className="size-7 p-0 text-muted-foreground"
+                          >
+                            <HugeiconsIcon
+                              icon={Edit02Icon}
+                              strokeWidth={2}
+                              className="size-4"
+                            />
+                          </Button>
+                        }
+                      />
                       <TooltipContent>Edit folder</TooltipContent>
                     </Tooltip>
 
                     <AlertDialog>
-                      <AlertDialogTrigger>
+                      <AlertDialogTrigger
+                        render={<span className="contents" />}
+                        nativeButton={false}
+                      >
                         <Tooltip delayDuration={0}>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              className="size-7 p-0 text-muted-foreground hover:text-red-500"
-                            >
-                              <Trash className="size-4" />
-                            </Button>
-                          </TooltipTrigger>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                className="size-7 p-0 text-muted-foreground hover:text-red-500"
+                              >
+                                <HugeiconsIcon
+                                  icon={Delete01Icon}
+                                  strokeWidth={2}
+                                  className="size-4"
+                                />
+                              </Button>
+                            }
+                          />
                           <TooltipContent>Delete folder</TooltipContent>
                         </Tooltip>
                       </AlertDialogTrigger>
@@ -403,7 +447,11 @@ export function FoldersCollapsed() {
                           className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                         >
                           {!selectedEmoji ?
-                            <FileIcon className="size-4" />
+                            <HugeiconsIcon
+                              icon={File01Icon}
+                              strokeWidth={2}
+                              className="size-4"
+                            />
                           : selectedEmoji}
                         </EmojiPicker>
 
@@ -422,7 +470,11 @@ export function FoldersCollapsed() {
                           variant="ghost"
                           className="absolute inset-y-0 right-1 my-auto size-7 text-muted-foreground"
                         >
-                          <Check className="size-4" />
+                          <HugeiconsIcon
+                            icon={Tick02Icon}
+                            strokeWidth={2}
+                            className="size-4"
+                          />
                         </Button>
                       </form>
                     )}
@@ -446,37 +498,57 @@ export function FoldersCollapsed() {
                             <span className="mr-2 shrink-0">
                               {iconId ?
                                 iconId
-                              : <FileIcon className="size-4" />}
+                              : <HugeiconsIcon
+                                  icon={File01Icon}
+                                  strokeWidth={2}
+                                  className="size-4"
+                                />
+                              }
                             </span>
                             {title}
                           </Link>
 
                           <Tooltip delayDuration={0}>
-                            <TooltipTrigger asChild>
-                              <Button
-                                size="icon"
-                                variant="ghost"
-                                onClick={currentlyInDev}
-                                className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
-                              >
-                                <Edit2 className="size-4" />
-                              </Button>
-                            </TooltipTrigger>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  onClick={currentlyInDev}
+                                  className="invisible z-10 ml-auto size-7 shrink-0 text-muted-foreground group-hover:visible"
+                                >
+                                  <HugeiconsIcon
+                                    icon={Edit02Icon}
+                                    strokeWidth={2}
+                                    className="size-4"
+                                  />
+                                </Button>
+                              }
+                            />
                             <TooltipContent>Edit file</TooltipContent>
                           </Tooltip>
 
                           <AlertDialog>
-                            <AlertDialogTrigger>
+                            <AlertDialogTrigger
+                              render={<span className="contents" />}
+                              nativeButton={false}
+                            >
                               <Tooltip delayDuration={0}>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
-                                  >
-                                    <Trash className="size-4" />
-                                  </Button>
-                                </TooltipTrigger>
+                                <TooltipTrigger
+                                  render={
+                                    <Button
+                                      size="icon"
+                                      variant="ghost"
+                                      className="invisible z-10 size-7 shrink-0 text-muted-foreground hover:text-red-500 group-hover:visible"
+                                    >
+                                      <HugeiconsIcon
+                                        icon={Delete01Icon}
+                                        strokeWidth={2}
+                                        className="size-4"
+                                      />
+                                    </Button>
+                                  }
+                                />
                                 <TooltipContent>Delete file</TooltipContent>
                               </Tooltip>
                             </AlertDialogTrigger>
@@ -514,7 +586,11 @@ export function FoldersCollapsed() {
                         </div>
                       ))
                     : <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-4 text-muted-foreground">
-                        <FileX size={20} />
+                        <HugeiconsIcon
+                          icon={FileNotFoundIcon}
+                          strokeWidth={2}
+                          size={20}
+                        />
 
                         <p className="text-center text-sm">
                           You don&apos;t have any file yet.

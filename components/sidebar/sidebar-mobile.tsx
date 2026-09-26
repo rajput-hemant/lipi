@@ -1,5 +1,6 @@
 import React from "react";
-import { Menu } from "lucide-react";
+import { Menu01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import {
   Sheet,
@@ -14,7 +15,11 @@ export function SidebarMobile() {
   return (
     <Sheet>
       <SheetTrigger className="lg:hidden">
-        <Menu className="mr-2 size-5" />
+        <HugeiconsIcon
+          icon={Menu01Icon}
+          strokeWidth={2}
+          className="mr-2 size-5"
+        />
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckmarkCircle01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
@@ -70,7 +71,12 @@ export function NewsletterSubscriptionForm() {
 
         {state.subscribed && (
           <p className="mt-2 flex flex-row items-center gap-1.5 text-sm duration-300 animate-in slide-in-from-right-full">
-            <CheckCircle className="h-5 text-green-600" aria-hidden="true" />
+            <HugeiconsIcon
+              icon={CheckmarkCircle01Icon}
+              strokeWidth={2}
+              className="h-5 text-green-600"
+              aria-hidden="true"
+            />
             Thanks for subscribing!
           </p>
         )}

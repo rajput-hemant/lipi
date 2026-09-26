@@ -29,24 +29,35 @@ export function ResizableLayout(props: ResizableLayoutProps) {
 
   return (
     <ResizablePanelGroup
-      direction="horizontal"
-      onLayout={(sizes) => {
-        setCookie("react-resizable-panels:layout", JSON.stringify(sizes));
+      orientation="horizontal"
+      onLayoutChange={(layout) => {
+        const sizes = [layout.sidebar, layout.main].filter(
+          (size): size is number => typeof size === "number"
+        );
+        if (sizes.length > 0) {
+          const total = sizes.reduce((sum, size) => sum + size, 0);
+          setCookie(
+            "react-resizable-panels:layout",
+            JSON.stringify(sizes.map((size) => (size / total) * 100))
+          );
+        }
       }}
     >
       <ResizablePanel
-        defaultSize={defaultLayout[0]}
-        collapsedSize={3}
+        id="sidebar"
+        defaultSize={`${defaultLayout[0]}%`}
+        collapsedSize="3%"
         collapsible={true}
-        minSize={14}
-        maxSize={20}
-        onExpand={() => {
-          setIsCollapsed(false);
-          setCookie("react-resizable-panels:collapsed", false);
-        }}
-        onCollapse={() => {
-          setIsCollapsed(true);
-          setCookie("react-resizable-panels:collapsed", true);
+        minSize="14%"
+        maxSize="20%"
+        onResize={(size) => {
+          const collapsed = size.asPercentage <= 3;
+          setIsCollapsed((previous) => {
+            if (previous !== collapsed) {
+              setCookie("react-resizable-panels:collapsed", collapsed);
+            }
+            return collapsed;
+          });
         }}
         className={cn(
           "hidden lg:block",
@@ -59,7 +70,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
 
       <ResizableHandle withHandle className="hidden lg:flex" />
 
-      <ResizablePanel defaultSize={defaultLayout[1]}>
+      <ResizablePanel id="main" defaultSize={`${defaultLayout[1]}%`}>
         <Navbar />
         <main className="overflow-auto">{children}</main>
       </ResizablePanel>

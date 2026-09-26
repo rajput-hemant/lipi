@@ -73,11 +73,13 @@ export const SubscriptionModalProvider = (props: Props) => {
             </DialogDescription>
 
             <DialogFooter>
-              <DialogClose asChild>
-                <Button size="sm" variant="secondary">
-                  Cancel
-                </Button>
-              </DialogClose>
+              <DialogClose
+                render={
+                  <Button size="sm" variant="secondary">
+                    Cancel
+                  </Button>
+                }
+              />
 
               <Button size="sm" onClick={onClickHandler}>
                 Upgrade

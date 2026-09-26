@@ -1,12 +1,13 @@
 import React from "react";
 import {
-  FileIcon,
-  Folder,
-  Ghost,
-  Trash2,
-  TrashIcon,
-  Undo2,
-} from "lucide-react";
+  Delete01Icon,
+  Delete02Icon,
+  File01Icon,
+  Folder01Icon,
+  GhostIcon,
+  Undo02Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
 import type { File } from "@/types/db";
@@ -125,34 +126,53 @@ export function Trash() {
                 >
                   <div className="group relative rounded-md border shadow">
                     <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
-                      {folder.iconId ? folder.iconId : <Folder size={56} />}
+                      {folder.iconId ?
+                        folder.iconId
+                      : <HugeiconsIcon
+                          icon={Folder01Icon}
+                          strokeWidth={2}
+                          size={56}
+                        />
+                      }
                     </div>
 
                     <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
                       <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => restoreFolder(folder.id!)}
-                          >
-                            <Undo2 size={20} />
-                          </Button>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => restoreFolder(folder.id!)}
+                            >
+                              <HugeiconsIcon
+                                icon={Undo02Icon}
+                                strokeWidth={2}
+                                size={20}
+                              />
+                            </Button>
+                          }
+                        />
 
                         <TooltipContent>Restore</TooltipContent>
                       </Tooltip>
 
                       <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            onClick={() => deleteFolderHandler(folder.id!)}
-                          >
-                            <Trash2 size={20} />
-                          </Button>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              onClick={() => deleteFolderHandler(folder.id!)}
+                            >
+                              <HugeiconsIcon
+                                icon={Delete02Icon}
+                                strokeWidth={2}
+                                size={20}
+                              />
+                            </Button>
+                          }
+                        />
 
                         <TooltipContent>Delete Permanently</TooltipContent>
                       </Tooltip>
@@ -168,7 +188,12 @@ export function Trash() {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         : <div className="flex flex-col items-center gap-4 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
-            <Ghost size={32} className="drop-shadow" />
+            <HugeiconsIcon
+              icon={GhostIcon}
+              strokeWidth={2}
+              size={32}
+              className="drop-shadow"
+            />
             <span className="drop-shadow-sm">Nothing to show here!</span>
           </div>
         }
@@ -186,34 +211,53 @@ export function Trash() {
                 >
                   <div className="group relative rounded-md border shadow">
                     <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
-                      {file.iconId ? file.iconId : <FileIcon size={56} />}
+                      {file.iconId ?
+                        file.iconId
+                      : <HugeiconsIcon
+                          icon={File01Icon}
+                          strokeWidth={2}
+                          size={56}
+                        />
+                      }
                     </div>
 
                     <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
                       <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => restoreFile(file.id!)}
-                          >
-                            <Undo2 size={20} />
-                          </Button>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => restoreFile(file.id!)}
+                            >
+                              <HugeiconsIcon
+                                icon={Undo02Icon}
+                                strokeWidth={2}
+                                size={20}
+                              />
+                            </Button>
+                          }
+                        />
 
                         <TooltipContent>Restore</TooltipContent>
                       </Tooltip>
 
                       <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            onClick={() => deleteFileHandler(file.id!)}
-                          >
-                            <Trash2 size={20} />
-                          </Button>
-                        </TooltipTrigger>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              size="icon"
+                              variant="destructive"
+                              onClick={() => deleteFileHandler(file.id!)}
+                            >
+                              <HugeiconsIcon
+                                icon={Delete02Icon}
+                                strokeWidth={2}
+                                size={20}
+                              />
+                            </Button>
+                          }
+                        />
 
                         <TooltipContent>Delete Permanently</TooltipContent>
                       </Tooltip>
@@ -229,7 +273,12 @@ export function Trash() {
             <ScrollBar orientation="vertical" />
           </ScrollArea>
         : <div className="flex flex-col items-center gap-4 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
-            <Ghost size={32} className="drop-shadow" />
+            <HugeiconsIcon
+              icon={GhostIcon}
+              strokeWidth={2}
+              size={32}
+              className="drop-shadow"
+            />
             <span className="drop-shadow-sm">Nothing to show here!</span>
           </div>
         }
@@ -242,12 +291,15 @@ export function Trash() {
           onClick={clearTrash}
           disabled={!trashedFiles.length && !trashedFolders.length}
         >
-          <TrashIcon className="mr-1 size-4" /> Clear Trash
+          <HugeiconsIcon
+            icon={Delete01Icon}
+            strokeWidth={2}
+            className="mr-1 size-4"
+          />{" "}
+          Clear Trash
         </Button>
 
-        <DialogClose asChild>
-          <Button size="sm">Close</Button>
-        </DialogClose>
+        <DialogClose render={<Button size="sm">Close</Button>} />
       </DialogFooter>
     </React.Fragment>
   );

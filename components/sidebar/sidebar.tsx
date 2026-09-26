@@ -1,7 +1,13 @@
 import React from "react";
-import { LayoutGrid, SettingsIcon, Trash2, User2 } from "lucide-react";
+import {
+  Delete02Icon,
+  GridIcon,
+  Settings01Icon,
+  UserIcon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { LucideIcon } from "lucide-react";
+import type { IconSvgElement } from "@hugeicons/react";
 
 import { siteConfig } from "@/config/site";
 import { useAppState } from "@/hooks/use-app-state";
@@ -26,7 +32,7 @@ type SidebarProps = React.ComponentProps<"aside"> & {
 type NavItem = {
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: IconSvgElement;
   content: React.FC;
 };
 
@@ -34,19 +40,19 @@ const navItems: NavItem[] = [
   {
     title: "My Workspaces",
     description: "Manage your workspaces",
-    icon: LayoutGrid,
+    icon: GridIcon,
     content: Workspaces,
   },
   {
     title: "Settings",
     description: "Manage your settings",
-    icon: SettingsIcon,
+    icon: Settings01Icon,
     content: Settings,
   },
   {
     title: "Trash",
     description: "Manage your trash",
-    icon: Trash2,
+    icon: Delete02Icon,
     content: Trash,
   },
 ];
@@ -85,7 +91,7 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
           {navItems.map(({ title, description, icon, content: Content }) =>
             isCollapsed ?
               <Tooltip key={title} delayDuration={0}>
-                <TooltipTrigger asChild>
+                <TooltipTrigger render={<span className="contents" />}>
                   <NavDialog
                     title={title}
                     icon={icon}
@@ -132,7 +138,11 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
                   />
 
                   <AvatarFallback className="cursor-pointer bg-background hover:bg-muted">
-                    <User2 className="size-5" />
+                    <HugeiconsIcon
+                      icon={UserIcon}
+                      strokeWidth={2}
+                      className="size-5"
+                    />
                   </AvatarFallback>
                 </Avatar>
               </PopoverTrigger>
@@ -158,7 +168,11 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
               <Avatar className="m-auto">
                 <AvatarImage src={user?.image ?? undefined} />
                 <AvatarFallback>
-                  <User2 className="size-6 text-muted-foreground" />
+                  <HugeiconsIcon
+                    icon={UserIcon}
+                    strokeWidth={2}
+                    className="size-6 text-muted-foreground"
+                  />
                 </AvatarFallback>
               </Avatar>
 

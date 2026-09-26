@@ -1,15 +1,14 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { Logout01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import type { ButtonProps } from "./ui/button";
-
-import { Button } from "./ui/button";
 import { signOut } from "@/lib/auth/auth-client";
+import { Button } from "./ui/button";
 
-export function SignOut(props: ButtonProps) {
+export function SignOut(props: React.ComponentProps<typeof Button>) {
   const router = useRouter();
 
   async function signOutHandler() {
@@ -25,7 +24,7 @@ export function SignOut(props: ButtonProps) {
 
   return (
     <Button title="Sign out" onClick={signOutHandler} {...props}>
-      <LogOut className="size-4" />
+      <HugeiconsIcon icon={Logout01Icon} strokeWidth={2} className="size-4" />
     </Button>
   );
 }
