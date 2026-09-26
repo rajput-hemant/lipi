@@ -31,6 +31,8 @@ cd lipi
 
 - Rename **.env.example** => **.env.local**, add your own environment variables.
 
+- Shared auth tables and legacy-user backfill are documented in [docs/shared-database-auth.md](docs/shared-database-auth.md) (run Infinitunes' `packages/db/src/backfill.ts` against the shared database).
+
 - Run the app with VS Code or the command line:
 
 ```

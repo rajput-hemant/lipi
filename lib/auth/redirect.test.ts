@@ -25,6 +25,12 @@ describe("getSafeRedirectPath", () => {
     );
   });
 
+  it("rejects double-encoded backslash separators even without baseURL", () => {
+    expect(
+      getSafeRedirectPath("/%25255Cevil.example/login", "/dashboard"),
+    ).toBe("/dashboard");
+  });
+
   it("rejects backslash paths that normalize to another origin", () => {
     expect(getSafeRedirectPath("/%5Cevil.example", "/dashboard", BASE)).toBe(
       "/dashboard",

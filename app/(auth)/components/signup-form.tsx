@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signUp } from "@/lib/auth/auth-client";
+import { getClientRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { signUpSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
@@ -49,6 +50,7 @@ export function SignUpForm() {
   const callbackURL = getSafeRedirectPath(
     searchParams.get("from"),
     DEFAULT_LOGIN_REDIRECT,
+    getClientRedirectBaseURL(),
   );
 
   if (authError === "OAuthAccountNotLinked") {

@@ -1,6 +1,28 @@
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 
 const UNSAFE_PATH_PATTERN = /[\\\u0000-\u001f\u007f]/;
+const ENCODED_BACKSLASH_PATTERN = /%5[cC]/;
+
+function decodeRedirectParam(from: string) {
+  let decoded = from;
+
+  for (let i = 0; i < 4; i++) {
+    if (ENCODED_BACKSLASH_PATTERN.test(decoded)) {
+      throw new Error("Invalid redirect path");
+    }
+
+    if (!/%[0-9A-Fa-f]{2}/.test(decoded)) break;
+
+    const next = decodeURIComponent(decoded);
+    if (ENCODED_BACKSLASH_PATTERN.test(next) || UNSAFE_PATH_PATTERN.test(next)) {
+      throw new Error("Invalid redirect path");
+    }
+
+    decoded = next;
+  }
+
+  return decoded;
+}
 
 export function isSafeRelativeRedirectPath(
   path: string,
@@ -30,7 +52,7 @@ export function getSafeRedirectPath(
   if (!from) return fallback;
 
   try {
-    const decoded = decodeURIComponent(from);
+    const decoded = decodeRedirectParam(from);
     if (!isSafeRelativeRedirectPath(decoded, baseURL)) {
       return fallback;
     }

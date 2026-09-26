@@ -4,7 +4,10 @@ import postgres from "postgres";
 
 import { env } from "@/lib/env";
 import * as schema from "./schema";
+import { assertDatabaseUrlConfigured } from "./database-url";
 import { lipiTableName } from "./table-prefix";
+
+assertDatabaseUrlConfigured(env.DATABASE_URL);
 
 // NOTE: postgres versions above 3.3.5 are not supported on the edge runtime
 const client = postgres(

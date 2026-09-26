@@ -48,7 +48,19 @@ export const env = createEnv({
     DATABASE_URL: z
       .string()
       .min(1, { message: "Database URL is invalid or missing" })
-      .optional(),
+      .optional()
+      .superRefine((value, ctx) => {
+        if (
+          process.env.NODE_ENV === "production" &&
+          process.env.SKIP_ENV_VALIDATION !== "true" &&
+          !value
+        ) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Database URL is invalid or missing",
+          });
+        }
+      }),
 
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
