@@ -1,35 +1,29 @@
-import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu";
-import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import { cva } from "class-variance-authority";
-import { cn } from "cn";
+import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu"
+import { cva } from "class-variance-authority"
+import { cn } from "cn"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { ArrowDown01Icon } from "@hugeicons/core-free-icons"
 
 function NavigationMenu({
   align = "start",
   className,
   children,
-  orientation = "horizontal",
   ...props
 }: NavigationMenuPrimitive.Root.Props &
   Pick<NavigationMenuPrimitive.Positioner.Props, "align">) {
   return (
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
-      data-orientation={orientation}
       className={cn(
         "group/navigation-menu relative flex max-w-max flex-1 items-center justify-center",
         className
       )}
-      orientation={orientation}
       {...props}
     >
       {children}
-      <NavigationMenuPositioner
-        align={align}
-        side={orientation === "vertical" ? "right" : "bottom"}
-      />
+      <NavigationMenuPositioner align={align} />
     </NavigationMenuPrimitive.Root>
-  );
+  )
 }
 
 function NavigationMenuList({
@@ -40,12 +34,12 @@ function NavigationMenuList({
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
       className={cn(
-        "group flex flex-1 list-none items-center justify-center gap-0 group-data-[orientation=vertical]/navigation-menu:flex-col",
+        "group flex flex-1 list-none items-center justify-center gap-0",
         className
       )}
       {...props}
     />
-  );
+  )
 }
 
 function NavigationMenuItem({
@@ -58,21 +52,18 @@ function NavigationMenuItem({
       className={cn("relative", className)}
       {...props}
     />
-  );
+  )
 }
 
 const navigationMenuTriggerStyle = cva(
   "group/navigation-menu-trigger inline-flex h-9 w-max items-center justify-center rounded-lg px-2.5 py-1.5 text-sm font-medium transition-all outline-none hover:bg-muted focus:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-popup-open:bg-muted/50 data-popup-open:hover:bg-muted data-open:bg-muted/50 data-open:hover:bg-muted data-open:focus:bg-muted"
-);
+)
 
 function NavigationMenuTrigger({
   className,
   children,
-  showIndicator = true,
   ...props
-}: NavigationMenuPrimitive.Trigger.Props & {
-  showIndicator?: boolean;
-}) {
+}: NavigationMenuPrimitive.Trigger.Props) {
   return (
     <NavigationMenuPrimitive.Trigger
       data-slot="navigation-menu-trigger"
@@ -80,16 +71,9 @@ function NavigationMenuTrigger({
       {...props}
     >
       {children}{" "}
-      {showIndicator && (
-        <HugeiconsIcon
-          icon={ArrowDown01Icon}
-          strokeWidth={2}
-          className="relative top-px ml-1 size-3 transition duration-300 group-data-popup-open/navigation-menu-trigger:rotate-180 group-data-open/navigation-menu-trigger:rotate-180"
-          aria-hidden="true"
-        />
-      )}
+      <HugeiconsIcon icon={ArrowDown01Icon} strokeWidth={2} className="relative top-px ml-1 size-3 transition duration-300 group-data-popup-open/navigation-menu-trigger:rotate-180 group-data-open/navigation-menu-trigger:rotate-180" aria-hidden="true" />
     </NavigationMenuPrimitive.Trigger>
-  );
+  )
 }
 
 function NavigationMenuContent({
@@ -105,7 +89,7 @@ function NavigationMenuContent({
       )}
       {...props}
     />
-  );
+  )
 }
 
 function NavigationMenuPositioner({
@@ -134,7 +118,7 @@ function NavigationMenuPositioner({
         </NavigationMenuPrimitive.Popup>
       </NavigationMenuPrimitive.Positioner>
     </NavigationMenuPrimitive.Portal>
-  );
+  )
 }
 
 function NavigationMenuLink({
@@ -150,7 +134,7 @@ function NavigationMenuLink({
       )}
       {...props}
     />
-  );
+  )
 }
 
 function NavigationMenuIndicator({
@@ -168,7 +152,7 @@ function NavigationMenuIndicator({
     >
       <div className="relative top-[60%] h-2 w-2 rotate-45 rounded-tl-sm bg-border shadow-md" />
     </NavigationMenuPrimitive.Icon>
-  );
+  )
 }
 
 export {
@@ -181,4 +165,4 @@ export {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
   NavigationMenuPositioner,
-};
+}
