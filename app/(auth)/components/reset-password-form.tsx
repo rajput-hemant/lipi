@@ -25,11 +25,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipDelayed } from "@/components/tooltip-delayed";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { resetPassword } from "@/lib/actions";
 import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
@@ -125,7 +122,7 @@ export function ResetPasswordForm() {
                     className="pr-8 shadow-sm"
                     {...field}
                   />
-                  <Tooltip delayDuration={150}>
+                  <TooltipDelayed delay={150}>
                     <TooltipTrigger
                       aria-label={
                         isPassVisible ? "Hide Password" : "Show Password"
@@ -155,7 +152,7 @@ export function ResetPasswordForm() {
                         {isPassVisible ? "Hide Password" : "Show Password"}
                       </p>
                     </TooltipContent>
-                  </Tooltip>
+                  </TooltipDelayed>
                 </div>
               </FormControl>
               <FormMessage />
@@ -178,7 +175,7 @@ export function ResetPasswordForm() {
                     className="pr-8 shadow-sm"
                     {...field}
                   />
-                  <Tooltip delayDuration={150}>
+                  <TooltipDelayed delay={150}>
                     <TooltipTrigger
                       aria-label={
                         isNewPassVisible ? "Hide Password" : "Show Password"
@@ -208,7 +205,7 @@ export function ResetPasswordForm() {
                         {isNewPassVisible ? "Hide Password" : "Show Password"}
                       </p>
                     </TooltipContent>
-                  </Tooltip>
+                  </TooltipDelayed>
                 </div>
               </FormControl>
               <FormMessage />

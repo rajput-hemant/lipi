@@ -26,11 +26,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipDelayed } from "@/components/tooltip-delayed";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signUp } from "@/lib/auth/auth-client";
 import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
@@ -139,7 +136,7 @@ export function SignUpForm() {
                     className="pr-8 shadow-sm"
                     {...field}
                   />
-                  <Tooltip delayDuration={150}>
+                  <TooltipDelayed delay={150}>
                     <TooltipTrigger
                       aria-label={
                         isPassVisible ? "Hide Password" : "Show Password"
@@ -169,7 +166,7 @@ export function SignUpForm() {
                         {isPassVisible ? "Hide Password" : "Show Password"}
                       </p>
                     </TooltipContent>
-                  </Tooltip>
+                  </TooltipDelayed>
                 </div>
               </FormControl>
               <FormMessage />
@@ -192,7 +189,7 @@ export function SignUpForm() {
                     className="pr-8 shadow-sm"
                     {...field}
                   />
-                  <Tooltip delayDuration={150}>
+                  <TooltipDelayed delay={150}>
                     <TooltipTrigger
                       aria-label={
                         isConfirmPassVisible ? "Hide Password" : "Show Password"
@@ -226,7 +223,7 @@ export function SignUpForm() {
                         : "Show Password"}
                       </p>
                     </TooltipContent>
-                  </Tooltip>
+                  </TooltipDelayed>
                 </div>
               </FormControl>
               <FormMessage />

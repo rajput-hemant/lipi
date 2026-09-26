@@ -47,7 +47,7 @@ export function NavDialog(props: NavDialogProps) {
   return (
     <Dialog>
       {isCollapsed ?
-        <Tooltip delayDuration={0}>
+        <Tooltip>
           <TooltipTrigger render={trigger} />
           <TooltipContent side="right">{title}</TooltipContent>
         </Tooltip>

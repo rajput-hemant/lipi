@@ -29,12 +29,13 @@ import {
   updateFileInDb,
   updateFolderInDb,
 } from "@/lib/db/queries";
+import { AlertDialogCloseAction } from "@/components/alert-dialog-close-action";
+import { hideNavigationMenuTriggerIndicator } from "@/lib/shadcn-call-site";
 import { cn, currentlyInDev } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -46,12 +47,15 @@ import {
 import { Button, buttonVariants } from "../ui/button";
 import { Input } from "../ui/input";
 import {
-  NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "../ui/navigation-menu";
+import {
+  VerticalNavigationMenu,
+  verticalNavigationMenuListClassName,
+} from "./vertical-navigation-menu";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
@@ -237,10 +241,15 @@ export function FoldersCollapsed() {
   }
 
   return (
-    <NavigationMenu orientation="vertical" className="max-w-none items-start">
-      <NavigationMenuList>
+    <VerticalNavigationMenu className="max-w-none items-start">
+      <NavigationMenuList className={verticalNavigationMenuListClassName}>
         <NavigationMenuItem>
-          <NavigationMenuTrigger showIndicator={false} className="size-10 p-0">
+          <NavigationMenuTrigger
+            className={cn(
+              hideNavigationMenuTriggerIndicator,
+              "size-10 p-0"
+            )}
+          >
             <HugeiconsIcon
               icon={PlusSignIcon}
               strokeWidth={2}
@@ -299,8 +308,10 @@ export function FoldersCollapsed() {
           return (
             <NavigationMenuItem key={id!}>
               <NavigationMenuTrigger
-                showIndicator={false}
-                className="size-10 p-0"
+                className={cn(
+                  hideNavigationMenuTriggerIndicator,
+                  "size-10 p-0"
+                )}
               >
                 {!iconId ?
                   <HugeiconsIcon
@@ -326,7 +337,7 @@ export function FoldersCollapsed() {
                   </h3>
 
                   <div>
-                    <Tooltip delayDuration={0}>
+                    <Tooltip>
                       <TooltipTrigger
                         render={
                           <Button
@@ -356,7 +367,7 @@ export function FoldersCollapsed() {
                       </TooltipContent>
                     </Tooltip>
 
-                    <Tooltip delayDuration={0}>
+                    <Tooltip>
                       <TooltipTrigger
                         render={
                           <Button
@@ -376,7 +387,7 @@ export function FoldersCollapsed() {
                     </Tooltip>
 
                     <AlertDialog>
-                      <Tooltip delayDuration={0}>
+                      <Tooltip>
                         <TooltipTrigger
                           render={
                             <AlertDialogTrigger
@@ -411,20 +422,20 @@ export function FoldersCollapsed() {
 
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
+                          <AlertDialogCloseAction
                             onClick={() => moveFolderToTrash(id!)}
                             className="bg-destructive/10 text-destructive hover:bg-destructive/15"
                           >
                             Move to trash
-                          </AlertDialogAction>
-                          <AlertDialogAction
+                          </AlertDialogCloseAction>
+                          <AlertDialogCloseAction
                             onClick={() => deleteFolderHandler(id!)}
                             className={buttonVariants({
                               variant: "destructive",
                             })}
                           >
                             Delete
-                          </AlertDialogAction>
+                          </AlertDialogCloseAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -507,7 +518,7 @@ export function FoldersCollapsed() {
                             {title}
                           </Link>
 
-                          <Tooltip delayDuration={0}>
+                          <Tooltip>
                             <TooltipTrigger
                               render={
                                 <Button
@@ -528,7 +539,7 @@ export function FoldersCollapsed() {
                           </Tooltip>
 
                           <AlertDialog>
-                            <Tooltip delayDuration={0}>
+                            <Tooltip>
                               <TooltipTrigger
                                 render={
                                   <AlertDialogTrigger
@@ -564,20 +575,20 @@ export function FoldersCollapsed() {
 
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
+                                <AlertDialogCloseAction
                                   onClick={() => moveFileToTrash(id!)}
                                   className="bg-destructive/10 text-destructive hover:bg-destructive/15"
                                 >
                                   Move to trash
-                                </AlertDialogAction>
-                                <AlertDialogAction
+                                </AlertDialogCloseAction>
+                                <AlertDialogCloseAction
                                   onClick={() => deleteFileHandler(id!)}
                                   className={buttonVariants({
                                     variant: "destructive",
                                   })}
                                 >
                                   Delete
-                                </AlertDialogAction>
+                                </AlertDialogCloseAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -604,6 +615,6 @@ export function FoldersCollapsed() {
           );
         })}
       </NavigationMenuList>
-    </NavigationMenu>
+    </VerticalNavigationMenu>
   );
 }

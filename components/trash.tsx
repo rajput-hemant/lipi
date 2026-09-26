@@ -137,7 +137,7 @@ export function Trash() {
                     </div>
 
                     <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
-                      <Tooltip delayDuration={0}>
+                      <Tooltip>
                         <TooltipTrigger
                           render={
                             <Button
@@ -157,7 +157,7 @@ export function Trash() {
                         <TooltipContent>Restore</TooltipContent>
                       </Tooltip>
 
-                      <Tooltip delayDuration={0}>
+                      <Tooltip>
                         <TooltipTrigger
                           render={
                             <Button
@@ -222,7 +222,7 @@ export function Trash() {
                     </div>
 
                     <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
-                      <Tooltip delayDuration={0}>
+                      <Tooltip>
                         <TooltipTrigger
                           render={
                             <Button
@@ -242,7 +242,7 @@ export function Trash() {
                         <TooltipContent>Restore</TooltipContent>
                       </Tooltip>
 
-                      <Tooltip delayDuration={0}>
+                      <Tooltip>
                         <TooltipTrigger
                           render={
                             <Button

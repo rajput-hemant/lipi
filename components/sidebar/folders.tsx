@@ -38,6 +38,7 @@ import {
   updateFileInDb,
   updateFolderInDb,
 } from "@/lib/db/queries";
+import { hideAccordionTriggerIndicator } from "@/lib/shadcn-call-site";
 import { cn, currentlyInDev, isAppleDevice } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
@@ -47,9 +48,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
+import { AlertDialogCloseAction } from "@/components/alert-dialog-close-action";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -247,7 +248,7 @@ export function Folders() {
     <>
       <div className="flex items-center justify-between px-4">
         <p className="text-sm font-medium text-muted-foreground">Folders</p>
-        <Tooltip delayDuration={0}>
+        <Tooltip>
           <TooltipTrigger
             render={
               <Button
@@ -341,9 +342,9 @@ export function Folders() {
                     <ContextMenu>
                       <ContextMenuTrigger>
                         <AccordionTrigger
-                          showIndicator={false}
                           className={cn(
                             buttonVariants({ size: "sm", variant: "ghost" }),
+                            hideAccordionTriggerIndicator,
                             "justify-start border-none hover:no-underline data-panel-open:bg-secondary"
                           )}
                         >
@@ -528,7 +529,7 @@ export function Folders() {
                                 {title}
                               </Link>
 
-                              <Tooltip delayDuration={0}>
+                              <Tooltip>
                                 <TooltipTrigger
                                   render={
                                     <Button
@@ -548,7 +549,7 @@ export function Folders() {
                               </Tooltip>
 
                               <AlertDialog>
-                                <Tooltip delayDuration={0}>
+                                <Tooltip>
                                   <TooltipTrigger
                                     render={
                                       <AlertDialogTrigger
@@ -585,20 +586,20 @@ export function Folders() {
                                     <AlertDialogCancel>
                                       Cancel
                                     </AlertDialogCancel>
-                                    <AlertDialogAction
+                                    <AlertDialogCloseAction
                                       onClick={() => moveFileToTrash(id!)}
                                       className="bg-destructive/10 text-destructive hover:bg-destructive/15"
                                     >
                                       Move to trash
-                                    </AlertDialogAction>
-                                    <AlertDialogAction
+                                    </AlertDialogCloseAction>
+                                    <AlertDialogCloseAction
                                       onClick={() => deleteFileHandler(id!)}
                                       className={buttonVariants({
                                         variant: "destructive",
                                       })}
                                     >
                                       Delete
-                                    </AlertDialogAction>
+                                    </AlertDialogCloseAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
