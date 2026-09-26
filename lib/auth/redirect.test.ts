@@ -20,4 +20,11 @@ describe("getSafeRedirectPath", () => {
       "/dashboard",
     );
   });
+
+  it("rejects backslash and control-character paths", () => {
+    expect(getSafeRedirectPath("/\\evil.test", "/dashboard")).toBe("/dashboard");
+    expect(getSafeRedirectPath("/dashboard%0a/evil", "/dashboard")).toBe(
+      "/dashboard",
+    );
+  });
 });

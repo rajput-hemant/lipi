@@ -5,12 +5,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 import type { NextRequest } from "next/server";
 
-import {
-  authRoutes,
-  DEFAULT_LOGIN_REDIRECT,
-  publicRoutes,
-} from "./config/routes";
-import { getSafeRedirectPath } from "./lib/auth/redirect";
+import { authRoutes, publicRoutes } from "./config/routes";
 import { env } from "./lib/env";
 
 const ratelimit = new Ratelimit({
@@ -53,12 +48,6 @@ export async function proxy(req: NextRequest) {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
 
   if (isAuthRoute) {
-    if (sessionToken) {
-      const from = nextUrl.searchParams.get("from");
-      const destination = getSafeRedirectPath(from, DEFAULT_LOGIN_REDIRECT);
-      return NextResponse.redirect(new URL(destination, nextUrl));
-    }
-
     return NextResponse.next();
   }
 

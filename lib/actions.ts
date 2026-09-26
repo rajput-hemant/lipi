@@ -7,8 +7,13 @@ import { eq } from "drizzle-orm";
 import type { resetPasswordSchema } from "./validations";
 import type { z } from "zod";
 
+import {
+  findCredentialAccount,
+  resolveStoredPasswordHash,
+  upsertCredentialPassword,
+} from "./auth/credential-account";
 import { db } from "./db";
-import { betterAuthAccounts, users } from "./db/schema";
+import { users } from "./db/schema";
 
 export async function resetPassword(
   credentials: z.infer<typeof resetPasswordSchema>,
@@ -23,11 +28,11 @@ export async function resetPassword(
     throw new Error("User not found, please try signing up");
   }
 
-  const credentialAccount = await db.query.betterAuthAccounts.findFirst({
-    where: eq(betterAuthAccounts.userId, user.id),
-  });
-
-  const storedHash = credentialAccount?.password ?? user.password;
+  const credentialAccount = await findCredentialAccount(user.id);
+  const storedHash = resolveStoredPasswordHash(
+    credentialAccount?.password,
+    user.password,
+  );
 
   if (!storedHash) {
     throw new Error(
@@ -43,12 +48,7 @@ export async function resetPassword(
 
   const hashedPassword = await hash(newPassword, 10);
 
-  if (credentialAccount) {
-    await db
-      .update(betterAuthAccounts)
-      .set({ password: hashedPassword })
-      .where(eq(betterAuthAccounts.userId, user.id));
-  }
+  await upsertCredentialPassword(user.id, hashedPassword);
 
   await db
     .update(users)

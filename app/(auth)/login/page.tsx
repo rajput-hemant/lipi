@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { redirectIfAuthenticated } from "@/lib/auth/redirect-authenticated";
 import { LoginForm } from "../components/login-form";
 
 export const metadata = {
@@ -7,7 +8,14 @@ export const metadata = {
   description: "Login to access your account",
 };
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ from?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  await redirectIfAuthenticated(params.from);
+
   return (
     <div className="flex flex-col space-y-2 text-center">
       <h1 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-4xl md:text-5xl">
