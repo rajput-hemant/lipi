@@ -15,16 +15,15 @@ type AppStateProviderProps = React.PropsWithChildren<AppState>;
 export function AppStateProvider({
   children,
   user,
-  files,
-  folders,
+  documents,
 }: AppStateProviderProps) {
   const [store] = React.useState(() =>
-    createAppStore({ user, files, folders })
+    createAppStore({ user, documents }),
   );
 
   React.useEffect(() => {
-    syncAppStore(store, { user, files, folders });
-  }, [store, user, files, folders]);
+    syncAppStore(store, { user, documents });
+  }, [store, user, documents]);
 
   return (
     <AppStateContext.Provider value={store}>{children}</AppStateContext.Provider>

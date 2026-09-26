@@ -1,306 +1,127 @@
 import React from "react";
 import {
   Delete01Icon,
-  Delete02Icon,
   File01Icon,
-  Folder01Icon,
   GhostIcon,
   Undo02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
-import type { File } from "@/types/db";
+import type { Document } from "@/types/db";
 
 import { useAppState } from "@/hooks/use-app-state";
-import {
-  deleteFileFromDb,
-  deleteFolderFromDb,
-  updateFileInDb,
-  updateFolderInDb,
-} from "@/lib/db/queries";
+import { deleteDocumentPermanently, restoreDocument } from "@/lib/db/queries";
 import { Button } from "./ui/button";
 import { DialogClose, DialogFooter } from "./ui/dialog";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export function Trash() {
-  const {
-    files,
-    addFile,
-    updateFile,
-    deleteFile,
-    folders,
-    addFolder,
-    updateFolder,
-    deleteFolder,
-  } = useAppState();
+  const { documents, addDocument, updateDocument, deleteDocument } =
+    useAppState();
 
-  const trashedFiles = files.filter((file) => file.inTrash);
-  const trashedFolders = folders.filter((folder) => folder.inTrash);
+  const trashed = documents.filter((document) => document.inTrash);
 
-  async function restoreFile(fileId: string) {
-    const file = files.find((f) => f.id === fileId);
+  async function restore(documentId: string) {
+    const document = documents.find((entry) => entry.id === documentId);
 
-    if (!file) {
-      toast.error("Something went wrong", { description: "File not found." });
+    if (!document) {
+      toast.error("Something went wrong", { description: "Page not found." });
       return;
     }
 
-    const updatedFile: File = { ...file, inTrash: false };
-    updateFile(updatedFile);
+    const updated: Document = { ...document, inTrash: false };
+    updateDocument(updated);
 
-    toast.promise(updateFileInDb(updatedFile), {
-      loading: "Restoring file...",
-      success: "File restored",
-      error: "Failed to restore file",
+    toast.promise(restoreDocument(documentId), {
+      loading: "Restoring page...",
+      success: "Page restored",
+      error: "Failed to restore page",
     });
   }
 
-  async function restoreFolder(folderId: string) {
-    const folder = folders.find((f) => f.id === folderId);
+  async function deletePermanently(documentId: string) {
+    const document = documents.find((entry) => entry.id === documentId);
+    deleteDocument(documentId);
 
-    if (!folder) {
-      toast.error("Something went wrong", { description: "Folder not found." });
-      return;
-    }
-
-    const updatedFolder: File = { ...folder, inTrash: false };
-    updateFolder(updatedFolder);
-
-    toast.promise(updateFolderInDb(updatedFolder), {
-      loading: "Restoring folder...",
-      success: "Folder restored",
-      error: "Failed to restore folder",
-    });
-  }
-
-  async function deleteFileHandler(fileId: string) {
-    const file = files.find((f) => f.id === fileId);
-    deleteFile(fileId);
-
-    toast.promise(deleteFileFromDb(fileId), {
-      loading: "Deleting file...",
-      success: "File deleted permanently.",
+    toast.promise(deleteDocumentPermanently(documentId), {
+      loading: "Deleting page...",
+      success: "Page deleted permanently.",
       error: () => {
-        addFile(file!);
-        return "Something went wrong! Unable to delete file.";
+        if (document) addDocument(document);
+        return "Something went wrong! Unable to delete page.";
       },
     });
-  }
-
-  async function deleteFolderHandler(folderId: string) {
-    const folder = folders.find((f) => f.id === folderId);
-    deleteFolder(folderId);
-
-    toast.promise(deleteFolderFromDb(folderId), {
-      loading: "Deleting folder...",
-      success: "Folder deleted permanently.",
-      error: () => {
-        addFolder(folder!);
-        return "Something went wrong! Unable to delete folder.";
-      },
-    });
-  }
-
-  async function clearTrash() {
-    Promise.all(trashedFiles.map((f) => deleteFileHandler(f.id!)));
-    Promise.all(trashedFolders.map((f) => deleteFolderHandler(f.id!)));
   }
 
   return (
-    <React.Fragment>
-      <div className="flex flex-col gap-4 p-4">
-        <h3 className="font-heading text-3xl drop-shadow-md">
-          Trashed Folders
-        </h3>
+    <div className="flex h-full flex-col gap-2">
+      <p className="px-4 text-sm font-medium text-muted-foreground">Trash</p>
 
-        {trashedFolders.length > 0 ?
-          <ScrollArea>
-            <div className="mb-6 flex h-full gap-4">
-              {trashedFolders.map((folder) => (
-                <div
-                  key={folder.id}
-                  title={folder.title}
-                  className="size-44 space-y-4"
-                >
-                  <div className="group relative rounded-md border shadow">
-                    <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
-                      {folder.iconId ?
-                        folder.iconId
-                      : <HugeiconsIcon
-                          icon={Folder01Icon}
-                          strokeWidth={2}
-                          size={56}
-                        />
+      {trashed.length ?
+        <ScrollArea className="h-64 px-4">
+          <ul className="space-y-1">
+            {trashed.map((document) => (
+              <li
+                key={document.id}
+                className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5"
+              >
+                <span className="flex min-w-0 items-center gap-2 truncate text-sm">
+                  {document.icon ?
+                    document.icon
+                  : <HugeiconsIcon icon={File01Icon} strokeWidth={2} className="size-4" />
+                  }
+                  {document.title}
+                </span>
+
+                <div className="flex shrink-0 gap-1">
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-7"
+                          onClick={() => restore(document.id!)}
+                        >
+                          <HugeiconsIcon icon={Undo02Icon} strokeWidth={2} className="size-4" />
+                        </Button>
                       }
-                    </div>
+                    />
+                    <TooltipContent>Restore</TooltipContent>
+                  </Tooltip>
 
-                    <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => restoreFolder(folder.id!)}
-                            >
-                              <HugeiconsIcon
-                                icon={Undo02Icon}
-                                strokeWidth={2}
-                                size={20}
-                              />
-                            </Button>
-                          }
-                        />
-
-                        <TooltipContent>Restore</TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              size="icon"
-                              variant="destructive"
-                              onClick={() => deleteFolderHandler(folder.id!)}
-                            >
-                              <HugeiconsIcon
-                                icon={Delete02Icon}
-                                strokeWidth={2}
-                                size={20}
-                              />
-                            </Button>
-                          }
-                        />
-
-                        <TooltipContent>Delete Permanently</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
-
-                  <p className="truncate text-center font-medium">
-                    {folder.title}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        : <div className="flex flex-col items-center gap-4 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
-            <HugeiconsIcon
-              icon={GhostIcon}
-              strokeWidth={2}
-              size={32}
-              className="drop-shadow"
-            />
-            <span className="drop-shadow-sm">Nothing to show here!</span>
-          </div>
-        }
-
-        <h3 className="font-heading text-3xl drop-shadow-md">Trashed Files</h3>
-
-        {trashedFiles.length > 0 ?
-          <ScrollArea>
-            <div className="mb-6 flex h-full gap-4">
-              {trashedFiles.map((file) => (
-                <div
-                  key={file.id}
-                  title={file.title}
-                  className="size-44 space-y-4"
-                >
-                  <div className="group relative rounded-md border shadow">
-                    <div className="mx-auto flex h-36 items-center justify-center text-5xl drop-shadow-md">
-                      {file.iconId ?
-                        file.iconId
-                      : <HugeiconsIcon
-                          icon={File01Icon}
-                          strokeWidth={2}
-                          size={56}
-                        />
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="size-7 text-destructive"
+                          onClick={() => deletePermanently(document.id!)}
+                        >
+                          <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} className="size-4" />
+                        </Button>
                       }
-                    </div>
-
-                    <div className="absolute inset-0 hidden items-center justify-center space-x-2 backdrop-blur-sm group-hover:flex">
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              size="icon"
-                              variant="outline"
-                              onClick={() => restoreFile(file.id!)}
-                            >
-                              <HugeiconsIcon
-                                icon={Undo02Icon}
-                                strokeWidth={2}
-                                size={20}
-                              />
-                            </Button>
-                          }
-                        />
-
-                        <TooltipContent>Restore</TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              size="icon"
-                              variant="destructive"
-                              onClick={() => deleteFileHandler(file.id!)}
-                            >
-                              <HugeiconsIcon
-                                icon={Delete02Icon}
-                                strokeWidth={2}
-                                size={20}
-                              />
-                            </Button>
-                          }
-                        />
-
-                        <TooltipContent>Delete Permanently</TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
-
-                  <p className="truncate text-center font-medium">
-                    {file.title}
-                  </p>
+                    />
+                    <TooltipContent>Delete permanently</TooltipContent>
+                  </Tooltip>
                 </div>
-              ))}
-            </div>
-            <ScrollBar orientation="vertical" />
-          </ScrollArea>
-        : <div className="flex flex-col items-center gap-4 rounded-md border border-dashed py-10 font-medium drop-shadow-md">
-            <HugeiconsIcon
-              icon={GhostIcon}
-              strokeWidth={2}
-              size={32}
-              className="drop-shadow"
-            />
-            <span className="drop-shadow-sm">Nothing to show here!</span>
-          </div>
-        }
-      </div>
+              </li>
+            ))}
+          </ul>
+          <ScrollBar />
+        </ScrollArea>
+      : <div className="flex flex-col items-center justify-center gap-2 px-4 py-8 text-muted-foreground">
+          <HugeiconsIcon icon={GhostIcon} strokeWidth={2} size={28} />
+          <p className="text-center text-sm">Trash is empty.</p>
+        </div>
+      }
 
-      <DialogFooter>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={clearTrash}
-          disabled={!trashedFiles.length && !trashedFolders.length}
-        >
-          <HugeiconsIcon
-            icon={Delete01Icon}
-            strokeWidth={2}
-            className="mr-1 size-4"
-          />{" "}
-          Clear Trash
-        </Button>
-
-        <DialogClose render={<Button size="sm">Close</Button>} />
+      <DialogFooter className="px-4">
+        <DialogClose render={<Button variant="outline">Close</Button>} />
       </DialogFooter>
-    </React.Fragment>
+    </div>
   );
 }

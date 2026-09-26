@@ -4,6 +4,8 @@ import { createAppStore, syncAppStore } from "@/hooks/use-app-state";
 import { getGitHubStars } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
+const ts = "2026-01-01T00:00:00.000Z";
+
 describe("smoke", () => {
   it("merges class names", () => {
     expect(cn("a", false && "b", "c")).toBe("a c");
@@ -12,45 +14,46 @@ describe("smoke", () => {
   it("syncAppStore replaces workspace data", () => {
     const store = createAppStore({
       user: null,
-      files: [
+      documents: [
         {
-          id: "old-file",
+          id: "old-doc",
           title: "Old",
-          iconId: "icon",
-          data: null,
+          icon: "",
           bannerUrl: null,
+          content: null,
           workspaceId: "ws-a",
-          folderId: "folder",
+          parentId: null,
           inTrash: false,
-          createdAt: new Date().toISOString(),
+          createdAt: ts,
+          updatedAt: ts,
         },
       ],
-      folders: [],
     });
 
-    syncAppStore(store, { user: null, files: [], folders: [] });
+    syncAppStore(store, { user: null, documents: [] });
 
-    expect(store.files).toHaveLength(0);
+    expect(store.documents).toHaveLength(0);
   });
 
   it("creates isolated valtio stores", () => {
-    const a = createAppStore({ user: null, files: [], folders: [] });
-    const b = createAppStore({ user: null, files: [], folders: [] });
+    const a = createAppStore({ user: null, documents: [] });
+    const b = createAppStore({ user: null, documents: [] });
 
-    a.addFile({
-      id: "file-a",
+    a.addDocument({
+      id: "doc-a",
       title: "A",
-      iconId: "icon",
-      data: null,
+      icon: "",
       bannerUrl: null,
+      content: null,
       workspaceId: "ws",
-      folderId: "folder",
+      parentId: null,
       inTrash: false,
-      createdAt: new Date().toISOString(),
+      createdAt: ts,
+      updatedAt: ts,
     });
 
-    expect(a.files).toHaveLength(1);
-    expect(b.files).toHaveLength(0);
+    expect(a.documents).toHaveLength(1);
+    expect(b.documents).toHaveLength(0);
   });
 
   afterEach(() => {

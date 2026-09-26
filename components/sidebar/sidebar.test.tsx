@@ -26,9 +26,11 @@ vi.mock("../settings", () => ({ Settings: () => <div /> }));
 vi.mock("../sign-out", () => ({ SignOut: () => <button>Sign out</button> }));
 vi.mock("../trash", () => ({ Trash: () => <div /> }));
 vi.mock("../workspaces", () => ({ Workspaces: () => <div /> }));
-vi.mock("./folders", () => ({ Folders: () => <div data-testid="folders" /> }));
-vi.mock("./folders-collapsed", () => ({
-  FoldersCollapsed: () => <div data-testid="folders-collapsed" />,
+vi.mock("./document-tree", () => ({
+  DocumentTree: () => <div data-testid="document-tree" />,
+}));
+vi.mock("./document-tree-collapsed", () => ({
+  DocumentTreeCollapsed: () => <div data-testid="document-tree-collapsed" />,
 }));
 
 vi.mock("../ui/avatar", () => ({
@@ -97,7 +99,7 @@ describe("sidebar navigation", () => {
       )
     ).toBe(true);
     expect(
-      container.querySelector('[data-testid="folders-collapsed"]')
+      container.querySelector('[data-testid="document-tree-collapsed"]')
     ).toBeTruthy();
   });
 
@@ -110,6 +112,6 @@ describe("sidebar navigation", () => {
       "Settings",
       "Trash",
     ]);
-    expect(container.querySelector('[data-testid="folders"]')).toBeTruthy();
+    expect(container.querySelector('[data-testid="document-tree"]')).toBeTruthy();
   });
 });

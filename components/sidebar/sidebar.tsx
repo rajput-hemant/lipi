@@ -20,8 +20,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
 import { Workspaces } from "../workspaces";
-import { Folders } from "./folders";
-import { FoldersCollapsed } from "./folders-collapsed";
+import { DocumentTree } from "./document-tree";
+import { DocumentTreeCollapsed } from "./document-tree-collapsed";
 import { NavDialog } from "./nav-dialog";
 
 type SidebarProps = React.ComponentProps<"aside"> & {
@@ -111,9 +111,16 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
 
         <Separator className={isCollapsed ? "block" : "hidden"} />
 
-        {isCollapsed ?
-          <FoldersCollapsed />
-        : <Folders />}
+        <div
+          data-testid={
+            isCollapsed ? "document-tree-collapsed" : "document-tree"
+          }
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
+        >
+          {isCollapsed ?
+            <DocumentTreeCollapsed />
+          : <DocumentTree />}
+        </div>
 
         <div
           className={cn(

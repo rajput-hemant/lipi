@@ -2,22 +2,17 @@ import React from "react";
 import { proxy, useSnapshot } from "valtio";
 
 import type { SessionUser } from "@/lib/auth/types";
-import type { File, Folder } from "@/types/db";
+import type { Document } from "@/types/db";
 
 export type AppState = {
   user: SessionUser | null;
-  files: File[];
-  folders: Folder[];
+  documents: Document[];
 };
 
 export type AppAction = {
-  addFile: (file: File) => void;
-  updateFile: (file: File) => void;
-  deleteFile: (fileId: string) => void;
-
-  addFolder: (folder: Folder) => void;
-  updateFolder: (folder: Folder) => void;
-  deleteFolder: (folderId: string) => void;
+  addDocument: (document: Document) => void;
+  updateDocument: (document: Document) => void;
+  deleteDocument: (documentId: string) => void;
 };
 
 export type Store = AppState & AppAction;
@@ -25,29 +20,18 @@ export type Store = AppState & AppAction;
 export function createAppStore(initial: AppState): Store {
   const store = proxy<Store>({
     user: initial.user,
-    files: initial.files,
-    folders: initial.folders,
+    documents: initial.documents,
 
-    addFile(file) {
-      store.files.push(file);
+    addDocument(document) {
+      store.documents.push(document);
     },
-    updateFile(file) {
-      store.files = store.files.map((f) => (f.id === file.id ? file : f));
-    },
-    deleteFile(id) {
-      store.files = store.files.filter((f) => f.id !== id);
-    },
-
-    addFolder(folder) {
-      store.folders.push(folder);
-    },
-    updateFolder(folder: Folder) {
-      store.folders = store.folders.map((f) =>
-        f.id === folder.id ? folder : f
+    updateDocument(document) {
+      store.documents = store.documents.map((entry) =>
+        entry.id === document.id ? document : entry,
       );
     },
-    deleteFolder(id) {
-      store.folders = store.folders.filter((f) => f.id !== id);
+    deleteDocument(id) {
+      store.documents = store.documents.filter((entry) => entry.id !== id);
     },
   });
 
@@ -56,8 +40,7 @@ export function createAppStore(initial: AppState): Store {
 
 export function syncAppStore(store: Store, state: AppState) {
   store.user = state.user;
-  store.files = state.files;
-  store.folders = state.folders;
+  store.documents = state.documents;
 }
 
 export const AppStateContext = React.createContext<Store | null>(null);
