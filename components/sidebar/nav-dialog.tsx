@@ -4,6 +4,7 @@ import type { IconSvgElement } from "@hugeicons/react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -23,25 +24,33 @@ type NavDialogProps = {
 
 export function NavDialog(props: NavDialogProps) {
   const { title, description, icon, isCollapsed, children } = props;
+  const trigger = (
+    <DialogTrigger
+      render={
+        <Button
+          size={isCollapsed ? "icon" : "sm"}
+          variant="ghost"
+          className={cn(!isCollapsed && "w-full justify-start")}
+        >
+          <HugeiconsIcon
+            icon={icon}
+            strokeWidth={2}
+            className={cn(isCollapsed ? "size-5" : "mr-2 size-4 shrink-0")}
+          />
+          {!isCollapsed && title}
+        </Button>
+      }
+    />
+  );
 
   return (
     <Dialog>
-      <DialogTrigger
-        render={
-          <Button
-            size={isCollapsed ? "icon" : "sm"}
-            variant="ghost"
-            className={cn(!isCollapsed && "w-full justify-start")}
-          >
-            <HugeiconsIcon
-              icon={icon}
-              strokeWidth={2}
-              className={cn(isCollapsed ? "size-5" : "mr-2 size-4 shrink-0")}
-            />
-            {!isCollapsed && title}
-          </Button>
-        }
-      />
+      {isCollapsed ?
+        <Tooltip delayDuration={0}>
+          <TooltipTrigger render={trigger} />
+          <TooltipContent side="right">{title}</TooltipContent>
+        </Tooltip>
+      : trigger}
 
       <DialogContent className="max-w-4xl">
         <DialogHeader>

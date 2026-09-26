@@ -19,7 +19,6 @@ import { Trash } from "../trash";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Separator } from "../ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Workspaces } from "../workspaces";
 import { Folders } from "./folders";
 import { FoldersCollapsed } from "./folders-collapsed";
@@ -90,19 +89,15 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
         <nav className="flex flex-col items-center justify-center gap-1 px-4">
           {navItems.map(({ title, description, icon, content: Content }) =>
             isCollapsed ?
-              <Tooltip key={title} delayDuration={0}>
-                <TooltipTrigger render={<span className="contents" />}>
-                  <NavDialog
-                    title={title}
-                    icon={icon}
-                    description={description}
-                    isCollapsed
-                  >
-                    <Content />
-                  </NavDialog>
-                </TooltipTrigger>
-                <TooltipContent side="right">{title}</TooltipContent>
-              </Tooltip>
+              <NavDialog
+                key={title}
+                title={title}
+                icon={icon}
+                description={description}
+                isCollapsed
+              >
+                <Content />
+              </NavDialog>
             : <NavDialog
                 key={title}
                 title={title}

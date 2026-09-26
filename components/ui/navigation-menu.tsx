@@ -8,20 +8,26 @@ function NavigationMenu({
   align = "start",
   className,
   children,
+  orientation = "horizontal",
   ...props
 }: NavigationMenuPrimitive.Root.Props &
   Pick<NavigationMenuPrimitive.Positioner.Props, "align">) {
   return (
     <NavigationMenuPrimitive.Root
       data-slot="navigation-menu"
+      data-orientation={orientation}
       className={cn(
         "group/navigation-menu relative flex max-w-max flex-1 items-center justify-center",
         className
       )}
+      orientation={orientation}
       {...props}
     >
       {children}
-      <NavigationMenuPositioner align={align} />
+      <NavigationMenuPositioner
+        align={align}
+        side={orientation === "vertical" ? "right" : "bottom"}
+      />
     </NavigationMenuPrimitive.Root>
   );
 }
@@ -34,7 +40,7 @@ function NavigationMenuList({
     <NavigationMenuPrimitive.List
       data-slot="navigation-menu-list"
       className={cn(
-        "group flex flex-1 list-none items-center justify-center gap-0",
+        "group flex flex-1 list-none items-center justify-center gap-0 group-data-[orientation=vertical]/navigation-menu:flex-col",
         className
       )}
       {...props}

@@ -548,28 +548,27 @@ export function Folders() {
                               </Tooltip>
 
                               <AlertDialog>
-                                <AlertDialogTrigger
-                                  render={<span className="contents" />}
-                                  nativeButton={false}
-                                >
-                                  <Tooltip delayDuration={0}>
-                                    <TooltipTrigger
-                                      render={
-                                        <Button
-                                          variant="ghost"
-                                          className="size-7 p-0 text-muted-foreground hover:text-red-500"
-                                        >
-                                          <HugeiconsIcon
-                                            icon={Delete01Icon}
-                                            strokeWidth={2}
-                                            className="size-4"
-                                          />
-                                        </Button>
-                                      }
-                                    />
-                                    <TooltipContent>Delete file</TooltipContent>
-                                  </Tooltip>
-                                </AlertDialogTrigger>
+                                <Tooltip delayDuration={0}>
+                                  <TooltipTrigger
+                                    render={
+                                      <AlertDialogTrigger
+                                        render={
+                                          <Button
+                                            variant="ghost"
+                                            className="size-7 p-0 text-muted-foreground hover:text-red-500"
+                                          >
+                                            <HugeiconsIcon
+                                              icon={Delete01Icon}
+                                              strokeWidth={2}
+                                              className="size-4"
+                                            />
+                                          </Button>
+                                        }
+                                      />
+                                    }
+                                  />
+                                  <TooltipContent>Delete file</TooltipContent>
+                                </Tooltip>
 
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
