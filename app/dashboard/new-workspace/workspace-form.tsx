@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import type { User } from "next-auth";
+import type { SessionUser } from "@/lib/auth/types";
 
 import { EmojiPicker } from "@/components/emoji-picker";
 import { useSubscriptionModal } from "@/components/subscription-modal-provider";
@@ -30,7 +30,7 @@ const workspaceSchema = z.object({
 
 type FormData = z.infer<typeof workspaceSchema>;
 
-type WorkspaceFormProps = { user: User };
+type WorkspaceFormProps = { user: SessionUser };
 
 export function WorkspaceForm({ user }: WorkspaceFormProps) {
   const router = useRouter();

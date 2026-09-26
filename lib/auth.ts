@@ -1,77 +1,74 @@
+import { db } from "@/lib/db";
+import { nextCookies } from "better-auth/next-js";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { eq } from "drizzle-orm";
-import NextAuth from "next-auth";
+import { cache } from "react";
 
-import { authConfig } from "@/config/auth";
-import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
-import { db } from "./db";
-import { users } from "./db/schema";
+import { createAuth } from "./auth/create-auth";
+import type { SessionUser } from "./auth/types";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  ...authConfig,
+let authInstance: ReturnType<typeof createAuth> | undefined;
 
-  adapter: DrizzleAdapter(db),
+export function getAuth(): ReturnType<typeof createAuth> {
+  if (!authInstance) {
+    authInstance = createAuth(db, { plugins: [nextCookies()] });
+  }
+  return authInstance;
+}
 
-  session: {
-    strategy: "jwt",
+export const auth = new Proxy({} as ReturnType<typeof createAuth>, {
+  get(_target, prop) {
+    const instance = getAuth() as unknown as Record<string | symbol, unknown>;
+    const value = instance[prop];
+    return typeof value === "function" ? value.bind(instance) : value;
   },
-
-  pages: {
-    signIn: "/login",
-    newUser: "/signup",
-  },
-
-  events: {
-    linkAccount: async ({ user }) => {
-      await db
-        .update(users)
-        .set({ emailVerified: new Date() })
-        .where(eq(users.id, user.id!));
-    },
-  },
-
-  callbacks: {
-    session: async ({ session, token }) => {
-      if (token.sub && session.user) {
-        session.user.id = token.sub;
-        session.user.username = token.username;
-      }
-
-      return session;
-    },
-
-    jwt: async ({ token }) => {
-      const user = await db.query.users.findFirst({
-        where: (u, { eq }) => eq(u.id, token.sub!),
-      });
-
-      if (user) {
-        token.username = user.username;
-      }
-
-      return token;
-    },
-
-    redirect: () => DEFAULT_LOGIN_REDIRECT,
-  },
+  has: (_target, prop) => prop in (getAuth() as object),
 });
 
-/**
- * Gets the current user from the server session
- *
- * @returns The current user
- */
-export const getCurrentUser = async () => {
-  const session = await auth();
-  return session?.user;
-};
+export type { SessionUser as User } from "./auth/types";
 
-/**
- * Checks if the current user is authenticated
- * If not, redirects to the login page
- */
+function isMissingSecretError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.name === "BetterAuthError" &&
+    (error.message.includes("You are using the default secret") ||
+      error.message.includes("BETTER_AUTH_SECRET is missing"))
+  );
+}
+
+function isValidatedProduction(): boolean {
+  return (
+    process.env.NODE_ENV === "production" &&
+    process.env.SKIP_ENV_VALIDATION !== "true"
+  );
+}
+
+export const getSession = cache(async () => {
+  try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+    return session ?? null;
+  } catch (error) {
+    if (!isMissingSecretError(error) || isValidatedProduction()) throw error;
+    return null;
+  }
+});
+
+export const getCurrentUser = cache(async (): Promise<SessionUser | undefined> => {
+  const session = await getSession();
+  if (!session?.user) return undefined;
+
+  return {
+    id: session.user.id,
+    name: session.user.name,
+    email: session.user.email,
+    image: session.user.image,
+    username: session.user.username,
+  };
+});
+
 export const checkAuth = async () => {
-  const session = await auth();
+  const session = await getSession();
   if (!session) redirect("/login");
 };

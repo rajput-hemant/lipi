@@ -2,56 +2,46 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 
 import { GitHub, Google } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { signIn } from "@/lib/auth/auth-client";
 
 type OAuthButtonProps = {
   isFormDisabled: boolean;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
+  callbackURL: string;
 };
 
 export function OAuthButtons(props: OAuthButtonProps) {
-  const { isFormDisabled, setIsSubmitting } = props;
+  const { isFormDisabled, setIsSubmitting, callbackURL } = props;
 
   const [oauthLoading, setOauthLoading] = React.useState<"google" | "github">();
 
-  function signInToaster(promise: Promise<unknown>) {
-    toast.promise(promise, {
-      loading: "Signing in...",
-      success: "You have been signed in.",
-      error: "Something went wrong.",
-      finally: () => {
-        setIsSubmitting(false);
-        setOauthLoading(undefined);
-      },
-    });
-  }
-  async function googleSignInHandler() {
-    setOauthLoading("google");
+  async function oauthSignIn(provider: "google" | "github") {
+    setOauthLoading(provider);
     setIsSubmitting(true);
 
     try {
-      signInToaster(signIn("google"));
+      const result = await signIn.social({
+        provider,
+        callbackURL,
+      });
+
+      if (result.error) {
+        toast.error(result.error.message ?? "Something went wrong.");
+      }
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
+      toast.error("Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
+      setOauthLoading(undefined);
     }
   }
 
-  async function githubSignInHandler() {
-    setOauthLoading("github");
-    setIsSubmitting(true);
-
-    try {
-      signInToaster(signIn("github"));
-    } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
-    }
-  }
   return (
     <>
       <div className="relative py-2">
@@ -65,7 +55,7 @@ export function OAuthButtons(props: OAuthButtonProps) {
       <div className="mt-6 flex w-full flex-col space-y-2 text-white">
         <Button
           size="sm"
-          onClick={googleSignInHandler}
+          onClick={() => oauthSignIn("google")}
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
         >
@@ -77,7 +67,7 @@ export function OAuthButtons(props: OAuthButtonProps) {
 
         <Button
           size="sm"
-          onClick={githubSignInHandler}
+          onClick={() => oauthSignIn("github")}
           disabled={isFormDisabled}
           className="w-full font-semibold shadow-md"
         >

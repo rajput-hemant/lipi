@@ -24,7 +24,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { resetPassword } from "@/lib/actions";
+import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { resetPasswordSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -43,6 +45,10 @@ export function ResetPasswordForm() {
 
   const searchParams = useSearchParams();
   const authError = searchParams.get("error");
+  const callbackURL = getSafeRedirectPath(
+    searchParams.get("from"),
+    DEFAULT_LOGIN_REDIRECT,
+  );
 
   if (authError === "OAuthAccountNotLinked") {
     toast.error("OAuth Account Not Linked", {
@@ -200,6 +206,7 @@ export function ResetPasswordForm() {
       <OAuthButtons
         isFormDisabled={isSubmitting}
         setIsSubmitting={setIsSubmitting}
+        callbackURL={callbackURL}
       />
     </Form>
   );

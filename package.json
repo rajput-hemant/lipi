@@ -25,8 +25,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@auth/core": "^0.41.3",
-    "@auth/drizzle-adapter": "^1.11.3",
     "@hookform/resolvers": "^5.9.1",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -51,6 +49,7 @@
     "@vercel/analytics": "^1.4.1",
     "babel-plugin-react-compiler": "^19.0.0-beta-df7b47d-20241124",
     "bcryptjs": "^3.0.3",
+    "better-auth": "^1.6.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cookies-next": "^6.0.0",
@@ -58,7 +57,6 @@
     "emoji-picker-react": "^4.12.0",
     "lucide-react": "^0.462.0",
     "next": "16.3.6",
-    "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.3",
     "postgres": "3.4.9",
     "react": "19.3.0",

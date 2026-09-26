@@ -41,7 +41,7 @@ const techs: Tech[] = [
   },
   {
     title: "Authentication",
-    description: "Authentication using NextAuth.js and middlewares.",
+    description: "Authentication using Better Auth and proxy middleware.",
     icon: Auth,
   },
   {

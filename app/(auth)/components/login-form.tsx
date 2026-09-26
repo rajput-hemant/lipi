@@ -2,10 +2,9 @@
 
 import React from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AtSign, Eye, EyeOff, Fingerprint, Loader2, Mail } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -26,6 +25,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
+import { signIn } from "@/lib/auth/auth-client";
+import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { loginSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -38,12 +40,17 @@ const defaultValues: FormData = {
 };
 
 export function LoginForm() {
+  const router = useRouter();
   const [isEmailMode, setIsEmailMode] = React.useState(true);
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const searchParams = useSearchParams();
   const authError = searchParams.get("error");
+  const callbackURL = getSafeRedirectPath(
+    searchParams.get("from"),
+    DEFAULT_LOGIN_REDIRECT,
+  );
 
   if (authError === "OAuthAccountNotLinked") {
     toast.error("OAuth Account Not Linked", {
@@ -60,15 +67,33 @@ export function LoginForm() {
     setIsSubmitting(true);
 
     try {
-      toast.promise(signIn("credentials", { ...formData }), {
-        loading: "Signing in...",
-        success: "You have been signed in.",
-        error: "Something went wrong.",
-        finally: () => setIsSubmitting(false),
-      });
+      const result =
+        formData.type === "email" ?
+          await signIn.email({
+            email: formData.email,
+            password: formData.password,
+            callbackURL,
+          })
+        : await signIn.username({
+            username: formData.username,
+            password: formData.password,
+            callbackURL,
+          });
+
+      if (result.error) {
+        toast.error(result.error.message ?? "Something went wrong.");
+        return;
+      }
+
+      toast.success("You have been signed in.");
+      router.push(callbackURL);
+      router.refresh();
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
+      toast.error("Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -196,6 +221,7 @@ export function LoginForm() {
       <OAuthButtons
         isFormDisabled={isSubmitting}
         setIsSubmitting={setIsSubmitting}
+        callbackURL={callbackURL}
       />
     </Form>
   );

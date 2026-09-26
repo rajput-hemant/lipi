@@ -1,6 +1,6 @@
 {
   "hasSrc": false,
-  "packages": ["shadcn-ui", "drizzle", "next-auth"],
+  "packages": ["shadcn-ui", "drizzle", "better-auth"],
   "preferredPackageManager": "bun",
   "t3": false,
   "alias": "@",
@@ -9,5 +9,5 @@
   "driver": "pg",
   "provider": "supabase",
   "orm": "drizzle",
-  "auth": "next-auth"
+  "auth": "better-auth"
 }

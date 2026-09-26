@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2, Mail } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -24,7 +24,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { createNewAccount } from "@/lib/actions";
+import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
+import { signUp } from "@/lib/auth/auth-client";
+import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { signUpSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -37,12 +39,17 @@ const defaultValues: FormData = {
 };
 
 export function SignUpForm() {
+  const router = useRouter();
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isConfirmPassVisible, setIsConfirmPassVisible] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const searchParams = useSearchParams();
   const authError = searchParams.get("error");
+  const callbackURL = getSafeRedirectPath(
+    searchParams.get("from"),
+    DEFAULT_LOGIN_REDIRECT,
+  );
 
   if (authError === "OAuthAccountNotLinked") {
     toast.error("OAuth Account Not Linked", {
@@ -59,15 +66,27 @@ export function SignUpForm() {
     setIsSubmitting(true);
 
     try {
-      toast.promise(createNewAccount({ ...formData }), {
-        loading: "Creating Account...",
-        success: "Account Created Successfully",
-        error: (error) => error.message,
-        finally: () => setIsSubmitting(false),
+      const result = await signUp.email({
+        email: formData.email,
+        password: formData.password,
+        name: formData.email.split("@")[0] ?? "",
+        callbackURL,
       });
+
+      if (result.error) {
+        toast.error(result.error.message ?? "Something went wrong.");
+        return;
+      }
+
+      toast.success("Account created successfully");
+      router.push(callbackURL);
+      router.refresh();
     } catch (error) {
       const err = error as Error;
       console.error(err.message);
+      toast.error(err.message);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -204,6 +223,7 @@ export function SignUpForm() {
       <OAuthButtons
         isFormDisabled={isSubmitting}
         setIsSubmitting={setIsSubmitting}
+        callbackURL={callbackURL}
       />
     </Form>
   );

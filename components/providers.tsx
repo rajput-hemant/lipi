@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 
 import type { ThemeProviderProps } from "next-themes";
@@ -19,9 +18,7 @@ export const Providers: React.FCC<{
       disableTransitionOnChange
       {...theme}
     >
-      <SessionProvider>
-        <TooltipProvider>{children}</TooltipProvider>
-      </SessionProvider>
+      <TooltipProvider>{children}</TooltipProvider>
     </ThemeProvider>
   );
 };

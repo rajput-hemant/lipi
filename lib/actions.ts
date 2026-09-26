@@ -1,64 +1,54 @@
 "use server";
 
-import { randomUUID } from "crypto";
 import { redirect } from "next/navigation";
 import { compare, hash } from "bcryptjs";
 import { eq } from "drizzle-orm";
 
-import type { resetPasswordSchema, signUpSchema } from "./validations";
+import type { resetPasswordSchema } from "./validations";
 import type { z } from "zod";
 
 import { db } from "./db";
-import { users } from "./db/schema";
-
-export async function createNewAccount(
-  credentials: z.infer<typeof signUpSchema>
-) {
-  const { email, password } = credentials;
-
-  const hashedPassword = await hash(password, 10);
-
-  const user = await db.query.users.findFirst({
-    where: (u, { eq }) => eq(u.email, email),
-  });
-
-  if (user) {
-    throw new Error("Email already exists, please try logging in");
-  }
-
-  await db
-    .insert(users)
-    .values({ username: randomUUID(), email, password: hashedPassword });
-
-  redirect("/");
-}
+import { betterAuthAccounts, users } from "./db/schema";
 
 export async function resetPassword(
-  credentials: z.infer<typeof resetPasswordSchema>
+  credentials: z.infer<typeof resetPasswordSchema>,
 ) {
   const { email, password, newPassword } = credentials;
 
   const user = await db.query.users.findFirst({
-    where: (u, { eq }) => eq(u.email, email),
+    where: (u, { eq: equals }) => equals(u.email, email),
   });
 
   if (!user) {
     throw new Error("User not found, please try signing up");
   }
 
-  if (!user.password) {
+  const credentialAccount = await db.query.betterAuthAccounts.findFirst({
+    where: eq(betterAuthAccounts.userId, user.id),
+  });
+
+  const storedHash = credentialAccount?.password ?? user.password;
+
+  if (!storedHash) {
     throw new Error(
-      "User does not have a password, you might have signed up with a social account"
+      "User does not have a password, you might have signed up with a social account",
     );
   }
 
-  const isPasswordValid = await compare(password, user.password);
+  const isPasswordValid = await compare(password, storedHash);
 
   if (!isPasswordValid) {
     throw new Error("Previous password is incorrect, please try again");
   }
 
   const hashedPassword = await hash(newPassword, 10);
+
+  if (credentialAccount) {
+    await db
+      .update(betterAuthAccounts)
+      .set({ password: hashedPassword })
+      .where(eq(betterAuthAccounts.userId, user.id));
+  }
 
   await db
     .update(users)

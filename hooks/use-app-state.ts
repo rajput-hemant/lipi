@@ -1,11 +1,11 @@
 import React from "react";
 import { proxy, useSnapshot } from "valtio";
 
-import type { User } from "next-auth";
+import type { SessionUser } from "@/lib/auth/types";
 import type { File, Folder } from "@/types/db";
 
 export type AppState = {
-  user: User | null;
+  user: SessionUser | null;
   files: File[];
   folders: Folder[];
 };
