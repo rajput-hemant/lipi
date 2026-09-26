@@ -11,5 +11,6 @@
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils"
-  }
+  },
+  "iconLibrary": "hugeicons"
 }

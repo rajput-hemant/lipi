@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
-import { Check, ChevronRight, Circle } from "lucide-react";
+import { Circle } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Tick02Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 const ContextMenu = ContextMenuPrimitive.Root;
 
@@ -34,7 +36,7 @@ const ContextMenuSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className="ml-auto size-4" />
+    <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-auto size-4" />
   </ContextMenuPrimitive.SubTrigger>
 ));
 ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
@@ -104,7 +106,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
   >
     <span className="absolute left-2 flex size-3.5 items-center justify-center">
       <ContextMenuPrimitive.ItemIndicator>
-        <Check className="size-4" />
+        <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-4" />
       </ContextMenuPrimitive.ItemIndicator>
     </span>
     {children}
