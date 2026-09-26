@@ -8,17 +8,14 @@ const isProd = process.env.NODE_ENV === "production";
 
 const config: NextConfig = {
   reactStrictMode: true,
+  cacheComponents: true,
+  reactCompiler: isProd,
   images: {
     remotePatterns: [],
     unoptimized: !isDocker,
   },
-  experimental: {
-    ppr: true,
-    reactCompiler: isProd,
-    // ...
-  },
 
-  output: isDocker ? "standalone" : undefined /* ... */,
+  output: isDocker ? "standalone" : undefined,
 };
 
 export default config;
