@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  foreignKey,
   integer,
   jsonb,
   text,
@@ -30,44 +31,40 @@ export const workspaces = createTable("workspaces", {
     .notNull(),
 });
 
-export const folders = createTable("folders", {
-  id: uuid("id").defaultRandom().primaryKey().notNull(),
-  title: text("title").notNull(),
-  iconId: text("icon_id").notNull(),
-  data: text("data"),
-  bannerUrl: text("banner_url"),
-  workspaceId: uuid("workspace_id").references(() => workspaces.id, {
-    onDelete: "cascade",
+export const documents = createTable(
+  "documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    parentId: uuid("parent_id"),
+    title: text("title").notNull(),
+    icon: text("icon").notNull().default(""),
+    bannerUrl: text("banner_url"),
+    content: text("content"),
+    inTrash: boolean("in_trash").notNull().default(false),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    documentsParentIdFkey: foreignKey({
+      columns: [table.parentId],
+      foreignColumns: [table.id],
+      name: "lipi_documents_parent_id_lipi_documents_id_fk",
+    }).onDelete("cascade"),
   }),
-  inTrash: boolean("in_trash").notNull().default(false),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
-});
-
-export const files = createTable("files", {
-  id: uuid("id").defaultRandom().primaryKey().notNull(),
-  title: text("title").notNull(),
-  iconId: text("icon_id").notNull(),
-  data: text("data"),
-  bannerUrl: text("banner_url"),
-  workspaceId: uuid("workspace_id").references(() => workspaces.id, {
-    onDelete: "cascade",
-  }),
-  folderId: uuid("folder_id").references(() => folders.id, {
-    onDelete: "cascade",
-  }),
-  inTrash: boolean("in_trash").notNull().default(false),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
-});
+);
 
 export const billingAccounts = createTable("accounts", {
   userId: uuid("user_id")

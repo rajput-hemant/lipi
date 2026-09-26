@@ -43,6 +43,13 @@
       "when": 1714991011079,
       "tag": "0005_broken_the_professor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790448532311,
+      "tag": "0006_documents_unified_tree",
+      "breakpoints": true
     }
   ]
 }

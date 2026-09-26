@@ -2,8 +2,7 @@ import type {
   billingAccounts,
   collaborators,
   customers,
-  files,
-  folders,
+  documents,
   prices,
   products,
   subscriptions,
@@ -13,8 +12,7 @@ import type {
 
 export type User = typeof users.$inferInsert;
 export type Workspace = typeof workspaces.$inferInsert;
-export type Folder = typeof folders.$inferInsert;
-export type File = typeof files.$inferInsert;
+export type Document = typeof documents.$inferInsert;
 export type Account = typeof billingAccounts.$inferInsert;
 export type Customer = typeof customers.$inferInsert;
 export type Product = typeof products.$inferInsert;

@@ -5,7 +5,7 @@ import { and, eq } from "drizzle-orm";
 import { getCurrentUser } from "@/lib/auth";
 
 import { db } from "..";
-import { collaborators, files, folders, workspaces } from "../schema";
+import { collaborators, documents, workspaces } from "../schema";
 
 export class MutationAuthError extends Error {
   constructor(message = "Unauthorized") {
@@ -65,30 +65,17 @@ export async function assertWorkspaceAccess(
   return workspace;
 }
 
-export async function assertFileAccess(userId: string, fileId: string) {
-  const file = await db.query.files.findFirst({
-    where: eq(files.id, fileId),
+export async function assertDocumentAccess(userId: string, documentId: string) {
+  const document = await db.query.documents.findFirst({
+    where: eq(documents.id, documentId),
   });
 
-  if (!file) {
-    throw new MutationAuthError("File not found");
+  if (!document) {
+    throw new MutationAuthError("Document not found");
   }
 
-  await assertWorkspaceAccess(userId, file.workspaceId);
-  return file;
-}
-
-export async function assertFolderAccess(userId: string, folderId: string) {
-  const folder = await db.query.folders.findFirst({
-    where: eq(folders.id, folderId),
-  });
-
-  if (!folder) {
-    throw new MutationAuthError("Folder not found");
-  }
-
-  await assertWorkspaceAccess(userId, folder.workspaceId);
-  return folder;
+  await assertWorkspaceAccess(userId, document.workspaceId);
+  return document;
 }
 
 export async function authorizeWorkspaceMutation(
@@ -99,14 +86,8 @@ export async function authorizeWorkspaceMutation(
   return user;
 }
 
-export async function authorizeFileMutation(fileId: string) {
+export async function authorizeDocumentMutation(documentId: string) {
   const user = await requireAuthenticatedUser();
-  await assertFileAccess(user.id, fileId);
-  return user;
-}
-
-export async function authorizeFolderMutation(folderId: string) {
-  const user = await requireAuthenticatedUser();
-  await assertFolderAccess(user.id, folderId);
+  await assertDocumentAccess(user.id, documentId);
   return user;
 }

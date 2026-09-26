@@ -13,22 +13,15 @@ export {
   getSharedWorkspaces,
 } from "./workspace";
 export {
-  createFolder,
-  createFolderInDb,
-  deleteFolder,
-  deleteFolderFromDb,
-  getFolders,
-  getFoldersFromDb,
-  updateFolder,
-  updateFolderInDb,
-} from "./folder";
-export {
-  createFile,
-  deleteFile,
-  deleteFileFromDb,
-  getFiles,
-  getFilesFromDb,
-  updateFile,
-  updateFileInDb,
-} from "./file";
+  createDocument,
+  deleteDocumentPermanently,
+  duplicateDocument,
+  getDocumentBreadcrumbs,
+  getDocuments,
+  getDocumentsFromDb,
+  restoreDocument,
+  softDeleteDocumentTree,
+  updateDocument,
+  updateDocumentInDb,
+} from "./document";
 export { getUserSubscription } from "./subscription";
