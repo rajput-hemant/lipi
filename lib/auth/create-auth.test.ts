@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from "vitest";
 import { compare, hash } from "bcryptjs";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import {
   betterAuthAccounts,
@@ -7,7 +7,6 @@ import {
   betterAuthVerifications,
   users,
 } from "@/lib/db/schema";
-
 import { createAuth } from "./create-auth";
 
 function makeFakeDb() {
@@ -36,7 +35,7 @@ describe("Better Auth configuration", () => {
     const auth = createAuth(makeFakeDb());
     expect(auth.options.account?.accountLinking?.enabled).toBe(false);
     expect(auth.options.account?.accountLinking?.disableImplicitLinking).toBe(
-      true,
+      true
     );
   });
 
@@ -44,7 +43,7 @@ describe("Better Auth configuration", () => {
     const auth = createAuth(makeFakeDb());
     expect(auth.options.user?.fields?.name).toBe("betterAuthName");
     expect(auth.options.user?.fields?.emailVerified).toBe(
-      "emailVerifiedBoolean",
+      "emailVerifiedBoolean"
     );
   });
 
@@ -55,11 +54,11 @@ describe("Better Auth configuration", () => {
     expect(passwordConfig?.verify).toBeTypeOf("function");
 
     const hashed = await passwordConfig!.hash!("hunter2");
-    expect(await passwordConfig!.verify!({ password: "hunter2", hash: hashed })).toBe(
-      true,
-    );
     expect(
-      await passwordConfig!.verify!({ password: "wrong", hash: hashed }),
+      await passwordConfig!.verify!({ password: "hunter2", hash: hashed })
+    ).toBe(true);
+    expect(
+      await passwordConfig!.verify!({ password: "wrong", hash: hashed })
     ).toBe(false);
     expect(await compare("hunter2", hashed)).toBe(true);
   });

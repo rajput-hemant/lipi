@@ -18,14 +18,19 @@ export function DocumentBreadcrumbs() {
 
   if (!workspaceId || !documentId) {
     return (
-      <nav aria-label="Breadcrumb" className="ml-4 text-sm text-muted-foreground">
+      <nav
+        aria-label="Breadcrumb"
+        className="ml-4 text-sm text-muted-foreground"
+      >
         Workspace
       </nav>
     );
   }
 
   const activeDocuments = documents.filter((document) => !document.inTrash);
-  const current = activeDocuments.find((document) => document.id === documentId);
+  const current = activeDocuments.find(
+    (document) => document.id === documentId
+  );
 
   if (!current) {
     return null;
@@ -33,12 +38,15 @@ export function DocumentBreadcrumbs() {
 
   const ancestors = getDocumentAncestors(
     toDocumentRecords(activeDocuments),
-    documentId,
+    documentId
   );
   const chain = [...ancestors, current];
 
   return (
-    <nav aria-label="Breadcrumb" className="ml-4 flex min-w-0 items-center gap-1 text-sm">
+    <nav
+      aria-label="Breadcrumb"
+      className="ml-4 flex min-w-0 items-center gap-1 text-sm"
+    >
       <Link
         href={`/dashboard/${workspaceId}`}
         className="truncate text-muted-foreground hover:text-foreground"

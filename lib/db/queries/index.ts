@@ -1,6 +1,5 @@
 export type DBResponse<T> =
-  | { data: T; error: null }
-  | { data: null; error: string };
+  { data: T; error: null } | { data: null; error: string };
 
 // NOTE:
 // avoid star export, causing warning

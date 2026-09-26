@@ -6,9 +6,7 @@ import { ensureHttpsUrl } from "./auth/ensure-https-url";
 const isProduction = process.env.NODE_ENV === "production";
 
 function requiredInProduction(message: string) {
-  return isProduction ?
-      z.string().min(1, { message })
-    : z.string().optional();
+  return isProduction ? z.string().min(1, { message }) : z.string().optional();
 }
 
 export const env = createEnv({
@@ -26,24 +24,24 @@ export const env = createEnv({
 
     AUTH_URL: z.preprocess(
       (str) => ensureHttpsUrl(process.env.VERCEL_URL) ?? str,
-      process.env.VERCEL ? z.string() : z.string().url().optional(),
+      process.env.VERCEL ? z.string() : z.string().url().optional()
     ),
 
     BETTER_AUTH_SECRET: z.string().optional(),
     BETTER_AUTH_URL: z.string().url().optional(),
 
     GOOGLE_CLIENT_ID: requiredInProduction(
-      "Google Client ID is invalid or missing",
+      "Google Client ID is invalid or missing"
     ),
     GOOGLE_CLIENT_SECRET: requiredInProduction(
-      "Google Client Secret is invalid or missing",
+      "Google Client Secret is invalid or missing"
     ),
 
     GITHUB_CLIENT_ID: requiredInProduction(
-      "Github Client ID is invalid or missing",
+      "Github Client ID is invalid or missing"
     ),
     GITHUB_CLIENT_SECRET: requiredInProduction(
-      "Github Client Secret is invalid or missing",
+      "Github Client Secret is invalid or missing"
     ),
     GITHUB_ACCESS_TOKEN: z.string().optional(),
 
@@ -68,6 +66,10 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     ENABLE_RATE_LIMITING: z.enum(["true", "false"]).default("false"),
     RATE_LIMITING_REQUESTS_PER_SECOND: z.coerce.number().default(50),
+
+    STRIPE_SECRET_KEY: z.string().optional(),
+    STRIPE_WEBHOOK_SECRET: z.string().optional(),
+    STRIPE_PRICE_ID_PRO: z.string().optional(),
   },
 
   client: {},

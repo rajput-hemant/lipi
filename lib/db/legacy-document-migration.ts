@@ -39,7 +39,7 @@ export function assertLegacyDocumentRow(row: DocumentRecord) {
 export function mapLegacyFoldersAndFilesToDocuments(
   folders: LegacyFolderRow[],
   files: LegacyFileRow[],
-  fallbackTimestamp: string,
+  fallbackTimestamp: string
 ): DocumentRecord[] {
   const documents: DocumentRecord[] = [];
 
@@ -88,7 +88,7 @@ export function mapLegacyFoldersAndFilesToDocuments(
 export function legacyDocumentMigrationRows(
   folders: LegacyFolderRow[],
   files: LegacyFileRow[],
-  fallbackTimestamp: string,
+  fallbackTimestamp: string
 ): DocumentRecord[] {
   return mapLegacyFoldersAndFilesToDocuments(folders, files, fallbackTimestamp);
 }

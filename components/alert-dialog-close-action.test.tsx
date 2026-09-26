@@ -17,7 +17,6 @@ import {
   AlertDialogContent,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
 import { AlertDialogCloseAction } from "./alert-dialog-close-action";
 
 const roots: ReturnType<typeof createRoot>[] = [];

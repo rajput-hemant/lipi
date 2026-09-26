@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import snapshot from "./shared-auth-schema.snapshot.json";
 import {
   accounts,
   betterAuthAccounts,
@@ -10,6 +9,7 @@ import {
   verificationTokens,
 } from "./schema/auth";
 import { serializeSharedAuthTables } from "./shared-auth-schema.serialize";
+import snapshot from "./shared-auth-schema.snapshot.json";
 
 const lipiSharedTables = {
   user: users,

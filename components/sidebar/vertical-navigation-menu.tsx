@@ -1,8 +1,6 @@
 import { NavigationMenu as NavigationMenuPrimitive } from "@base-ui/react/navigation-menu";
 
-import {
-  NavigationMenuPositioner,
-} from "@/components/ui/navigation-menu";
+import { NavigationMenuPositioner } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 
 export function VerticalNavigationMenu({

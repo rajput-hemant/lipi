@@ -1,20 +1,20 @@
 import { redirect } from "next/navigation";
+
 import type { Route } from "next";
 
 import { authRoutes, DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
-
 import { getCurrentUser } from "@/lib/auth";
 import { getSafeRedirectPath } from "./redirect";
 import { resolveAuthBaseURL } from "./resolve-auth-base-url";
 
 export function resolveAuthenticatedRedirect(
   from: string | null | undefined,
-  currentPath?: string,
+  currentPath?: string
 ) {
   let destination = getSafeRedirectPath(
     from,
     DEFAULT_LOGIN_REDIRECT,
-    resolveAuthBaseURL(),
+    resolveAuthBaseURL()
   );
 
   const destinationPath = destination.split("?")[0];
@@ -30,7 +30,7 @@ export function resolveAuthenticatedRedirect(
 
 export async function redirectIfAuthenticated(
   from?: string | null,
-  currentPath?: string,
+  currentPath?: string
 ) {
   const user = await getCurrentUser();
   if (!user) return;

@@ -9,7 +9,7 @@ describe("ensureHttpsUrl", () => {
 
   it("leaves fully qualified URLs unchanged", () => {
     expect(ensureHttpsUrl("http://localhost:3000")).toBe(
-      "http://localhost:3000",
+      "http://localhost:3000"
     );
   });
 });

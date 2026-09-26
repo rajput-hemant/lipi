@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { DocumentRecord } from "./documents-tree";
+
 import {
   assertPermanentDeleteAllowed,
   assertRootPageQuota,
@@ -13,7 +14,7 @@ import {
 const ts = "2026-01-01T00:00:00.000Z";
 
 function doc(
-  partial: Partial<DocumentRecord> & Pick<DocumentRecord, "id" | "title">,
+  partial: Partial<DocumentRecord> & Pick<DocumentRecord, "id" | "title">
 ): DocumentRecord {
   return {
     workspaceId: "ws-1",
@@ -42,7 +43,7 @@ describe("validateParentAssignment", () => {
       validateParentAssignment(tree, {
         workspaceId: "ws-1",
         parentId: "other-ws",
-      }),
+      })
     ).toThrow(/another workspace/);
   });
 
@@ -51,7 +52,7 @@ describe("validateParentAssignment", () => {
       validateParentAssignment(tree, {
         workspaceId: "ws-1",
         parentId: "trashed",
-      }),
+      })
     ).toThrow(/trash/);
   });
 
@@ -61,7 +62,7 @@ describe("validateParentAssignment", () => {
         workspaceId: "ws-1",
         parentId: "c",
         documentId: "a",
-      }),
+      })
     ).toThrow(/descendant/);
   });
 });
@@ -74,9 +75,9 @@ describe("assertRootPageQuota", () => {
       doc({ id: "3", title: "3" }),
     ];
 
-    expect(() =>
-      assertRootPageQuota(documents, "ws-1", false, null),
-    ).toThrow(/limit/);
+    expect(() => assertRootPageQuota(documents, "ws-1", false, null)).toThrow(
+      /limit/
+    );
   });
 });
 
@@ -104,7 +105,7 @@ describe("assertPermanentDeleteAllowed", () => {
     ];
 
     expect(() => assertPermanentDeleteAllowed(documents, "a")).toThrow(
-      /active descendants/,
+      /active descendants/
     );
   });
 
@@ -145,10 +146,23 @@ describe("planDeepDuplicate", () => {
     ];
 
     let n = 0;
-    const plan = planDeepDuplicate(documents, "a", "copy-a", () => `new-${++n}`);
+    const plan = planDeepDuplicate(
+      documents,
+      "a",
+      "copy-a",
+      () => `new-${++n}`
+    );
 
     expect(plan).toHaveLength(2);
-    expect(plan[0]).toMatchObject({ id: "copy-a", parentId: null, title: "A copy" });
-    expect(plan[1]).toMatchObject({ id: "new-1", parentId: "copy-a", title: "B" });
+    expect(plan[0]).toMatchObject({
+      id: "copy-a",
+      parentId: null,
+      title: "A copy",
+    });
+    expect(plan[1]).toMatchObject({
+      id: "new-1",
+      parentId: "copy-a",
+      title: "B",
+    });
   });
 });

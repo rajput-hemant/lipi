@@ -12,6 +12,9 @@ import {
   vi,
 } from "vitest";
 
+import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TooltipDelayed } from "./tooltip-delayed";
+
 vi.mock("@/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => (
     <div data-slot="tooltip">{children}</div>
@@ -34,10 +37,6 @@ vi.mock("@/components/ui/tooltip", () => ({
     <div>{children}</div>
   ),
 }));
-
-import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-import { TooltipDelayed } from "./tooltip-delayed";
 
 const roots: ReturnType<typeof createRoot>[] = [];
 

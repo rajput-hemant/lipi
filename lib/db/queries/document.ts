@@ -2,9 +2,9 @@
 
 import { unstable_cache as cache, revalidateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
-import { validate as validateUuid } from "uuid";
-import { v4 as uuid } from "uuid";
+import { v4 as uuid, validate as validateUuid } from "uuid";
 
+import type { DocumentRecord } from "@/lib/db/documents-tree";
 import type { Document } from "@/types/db";
 
 import {
@@ -16,16 +16,12 @@ import {
   planDeepDuplicate,
   validateParentAssignment,
 } from "@/lib/db/document-operations";
-import {
-  collectDescendantIds,
-  type DocumentRecord,
-} from "@/lib/db/documents-tree";
+import { collectDescendantIds } from "@/lib/db/documents-tree";
 import {
   createDocumentSchema,
   duplicateDocumentSchema,
   updateDocumentSchema,
 } from "@/lib/validations/document";
-
 import { db } from "..";
 import { documents } from "../schema";
 import {
@@ -93,7 +89,7 @@ export async function createDocument(input: unknown) {
       workspaceDocs,
       parsed.workspaceId,
       hasSubscription,
-      parsed.parentId ?? null,
+      parsed.parentId ?? null
     );
     validateParentAssignment(workspaceDocs, {
       workspaceId: parsed.workspaceId,
@@ -147,7 +143,7 @@ export async function getDocuments(workspaceId: string) {
       }
     },
     ["get_documents", workspaceId],
-    { tags: [documentsCacheTag(workspaceId)] },
+    { tags: [documentsCacheTag(workspaceId)] }
   )();
 }
 
@@ -319,7 +315,7 @@ export async function duplicateDocument(input: unknown) {
 
 export async function getDocumentBreadcrumbs(
   workspaceId: string,
-  documentId: string,
+  documentId: string
 ) {
   if (!validateUuid(workspaceId) || !validateUuid(documentId)) {
     return [];

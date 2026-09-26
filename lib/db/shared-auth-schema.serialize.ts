@@ -1,5 +1,7 @@
 import { getTableColumns, getTableName } from "drizzle-orm";
-import { getTableConfig, type PgTable } from "drizzle-orm/pg-core";
+import { getTableConfig } from "drizzle-orm/pg-core";
+
+import type { PgTable } from "drizzle-orm/pg-core";
 
 export type SerializedSharedAuthSchema = {
   tables: Record<string, SerializedTable>;
@@ -76,7 +78,7 @@ export function serializeSharedAuthTable(table: PgTable): SerializedTable {
 }
 
 export function serializeSharedAuthTables(
-  tables: Record<string, PgTable>,
+  tables: Record<string, PgTable>
 ): SerializedSharedAuthSchema {
   const serialized: SerializedSharedAuthSchema["tables"] = {};
 

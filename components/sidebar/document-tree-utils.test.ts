@@ -28,17 +28,14 @@ describe("trash record helpers", () => {
   });
 
   it("resolves permanent delete ids when using toAllDocumentRecords", () => {
-    const documents = [
-      trashedDoc("a"),
-      trashedDoc("b", "a"),
-    ];
+    const documents = [trashedDoc("a"), trashedDoc("b", "a")];
 
     expect(() =>
-      permanentDeleteTargetIds(toDocumentRecords(documents), "a"),
+      permanentDeleteTargetIds(toDocumentRecords(documents), "a")
     ).toThrow(/not found/i);
 
-    expect(permanentDeleteTargetIds(toAllDocumentRecords(documents), "a").sort()).toEqual(
-      ["a", "b"],
-    );
+    expect(
+      permanentDeleteTargetIds(toAllDocumentRecords(documents), "a").sort()
+    ).toEqual(["a", "b"]);
   });
 });

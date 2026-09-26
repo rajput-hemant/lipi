@@ -1,11 +1,12 @@
-import { db } from "@/lib/db";
-import { nextCookies } from "better-auth/next-js";
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { cache } from "react";
+import { nextCookies } from "better-auth/next-js";
 
-import { createAuth } from "./auth/create-auth";
 import type { SessionUser } from "./auth/types";
+
+import { db } from "@/lib/db";
+import { createAuth } from "./auth/create-auth";
 
 let authInstance: ReturnType<typeof createAuth> | undefined;
 
@@ -55,18 +56,20 @@ export const getSession = cache(async () => {
   }
 });
 
-export const getCurrentUser = cache(async (): Promise<SessionUser | undefined> => {
-  const session = await getSession();
-  if (!session?.user) return undefined;
+export const getCurrentUser = cache(
+  async (): Promise<SessionUser | undefined> => {
+    const session = await getSession();
+    if (!session?.user) return undefined;
 
-  return {
-    id: session.user.id,
-    name: session.user.name,
-    email: session.user.email,
-    image: session.user.image,
-    username: session.user.username,
-  };
-});
+    return {
+      id: session.user.id,
+      name: session.user.name,
+      email: session.user.email,
+      image: session.user.image,
+      username: session.user.username,
+    };
+  }
+);
 
 export const checkAuth = async () => {
   const session = await getSession();

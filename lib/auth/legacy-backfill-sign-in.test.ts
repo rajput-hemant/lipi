@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it } from "vitest";
 import { hash } from "bcryptjs";
+import { beforeAll, describe, expect, it } from "vitest";
 
 import {
   betterAuthAccounts,
@@ -7,7 +7,6 @@ import {
   betterAuthVerifications,
   users,
 } from "@/lib/db/schema";
-
 import { createAuth } from "./create-auth";
 import { CREDENTIAL_PROVIDER_ID } from "./credential-account";
 
@@ -28,7 +27,7 @@ function makeFakeDb() {
 /** Shape produced by Infinitunes BACKFILL_CREDENTIAL_ACCOUNTS (packages/db/src/backfill.ts). */
 export function infinitunesBackfillCredentialRow(
   userId: string,
-  passwordHash: string,
+  passwordHash: string
 ) {
   return {
     userId,
@@ -50,15 +49,16 @@ describe("legacy credential backfill sign-in", () => {
     const auth = createAuth(makeFakeDb());
     const password = "LegacyPass1!";
     const passwordHash = await hash(password, 10);
-    const row = infinitunesBackfillCredentialRow("11111111-1111-4111-8111-111111111111", passwordHash);
+    const row = infinitunesBackfillCredentialRow(
+      "11111111-1111-4111-8111-111111111111",
+      passwordHash
+    );
 
     expect(row.accountId).toBe(row.userId);
     expect(row.providerId).toBe("credential");
 
     const verify = auth.options.emailAndPassword?.password?.verify;
     expect(verify).toBeTypeOf("function");
-    expect(
-      await verify!({ password, hash: row.password }),
-    ).toBe(true);
+    expect(await verify!({ password, hash: row.password })).toBe(true);
   });
 });

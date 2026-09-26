@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { DocumentRecord } from "./documents-tree";
 import type { Document } from "@/types/db";
 
 import {
@@ -7,12 +8,11 @@ import {
   patchDocumentsForRestore,
   permanentDeleteTargetIds,
 } from "./client-document-state";
-import type { DocumentRecord } from "./documents-tree";
 
 const ts = "2026-01-01T00:00:00.000Z";
 
 function record(
-  partial: Partial<DocumentRecord> & Pick<DocumentRecord, "id" | "title">,
+  partial: Partial<DocumentRecord> & Pick<DocumentRecord, "id" | "title">
 ): DocumentRecord {
   return {
     workspaceId: "ws-1",
@@ -28,7 +28,7 @@ function record(
 }
 
 function doc(
-  partial: Partial<Document> & Pick<Document, "id" | "title">,
+  partial: Partial<Document> & Pick<Document, "id" | "title">
 ): Document {
   return {
     workspaceId: "ws-1",
@@ -84,7 +84,7 @@ describe("buildOptimisticDuplicateDocuments", () => {
       "a",
       "copy-a",
       () => `new-${++n}`,
-      "ws-1",
+      "ws-1"
     );
 
     expect(copies).toHaveLength(2);

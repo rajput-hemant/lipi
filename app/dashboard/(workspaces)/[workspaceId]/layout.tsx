@@ -30,11 +30,7 @@ export const WorkspaceLayout: React.FCC<{
   const documents = await getDocuments(workspaceId);
 
   return (
-    <AppStateProvider
-      key={workspaceId}
-      user={user}
-      documents={documents}
-    >
+    <AppStateProvider key={workspaceId} user={user} documents={documents}>
       <ResizableLayout
         defaultLayout={defaultLayout as number[]}
         defaultCollapsed={defaultCollapsed as boolean}

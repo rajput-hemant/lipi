@@ -9,7 +9,7 @@ export type VisibleTreeNode = {
 
 export function flattenVisibleTreeNodes(
   forest: DocumentTreeNode[],
-  expandedIds: Set<string>,
+  expandedIds: Set<string>
 ): VisibleTreeNode[] {
   const visible: VisibleTreeNode[] = [];
 
@@ -43,13 +43,12 @@ export function resolveTreeKeyAction(
   key: string,
   focusedId: string | null,
   visible: VisibleTreeNode[],
-  expandedIds: Set<string>,
+  expandedIds: Set<string>
 ): TreeKeyAction {
   if (!visible.length) return {};
 
-  const index = focusedId ?
-    visible.findIndex((node) => node.id === focusedId)
-  : -1;
+  const index =
+    focusedId ? visible.findIndex((node) => node.id === focusedId) : -1;
   const current = index >= 0 ? visible[index] : visible[0];
 
   switch (key) {

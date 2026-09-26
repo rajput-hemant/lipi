@@ -13,9 +13,10 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type z from "zod";
 import type { Route } from "next";
+import type z from "zod";
 
+import { TooltipDelayed } from "@/components/tooltip-delayed";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -27,11 +28,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { TooltipDelayed } from "@/components/tooltip-delayed";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signUp } from "@/lib/auth/auth-client";
-import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
+import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { signUpSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -54,7 +54,7 @@ export function SignUpForm() {
   const callbackURL = getSafeRedirectPath(
     searchParams.get("from"),
     DEFAULT_LOGIN_REDIRECT,
-    getRedirectBaseURL(),
+    getRedirectBaseURL()
   );
 
   if (authError === "OAuthAccountNotLinked") {

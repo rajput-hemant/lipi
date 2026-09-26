@@ -28,7 +28,7 @@ export function createAppStore(initial: AppState): Store {
     },
     updateDocument(document) {
       store.documents = store.documents.map((entry) =>
-        entry.id === document.id ? document : entry,
+        entry.id === document.id ? document : entry
       );
     },
     deleteDocument(id) {

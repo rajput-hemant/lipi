@@ -8,13 +8,9 @@ describe("redirect base URL during SSR", () => {
     expect(getRedirectBaseURL()).toBeUndefined();
   });
 
-  it(
-    "imports the login form module without throwing in Node",
-    async () => {
-      await expect(
-        import("@/app/(auth)/components/login-form"),
-      ).resolves.toBeDefined();
-    },
-    15_000,
-  );
+  it("imports the login form module without throwing in Node", async () => {
+    await expect(
+      import("@/app/(auth)/components/login-form")
+    ).resolves.toBeDefined();
+  }, 15_000);
 });

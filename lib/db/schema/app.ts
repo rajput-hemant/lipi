@@ -60,20 +60,20 @@ export const documents = createTable(
   },
   (table) => ({
     documentsWorkspaceIdIdx: index("lipi_documents_workspace_id_idx").on(
-      table.workspaceId,
+      table.workspaceId
     ),
     documentsParentIdIdx: index("lipi_documents_parent_id_idx").on(
-      table.parentId,
+      table.parentId
     ),
     documentsWorkspaceParentIdx: index(
-      "lipi_documents_workspace_parent_idx",
+      "lipi_documents_workspace_parent_idx"
     ).on(table.workspaceId, table.parentId),
     documentsParentIdFkey: foreignKey({
       columns: [table.parentId],
       foreignColumns: [table.id],
       name: "lipi_documents_parent_id_lipi_documents_id_fk",
     }).onDelete("restrict"),
-  }),
+  })
 );
 
 export const billingAccounts = createTable("accounts", {
@@ -157,6 +157,17 @@ export const subscriptions = createTable("subscriptions", {
     withTimezone: true,
     mode: "string",
   }).defaultNow(),
+});
+
+export const stripeWebhookEvents = createTable("stripe_webhook_events", {
+  id: text("id").primaryKey().notNull(),
+  type: text("type").notNull(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const collaborators = createTable("collaborators", {

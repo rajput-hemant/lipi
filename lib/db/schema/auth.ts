@@ -52,7 +52,7 @@ export const accounts = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-  }),
+  })
 );
 
 export const verificationTokens = pgTable(
@@ -64,7 +64,7 @@ export const verificationTokens = pgTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  }),
+  })
 );
 
 /* ---------------------------------------------------------------------------
@@ -92,9 +92,9 @@ export const betterAuthAccounts = pgTable(
   },
   (table) => ({
     providerAccountUnique: uniqueIndex(
-      "better_auth_account_provider_account_unique",
+      "better_auth_account_provider_account_unique"
     ).on(table.providerId, table.accountId),
-  }),
+  })
 );
 
 export const betterAuthSessions = pgTable("better_auth_session", {

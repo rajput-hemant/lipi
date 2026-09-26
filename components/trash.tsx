@@ -44,7 +44,7 @@ export function Trash() {
 
   const trashed = documents.filter((document) => document.inTrash);
   const pendingDocument = trashed.find(
-    (document) => document.id === pendingDeleteId,
+    (document) => document.id === pendingDeleteId
   );
 
   async function restore(documentId: string) {
@@ -73,7 +73,9 @@ export function Trash() {
       const records = toAllDocumentRecords(documents);
       const deleteIds = new Set(permanentDeleteTargetIds(records, documentId));
       const previous = cloneDocuments(documents);
-      replaceDocuments(previous.filter((document) => !deleteIds.has(document.id)));
+      replaceDocuments(
+        previous.filter((document) => !deleteIds.has(document.id))
+      );
 
       toast.promise(deleteDocumentPermanently(documentId), {
         loading: "Deleting page...",
@@ -105,7 +107,11 @@ export function Trash() {
                 <span className="flex min-w-0 items-center gap-2 truncate text-sm">
                   {document.icon ?
                     document.icon
-                  : <HugeiconsIcon icon={File01Icon} strokeWidth={2} className="size-4" />
+                  : <HugeiconsIcon
+                      icon={File01Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
                   }
                   {document.title}
                 </span>
@@ -121,7 +127,11 @@ export function Trash() {
                           aria-label="Restore document"
                           onClick={() => restore(document.id)}
                         >
-                          <HugeiconsIcon icon={Undo02Icon} strokeWidth={2} className="size-4" />
+                          <HugeiconsIcon
+                            icon={Undo02Icon}
+                            strokeWidth={2}
+                            className="size-4"
+                          />
                         </Button>
                       }
                     />
@@ -138,7 +148,11 @@ export function Trash() {
                           aria-label="Delete document permanently"
                           onClick={() => setPendingDeleteId(document.id)}
                         >
-                          <HugeiconsIcon icon={Delete01Icon} strokeWidth={2} className="size-4" />
+                          <HugeiconsIcon
+                            icon={Delete01Icon}
+                            strokeWidth={2}
+                            className="size-4"
+                          />
                         </Button>
                       }
                     />
@@ -166,8 +180,8 @@ export function Trash() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete permanently?</AlertDialogTitle>
             <AlertDialogDescription>
-              This cannot be undone. &quot;{pendingDocument?.title}&quot; will be
-              removed forever.
+              This cannot be undone. &quot;{pendingDocument?.title}&quot; will
+              be removed forever.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,3 +1,4 @@
+import type { DocumentRecord } from "./documents-tree";
 import type { Document } from "@/types/db";
 
 import {
@@ -5,23 +6,22 @@ import {
   collectRestoreTargetIds,
   planDeepDuplicate,
 } from "./document-operations";
-import type { DocumentRecord } from "./documents-tree";
 
 export function patchDocumentsForRestore(
   documents: Document[],
   records: DocumentRecord[],
-  documentId: string,
+  documentId: string
 ): Document[] {
   const restoreIds = new Set(collectRestoreTargetIds(records, documentId));
 
   return documents.map((document) =>
-    restoreIds.has(document.id) ? { ...document, inTrash: false } : document,
+    restoreIds.has(document.id) ? { ...document, inTrash: false } : document
   );
 }
 
 export function permanentDeleteTargetIds(
   records: DocumentRecord[],
-  documentId: string,
+  documentId: string
 ): string[] {
   return assertPermanentDeleteAllowed(records, documentId);
 }
@@ -32,7 +32,7 @@ export function buildOptimisticDuplicateDocuments(
   sourceRootId: string,
   newRootId: string,
   createId: () => string,
-  workspaceId: string,
+  workspaceId: string
 ): Document[] {
   const plan = planDeepDuplicate(records, sourceRootId, newRootId, createId);
   const byId = new Map(documents.map((document) => [document.id, document]));

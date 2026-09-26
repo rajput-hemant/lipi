@@ -36,7 +36,7 @@ export async function proxy(req: NextRequest) {
             "x-ratelimit-limit": limit.toString(),
             "x-ratelimit-remaining": remaining.toString(),
           },
-        },
+        }
       );
     }
   }
@@ -60,7 +60,7 @@ export async function proxy(req: NextRequest) {
       }
 
       return NextResponse.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl),
+        new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)
       );
     }
   }

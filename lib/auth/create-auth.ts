@@ -1,3 +1,12 @@
+import { compare, hash } from "bcryptjs";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { username } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
+
+import type { BetterAuthPlugin } from "better-auth";
+import type { db } from "@/lib/db";
+
 import {
   betterAuthAccounts,
   betterAuthSessions,
@@ -5,26 +14,17 @@ import {
   users,
 } from "@/lib/db/schema";
 import { env } from "@/lib/env";
-import { compare, hash } from "bcryptjs";
-import { betterAuth } from "better-auth";
-import type { BetterAuthPlugin } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { username } from "better-auth/plugins";
-import { eq } from "drizzle-orm";
-
-import type { db } from "@/lib/db";
-
-import { credentialAccountWhere } from "./credential-account";
 import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_REGEX,
 } from "./constants";
+import { credentialAccountWhere } from "./credential-account";
 import { resolveAuthBaseURL } from "./resolve-auth-base-url";
 
 export function createAuth(
   database: typeof db,
-  options: { plugins?: BetterAuthPlugin[] } = {},
+  options: { plugins?: BetterAuthPlugin[] } = {}
 ) {
   async function mirrorAccountPassword(userId: string) {
     const account = await database.query.betterAuthAccounts.findFirst({

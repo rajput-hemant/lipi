@@ -39,7 +39,7 @@ describe("mapLegacyFoldersAndFilesToDocuments", () => {
           createdAt: ts,
         },
       ],
-      ts,
+      ts
     );
 
     expect(documents).toHaveLength(2);
@@ -67,8 +67,8 @@ describe("mapLegacyFoldersAndFilesToDocuments", () => {
           },
         ],
         [],
-        ts,
-      ),
+        ts
+      )
     ).toThrow(LegacyMigrationValidationError);
   });
 });
@@ -89,7 +89,7 @@ describe("legacyDocumentMigrationRows", () => {
         },
       ],
       [],
-      ts,
+      ts
     );
 
     expect(rows).toHaveLength(1);

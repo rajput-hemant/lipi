@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 import type z from "zod";
 
+import { TooltipDelayed } from "@/components/tooltip-delayed";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,11 +27,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { TooltipDelayed } from "@/components/tooltip-delayed";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { resetPassword } from "@/lib/actions";
-import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
+import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { resetPasswordSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -52,7 +52,7 @@ export function ResetPasswordForm() {
   const callbackURL = getSafeRedirectPath(
     searchParams.get("from"),
     DEFAULT_LOGIN_REDIRECT,
-    getRedirectBaseURL(),
+    getRedirectBaseURL()
   );
 
   if (authError === "OAuthAccountNotLinked") {

@@ -1,5 +1,4 @@
 import { env } from "@/lib/env";
-
 import { ensureHttpsUrl } from "./ensure-https-url";
 
 export function resolveAuthBaseURL() {
@@ -16,7 +15,7 @@ export function resolveAuthBaseURL() {
     process.env.SKIP_ENV_VALIDATION !== "true"
   ) {
     throw new Error(
-      "AUTH_URL or BETTER_AUTH_URL is required in production deployments",
+      "AUTH_URL or BETTER_AUTH_URL is required in production deployments"
     );
   }
 

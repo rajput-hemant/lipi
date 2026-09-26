@@ -12,7 +12,7 @@ describe("assertDatabaseUrlConfigured", () => {
     vi.stubEnv("SKIP_ENV_VALIDATION", "false");
 
     expect(() => assertDatabaseUrlConfigured(undefined)).toThrow(
-      /Database URL/,
+      /Database URL/
     );
   });
 

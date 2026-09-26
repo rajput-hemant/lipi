@@ -16,7 +16,7 @@ export type DocumentTreeNode = DocumentRecord & {
 };
 
 export function buildDocumentTree(
-  documents: DocumentRecord[],
+  documents: DocumentRecord[]
 ): DocumentTreeNode[] {
   const byParent = new Map<string | null, DocumentRecord[]>();
 
@@ -41,7 +41,7 @@ export function buildDocumentTree(
 
 export function getDocumentAncestors(
   documents: DocumentRecord[],
-  documentId: string,
+  documentId: string
 ): DocumentRecord[] {
   const byId = new Map(documents.map((document) => [document.id, document]));
   const ancestors: DocumentRecord[] = [];
@@ -65,7 +65,7 @@ export function getDocumentAncestors(
 
 export function collectDescendantIds(
   documents: DocumentRecord[],
-  rootId: string,
+  rootId: string
 ): string[] {
   const byParent = new Map<string | null, DocumentRecord[]>();
   for (const document of documents) {

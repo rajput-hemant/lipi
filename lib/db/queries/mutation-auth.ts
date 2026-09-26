@@ -3,7 +3,6 @@
 import { and, eq } from "drizzle-orm";
 
 import { getCurrentUser } from "@/lib/auth";
-
 import { db } from "..";
 import { collaborators, documents, workspaces } from "../schema";
 
@@ -17,7 +16,7 @@ export class MutationAuthError extends Error {
 export function isWorkspaceMember(
   userId: string,
   workspace: { workspaceOwnerId: string },
-  collaboratorUserIds: string[],
+  collaboratorUserIds: string[]
 ) {
   return (
     workspace.workspaceOwnerId === userId ||
@@ -33,7 +32,7 @@ export async function requireAuthenticatedUser() {
 
 export async function assertWorkspaceAccess(
   userId: string,
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   if (!workspaceId) {
     throw new MutationAuthError("Invalid workspace");
@@ -54,7 +53,7 @@ export async function assertWorkspaceAccess(
   const collaborator = await db.query.collaborators.findFirst({
     where: and(
       eq(collaborators.workspaceId, workspaceId),
-      eq(collaborators.userId, userId),
+      eq(collaborators.userId, userId)
     ),
   });
 
@@ -79,7 +78,7 @@ export async function assertDocumentAccess(userId: string, documentId: string) {
 }
 
 export async function authorizeWorkspaceMutation(
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   const user = await requireAuthenticatedUser();
   await assertWorkspaceAccess(user.id, workspaceId);

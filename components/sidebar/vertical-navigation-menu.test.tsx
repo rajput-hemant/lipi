@@ -12,7 +12,6 @@ import {
   vi,
 } from "vitest";
 
-import { hideNavigationMenuTriggerIndicator } from "@/lib/shadcn-call-site";
 import {
   NavigationMenuContent,
   NavigationMenuItem,
@@ -20,7 +19,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
-
+import { hideNavigationMenuTriggerIndicator } from "@/lib/shadcn-call-site";
 import {
   VerticalNavigationMenu,
   verticalNavigationMenuListClassName,

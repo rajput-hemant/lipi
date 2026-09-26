@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 
+import type { DocumentRecord } from "./documents-tree";
+
 import {
   buildDocumentTree,
   collectDescendantIds,
   getDocumentAncestors,
-  type DocumentRecord,
 } from "./documents-tree";
 
 const ts = "2026-01-01T00:00:00.000Z";
 
 function doc(
-  partial: Partial<DocumentRecord> & Pick<DocumentRecord, "id" | "title">,
+  partial: Partial<DocumentRecord> & Pick<DocumentRecord, "id" | "title">
 ): DocumentRecord {
   return {
     workspaceId: "ws-1",

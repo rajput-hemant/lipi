@@ -1,10 +1,7 @@
+import type { DocumentRecord, DocumentTreeNode } from "@/lib/db/documents-tree";
 import type { Document } from "@/types/db";
 
-import {
-  buildDocumentTree,
-  type DocumentRecord,
-  type DocumentTreeNode,
-} from "@/lib/db/documents-tree";
+import { buildDocumentTree } from "@/lib/db/documents-tree";
 
 export function getActiveDocuments(documents: readonly Document[]) {
   return documents.filter((document) => !document.inTrash);
@@ -27,7 +24,9 @@ function toDocumentRecord(document: Document): DocumentRecord | null {
   };
 }
 
-export function toDocumentRecords(documents: readonly Document[]): DocumentRecord[] {
+export function toDocumentRecords(
+  documents: readonly Document[]
+): DocumentRecord[] {
   return getActiveDocuments(documents).flatMap((document) => {
     const record = toDocumentRecord(document);
     return record ? [record] : [];
@@ -36,7 +35,7 @@ export function toDocumentRecords(documents: readonly Document[]): DocumentRecor
 
 /** Includes trashed rows; use for trash restore/delete helpers, not sidebar tree building. */
 export function toAllDocumentRecords(
-  documents: readonly Document[],
+  documents: readonly Document[]
 ): DocumentRecord[] {
   return documents.flatMap((document) => {
     const record = toDocumentRecord(document);
@@ -50,10 +49,10 @@ export function getDocumentForest(documents: readonly Document[]) {
 
 export function countChildren(
   documents: readonly Document[],
-  parentId: string | null,
+  parentId: string | null
 ) {
   return getActiveDocuments(documents).filter(
-    (document) => (document.parentId ?? null) === parentId,
+    (document) => (document.parentId ?? null) === parentId
   ).length;
 }
 

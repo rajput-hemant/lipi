@@ -17,15 +17,15 @@ export function AppStateProvider({
   user,
   documents,
 }: AppStateProviderProps) {
-  const [store] = React.useState(() =>
-    createAppStore({ user, documents }),
-  );
+  const [store] = React.useState(() => createAppStore({ user, documents }));
 
   React.useEffect(() => {
     syncAppStore(store, { user, documents });
   }, [store, user, documents]);
 
   return (
-    <AppStateContext.Provider value={store}>{children}</AppStateContext.Provider>
+    <AppStateContext.Provider value={store}>
+      {children}
+    </AppStateContext.Provider>
   );
 }

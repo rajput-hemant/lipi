@@ -35,7 +35,7 @@ describe("proxy auth routes", () => {
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe(
-      "http://localhost:3000/login?from=%2Fdashboard",
+      "http://localhost:3000/login?from=%2Fdashboard"
     );
   });
 
@@ -46,7 +46,7 @@ describe("proxy auth routes", () => {
 
     expect(res.status).toBe(307);
     expect(res.headers.get("location")).toBe(
-      "http://localhost:3000/login?from=%2Fdashboard",
+      "http://localhost:3000/login?from=%2Fdashboard"
     );
   });
 });

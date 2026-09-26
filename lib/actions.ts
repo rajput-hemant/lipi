@@ -16,7 +16,7 @@ import { db } from "./db";
 import { users } from "./db/schema";
 
 export async function resetPassword(
-  credentials: z.infer<typeof resetPasswordSchema>,
+  credentials: z.infer<typeof resetPasswordSchema>
 ) {
   const { email, password, newPassword } = credentials;
 
@@ -31,12 +31,12 @@ export async function resetPassword(
   const credentialAccount = await findCredentialAccount(user.id);
   const storedHash = resolveStoredPasswordHash(
     credentialAccount?.password,
-    user.password,
+    user.password
   );
 
   if (!storedHash) {
     throw new Error(
-      "User does not have a password, you might have signed up with a social account",
+      "User does not have a password, you might have signed up with a social account"
     );
   }
 

@@ -19,6 +19,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 
+import type { DocumentTreeNode } from "./document-tree-utils";
 import type { Document } from "@/types/db";
 
 import {
@@ -29,6 +30,11 @@ import {
 } from "@/components/ui/context-menu";
 import { useAppState } from "@/hooks/use-app-state";
 import { buildOptimisticDuplicateDocuments } from "@/lib/db/client-document-state";
+import {
+  flattenVisibleTreeNodes,
+  resolveTreeKeyAction,
+} from "@/lib/db/document-tree-navigation";
+import { collectDescendantIds } from "@/lib/db/documents-tree";
 import {
   createDocument,
   duplicateDocument,
@@ -43,15 +49,9 @@ import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
-  flattenVisibleTreeNodes,
-  resolveTreeKeyAction,
-} from "@/lib/db/document-tree-navigation";
-import { collectDescendantIds } from "@/lib/db/documents-tree";
-import {
   countChildren,
   getDocumentForest,
   toDocumentRecords,
-  type DocumentTreeNode,
 } from "./document-tree-utils";
 
 type DocumentTreeItemProps = {
@@ -155,7 +155,7 @@ function DocumentTreeItem({
       node.id,
       newId,
       uuid,
-      workspaceId,
+      workspaceId
     );
 
     for (const copy of copies) {
@@ -208,7 +208,7 @@ function DocumentTreeItem({
             className={cn(
               "group flex items-center gap-0.5 rounded-md pr-1",
               buttonVariants({ size: "sm", variant: "ghost" }),
-              isActive && "bg-secondary",
+              isActive && "bg-secondary"
             )}
             style={{ paddingLeft: `${depth * 12 + 4}px` }}
           >
@@ -228,7 +228,10 @@ function DocumentTreeItem({
             : <span className="inline-block size-6 shrink-0" />}
 
             {isRenaming ?
-              <form onSubmit={submitRename} className="flex min-w-0 flex-1 gap-1">
+              <form
+                onSubmit={submitRename}
+                className="flex min-w-0 flex-1 gap-1"
+              >
                 <Input
                   autoFocus
                   value={renameValue}
@@ -242,8 +245,17 @@ function DocumentTreeItem({
                   }}
                   className="h-8"
                 />
-                <Button type="submit" size="icon" variant="ghost" className="size-8">
-                  <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-4" />
+                <Button
+                  type="submit"
+                  size="icon"
+                  variant="ghost"
+                  className="size-8"
+                >
+                  <HugeiconsIcon
+                    icon={Tick02Icon}
+                    strokeWidth={2}
+                    className="size-4"
+                  />
                 </Button>
               </form>
             : <>
@@ -276,7 +288,11 @@ function DocumentTreeItem({
             className="cursor-pointer"
             onClick={() => setCreatingChild(true)}
           >
-            <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} className="mr-2 size-4" />
+            <HugeiconsIcon
+              icon={PlusSignIcon}
+              strokeWidth={2}
+              className="mr-2 size-4"
+            />
             New subpage
           </ContextMenuItem>
           <ContextMenuItem
@@ -289,14 +305,22 @@ function DocumentTreeItem({
             Rename
           </ContextMenuItem>
           <ContextMenuItem className="cursor-pointer" onClick={duplicatePage}>
-            <HugeiconsIcon icon={Copy01Icon} strokeWidth={2} className="mr-2 size-4" />
+            <HugeiconsIcon
+              icon={Copy01Icon}
+              strokeWidth={2}
+              className="mr-2 size-4"
+            />
             Duplicate
           </ContextMenuItem>
           <ContextMenuItem
             className="cursor-pointer !text-red-500"
             onClick={moveToTrash}
           >
-            <HugeiconsIcon icon={Delete02Icon} strokeWidth={2} className="mr-2 size-4" />
+            <HugeiconsIcon
+              icon={Delete02Icon}
+              strokeWidth={2}
+              className="mr-2 size-4"
+            />
             Move to trash
           </ContextMenuItem>
         </ContextMenuContent>
@@ -316,7 +340,11 @@ function DocumentTreeItem({
             className="absolute inset-y-0 left-0 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
           >
             {childIcon || (
-              <HugeiconsIcon icon={File01Icon} strokeWidth={2} className="size-4" />
+              <HugeiconsIcon
+                icon={File01Icon}
+                strokeWidth={2}
+                className="size-4"
+              />
             )}
           </EmojiPicker>
           <Input
@@ -394,7 +422,7 @@ export function DocumentTree() {
 
   const visibleNodes = useMemo(
     () => flattenVisibleTreeNodes(forest, expandedIds),
-    [forest, expandedIds],
+    [forest, expandedIds]
   );
 
   const activeFocusId = focusedId ?? visibleNodes[0]?.id ?? null;
@@ -415,7 +443,7 @@ export function DocumentTree() {
       event.key,
       activeFocusId,
       visibleNodes,
-      expandedIds,
+      expandedIds
     );
 
     if (action.expandId) expandNode(action.expandId);
@@ -490,8 +518,16 @@ export function DocumentTree() {
                 aria-label={isCreatingRoot ? "Cancel new page" : "New page"}
               >
                 {isCreatingRoot ?
-                  <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-4" />
-                : <HugeiconsIcon icon={PlusSignIcon} strokeWidth={2} className="size-[18px]" />
+                  <HugeiconsIcon
+                    icon={Cancel01Icon}
+                    strokeWidth={2}
+                    className="size-4"
+                  />
+                : <HugeiconsIcon
+                    icon={PlusSignIcon}
+                    strokeWidth={2}
+                    className="size-[18px]"
+                  />
                 }
               </Button>
             }
@@ -522,7 +558,11 @@ export function DocumentTree() {
                       className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
                     >
                       {rootIcon || (
-                        <HugeiconsIcon icon={File01Icon} strokeWidth={2} className="size-4" />
+                        <HugeiconsIcon
+                          icon={File01Icon}
+                          strokeWidth={2}
+                          className="size-4"
+                        />
                       )}
                     </EmojiPicker>
                     <Input
@@ -545,7 +585,11 @@ export function DocumentTree() {
                       variant="ghost"
                       className="absolute inset-y-0 right-1 my-auto size-7"
                     >
-                      <HugeiconsIcon icon={Tick02Icon} strokeWidth={2} className="size-4" />
+                      <HugeiconsIcon
+                        icon={Tick02Icon}
+                        strokeWidth={2}
+                        className="size-4"
+                      />
                     </Button>
                   </form>
                 </li>
@@ -569,7 +613,9 @@ export function DocumentTree() {
           </ScrollArea>
         : <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
             <HugeiconsIcon icon={FileNotFoundIcon} strokeWidth={2} size={32} />
-            <p className="text-center text-sm">No pages yet. Create your first page.</p>
+            <p className="text-center text-sm">
+              No pages yet. Create your first page.
+            </p>
           </div>
         }
       </div>

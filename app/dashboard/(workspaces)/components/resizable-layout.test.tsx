@@ -39,7 +39,9 @@ vi.mock("@/components/ui/resizable", async (importOriginal) => {
     useEffect(() => {
       onLayoutChange?.({ sidebar: 16, main: 84 });
     }, [onLayoutChange]);
-    return <actual.ResizablePanelGroup onLayoutChange={onLayoutChange} {...props} />;
+    return (
+      <actual.ResizablePanelGroup onLayoutChange={onLayoutChange} {...props} />
+    );
   }
 
   function ResizablePanel({
@@ -52,9 +54,7 @@ vi.mock("@/components/ui/resizable", async (importOriginal) => {
         onResize?.({ asPercentage: 2, inPixels: 24 }, "sidebar", undefined);
       }
     }, [id, onResize]);
-    return (
-      <actual.ResizablePanel id={id} onResize={onResize} {...props} />
-    );
+    return <actual.ResizablePanel id={id} onResize={onResize} {...props} />;
   }
 
   return {

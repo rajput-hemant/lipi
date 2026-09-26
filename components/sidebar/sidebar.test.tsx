@@ -112,6 +112,8 @@ describe("sidebar navigation", () => {
       "Settings",
       "Trash",
     ]);
-    expect(container.querySelector('[data-testid="document-tree"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="document-tree"]')
+    ).toBeTruthy();
   });
 });

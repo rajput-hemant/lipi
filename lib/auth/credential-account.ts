@@ -8,13 +8,13 @@ export const CREDENTIAL_PROVIDER_ID = "credential";
 export function credentialAccountWhere(userId: string) {
   return and(
     eq(betterAuthAccounts.userId, userId),
-    eq(betterAuthAccounts.providerId, CREDENTIAL_PROVIDER_ID),
+    eq(betterAuthAccounts.providerId, CREDENTIAL_PROVIDER_ID)
   );
 }
 
 export function resolveStoredPasswordHash(
   credentialPassword: string | null | undefined,
-  legacyUserPassword: string | null | undefined,
+  legacyUserPassword: string | null | undefined
 ) {
   return credentialPassword ?? legacyUserPassword ?? null;
 }
@@ -25,7 +25,10 @@ export async function findCredentialAccount(userId: string) {
   });
 }
 
-export async function upsertCredentialPassword(userId: string, hashedPassword: string) {
+export async function upsertCredentialPassword(
+  userId: string,
+  hashedPassword: string
+) {
   const existing = await findCredentialAccount(userId);
 
   if (existing) {

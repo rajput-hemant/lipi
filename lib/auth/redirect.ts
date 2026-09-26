@@ -14,7 +14,10 @@ function decodeRedirectParam(from: string) {
     if (!/%[0-9A-Fa-f]{2}/.test(decoded)) break;
 
     const next = decodeURIComponent(decoded);
-    if (ENCODED_BACKSLASH_PATTERN.test(next) || UNSAFE_PATH_PATTERN.test(next)) {
+    if (
+      ENCODED_BACKSLASH_PATTERN.test(next) ||
+      UNSAFE_PATH_PATTERN.test(next)
+    ) {
       throw new Error("Invalid redirect path");
     }
 
@@ -24,10 +27,7 @@ function decodeRedirectParam(from: string) {
   return decoded;
 }
 
-export function isSafeRelativeRedirectPath(
-  path: string,
-  baseURL?: string,
-) {
+export function isSafeRelativeRedirectPath(path: string, baseURL?: string) {
   if (!path.startsWith("/") || path.startsWith("//")) return false;
   if (UNSAFE_PATH_PATTERN.test(path)) return false;
 
@@ -47,7 +47,7 @@ export function isSafeRelativeRedirectPath(
 export function getSafeRedirectPath(
   from: string | null | undefined,
   fallback = DEFAULT_LOGIN_REDIRECT,
-  baseURL?: string,
+  baseURL?: string
 ) {
   if (!from) return fallback;
 

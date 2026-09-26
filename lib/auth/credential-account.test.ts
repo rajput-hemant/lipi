@@ -8,13 +8,13 @@ import {
 describe("credential account helpers", () => {
   it("uses the credential account hash when present", () => {
     expect(resolveStoredPasswordHash("credential-hash", "legacy-hash")).toBe(
-      "credential-hash",
+      "credential-hash"
     );
   });
 
   it("falls back to legacy user password when credential row is missing", () => {
     expect(resolveStoredPasswordHash(undefined, "legacy-hash")).toBe(
-      "legacy-hash",
+      "legacy-hash"
     );
   });
 

@@ -17,11 +17,12 @@ export function DocumentTreeCollapsed() {
     <NavigationMenu className="max-w-full justify-center">
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger
-            className="size-9 p-0"
-            aria-label="Open pages"
-          >
-            <HugeiconsIcon icon={File01Icon} strokeWidth={2} className="size-5" />
+          <NavigationMenuTrigger className="size-9 p-0" aria-label="Open pages">
+            <HugeiconsIcon
+              icon={File01Icon}
+              strokeWidth={2}
+              className="size-5"
+            />
           </NavigationMenuTrigger>
           <NavigationMenuContent className="w-72 p-0">
             <div className="max-h-96 overflow-hidden">

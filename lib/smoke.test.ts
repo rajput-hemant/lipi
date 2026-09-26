@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { createAppStore, syncAppStore } from "@/hooks/use-app-state";
-import { getGitHubStars } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { cn, getGitHubStars } from "@/lib/utils";
 
 const ts = "2026-01-01T00:00:00.000Z";
 
