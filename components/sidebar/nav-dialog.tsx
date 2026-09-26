@@ -4,7 +4,6 @@ import type { IconSvgElement } from "@hugeicons/react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 type NavDialogProps = {
   title: string;
@@ -28,6 +28,7 @@ export function NavDialog(props: NavDialogProps) {
     <DialogTrigger
       render={
         <Button
+          aria-label={isCollapsed ? title : undefined}
           size={isCollapsed ? "icon" : "sm"}
           variant="ghost"
           className={cn(!isCollapsed && "w-full justify-start")}
