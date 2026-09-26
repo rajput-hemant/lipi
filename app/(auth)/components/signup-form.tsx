@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import type z from "zod";
+import type { Route } from "next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -87,7 +88,7 @@ export function SignUpForm() {
       }
 
       toast.success("Account created successfully");
-      router.push(callbackURL);
+      router.push(callbackURL as Route);
       router.refresh();
     } catch (error) {
       const err = error as Error;

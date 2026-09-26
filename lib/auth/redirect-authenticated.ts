@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import type { Route } from "next";
 
 import { authRoutes, DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 
@@ -34,5 +35,5 @@ export async function redirectIfAuthenticated(
   const user = await getCurrentUser();
   if (!user) return;
 
-  redirect(resolveAuthenticatedRedirect(from, currentPath));
+  redirect(resolveAuthenticatedRedirect(from, currentPath) as Route);
 }
