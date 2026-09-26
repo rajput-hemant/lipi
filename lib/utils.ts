@@ -1,20 +1,8 @@
-import { clsx } from "clsx";
 import { toast } from "sonner";
-import { twMerge } from "tailwind-merge";
-
-import type { ClassValue } from "clsx";
-
 import { siteConfig } from "@/config/site";
 import { env } from "./env";
 
-/**
- * Merges the given class names with the tailwind classes
- * @param inputs The class names to merge
- * @returns The merged class names
- */
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+export { cn } from "cn";
 
 /**
  * Returns the absolute url for the given path based on the current environment
