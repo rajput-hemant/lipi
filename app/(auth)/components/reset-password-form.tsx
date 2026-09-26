@@ -3,7 +3,13 @@
 import React from "react";
 import { useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Key, Loader2 } from "lucide-react";
+import {
+  EyeIcon,
+  EyeOffIcon,
+  Key01Icon,
+  Loading03Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -131,8 +137,17 @@ export function ResetPasswordForm() {
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isPassVisible ?
-                        <EyeOff className="size-5" />
-                      : <Eye className="size-5" />}
+                        <HugeiconsIcon
+                          icon={EyeOffIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      : <HugeiconsIcon
+                          icon={EyeIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      }
                     </TooltipTrigger>
 
                     <TooltipContent>
@@ -175,8 +190,17 @@ export function ResetPasswordForm() {
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isNewPassVisible ?
-                        <EyeOff className="size-5" />
-                      : <Eye className="size-5" />}
+                        <HugeiconsIcon
+                          icon={EyeOffIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      : <HugeiconsIcon
+                          icon={EyeIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      }
                     </TooltipTrigger>
 
                     <TooltipContent>
@@ -199,8 +223,17 @@ export function ResetPasswordForm() {
           className="w-full font-semibold shadow-md"
         >
           {isSubmitting ?
-            <Loader2 className="mr-2 size-4 animate-spin" />
-          : <Key className="mr-2 size-4" />}
+            <HugeiconsIcon
+              icon={Loading03Icon}
+              strokeWidth={2}
+              className="mr-2 size-4 animate-spin"
+            />
+          : <HugeiconsIcon
+              icon={Key01Icon}
+              strokeWidth={2}
+              className="mr-2 size-4"
+            />
+          }
           Reset Password
         </Button>
       </form>

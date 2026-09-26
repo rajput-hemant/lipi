@@ -1,4 +1,5 @@
-import { CheckIcon } from "lucide-react";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Diamond } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -71,7 +72,11 @@ export default function PricingPage() {
                     <ul className="flex flex-col gap-2">
                       {features.map((feature) => (
                         <li key={feature} className="flex items-center gap-2">
-                          <CheckIcon className="size-4" />
+                          <HugeiconsIcon
+                            icon={Tick02Icon}
+                            strokeWidth={2}
+                            className="size-4"
+                          />
                           {feature}
                         </li>
                       ))}

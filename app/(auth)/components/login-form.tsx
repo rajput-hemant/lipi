@@ -4,7 +4,15 @@ import React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AtSign, Eye, EyeOff, Fingerprint, Loader2, Mail } from "lucide-react";
+import {
+  AtSignIcon,
+  EyeIcon,
+  EyeOffIcon,
+  FingerPrintIcon,
+  Loading03Icon,
+  Mail01Icon,
+} from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -140,8 +148,17 @@ export function LoginForm() {
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isEmailMode ?
-                        <AtSign className="size-5" />
-                      : <Mail className="size-5" />}
+                        <HugeiconsIcon
+                          icon={AtSignIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      : <HugeiconsIcon
+                          icon={Mail01Icon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      }
                     </TooltipTrigger>
 
                     <TooltipContent>
@@ -186,8 +203,17 @@ export function LoginForm() {
                       className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
                     >
                       {isPassVisible ?
-                        <EyeOff className="size-5" />
-                      : <Eye className="size-5" />}
+                        <HugeiconsIcon
+                          icon={EyeOffIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      : <HugeiconsIcon
+                          icon={EyeIcon}
+                          strokeWidth={2}
+                          className="size-5"
+                        />
+                      }
                     </TooltipTrigger>
 
                     <TooltipContent>
@@ -210,10 +236,23 @@ export function LoginForm() {
           className="w-full font-semibold shadow-md"
         >
           {isSubmitting ?
-            <Loader2 className="mr-2 size-4 animate-spin" />
+            <HugeiconsIcon
+              icon={Loading03Icon}
+              strokeWidth={2}
+              className="mr-2 size-4 animate-spin"
+            />
           : isEmailMode ?
-            <Mail className="mr-2 size-4" />
-          : <Fingerprint className="mr-2 size-4" />}
+            <HugeiconsIcon
+              icon={Mail01Icon}
+              strokeWidth={2}
+              className="mr-2 size-4"
+            />
+          : <HugeiconsIcon
+              icon={FingerPrintIcon}
+              strokeWidth={2}
+              className="mr-2 size-4"
+            />
+          }
 
           {isEmailMode ? "Login with Email" : "Login"}
         </Button>

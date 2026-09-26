@@ -3,7 +3,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loading03Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -106,7 +107,11 @@ export function WorkspaceForm({ user }: WorkspaceFormProps) {
             className="ml-auto w-40 shadow-md"
           >
             {form.formState.isSubmitting ?
-              <Loader2 className="size-4 animate-spin" />
+              <HugeiconsIcon
+                icon={Loading03Icon}
+                strokeWidth={2}
+                className="size-4 animate-spin"
+              />
             : "Create workspace"}
           </Button>
         </div>
