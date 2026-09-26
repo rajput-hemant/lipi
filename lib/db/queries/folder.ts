@@ -23,7 +23,7 @@ export async function createFolder(folder: Folder) {
     console.error((e as Error).message);
     throw new Error("Failed to create folders");
   } finally {
-    revalidateTag("get_folders");
+    revalidateTag("get_folders", "max");
   }
 }
 
@@ -79,7 +79,7 @@ export async function updateFolder(folder: Folder) {
     console.error((e as Error).message);
     throw new Error("Failed to update folder.");
   } finally {
-    revalidateTag("get_folders");
+    revalidateTag("get_folders", "max");
   }
 }
 

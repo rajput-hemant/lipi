@@ -58,16 +58,20 @@ export function absoluteUrl(path: string) {
  */
 export async function getGitHubStars(): Promise<string | null> {
   try {
+    const headers: HeadersInit = {
+      Accept: "application/vnd.github+json",
+    };
+    if (env.GITHUB_ACCESS_TOKEN) {
+      headers.Authorization = `Bearer ${env.GITHUB_ACCESS_TOKEN}`;
+    }
+
     const response = await fetch(
       `https://api.github.com/repos/${siteConfig.links.github
         .split("/")
         .slice(-2)
         .join("/")}`,
       {
-        headers: {
-          Accept: "application/vnd.github+json",
-          Authorization: `Bearer ${env.GITHUB_ACCESS_TOKEN}`,
-        },
+        headers,
         next: { revalidate: 60 },
       }
     );

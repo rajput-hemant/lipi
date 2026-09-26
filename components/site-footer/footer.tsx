@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 
 import { siteConfig } from "@/config/site";
 import { GitHub, Logo, X } from "../icons";
@@ -22,7 +23,9 @@ const footerLinks = [
   { title: "Support", links: ["Contact us", "FAQs"] },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  await connection();
+  const year = new Date().getFullYear();
   const githubUrl = siteConfig.links.github;
 
   return (
@@ -97,7 +100,7 @@ export function SiteFooter() {
         <div className="mt-8 flex items-center justify-between lg:mt-12">
           <p className="mt-4 text-muted-foreground">
             <span>
-              &copy; {new Date().getFullYear()} {siteConfig.name}.
+              &copy; {year} {siteConfig.name}.
             </span>{" "}
             <span>
               Illustrations by{" "}

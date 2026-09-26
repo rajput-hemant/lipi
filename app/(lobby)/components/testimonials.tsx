@@ -1,5 +1,3 @@
-import { randomUUID } from "crypto";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
@@ -34,7 +32,7 @@ export function Testimonials() {
       >
         {[...Array(2)].map((_, i) => (
           <div
-            key={randomUUID()}
+            key={`testimonial-row-${i}`}
             className={cn(
               "mt-10 flex flex-nowrap gap-6 self-start",
               {

@@ -22,9 +22,9 @@ export async function createWorkspace(workspace: Workspace) {
     console.error((e as Error).message);
     throw new Error("Failed to create Workspace.");
   } finally {
-    revalidateTag("get_private_workspaces");
-    revalidateTag("get_collaborating_workspaces");
-    revalidateTag("get_shared_workspaces");
+    revalidateTag("get_private_workspaces", "max");
+    revalidateTag("get_collaborating_workspaces", "max");
+    revalidateTag("get_shared_workspaces", "max");
   }
 }
 

@@ -20,45 +20,52 @@ export type AppAction = {
   deleteFolder: (folderId: string) => void;
 };
 
-export const store = proxy<AppState & AppAction>({
-  user: null,
-  files: [],
-  folders: [],
+export type Store = AppState & AppAction;
 
-  addFile(file) {
-    store.files.push(file);
-  },
-  updateFile(file) {
-    store.files = store.files.map((f) => (f.id === file.id ? file : f));
-  },
-  deleteFile(id) {
-    store.files = store.files.filter((f) => f.id !== id);
-  },
+export function createAppStore(initial: AppState): Store {
+  const store = proxy<Store>({
+    user: initial.user,
+    files: initial.files,
+    folders: initial.folders,
 
-  addFolder(folder) {
-    store.folders.push(folder);
-  },
-  updateFolder(folder: Folder) {
-    store.folders = store.folders.map((f) => (f.id === folder.id ? folder : f));
-  },
-  deleteFolder(id) {
-    store.folders = store.folders.filter((f) => f.id !== id);
-  },
-});
+    addFile(file) {
+      store.files.push(file);
+    },
+    updateFile(file) {
+      store.files = store.files.map((f) => (f.id === file.id ? file : f));
+    },
+    deleteFile(id) {
+      store.files = store.files.filter((f) => f.id !== id);
+    },
 
-export function setStore(newState: AppState) {
-  store.user = newState.user;
-  store.files = newState.files;
-  store.folders = newState.folders;
+    addFolder(folder) {
+      store.folders.push(folder);
+    },
+    updateFolder(folder: Folder) {
+      store.folders = store.folders.map((f) =>
+        f.id === folder.id ? folder : f
+      );
+    },
+    deleteFolder(id) {
+      store.folders = store.folders.filter((f) => f.id !== id);
+    },
+  });
+
+  return store;
 }
 
-export type Store = typeof store;
+export function syncAppStore(store: Store, state: AppState) {
+  store.user = state.user;
+  store.files = state.files;
+  store.folders = state.folders;
+}
 
 export const AppStateContext = React.createContext<Store | null>(null);
 
 export function useAppState() {
-  if (!AppStateContext)
+  const store = React.useContext(AppStateContext);
+  if (!store)
     throw new Error("Cannot use `useAppState` outside of a `StoreProvider`");
 
-  return useSnapshot(React.useContext(AppStateContext)!);
+  return useSnapshot(store);
 }

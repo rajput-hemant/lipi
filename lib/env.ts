@@ -58,9 +58,7 @@ export const env = createEnv({
     GITHUB_CLIENT_SECRET: z
       .string()
       .min(1, { message: "Github Client Secret is invalid or missing" }),
-    GITHUB_ACCESS_TOKEN: z
-      .string()
-      .min(1, { message: "Github Access Token is invalid or missing" }),
+    GITHUB_ACCESS_TOKEN: z.string().optional(),
 
     /* -----------------------------------------------------------------------------------------------
      * Discord OAuth

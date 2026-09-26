@@ -23,7 +23,7 @@ export async function createFile(file: File) {
     console.error((e as Error).message);
     throw new Error("Failed to create file");
   } finally {
-    revalidateTag("get_files");
+    revalidateTag("get_files", "max");
   }
 }
 
@@ -77,7 +77,7 @@ export async function updateFile(file: File) {
     console.error((e as Error).message);
     throw new Error("Failed to update file");
   } finally {
-    revalidateTag("get_files");
+    revalidateTag("get_files", "max");
   }
 }
 
