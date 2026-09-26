@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -385,16 +385,7 @@ export function DocumentTree() {
     [forest, expandedIds],
   );
 
-  useEffect(() => {
-    if (!focusedId && visibleNodes[0]) {
-      setFocusedId(visibleNodes[0].id);
-    }
-  }, [focusedId, visibleNodes]);
-
-  useEffect(() => {
-    if (!focusedId) return;
-    document.getElementById(`document-tree-item-${focusedId}`)?.focus();
-  }, [focusedId, expandedIds]);
+  const activeFocusId = focusedId ?? visibleNodes[0]?.id ?? null;
 
   const onTreeKeyDown = (event: React.KeyboardEvent<HTMLUListElement>) => {
     const navigationKeys = [
@@ -410,14 +401,21 @@ export function DocumentTree() {
     event.preventDefault();
     const action = resolveTreeKeyAction(
       event.key,
-      focusedId,
+      activeFocusId,
       visibleNodes,
       expandedIds,
     );
 
     if (action.expandId) expandNode(action.expandId);
     if (action.collapseId) collapseNode(action.collapseId);
-    if (action.nextFocusId) setFocusedId(action.nextFocusId);
+    if (action.nextFocusId) {
+      setFocusedId(action.nextFocusId);
+      requestAnimationFrame(() => {
+        document
+          .getElementById(`document-tree-item-${action.nextFocusId}`)
+          ?.focus();
+      });
+    }
   };
 
   function createRootToggle() {
@@ -550,7 +548,7 @@ export function DocumentTree() {
                   expandedIds={expandedIds}
                   toggleExpanded={toggleExpanded}
                   expandNode={expandNode}
-                  focusedId={focusedId}
+                  focusedId={activeFocusId}
                   setFocusedId={setFocusedId}
                 />
               ))}
