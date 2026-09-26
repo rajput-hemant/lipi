@@ -5,6 +5,7 @@ import {
   assertPermanentDeleteAllowed,
   assertRootPageQuota,
   collectRestoreTargetIds,
+  orderPermanentDeleteIds,
   planDeepDuplicate,
   validateParentAssignment,
 } from "./document-operations";
@@ -116,6 +117,22 @@ describe("assertPermanentDeleteAllowed", () => {
     expect(assertPermanentDeleteAllowed(documents, "a").sort()).toEqual([
       "a",
       "b",
+    ]);
+  });
+});
+
+describe("orderPermanentDeleteIds", () => {
+  it("deletes deeper nodes before ancestors", () => {
+    const documents = [
+      doc({ id: "a", title: "A", inTrash: true }),
+      doc({ id: "b", title: "B", parentId: "a", inTrash: true }),
+      doc({ id: "c", title: "C", parentId: "b", inTrash: true }),
+    ];
+
+    expect(orderPermanentDeleteIds(documents, ["a", "b", "c"])).toEqual([
+      "c",
+      "b",
+      "a",
     ]);
   });
 });

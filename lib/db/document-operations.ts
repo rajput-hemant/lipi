@@ -1,5 +1,6 @@
 import {
   collectDescendantIds,
+  getDocumentAncestors,
   type DocumentRecord,
 } from "./documents-tree";
 
@@ -135,6 +136,17 @@ export function assertPermanentDeleteAllowed(
   }
 
   return subtreeIds.filter((id) => byIdIn(documents, id)?.inTrash);
+}
+
+export function orderPermanentDeleteIds(
+  documents: DocumentRecord[],
+  ids: string[],
+): string[] {
+  return [...ids].sort(
+    (a, b) =>
+      getDocumentAncestors(documents, b).length -
+      getDocumentAncestors(documents, a).length,
+  );
 }
 
 export type DuplicateNode = {

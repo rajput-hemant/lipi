@@ -28,6 +28,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useAppState } from "@/hooks/use-app-state";
+import { buildOptimisticDuplicateDocuments } from "@/lib/db/client-document-state";
 import {
   createDocument,
   duplicateDocument,
@@ -77,6 +78,7 @@ function DocumentTreeItem({
   const pathname = usePathname();
   const {
     addDocument,
+    deleteDocument,
     updateDocument: updateDocumentState,
     documents: allDocuments,
   } = useAppState();
@@ -146,19 +148,29 @@ function DocumentTreeItem({
 
   async function duplicatePage() {
     const newId = uuid();
-    const optimistic: Document = {
-      ...node,
-      id: newId,
-      title: `${node.title} copy`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    addDocument(optimistic);
+    const records = toDocumentRecords(allDocuments);
+    const copies = buildOptimisticDuplicateDocuments(
+      allDocuments as Document[],
+      records,
+      node.id,
+      newId,
+      uuid,
+      workspaceId,
+    );
+
+    for (const copy of copies) {
+      addDocument(copy);
+    }
 
     toast.promise(duplicateDocument({ sourceId: node.id, newId }), {
       loading: "Duplicating...",
       success: "Page duplicated.",
-      error: "Could not duplicate page.",
+      error: () => {
+        for (const copy of copies) {
+          deleteDocument(copy.id);
+        }
+        return "Could not duplicate page.";
+      },
     });
   }
 

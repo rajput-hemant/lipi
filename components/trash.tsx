@@ -12,7 +12,12 @@ import { toast } from "sonner";
 
 import type { Document } from "@/types/db";
 
+import { toDocumentRecords } from "@/components/sidebar/document-tree-utils";
 import { useAppState } from "@/hooks/use-app-state";
+import {
+  patchDocumentsForRestore,
+  permanentDeleteTargetIds,
+} from "@/lib/db/client-document-state";
 import { deleteDocumentPermanently, restoreDocument } from "@/lib/db/queries";
 import {
   AlertDialog,
@@ -29,9 +34,12 @@ import { DialogClose, DialogFooter } from "./ui/dialog";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
+function cloneDocuments(documents: readonly Document[]): Document[] {
+  return documents.map((document) => ({ ...document }));
+}
+
 export function Trash() {
-  const { documents, addDocument, updateDocument, deleteDocument } =
-    useAppState();
+  const { documents, replaceDocuments } = useAppState();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const trashed = documents.filter((document) => document.inTrash);
@@ -40,38 +48,46 @@ export function Trash() {
   );
 
   async function restore(documentId: string) {
-    const document = documents.find((entry) => entry.id === documentId);
+    const records = toDocumentRecords(documents);
+    const previous = cloneDocuments(documents);
+    const next = patchDocumentsForRestore(previous, records, documentId);
 
-    if (!document) {
-      toast.error("Something went wrong", { description: "Page not found." });
-      return;
-    }
-
-    const updated: Document = { ...document, inTrash: false };
-    updateDocument(updated);
+    replaceDocuments(next);
 
     toast.promise(restoreDocument(documentId), {
       loading: "Restoring page...",
       success: "Page restored",
-      error: "Failed to restore page",
+      error: () => {
+        replaceDocuments(previous);
+        return "Failed to restore page";
+      },
     });
   }
 
   async function confirmPermanentDelete() {
     if (!pendingDeleteId) return;
     const documentId = pendingDeleteId;
-    const document = documents.find((entry) => entry.id === documentId);
-    deleteDocument(documentId);
     setPendingDeleteId(null);
 
-    toast.promise(deleteDocumentPermanently(documentId), {
-      loading: "Deleting page...",
-      success: "Page deleted permanently.",
-      error: () => {
-        if (document) addDocument(document);
-        return "Something went wrong! Unable to delete page.";
-      },
-    });
+    try {
+      const records = toDocumentRecords(documents);
+      const deleteIds = new Set(permanentDeleteTargetIds(records, documentId));
+      const previous = cloneDocuments(documents);
+      replaceDocuments(previous.filter((document) => !deleteIds.has(document.id)));
+
+      toast.promise(deleteDocumentPermanently(documentId), {
+        loading: "Deleting page...",
+        success: "Page deleted permanently.",
+        error: () => {
+          replaceDocuments(previous);
+          return "Something went wrong! Unable to delete page.";
+        },
+      });
+    } catch {
+      toast.error("Something went wrong", {
+        description: "This page cannot be deleted permanently.",
+      });
+    }
   }
 
   return (

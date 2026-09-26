@@ -13,6 +13,7 @@ export type AppAction = {
   addDocument: (document: Document) => void;
   updateDocument: (document: Document) => void;
   deleteDocument: (documentId: string) => void;
+  replaceDocuments: (documents: Document[]) => void;
 };
 
 export type Store = AppState & AppAction;
@@ -32,6 +33,9 @@ export function createAppStore(initial: AppState): Store {
     },
     deleteDocument(id) {
       store.documents = store.documents.filter((entry) => entry.id !== id);
+    },
+    replaceDocuments(documents) {
+      store.documents = documents;
     },
   });
 

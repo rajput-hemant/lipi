@@ -12,12 +12,12 @@ import {
   assertRootPageQuota,
   collectRestoreTargetIds,
   DocumentOperationError,
+  orderPermanentDeleteIds,
   planDeepDuplicate,
   validateParentAssignment,
 } from "@/lib/db/document-operations";
 import {
   collectDescendantIds,
-  getDocumentAncestors,
   type DocumentRecord,
 } from "@/lib/db/documents-tree";
 import {
@@ -82,6 +82,7 @@ async function userHasActiveSubscription(userId: string) {
 
 export async function createDocument(input: unknown) {
   const parsed = createDocumentSchema.parse(input);
+  let workspaceIdForRevalidate: string | undefined;
 
   try {
     const user = await authorizeWorkspaceMutation(parsed.workspaceId);
@@ -110,13 +111,16 @@ export async function createDocument(input: unknown) {
       })
       .returning();
 
+    workspaceIdForRevalidate = parsed.workspaceId;
     return data;
   } catch (e) {
     rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to create document");
   } finally {
-    revalidateDocuments(parsed.workspaceId);
+    if (workspaceIdForRevalidate) {
+      revalidateDocuments(workspaceIdForRevalidate);
+    }
   }
 }
 
@@ -257,11 +261,7 @@ export async function deleteDocumentPermanently(documentId: string) {
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
     const ids = assertPermanentDeleteAllowed(workspaceDocs, documentId);
-    const ordered = [...ids].sort(
-      (a, b) =>
-        getDocumentAncestors(workspaceDocs, b).length -
-        getDocumentAncestors(workspaceDocs, a).length,
-    );
+    const ordered = orderPermanentDeleteIds(workspaceDocs, ids);
 
     for (const id of ordered) {
       await db.delete(documents).where(eq(documents.id, id));
