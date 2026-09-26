@@ -12,7 +12,7 @@ import { toast } from "sonner";
 
 import type { Document } from "@/types/db";
 
-import { toDocumentRecords } from "@/components/sidebar/document-tree-utils";
+import { toAllDocumentRecords } from "@/components/sidebar/document-tree-utils";
 import { useAppState } from "@/hooks/use-app-state";
 import {
   patchDocumentsForRestore,
@@ -48,7 +48,7 @@ export function Trash() {
   );
 
   async function restore(documentId: string) {
-    const records = toDocumentRecords(documents);
+    const records = toAllDocumentRecords(documents);
     const previous = cloneDocuments(documents);
     const next = patchDocumentsForRestore(previous, records, documentId);
 
@@ -70,7 +70,7 @@ export function Trash() {
     setPendingDeleteId(null);
 
     try {
-      const records = toDocumentRecords(documents);
+      const records = toAllDocumentRecords(documents);
       const deleteIds = new Set(permanentDeleteTargetIds(records, documentId));
       const previous = cloneDocuments(documents);
       replaceDocuments(previous.filter((document) => !deleteIds.has(document.id)));

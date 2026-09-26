@@ -10,25 +10,38 @@ export function getActiveDocuments(documents: readonly Document[]) {
   return documents.filter((document) => !document.inTrash);
 }
 
+function toDocumentRecord(document: Document): DocumentRecord | null {
+  if (!document.id) return null;
+
+  return {
+    id: document.id,
+    workspaceId: document.workspaceId,
+    parentId: document.parentId ?? null,
+    title: document.title,
+    icon: document.icon ?? "",
+    bannerUrl: document.bannerUrl ?? null,
+    content: document.content ?? null,
+    inTrash: document.inTrash ?? false,
+    createdAt: document.createdAt ?? new Date(0).toISOString(),
+    updatedAt: document.updatedAt ?? new Date(0).toISOString(),
+  };
+}
+
 export function toDocumentRecords(documents: readonly Document[]): DocumentRecord[] {
-  return getActiveDocuments(documents).flatMap((document) =>
-    document.id ?
-      [
-        {
-          id: document.id,
-          workspaceId: document.workspaceId,
-          parentId: document.parentId ?? null,
-          title: document.title,
-          icon: document.icon ?? "",
-          bannerUrl: document.bannerUrl ?? null,
-          content: document.content ?? null,
-          inTrash: document.inTrash ?? false,
-          createdAt: document.createdAt ?? new Date(0).toISOString(),
-          updatedAt: document.updatedAt ?? new Date(0).toISOString(),
-        },
-      ]
-    : [],
-  );
+  return getActiveDocuments(documents).flatMap((document) => {
+    const record = toDocumentRecord(document);
+    return record ? [record] : [];
+  });
+}
+
+/** Includes trashed rows; use for trash restore/delete helpers, not sidebar tree building. */
+export function toAllDocumentRecords(
+  documents: readonly Document[],
+): DocumentRecord[] {
+  return documents.flatMap((document) => {
+    const record = toDocumentRecord(document);
+    return record ? [record] : [];
+  });
 }
 
 export function getDocumentForest(documents: readonly Document[]) {
