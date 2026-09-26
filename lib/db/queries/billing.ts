@@ -1,9 +1,21 @@
 import { eq } from "drizzle-orm";
 
+import type Stripe from "stripe";
 import type { Subscription } from "@/types/db";
 
+import { catalogRowsFromStripePrice } from "@/lib/stripe/catalog-sync";
+import { subscriptionRowFromStripe } from "@/lib/stripe/subscription-sync";
 import { db } from "..";
-import { customers, stripeWebhookEvents, subscriptions } from "../schema";
+import {
+  customers,
+  prices,
+  products,
+  stripeWebhookEvents,
+  subscriptions,
+} from "../schema";
+
+type BillingTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+type DbClient = typeof db | BillingTx;
 
 export async function getCustomerByUserId(userId: string) {
   return db.query.customers.findFirst({
@@ -13,9 +25,10 @@ export async function getCustomerByUserId(userId: string) {
 
 export async function upsertStripeCustomer(
   userId: string,
-  stripeCustomerId: string
+  stripeCustomerId: string,
+  client: DbClient = db
 ) {
-  await db
+  await client
     .insert(customers)
     .values({ id: userId, stripeCustomerId })
     .onConflictDoUpdate({
@@ -24,8 +37,67 @@ export async function upsertStripeCustomer(
     });
 }
 
-export async function upsertSubscriptionRow(row: Subscription) {
-  await db
+export async function upsertProductRow(
+  row: typeof products.$inferInsert,
+  client: DbClient = db
+) {
+  await client
+    .insert(products)
+    .values(row)
+    .onConflictDoUpdate({
+      target: products.id,
+      set: {
+        active: row.active,
+        name: row.name,
+        description: row.description,
+        image: row.image,
+        metadata: row.metadata,
+      },
+    });
+}
+
+export async function upsertPriceRow(
+  row: typeof prices.$inferInsert,
+  client: DbClient = db
+) {
+  await client
+    .insert(prices)
+    .values(row)
+    .onConflictDoUpdate({
+      target: prices.id,
+      set: {
+        productId: row.productId,
+        active: row.active,
+        description: row.description,
+        unitAmount: row.unitAmount,
+        currency: row.currency,
+        type: row.type,
+        interval: row.interval,
+        intervalCount: row.intervalCount,
+        trialPeriodDays: row.trialPeriodDays,
+        metadata: row.metadata,
+      },
+    });
+}
+
+export async function upsertCatalogFromStripePrice(
+  stripePrice: Stripe.Price,
+  client: DbClient = db
+) {
+  const { product, price } = catalogRowsFromStripePrice(stripePrice);
+  if (product) {
+    await upsertProductRow(product, client);
+  }
+  if (price) {
+    await upsertPriceRow(price, client);
+  }
+}
+
+export async function upsertSubscriptionRow(
+  row: Subscription,
+  client: DbClient = db
+) {
+  await client
     .insert(subscriptions)
     .values(row)
     .onConflictDoUpdate({
@@ -49,19 +121,38 @@ export async function upsertSubscriptionRow(row: Subscription) {
     });
 }
 
-export async function hasProcessedStripeEvent(eventId: string) {
-  const existing = await db.query.stripeWebhookEvents.findFirst({
-    where: eq(stripeWebhookEvents.id, eventId),
+export async function syncSubscriptionFromStripe(
+  stripeSubscription: Stripe.Subscription,
+  userId: string
+) {
+  await db.transaction(async (tx) => {
+    for (const item of stripeSubscription.items.data) {
+      const stripePrice = item.price;
+      if (stripePrice && typeof stripePrice !== "string") {
+        await upsertCatalogFromStripePrice(stripePrice, tx);
+      }
+    }
+
+    const row = subscriptionRowFromStripe(stripeSubscription, userId);
+    await upsertSubscriptionRow(row, tx);
   });
-  return !!existing;
 }
 
-export async function markStripeEventProcessed(
+export async function claimStripeWebhookEvent(
   eventId: string,
   eventType: string
-) {
-  await db
+): Promise<boolean> {
+  const [claimed] = await db
     .insert(stripeWebhookEvents)
     .values({ id: eventId, type: eventType })
-    .onConflictDoNothing();
+    .onConflictDoNothing()
+    .returning({ id: stripeWebhookEvents.id });
+
+  return !!claimed;
+}
+
+export async function releaseStripeWebhookEventClaim(eventId: string) {
+  await db
+    .delete(stripeWebhookEvents)
+    .where(eq(stripeWebhookEvents.id, eventId));
 }

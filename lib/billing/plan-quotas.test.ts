@@ -45,8 +45,27 @@ describe("plan quotas", () => {
     ).toBe(false);
   });
 
-  it("treats trialing subscriptions as pro for workspace quota", () => {
-    expect(evaluateWorkspaceQuota({ status: "trialing" }, 5)).toBe(true);
-    expect(evaluateWorkspaceQuota({ status: "canceled" }, 1)).toBe(false);
+  it("treats trialing pro-price subscriptions as pro for workspace quota", () => {
+    expect(
+      evaluateWorkspaceQuota(
+        { status: "trialing", priceId: "price_pro" },
+        "price_pro",
+        5
+      )
+    ).toBe(true);
+    expect(
+      evaluateWorkspaceQuota(
+        { status: "trialing", priceId: "price_other" },
+        "price_pro",
+        5
+      )
+    ).toBe(false);
+    expect(
+      evaluateWorkspaceQuota(
+        { status: "canceled", priceId: "price_pro" },
+        "price_pro",
+        1
+      )
+    ).toBe(false);
   });
 });

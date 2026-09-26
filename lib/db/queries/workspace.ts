@@ -7,11 +7,10 @@ import type { Workspace } from "@/types/db";
 
 import { assertUserCanCreateWorkspace } from "@/lib/billing/enforce-quotas";
 import { PlanQuotaError } from "@/lib/billing/errors";
-
 import { db } from "..";
 import { collaborators, users, workspaces } from "../schema";
-import { MutationAuthError } from "./mutation-auth-core";
 import { requireAuthenticatedUser } from "./mutation-auth";
+import { MutationAuthError } from "./mutation-auth-core";
 
 /**
  * Create workspace

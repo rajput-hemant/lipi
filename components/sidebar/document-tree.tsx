@@ -388,7 +388,7 @@ function DocumentTreeItem({
 export function DocumentTree() {
   const pathname = usePathname();
   const workspaceId = pathname.split("/")[2] ?? "";
-  const { setOpen, subscription } = useSubscriptionModal();
+  const { setOpen, hasProEntitlement } = useSubscriptionModal();
   const { documents, addDocument } = useAppState();
 
   const forest = useMemo(() => getDocumentForest(documents), [documents]);
@@ -460,7 +460,7 @@ export function DocumentTree() {
 
   function createRootToggle() {
     const rootCount = countChildren(documents, null);
-    if (subscription?.status !== "active" && rootCount >= 3) {
+    if (!hasProEntitlement && rootCount >= 3) {
       toast.error("Something went wrong", {
         description: "You have reached the maximum number of root pages.",
       });

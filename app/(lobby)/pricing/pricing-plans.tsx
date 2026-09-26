@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { Tick02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import Link from "next/link";
 
 import { StripeCheckoutButton } from "@/components/billing/stripe-checkout-button";
 import { Diamond } from "@/components/icons";
@@ -28,7 +28,7 @@ export function PricingPlans({ isAuthenticated }: Props) {
               className={cn(
                 "w-80 rounded-2xl py-6 transition-shadow ease-in-out hover:shadow-xl",
                 isProPlan &&
-                  "ring-4 ring-ring ring-offset-4 ring-offset-background hover:shadow-2xl",
+                  "ring-4 ring-ring ring-offset-4 ring-offset-background hover:shadow-2xl"
               )}
             >
               <CardHeader>
@@ -66,9 +66,7 @@ export function PricingPlans({ isAuthenticated }: Props) {
 
                 : <Button
                     render={
-                      <Link
-                        href={isAuthenticated ? "/dashboard" : "/signup"}
-                      />
+                      <Link href={isAuthenticated ? "/dashboard" : "/signup"} />
                     }
                     variant="secondary"
                     className="w-full whitespace-nowrap font-semibold"
@@ -98,7 +96,7 @@ export function PricingPlans({ isAuthenticated }: Props) {
               </CardContent>
             </Card>
           );
-        },
+        }
       )}
     </div>
   );

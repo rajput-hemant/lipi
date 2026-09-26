@@ -30,10 +30,11 @@ export function canCreateBlock(params: {
 
 export function evaluateWorkspaceQuota(
   subscription: Parameters<typeof hasProEntitlement>[0],
+  proPriceId: string,
   ownedWorkspaceCount: number
 ): boolean {
   return canCreateWorkspace({
-    isPro: hasProEntitlement(subscription),
+    isPro: hasProEntitlement(subscription, proPriceId),
     ownedWorkspaceCount,
   });
 }

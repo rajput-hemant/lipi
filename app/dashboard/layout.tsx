@@ -4,17 +4,29 @@ import type { PropsWithChildren } from "react";
 
 import { SubscriptionModalProvider } from "@/components/subscription-modal-provider";
 import { getCurrentUser } from "@/lib/auth";
-import { getUserSubscription } from "@/lib/db/queries";
+import { hasConfiguredProEntitlement } from "@/lib/billing/entitlement";
+import { getCurrentBillingSubscription } from "@/lib/billing/subscription-access";
 
 export default async function DashboardLayout({ children }: PropsWithChildren) {
   const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 
-  const { data, error } = await getUserSubscription(user.id);
+  let subscription = null;
+  let hasErrored = false;
+  try {
+    subscription = await getCurrentBillingSubscription(user.id);
+  } catch {
+    hasErrored = true;
+  }
+  const hasProEntitlement = hasConfiguredProEntitlement(subscription);
 
   return (
-    <SubscriptionModalProvider subscription={data} hasErrored={!!error}>
+    <SubscriptionModalProvider
+      subscription={subscription}
+      hasProEntitlement={hasProEntitlement}
+      hasErrored={hasErrored}
+    >
       {children}
     </SubscriptionModalProvider>
   );

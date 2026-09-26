@@ -3,7 +3,7 @@
 import type { DBResponse } from ".";
 import type { Subscription } from "@/types/db";
 
-import { db } from "..";
+import { getCurrentBillingSubscription } from "@/lib/billing/subscription-access";
 
 /**
  * Get user subscription
@@ -14,11 +14,9 @@ export async function getUserSubscription(
   userId: string
 ): Promise<DBResponse<Subscription | null>> {
   try {
-    const data = await db.query.subscriptions.findFirst({
-      where: (s, { eq }) => eq(s.userId, userId),
-    });
+    const data = await getCurrentBillingSubscription(userId);
 
-    return { data: data ?? null, error: null };
+    return { data, error: null };
   } catch (error) {
     return { error: (error as Error).message, data: null };
   }

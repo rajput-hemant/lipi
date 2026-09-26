@@ -12,8 +12,12 @@ export function getStripeWebhookSecret(): string {
   return secret;
 }
 
+export function tryGetStripeProPriceId(): string | undefined {
+  return process.env.STRIPE_PRICE_ID_PRO;
+}
+
 export function getStripeProPriceId(): string {
-  const priceId = process.env.STRIPE_PRICE_ID_PRO;
+  const priceId = tryGetStripeProPriceId();
   if (!priceId) throw new BillingNotConfiguredError();
   return priceId;
 }

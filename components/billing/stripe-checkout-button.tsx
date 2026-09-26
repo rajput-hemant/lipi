@@ -5,11 +5,11 @@ import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
 import {
   openStripeBillingPortal,
   startStripeCheckout,
 } from "@/lib/billing/checkout-client";
-import { Button } from "@/components/ui/button";
 
 type Props = {
   mode: "checkout" | "portal";

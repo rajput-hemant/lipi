@@ -1,23 +1,14 @@
 import type Stripe from "stripe";
 
 import {
-  markStripeEventProcessed,
+  syncSubscriptionFromStripe,
+  upsertCatalogFromStripePrice,
   upsertStripeCustomer,
-  upsertSubscriptionRow,
 } from "@/lib/db/queries/billing";
 import { getStripe } from "@/lib/stripe/client";
-import {
-  resolveUserIdFromStripeSubscription,
-  subscriptionRowFromStripe,
-} from "@/lib/stripe/subscription-sync";
+import { resolveUserIdFromStripeSubscription } from "@/lib/stripe/subscription-sync";
 
-async function syncSubscription(
-  subscription: Stripe.Subscription,
-  userId: string
-) {
-  const row = subscriptionRowFromStripe(subscription, userId);
-  await upsertSubscriptionRow(row);
-}
+const SUBSCRIPTION_EXPAND = ["items.data.price.product"] as const;
 
 export async function handleStripeWebhookEvent(event: Stripe.Event) {
   const stripe = getStripe();
@@ -47,9 +38,11 @@ export async function handleStripeWebhookEvent(event: Stripe.Event) {
         : session.subscription?.id;
 
       if (subscriptionId) {
-        const subscription =
-          await stripe.subscriptions.retrieve(subscriptionId);
-        await syncSubscription(subscription, userId);
+        const subscription = await stripe.subscriptions.retrieve(
+          subscriptionId,
+          { expand: [...SUBSCRIPTION_EXPAND] }
+        );
+        await syncSubscriptionFromStripe(subscription, userId);
       }
       break;
     }
@@ -62,12 +55,41 @@ export async function handleStripeWebhookEvent(event: Stripe.Event) {
         throw new Error(`${event.type} missing user id metadata`);
       }
 
-      await syncSubscription(subscription, userId);
+      const expanded = await stripe.subscriptions.retrieve(subscription.id, {
+        expand: [...SUBSCRIPTION_EXPAND],
+      });
+      await syncSubscriptionFromStripe(expanded, userId);
+      break;
+    }
+    case "price.created":
+    case "price.updated": {
+      const price = event.data.object as Stripe.Price;
+      const expanded =
+        typeof price.product === "string" ?
+          await stripe.prices.retrieve(price.id, {
+            expand: ["product"],
+          })
+        : price;
+      await upsertCatalogFromStripePrice(expanded);
+      break;
+    }
+    case "product.created":
+    case "product.updated": {
+      const product = event.data.object as Stripe.Product;
+      const defaultPriceId =
+        typeof product.default_price === "string" ?
+          product.default_price
+        : product.default_price?.id;
+
+      if (defaultPriceId) {
+        const price = await stripe.prices.retrieve(defaultPriceId, {
+          expand: ["product"],
+        });
+        await upsertCatalogFromStripePrice(price);
+      }
       break;
     }
     default:
       break;
   }
-
-  await markStripeEventProcessed(event.id, event.type);
 }

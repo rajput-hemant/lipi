@@ -35,7 +35,7 @@ type WorkspaceFormProps = { user: SessionUser };
 
 export function WorkspaceForm({ user }: WorkspaceFormProps) {
   const router = useRouter();
-  const { subscription } = useSubscriptionModal();
+  const { hasProEntitlement } = useSubscriptionModal();
 
   const [selectedEmoji, setSelectedEmoji] = React.useState("💼");
 
@@ -95,7 +95,7 @@ export function WorkspaceForm({ user }: WorkspaceFormProps) {
           )}
         />
 
-        {subscription?.status !== "active" && (
+        {!hasProEntitlement && (
           <small className="block pt-4 text-center text-xs text-muted-foreground">
             To customize your workspace, you need to be on a Pro Plan
           </small>

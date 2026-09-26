@@ -2,10 +2,9 @@ import { NextResponse } from "next/server";
 
 import type Stripe from "stripe";
 
-import { hasProcessedStripeEvent } from "@/lib/db/queries/billing";
 import { getStripeWebhookSecret } from "@/lib/stripe/billing-env";
 import { getStripe } from "@/lib/stripe/client";
-import { handleStripeWebhookEvent } from "@/lib/stripe/webhook-handlers";
+import { deliverStripeWebhookEvent } from "@/lib/stripe/webhook-delivery";
 
 export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
@@ -30,12 +29,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  if (await hasProcessedStripeEvent(event.id)) {
-    return NextResponse.json({ received: true, duplicate: true });
-  }
-
   try {
-    await handleStripeWebhookEvent(event);
+    const result = await deliverStripeWebhookEvent(event);
+    if (result.kind === "duplicate") {
+      return NextResponse.json({ received: true, duplicate: true });
+    }
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error("Stripe webhook handler failed:", error);

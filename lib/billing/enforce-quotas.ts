@@ -3,11 +3,12 @@
 import { and, count, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { getUserSubscription } from "@/lib/db/queries";
 import { collaborators, workspaces } from "@/lib/db/schema";
+import { tryGetStripeProPriceId } from "@/lib/stripe/billing-env";
 import { hasProEntitlement } from "./entitlement";
 import { PlanQuotaError } from "./errors";
 import { canAddCollaborator, canCreateWorkspace } from "./plan-quotas";
+import { getCurrentBillingSubscription } from "./subscription-access";
 
 export async function countOwnedWorkspaces(userId: string): Promise<number> {
   const [row] = await db
@@ -35,11 +36,19 @@ export async function countCollaboratorsForOwner(
   return Number(row?.value ?? 0);
 }
 
+function isProSubscriber(
+  subscription: Awaited<ReturnType<typeof getCurrentBillingSubscription>>
+): boolean {
+  const proPriceId = tryGetStripeProPriceId();
+  if (!proPriceId) return false;
+  return hasProEntitlement(subscription, proPriceId);
+}
+
 export async function assertUserCanCreateWorkspace(
   userId: string
 ): Promise<void> {
-  const { data: subscription } = await getUserSubscription(userId);
-  const isPro = hasProEntitlement(subscription);
+  const subscription = await getCurrentBillingSubscription(userId);
+  const isPro = isProSubscriber(subscription);
   const ownedWorkspaceCount = await countOwnedWorkspaces(userId);
 
   if (!canCreateWorkspace({ isPro, ownedWorkspaceCount })) {
@@ -53,8 +62,8 @@ export async function assertUserCanCreateWorkspace(
 export async function assertUserCanAddCollaborator(
   userId: string
 ): Promise<void> {
-  const { data: subscription } = await getUserSubscription(userId);
-  const isPro = hasProEntitlement(subscription);
+  const subscription = await getCurrentBillingSubscription(userId);
+  const isPro = isProSubscriber(subscription);
   const collaboratorCount = await countCollaboratorsForOwner(userId);
 
   if (!canAddCollaborator({ isPro, collaboratorCount })) {

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import type { Subscription } from "@/types/db";
 
 import { StripeCheckoutButton } from "@/components/billing/stripe-checkout-button";
-
 import { Button } from "./ui/button";
 import {
   Dialog,
@@ -22,12 +21,14 @@ type SubscriptionModalContext = {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   subscription: Subscription | null;
+  hasProEntitlement: boolean;
 };
 
 const SubscriptionModalContext = React.createContext<SubscriptionModalContext>({
   open: false,
   setOpen: () => {},
   subscription: null,
+  hasProEntitlement: false,
 });
 
 export const useSubscriptionModal = () => {
@@ -36,11 +37,12 @@ export const useSubscriptionModal = () => {
 
 type Props = React.PropsWithChildren<{
   subscription: Subscription | null;
+  hasProEntitlement: boolean;
   hasErrored?: boolean;
 }>;
 
 export const SubscriptionModalProvider = (props: Props) => {
-  const { subscription, hasErrored, children } = props;
+  const { subscription, hasProEntitlement, hasErrored, children } = props;
 
   const [open, setOpen] = React.useState(false);
 
@@ -54,12 +56,13 @@ export const SubscriptionModalProvider = (props: Props) => {
   }, [hasErrored]);
 
   return (
-    <SubscriptionModalContext.Provider value={{ open, setOpen, subscription }}>
+    <SubscriptionModalContext.Provider
+      value={{ open, setOpen, subscription, hasProEntitlement }}
+    >
       {children}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        {subscription?.status === "active" ||
-        subscription?.status === "trialing" ?
+        {hasProEntitlement ?
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Pro plan active</DialogTitle>

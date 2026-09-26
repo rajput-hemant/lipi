@@ -1,6 +1,5 @@
-import { getCurrentUser } from "@/lib/auth";
 import { siteConfig } from "@/config/site";
-
+import { getCurrentUser } from "@/lib/auth";
 import { PricingPlans } from "./pricing-plans";
 
 export const metadata = {
