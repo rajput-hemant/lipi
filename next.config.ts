@@ -4,12 +4,12 @@ import type { NextConfig } from "next";
 import "./lib/env";
 
 const isDocker = process.env.IS_DOCKER === "true";
-const isProd = process.env.NODE_ENV === "production";
 
 const config: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
-  reactCompiler: isProd,
+  reactCompiler: true,
+  typedRoutes: true,
   images: {
     remotePatterns: [],
     unoptimized: !isDocker,
