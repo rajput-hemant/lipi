@@ -22,7 +22,7 @@ export function AppStateProvider({
     createAppStore({ user, files, folders })
   );
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     syncAppStore(store, { user, files, folders });
   }, [store, user, files, folders]);
 

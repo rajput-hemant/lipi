@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { LoginForm } from "../components/login-form";
 
 export const metadata = {
@@ -16,7 +18,9 @@ export default function LoginPage() {
         Enter your credentials below to login
       </p>
 
-      <LoginForm />
+      <Suspense fallback={null}>
+        <LoginForm />
+      </Suspense>
     </div>
   );
 }

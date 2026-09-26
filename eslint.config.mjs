@@ -17,8 +17,6 @@ export default defineConfig([
       "react-compiler": reactCompiler,
     },
     rules: {
-      "@next/next/no-html-link-for-pages": "off",
-      "react/jsx-key": "warn",
       "react-compiler/react-compiler": "error",
     },
     settings: {

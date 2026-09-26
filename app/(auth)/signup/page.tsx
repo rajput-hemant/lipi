@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { SignUpForm } from "../components/signup-form";
 
 export const metadata = {
@@ -15,7 +17,9 @@ export default function SignupPage() {
         Enter your email below to create your account
       </p>
 
-      <SignUpForm />
+      <Suspense fallback={null}>
+        <SignUpForm />
+      </Suspense>
     </div>
   );
 }
