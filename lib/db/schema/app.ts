@@ -8,6 +8,7 @@ import {
   jsonb,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -196,28 +197,36 @@ export const collaborators = createTable("collaborators", {
     .references(() => users.id, { onDelete: "cascade" }),
 });
 
-export const workspaceInvites = createTable("workspace_invites", {
-  id: uuid("id").defaultRandom().primaryKey().notNull(),
-  workspaceId: uuid("workspace_id")
-    .notNull()
-    .references(() => workspaces.id, { onDelete: "cascade" }),
-  email: text("email").notNull(),
-  role: workspaceCollaboratorRole("role").notNull().default("editor"),
-  token: text("token").notNull().unique(),
-  invitedByUserId: uuid("invited_by_user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  expiresAt: timestamp("expires_at", {
-    withTimezone: true,
-    mode: "string",
-  }).notNull(),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
-});
+export const workspaceInvites = createTable(
+  "workspace_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey().notNull(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: workspaceCollaboratorRole("role").notNull().default("editor"),
+    token: text("token").notNull().unique(),
+    invitedByUserId: uuid("invited_by_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "string",
+    }).notNull(),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => ({
+    workspaceEmailUnique: uniqueIndex(
+      "lipi_workspace_invites_workspace_id_email_unique",
+    ).on(table.workspaceId, table.email),
+  }),
+);
 
 export const productsRelations = relations(products, ({ many }) => ({
   prices: many(prices),

@@ -71,6 +71,13 @@
       "when": 1790478006278,
       "tag": "0009_workspace_roles_invites",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790478700000,
+      "tag": "0009_workspace_invite_email_unique",
+      "breakpoints": true
     }
   ]
 }
