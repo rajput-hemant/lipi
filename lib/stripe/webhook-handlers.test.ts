@@ -5,9 +5,9 @@ import type Stripe from "stripe";
 import { handleStripeWebhookEvent } from "./webhook-handlers";
 
 const billingMocks = vi.hoisted(() => ({
+  getCustomerByUserId: vi.fn(),
   syncSubscriptionFromStripe: vi.fn(),
   upsertCatalogFromStripePrice: vi.fn(),
-  upsertStripeCustomer: vi.fn(),
 }));
 
 const stripeMocks = vi.hoisted(() => ({
@@ -26,6 +26,10 @@ vi.mock("@/lib/stripe/client", () => ({
 describe("handleStripeWebhookEvent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    billingMocks.getCustomerByUserId.mockResolvedValue({
+      id: "user-1",
+      stripeCustomerId: "cus_1",
+    });
   });
 
   it("syncs checkout.session.completed with expanded subscription retrieve", async () => {
@@ -48,13 +52,51 @@ describe("handleStripeWebhookEvent", () => {
       },
     } as Stripe.Event);
 
-    expect(billingMocks.upsertStripeCustomer).toHaveBeenCalledWith(
-      "user-1",
-      "cus_1"
-    );
+    expect(billingMocks.getCustomerByUserId).toHaveBeenCalledWith("user-1");
     expect(stripeMocks.retrieve).toHaveBeenCalledWith("sub_1", {
       expand: ["items.data.price.product"],
     });
     expect(billingMocks.syncSubscriptionFromStripe).toHaveBeenCalled();
+  });
+
+  it("rejects a completed checkout from a different Stripe customer", async () => {
+    billingMocks.getCustomerByUserId.mockResolvedValueOnce({
+      id: "user-1",
+      stripeCustomerId: "cus_expected",
+    });
+
+    await expect(
+      handleStripeWebhookEvent({
+        id: "evt_2",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            client_reference_id: "user-1",
+            customer: "cus_other",
+            subscription: "sub_1",
+          },
+        },
+      } as Stripe.Event)
+    ).rejects.toThrow("customer mismatch");
+
+    expect(stripeMocks.retrieve).not.toHaveBeenCalled();
+    expect(billingMocks.syncSubscriptionFromStripe).not.toHaveBeenCalled();
+  });
+
+  it("rejects a completed checkout with no stored Stripe customer", async () => {
+    billingMocks.getCustomerByUserId.mockResolvedValueOnce(null);
+
+    await expect(
+      handleStripeWebhookEvent({
+        id: "evt_3",
+        type: "checkout.session.completed",
+        data: {
+          object: {
+            client_reference_id: "user-1",
+            customer: "cus_1",
+          },
+        },
+      } as Stripe.Event)
+    ).rejects.toThrow("customer mismatch");
   });
 });

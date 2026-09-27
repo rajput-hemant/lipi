@@ -1,9 +1,9 @@
 import type Stripe from "stripe";
 
 import {
+  getCustomerByUserId,
   syncSubscriptionFromStripe,
   upsertCatalogFromStripePrice,
-  upsertStripeCustomer,
 } from "@/lib/db/queries/billing";
 import { getStripe } from "@/lib/stripe/client";
 import { resolveUserIdFromStripeSubscription } from "@/lib/stripe/subscription-sync";
@@ -16,8 +16,7 @@ export async function handleStripeWebhookEvent(event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      const userId =
-        session.client_reference_id ?? session.metadata?.userId ?? null;
+      const userId = session.client_reference_id;
 
       if (!userId) {
         throw new Error("checkout.session.completed missing user id");
@@ -28,8 +27,12 @@ export async function handleStripeWebhookEvent(event: Stripe.Event) {
           session.customer
         : session.customer?.id;
 
-      if (stripeCustomerId) {
-        await upsertStripeCustomer(userId, stripeCustomerId);
+      const customer = await getCustomerByUserId(userId);
+      if (
+        !customer?.stripeCustomerId ||
+        customer.stripeCustomerId !== stripeCustomerId
+      ) {
+        throw new Error("checkout.session.completed customer mismatch");
       }
 
       const subscriptionId =
