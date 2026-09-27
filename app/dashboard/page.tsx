@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getDefaultWorkspaceId } from "@/lib/db/queries";
 
 export const metadata = {
   title: "Dashboard",
@@ -15,13 +15,11 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const workspace = await db.query.workspaces.findFirst({
-    where: (workspace, { eq }) => eq(workspace.workspaceOwnerId, user.id),
-  });
+  const workspaceId = await getDefaultWorkspaceId(user.id);
 
-  if (!workspace) {
+  if (!workspaceId) {
     redirect(`/dashboard/new-workspace`);
   }
 
-  redirect(`/dashboard/${workspace.id}`);
+  redirect(`/dashboard/${workspaceId}`);
 }

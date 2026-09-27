@@ -64,6 +64,13 @@
       "when": 1790477546112,
       "tag": "0008_colossal_onslaught",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790478006278,
+      "tag": "0009_workspace_roles_invites",
+      "breakpoints": true
     }
   ]
 }

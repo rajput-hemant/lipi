@@ -18,3 +18,8 @@ export const pricingPlanInterval = pgEnum("pricing_plan_interval", [
   "week",
   "day",
 ]);
+
+export const workspaceCollaboratorRole = pgEnum("workspace_collaborator_role", [
+  "editor",
+  "viewer",
+]);

@@ -13,7 +13,12 @@ import {
 
 import { createTable } from "../table-creator";
 import { users } from "./auth";
-import { pricingPlanInterval, pricingType, subscriptionStatus } from "./enums";
+import {
+  pricingPlanInterval,
+  pricingType,
+  subscriptionStatus,
+  workspaceCollaboratorRole,
+} from "./enums";
 
 export const workspaces = createTable("workspaces", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
@@ -179,6 +184,7 @@ export const collaborators = createTable("collaborators", {
   workspaceId: uuid("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
+  role: workspaceCollaboratorRole("role").notNull().default("editor"),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
@@ -188,6 +194,29 @@ export const collaborators = createTable("collaborators", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+});
+
+export const workspaceInvites = createTable("workspace_invites", {
+  id: uuid("id").defaultRandom().primaryKey().notNull(),
+  workspaceId: uuid("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" }),
+  email: text("email").notNull(),
+  role: workspaceCollaboratorRole("role").notNull().default("editor"),
+  token: text("token").notNull().unique(),
+  invitedByUserId: uuid("invited_by_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", {
+    withTimezone: true,
+    mode: "string",
+  }).notNull(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  })
+    .defaultNow()
+    .notNull(),
 });
 
 export const productsRelations = relations(products, ({ many }) => ({

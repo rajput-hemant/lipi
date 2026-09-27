@@ -27,8 +27,8 @@ import { documents } from "../schema";
 import { userHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
 
 import {
-  assertDocumentAccess,
   assertWorkspaceAccess,
+  authorizeDocumentMutation,
   authorizeWorkspaceMutation,
   MutationAuthError,
   requireAuthenticatedUser,
@@ -154,8 +154,7 @@ export async function updateDocument(input: unknown) {
       throw new MutationAuthError("Invalid document");
     }
 
-    const user = await requireAuthenticatedUser();
-    const existing = await assertDocumentAccess(user.id, parsed.id);
+    const { document: existing } = await authorizeDocumentMutation(parsed.id);
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
 
@@ -193,8 +192,7 @@ export async function softDeleteDocumentTree(documentId: string) {
   let workspaceIdForRevalidate: string | undefined;
 
   try {
-    const user = await requireAuthenticatedUser();
-    const root = await assertDocumentAccess(user.id, documentId);
+    const { document: root } = await authorizeDocumentMutation(documentId);
     workspaceIdForRevalidate = root.workspaceId;
 
     const workspaceDocs = await loadWorkspaceDocuments(root.workspaceId);
@@ -222,8 +220,7 @@ export async function restoreDocument(documentId: string) {
   let workspaceIdForRevalidate: string | undefined;
 
   try {
-    const user = await requireAuthenticatedUser();
-    const existing = await assertDocumentAccess(user.id, documentId);
+    const { document: existing } = await authorizeDocumentMutation(documentId);
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
     const ids = collectRestoreTargetIds(workspaceDocs, documentId);
@@ -248,8 +245,7 @@ export async function deleteDocumentPermanently(documentId: string) {
   let workspaceIdForRevalidate: string | undefined;
 
   try {
-    const user = await requireAuthenticatedUser();
-    const existing = await assertDocumentAccess(user.id, documentId);
+    const { document: existing } = await authorizeDocumentMutation(documentId);
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
     const ids = assertPermanentDeleteAllowed(workspaceDocs, documentId);
@@ -276,8 +272,7 @@ export async function duplicateDocument(input: unknown) {
   let workspaceIdForRevalidate: string | undefined;
 
   try {
-    const user = await requireAuthenticatedUser();
-    const source = await assertDocumentAccess(user.id, sourceId);
+    const { document: source } = await authorizeDocumentMutation(sourceId);
     workspaceIdForRevalidate = source.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(source.workspaceId);
     const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);

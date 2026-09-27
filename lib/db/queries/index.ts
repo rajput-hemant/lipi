@@ -8,9 +8,24 @@ export type DBResponse<T> =
 export {
   createWorkspace,
   getCollaboratingWorkspaces,
+  getDefaultWorkspaceId,
   getPrivateWorkspaces,
   getSharedWorkspaces,
+  listWorkspacesForCurrentUser,
+  listWorkspacesForSwitcher,
 } from "./workspace";
+export {
+  acceptWorkspaceInvite,
+  createWorkspaceCollaboratorInvite,
+  listWorkspaceMembers,
+  removeWorkspaceMember,
+  updateCollaboratorRole,
+} from "./workspace-members";
+export {
+  deleteWorkspace,
+  transferWorkspaceOwnership,
+  updateWorkspaceSettings,
+} from "./workspace-settings";
 export {
   createDocument,
   deleteDocumentPermanently,

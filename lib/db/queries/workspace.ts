@@ -11,6 +11,43 @@ import { db } from "..";
 import { collaborators, users, workspaces } from "../schema";
 import { MutationAuthError, requireAuthenticatedUser } from "./mutation-auth";
 
+export async function getDefaultWorkspaceId(userId: string) {
+  const owned = await db.query.workspaces.findFirst({
+    where: eq(workspaces.workspaceOwnerId, userId),
+    orderBy: (workspace, { asc }) => [asc(workspace.createdAt)],
+  });
+
+  if (owned) {
+    return owned.id;
+  }
+
+  const membership = await db.query.collaborators.findFirst({
+    where: eq(collaborators.userId, userId),
+    orderBy: (row, { asc }) => [asc(row.createdAt)],
+  });
+
+  return membership?.workspaceId ?? null;
+}
+
+export async function listWorkspacesForSwitcher(userId: string) {
+  const [privateWorkspaces, collaborating, shared] = await Promise.all([
+    getPrivateWorkspaces(userId),
+    getCollaboratingWorkspaces(userId),
+    getSharedWorkspaces(userId),
+  ]);
+
+  return {
+    privateWorkspaces,
+    collaborating,
+    shared,
+  };
+}
+
+export async function listWorkspacesForCurrentUser() {
+  const user = await requireAuthenticatedUser();
+  return listWorkspacesForSwitcher(user.id);
+}
+
 /**
  * Create workspace
  * @param workspace Workspace
