@@ -2,9 +2,29 @@ import type { PartialBlock } from "@blocknote/core";
 import { describe, expect, it } from "vitest";
 
 import {
+  getStoredDocumentContentState,
   parseStoredDocumentContent,
   serializeDocumentContent,
 } from "./document-content";
+
+describe("getStoredDocumentContentState", () => {
+  it("marks empty content as empty", () => {
+    expect(getStoredDocumentContentState(null)).toEqual({ status: "empty" });
+    expect(getStoredDocumentContentState("")).toEqual({ status: "empty" });
+  });
+
+  it("marks invalid JSON as corrupt", () => {
+    expect(getStoredDocumentContentState("{not json")).toEqual({
+      status: "corrupt",
+    });
+  });
+
+  it("marks non-array JSON as corrupt", () => {
+    expect(getStoredDocumentContentState(JSON.stringify({ type: "paragraph" }))).toEqual({
+      status: "corrupt",
+    });
+  });
+});
 
 describe("parseStoredDocumentContent", () => {
   it("returns undefined for empty content", () => {

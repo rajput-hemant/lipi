@@ -4,7 +4,7 @@ import React from "react";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 
-import type { BlockNoteEditor } from "@blocknote/core";
+import type { BlockNoteEditor, PartialBlock } from "@blocknote/core";
 import { filterSuggestionItems } from "@blocknote/core/extensions";
 import { BlockNoteView } from "@blocknote/shadcn";
 import {
@@ -26,7 +26,7 @@ import {
   calloutBlockTypeSelectItem,
   insertCalloutSlashMenuItem,
 } from "@/lib/block-editor/callout-menu-items";
-import { parseStoredDocumentContent } from "@/lib/block-editor/document-content";
+import { getStoredDocumentContentState } from "@/lib/block-editor/document-content";
 import { blockEditorSchema, type BlockEditorSchema } from "@/lib/block-editor/editor-schema";
 import { lipiBlockNoteShadcnComponents } from "@/lib/block-editor/lipi-shadcn-components";
 import { saveDocumentContent } from "@/lib/block-editor/save-document-content";
@@ -61,11 +61,50 @@ function DocumentFormattingToolbar() {
 
 export function DocumentBlockEditor({ document }: DocumentBlockEditorProps) {
   const { resolvedTheme } = useTheme();
-  const initialContent = React.useMemo(
-    () => parseStoredDocumentContent(document.content),
+  const contentState = React.useMemo(
+    () => getStoredDocumentContentState(document.content),
     [document.content],
   );
 
+  if (contentState.status === "corrupt") {
+    return (
+      <div
+        className="mx-auto w-full max-w-3xl px-6 py-8"
+        role="alert"
+      >
+        <p className="font-medium text-destructive">
+          This page could not be loaded.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The stored document content is invalid. Editing is disabled so your
+          data is not overwritten.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <DocumentBlockEditorLoaded
+      document={document}
+      initialContent={
+        contentState.status === "ready" ? contentState.blocks : undefined
+      }
+      resolvedTheme={resolvedTheme}
+    />
+  );
+}
+
+type DocumentBlockEditorLoadedProps = {
+  document: Document;
+  initialContent: PartialBlock[] | undefined;
+  resolvedTheme: string | undefined;
+};
+
+function DocumentBlockEditorLoaded({
+  document,
+  initialContent,
+  resolvedTheme,
+}: DocumentBlockEditorLoadedProps) {
   const editor = useCreateBlockNote({
     schema: blockEditorSchema,
     initialContent,
