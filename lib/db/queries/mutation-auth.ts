@@ -172,3 +172,25 @@ export async function authorizeWorkspaceMemberManagement(
   await requireWorkspacePermission(user.id, workspaceId, "member:manage");
   return user;
 }
+
+export async function authorizeWorkspaceTransfer(
+  workspaceId: string | null | undefined,
+) {
+  const user = await requireAuthenticatedUser();
+  if (!workspaceId) {
+    throw new MutationAuthError("Invalid workspace");
+  }
+  await requireWorkspacePermission(user.id, workspaceId, "workspace:transfer");
+  return user;
+}
+
+export async function authorizeWorkspaceDelete(
+  workspaceId: string | null | undefined,
+) {
+  const user = await requireAuthenticatedUser();
+  if (!workspaceId) {
+    throw new MutationAuthError("Invalid workspace");
+  }
+  await requireWorkspacePermission(user.id, workspaceId, "workspace:delete");
+  return user;
+}

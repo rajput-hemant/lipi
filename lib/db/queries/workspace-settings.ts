@@ -8,7 +8,9 @@ import { db } from "..";
 import { collaborators, workspaces } from "../schema";
 
 import {
+  authorizeWorkspaceDelete,
   authorizeWorkspaceOwnerAction,
+  authorizeWorkspaceTransfer,
   MutationAuthError,
 } from "./mutation-auth";
 
@@ -65,7 +67,7 @@ export async function updateWorkspaceSettings(input: unknown) {
 
 export async function transferWorkspaceOwnership(input: unknown) {
   const parsed = transferOwnershipSchema.parse(input);
-  const user = await authorizeWorkspaceOwnerAction(parsed.workspaceId);
+  const user = await authorizeWorkspaceTransfer(parsed.workspaceId);
 
   if (parsed.newOwnerUserId === user.id) {
     throw new MutationAuthError("Choose a different member");
@@ -122,7 +124,7 @@ export async function transferWorkspaceOwnership(input: unknown) {
 
 export async function deleteWorkspace(input: unknown) {
   const parsed = deleteWorkspaceSchema.parse(input);
-  await authorizeWorkspaceOwnerAction(parsed.workspaceId);
+  await authorizeWorkspaceDelete(parsed.workspaceId);
 
   const [deleted] = await db
     .delete(workspaces)
