@@ -5,9 +5,15 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["**/*.{test,spec}.{ts,tsx}"],
-    exclude: [...configDefaults.exclude, ".next/**", ".opencode/**"],
+    exclude: [
+      ...configDefaults.exclude,
+      ".next/**",
+      ".opencode/**",
+      "tests/e2e/**",
+    ],
     env: {
       SKIP_ENV_VALIDATION: "true",
+      DISABLE_AUTH_RATE_LIMIT: "true",
     },
   },
   resolve: {
