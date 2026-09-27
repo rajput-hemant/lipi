@@ -168,6 +168,10 @@ export const stripeWebhookEvents = createTable("stripe_webhook_events", {
   })
     .defaultNow()
     .notNull(),
+  processedAt: timestamp("processed_at", {
+    withTimezone: true,
+    mode: "string",
+  }),
 });
 
 export const collaborators = createTable("collaborators", {

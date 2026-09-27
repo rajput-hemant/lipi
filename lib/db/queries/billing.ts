@@ -138,17 +138,45 @@ export async function syncSubscriptionFromStripe(
   });
 }
 
+export type StripeWebhookClaimResult =
+  | { status: "claimed" }
+  | { status: "already_processed" }
+  | { status: "in_progress" };
+
 export async function claimStripeWebhookEvent(
   eventId: string,
-  eventType: string
-): Promise<boolean> {
+  eventType: string,
+): Promise<StripeWebhookClaimResult> {
   const [claimed] = await db
     .insert(stripeWebhookEvents)
-    .values({ id: eventId, type: eventType })
+    .values({ id: eventId, type: eventType, processedAt: null })
     .onConflictDoNothing()
     .returning({ id: stripeWebhookEvents.id });
 
-  return !!claimed;
+  if (claimed) {
+    return { status: "claimed" };
+  }
+
+  const existing = await db.query.stripeWebhookEvents.findFirst({
+    where: eq(stripeWebhookEvents.id, eventId),
+  });
+
+  if (!existing) {
+    return claimStripeWebhookEvent(eventId, eventType);
+  }
+
+  if (existing.processedAt) {
+    return { status: "already_processed" };
+  }
+
+  return { status: "in_progress" };
+}
+
+export async function markStripeWebhookEventProcessed(eventId: string) {
+  await db
+    .update(stripeWebhookEvents)
+    .set({ processedAt: new Date().toISOString() })
+    .where(eq(stripeWebhookEvents.id, eventId));
 }
 
 export async function releaseStripeWebhookEventClaim(eventId: string) {
