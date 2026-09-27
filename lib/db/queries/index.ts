@@ -39,3 +39,7 @@ export {
   updateDocumentInDb,
 } from "./document";
 export { getUserSubscription } from "./subscription";
+export {
+  searchDocumentsInWorkspace,
+  type SearchDocumentResult,
+} from "./search";
