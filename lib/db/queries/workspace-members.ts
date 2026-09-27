@@ -11,6 +11,9 @@ import { collaborators, users, workspaceInvites, workspaces } from "../schema";
 import { sendWorkspaceInviteEmail } from "@/lib/workspace/send-invite";
 import { resolveAuthBaseURL } from "@/lib/auth/resolve-auth-base-url";
 
+import { hasWorkspacePermission } from "@/lib/workspace/permissions";
+import { publicPendingInvitesForRole } from "@/lib/workspace/workspace-invites";
+
 import {
   authorizeWorkspaceMemberManagement,
   getWorkspaceMembershipRole,
@@ -78,15 +81,26 @@ export async function listWorkspaceMembers(workspaceId: string) {
     .innerJoin(users, eq(collaborators.userId, users.id))
     .where(eq(collaborators.workspaceId, workspaceId));
 
-  const pendingInvites = await db
-    .select()
-    .from(workspaceInvites)
-    .where(eq(workspaceInvites.workspaceId, workspaceId));
-
   const { role: currentRole } = await getWorkspaceMembershipRole(
     user.id,
     workspaceId,
   );
+
+  const inviteRows =
+    hasWorkspacePermission(currentRole, "member:manage") ?
+      await db
+        .select({
+          id: workspaceInvites.id,
+          email: workspaceInvites.email,
+          role: workspaceInvites.role,
+          token: workspaceInvites.token,
+          expiresAt: workspaceInvites.expiresAt,
+        })
+        .from(workspaceInvites)
+        .where(eq(workspaceInvites.workspaceId, workspaceId))
+    : [];
+
+  const pendingInvites = publicPendingInvitesForRole(currentRole, inviteRows);
 
   return {
     workspace,
@@ -138,14 +152,25 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
   const token = randomUUID();
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  await db.insert(workspaceInvites).values({
-    workspaceId: parsed.workspaceId,
-    email,
-    role: parsed.role,
-    token,
-    invitedByUserId: user.id,
-    expiresAt,
-  });
+  await db
+    .insert(workspaceInvites)
+    .values({
+      workspaceId: parsed.workspaceId,
+      email,
+      role: parsed.role,
+      token,
+      invitedByUserId: user.id,
+      expiresAt,
+    })
+    .onConflictDoUpdate({
+      target: [workspaceInvites.workspaceId, workspaceInvites.email],
+      set: {
+        role: parsed.role,
+        token,
+        invitedByUserId: user.id,
+        expiresAt,
+      },
+    });
 
   const baseUrl = resolveAuthBaseURL();
   const acceptUrl = `${baseUrl}/invite/${token}`;
