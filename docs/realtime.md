@@ -25,6 +25,9 @@ BlockNote JSON snapshot in the same database transaction. Existing pages are
 seeded into Yjs on first room load. Hocuspocus saves after a one-second debounce
 and at most five seconds after ongoing edits. The old editor content action was
 removed so another server path cannot overwrite the snapshot independently.
+Document duplicate reads the same authoritative snapshot via
+`loadAuthoritativeDocumentContentBySourceIds` so copies are not limited to
+debounced `documents.content`.
 
 The app checks the Better Auth session and workspace role before issuing a
 60-second signed token scoped to one document or workspace room. The editor

@@ -23,6 +23,7 @@ import {
   duplicateDocumentSchema,
   updateDocumentSchema,
 } from "@/lib/validations/document";
+import { loadAuthoritativeDocumentContentBySourceIds } from "@/lib/realtime/authoritative-content";
 import { db } from "..";
 import { documents } from "../schema";
 import {
@@ -275,6 +276,14 @@ export async function duplicateDocument(input: unknown) {
     workspaceIdForRevalidate = source.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(source.workspaceId);
     const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);
+    const fallbackBySourceId = new Map(
+      plan.map((node) => [node.sourceId, node.content])
+    );
+    const authoritativeContent =
+      await loadAuthoritativeDocumentContentBySourceIds(
+        plan.map((node) => node.sourceId),
+        fallbackBySourceId
+      );
 
     const now = new Date().toISOString();
     const rows = plan.map((node) => ({
@@ -284,7 +293,7 @@ export async function duplicateDocument(input: unknown) {
       title: node.title,
       icon: node.icon,
       bannerUrl: node.bannerUrl,
-      content: node.content,
+      content: authoritativeContent.get(node.sourceId) ?? node.content,
       createdAt: now,
       updatedAt: now,
     }));
