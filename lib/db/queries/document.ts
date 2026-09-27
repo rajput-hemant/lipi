@@ -1,12 +1,13 @@
 "use server";
 
-import { unstable_cache as cache, revalidateTag } from "next/cache";
+import { unstable_cache as cache, updateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
 import type { DocumentRecord } from "@/lib/db/documents-tree";
 import type { Document } from "@/types/db";
 
+import { userHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
 import {
   assertPermanentDeleteAllowed,
   assertRootPageQuota,
@@ -24,8 +25,6 @@ import {
 } from "@/lib/validations/document";
 import { db } from "..";
 import { documents } from "../schema";
-import { userHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
-
 import {
   assertWorkspaceAccess,
   authorizeDocumentMutation,
@@ -39,7 +38,7 @@ function documentsCacheTag(workspaceId: string) {
 }
 
 function revalidateDocuments(workspaceId: string) {
-  revalidateTag(documentsCacheTag(workspaceId), "max");
+  updateTag(documentsCacheTag(workspaceId));
 }
 
 function toRecords(rows: Document[]): DocumentRecord[] {

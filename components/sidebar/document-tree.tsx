@@ -22,6 +22,7 @@ import { v4 as uuid } from "uuid";
 import type { DocumentTreeNode } from "./document-tree-utils";
 import type { Document } from "@/types/db";
 
+import { useNotifyWorkspacePageChanges } from "@/components/realtime/workspace-realtime-provider";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -76,6 +77,7 @@ function DocumentTreeItem({
   setFocusedId,
 }: DocumentTreeItemProps) {
   const pathname = usePathname();
+  const notifyPageChanges = useNotifyWorkspacePageChanges();
   const {
     addDocument,
     deleteDocument,
@@ -101,13 +103,15 @@ function DocumentTreeItem({
       return;
     }
 
-    const updated: Document = { ...node, title };
-    updateDocumentState(updated);
     setIsRenaming(false);
 
     toast.promise(updateDocumentInDb({ id: node.id, title }), {
       loading: "Renaming...",
-      success: "Page renamed.",
+      success: (updated) => {
+        updateDocumentState(updated);
+        notifyPageChanges();
+        return "Page renamed.";
+      },
       error: "Could not rename page.",
     });
   }
@@ -141,7 +145,10 @@ function DocumentTreeItem({
 
     toast.promise(createDocument(newDocument), {
       loading: "Creating page...",
-      success: "Page created.",
+      success: () => {
+        notifyPageChanges();
+        return "Page created.";
+      },
       error: "Could not create page.",
     });
   }
@@ -164,7 +171,10 @@ function DocumentTreeItem({
 
     toast.promise(duplicateDocument({ sourceId: node.id, newId }), {
       loading: "Duplicating...",
-      success: "Page duplicated.",
+      success: () => {
+        notifyPageChanges();
+        return "Page duplicated.";
+      },
       error: () => {
         for (const copy of copies) {
           deleteDocument(copy.id);
@@ -189,7 +199,10 @@ function DocumentTreeItem({
 
     toast.promise(softDeleteDocumentTree(node.id), {
       loading: "Moving to trash...",
-      success: "Moved to trash.",
+      success: () => {
+        notifyPageChanges();
+        return "Moved to trash.";
+      },
       error: "Could not move to trash.",
     });
   }
@@ -389,6 +402,7 @@ export function DocumentTree() {
   const pathname = usePathname();
   const workspaceId = pathname.split("/")[2] ?? "";
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
+  const notifyPageChanges = useNotifyWorkspacePageChanges();
   const { documents, addDocument } = useAppState();
 
   const forest = useMemo(() => getDocumentForest(documents), [documents]);
@@ -498,7 +512,10 @@ export function DocumentTree() {
 
     toast.promise(createDocument(newDocument), {
       loading: "Creating page...",
-      success: "Page created.",
+      success: () => {
+        notifyPageChanges();
+        return "Page created.";
+      },
       error: "Could not create page.",
     });
   }

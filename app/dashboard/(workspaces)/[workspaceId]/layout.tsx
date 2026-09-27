@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppStateProvider } from "@/components/app-state-provider";
+import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realtime-provider";
 import { getCurrentUser } from "@/lib/auth";
 import { getDocuments } from "@/lib/db/queries";
 import { assertWorkspaceAccess } from "@/lib/db/queries/mutation-auth";
@@ -31,12 +32,14 @@ export const WorkspaceLayout: React.FCC<{
 
   return (
     <AppStateProvider key={workspaceId} user={user} documents={documents}>
-      <ResizableLayout
-        defaultLayout={defaultLayout as number[]}
-        defaultCollapsed={defaultCollapsed as boolean}
-      >
-        {children}
-      </ResizableLayout>
+      <WorkspaceRealtimeProvider workspaceId={workspaceId}>
+        <ResizableLayout
+          defaultLayout={defaultLayout as number[]}
+          defaultCollapsed={defaultCollapsed as boolean}
+        >
+          {children}
+        </ResizableLayout>
+      </WorkspaceRealtimeProvider>
     </AppStateProvider>
   );
 };

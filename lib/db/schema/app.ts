@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
+  customType,
   foreignKey,
   index,
   integer,
@@ -20,6 +21,10 @@ import {
   subscriptionStatus,
   workspaceCollaboratorRole,
 } from "./enums";
+
+const bytea = customType<{ data: Uint8Array; driverData: Uint8Array }>({
+  dataType: () => "bytea",
+});
 
 export const workspaces = createTable("workspaces", {
   id: uuid("id").defaultRandom().primaryKey().notNull(),
@@ -81,6 +86,16 @@ export const documents = createTable(
     }).onDelete("restrict"),
   })
 );
+
+export const realtimeDocuments = createTable("realtime_documents", {
+  documentId: uuid("document_id")
+    .primaryKey()
+    .references(() => documents.id, { onDelete: "cascade" }),
+  state: bytea("state").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+    .defaultNow()
+    .notNull(),
+});
 
 export const billingAccounts = createTable("accounts", {
   userId: uuid("user_id")
@@ -229,9 +244,9 @@ export const workspaceInvites = createTable(
   },
   (table) => ({
     workspaceEmailUnique: uniqueIndex(
-      "lipi_workspace_invites_workspace_id_email_unique",
+      "lipi_workspace_invites_workspace_id_email_unique"
     ).on(table.workspaceId, table.email),
-  }),
+  })
 );
 
 export const productsRelations = relations(products, ({ many }) => ({

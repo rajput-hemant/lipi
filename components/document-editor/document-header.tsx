@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import type { Document } from "@/types/db";
 
 import { EmojiPicker } from "@/components/emoji-picker";
+import { useNotifyWorkspacePageChanges } from "@/components/realtime/workspace-realtime-provider";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -35,6 +36,7 @@ type DocumentHeaderProps = {
 
 export function DocumentHeader({ document }: DocumentHeaderProps) {
   const { updateDocument: updateDocumentState } = useAppState();
+  const notifyPageChanges = useNotifyWorkspacePageChanges();
   const savedTitleRef = React.useRef(document.title);
 
   const [title, setTitle] = React.useState(document.title);
@@ -53,6 +55,9 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
           ...patch,
         });
         updateDocumentState(updated);
+        if (patch.title !== undefined || patch.icon !== undefined) {
+          notifyPageChanges();
+        }
         if (updated.title) {
           savedTitleRef.current = updated.title;
         }

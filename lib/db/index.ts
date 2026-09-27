@@ -2,18 +2,17 @@ import { pgTableCreator } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { env } from "@/lib/env";
 import { assertDatabaseUrlConfigured } from "./database-url";
 import * as schema from "./schema";
 import { lipiTableName } from "./table-prefix";
 
-assertDatabaseUrlConfigured(env.DATABASE_URL);
+const databaseUrl = process.env.DATABASE_URL;
+assertDatabaseUrlConfigured(databaseUrl);
 
 // NOTE: postgres versions above 3.3.5 are not supported on the edge runtime
-const client = postgres(
-  env.DATABASE_URL ?? "postgresql://localhost:5432/lipi",
-  { max: 1 }
-);
+const client = postgres(databaseUrl ?? "postgresql://localhost:5432/lipi", {
+  max: 1,
+});
 
 export const db = drizzle(client, { schema });
 

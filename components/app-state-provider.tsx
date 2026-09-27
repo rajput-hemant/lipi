@@ -10,7 +10,9 @@ import {
   syncAppStore,
 } from "@/hooks/use-app-state";
 
-type AppStateProviderProps = React.PropsWithChildren<AppState>;
+type AppStateProviderProps = React.PropsWithChildren<
+  Pick<AppState, "user" | "documents">
+>;
 
 export function AppStateProvider({
   children,

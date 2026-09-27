@@ -1,3 +1,4 @@
+import { DocumentCollaborators } from "@/components/realtime/document-collaborators";
 import { SearchCommand } from "@/components/search-command";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarMobile } from "../sidebar/sidebar-mobile";
@@ -13,6 +14,7 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <DocumentCollaborators />
           <SearchCommand />
           <ThemeToggle />
         </div>

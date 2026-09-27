@@ -6,6 +6,7 @@ import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 
 import { filterSuggestionItems } from "@blocknote/core/extensions";
+import { withCollaboration } from "@blocknote/core/yjs";
 import {
   blockTypeSelectItems,
   FormattingToolbar,
@@ -14,36 +15,49 @@ import {
   SuggestionMenuController,
   useBlockNoteEditor,
   useCreateBlockNote,
-  useEditorChange,
 } from "@blocknote/react";
 import { BlockNoteView } from "@blocknote/shadcn";
+import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
-import type { BlockNoteEditor, PartialBlock } from "@blocknote/core";
-import type { BlockEditorSchema } from "@/lib/block-editor/editor-schema";
 import type { Document } from "@/types/db";
 
+import { useAppActions, useAppState } from "@/hooks/use-app-state";
 import {
   calloutBlockTypeSelectItem,
   insertCalloutSlashMenuItem,
 } from "@/lib/block-editor/callout-menu-items";
-import { getStoredDocumentContentState } from "@/lib/block-editor/document-content";
 import { blockEditorSchema } from "@/lib/block-editor/editor-schema";
 import { lipiBlockNoteShadcnComponents } from "@/lib/block-editor/lipi-shadcn-components";
-import { saveDocumentContent } from "@/lib/block-editor/save-document-content";
-import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
+import { fetchRealtimeAccess, getRealtimeUrl } from "@/lib/realtime/client";
+import { BLOCKNOTE_FRAGMENT } from "@/lib/realtime/constants";
+import { readCollaboratorPresence } from "@/lib/realtime/presence";
+import { documentRoomName } from "@/lib/realtime/rooms";
 import { uploadFiles } from "@/lib/uploadthing";
-
-type BlockEditorInstance = BlockNoteEditor<
-  BlockEditorSchema["blockSchema"],
-  BlockEditorSchema["inlineContentSchema"],
-  BlockEditorSchema["styleSchema"]
->;
 
 type DocumentBlockEditorProps = {
   document: Document;
 };
+
+function createRealtimeProviderStore() {
+  let provider: HocuspocusProvider | null = null;
+  const subscribers = new Set<() => void>();
+
+  return {
+    getSnapshot: () => provider,
+    subscribe: (subscriber: () => void) => {
+      subscribers.add(subscriber);
+      return () => {
+        subscribers.delete(subscriber);
+      };
+    },
+    setProvider: (next: HocuspocusProvider | null) => {
+      provider = next;
+      for (const subscriber of subscribers) subscriber();
+    },
+  };
+}
 
 function DocumentFormattingToolbar() {
   const editor = useBlockNoteEditor<
@@ -64,47 +78,112 @@ function DocumentFormattingToolbar() {
 
 export function DocumentBlockEditor({ document }: DocumentBlockEditorProps) {
   const { resolvedTheme } = useTheme();
-  const contentState = React.useMemo(
-    () => getStoredDocumentContentState(document.content),
-    [document.content]
+  const url = getRealtimeUrl();
+  const roomName = documentRoomName(document.id);
+  const [providerStore] = React.useState(createRealtimeProviderStore);
+  const provider = React.useSyncExternalStore(
+    providerStore.subscribe,
+    providerStore.getSnapshot,
+    providerStore.getSnapshot
   );
+  const [isReadOnly, setIsReadOnly] = React.useState(true);
 
-  if (contentState.status === "corrupt") {
+  React.useEffect(() => {
+    if (!url) return;
+
+    const connection = new HocuspocusProvider({
+      url,
+      name: roomName,
+      token: async () => {
+        const access = await fetchRealtimeAccess(roomName);
+        setIsReadOnly(access.readOnly);
+        return access.token;
+      },
+    });
+
+    providerStore.setProvider(connection);
+    return () => {
+      providerStore.setProvider(null);
+      connection.destroy();
+    };
+  }, [providerStore, roomName, url]);
+
+  if (!url) {
     return (
       <div className="mx-auto w-full max-w-3xl px-6 py-8" role="alert">
-        <p className="font-medium text-destructive">
-          This page could not be loaded.
-        </p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The stored document content is invalid. Editing is disabled so your
-          data is not overwritten.
-        </p>
+        Real-time editing is unavailable.
+      </div>
+    );
+  }
+
+  if (!provider) {
+    return (
+      <div className="mx-auto w-full max-w-3xl px-6 py-8" role="status">
+        Connecting to collaborators...
       </div>
     );
   }
 
   return (
-    <DocumentBlockEditorLoaded
+    <DocumentBlockEditorConnected
       document={document}
-      initialContent={
-        contentState.status === "ready" ? contentState.blocks : undefined
-      }
+      provider={provider}
+      isReadOnly={isReadOnly}
       resolvedTheme={resolvedTheme}
     />
   );
 }
 
-type DocumentBlockEditorLoadedProps = {
+type DocumentBlockEditorConnectedProps = {
   document: Document;
-  initialContent: PartialBlock[] | undefined;
+  provider: HocuspocusProvider;
+  isReadOnly: boolean;
   resolvedTheme: string | undefined;
 };
 
-function DocumentBlockEditorLoaded({
+function DocumentBlockEditorConnected({
   document,
-  initialContent,
+  provider,
+  isReadOnly,
   resolvedTheme,
-}: DocumentBlockEditorLoadedProps) {
+}: DocumentBlockEditorConnectedProps) {
+  const { user } = useAppState();
+  const { setCollaborators } = useAppActions();
+  const [connectionStatus, setConnectionStatus] = React.useState("connecting");
+  const [isSynced, setIsSynced] = React.useState(false);
+
+  React.useEffect(() => {
+    const onStatus = ({ status }: { status: string }) => {
+      setConnectionStatus(status);
+      if (status !== "connected") setIsSynced(false);
+    };
+    const onSynced = ({ state }: { state: boolean }) => setIsSynced(state);
+    const refreshToken = () => void provider.sendToken();
+    const awareness = provider.awareness;
+    const updateCollaborators = () => {
+      if (awareness) {
+        setCollaborators(
+          readCollaboratorPresence(awareness.getStates().values())
+        );
+      }
+    };
+
+    provider.on("status", onStatus);
+    provider.on("synced", onSynced);
+    awareness?.on("change", updateCollaborators);
+    updateCollaborators();
+
+    const refreshInterval = window.setInterval(refreshToken, 30_000);
+
+    return () => {
+      window.clearInterval(refreshInterval);
+      provider.off("status", onStatus);
+      provider.off("synced", onSynced);
+      awareness?.off("change", updateCollaborators);
+      setCollaborators([]);
+    };
+  }, [provider, setCollaborators]);
+
   const uploadFile = React.useCallback(
     async (file: File) => {
       if (file.size > 4 * 1024 * 1024) {
@@ -121,10 +200,7 @@ function DocumentBlockEditorLoaded({
         const uploaded = response?.[0];
         const url = uploaded?.serverData?.url ?? uploaded?.url;
 
-        if (!url) {
-          throw new Error("No URL returned from upload");
-        }
-
+        if (!url) throw new Error("No URL returned from upload");
         return url;
       } catch (error) {
         const message =
@@ -136,45 +212,39 @@ function DocumentBlockEditorLoaded({
     [document.workspaceId]
   );
 
-  const editor = useCreateBlockNote({
-    schema: blockEditorSchema,
-    initialContent,
-    uploadFile,
-  });
-
-  const { debounced: persistContent, flush: flushContent } =
-    useDebouncedCallback(async (blocks: BlockEditorInstance["document"]) => {
-      try {
-        await saveDocumentContent({
-          documentId: document.id,
-          blocks,
-        });
-      } catch {
-        toast.error("Could not save document.");
-      }
-    }, 800);
-
-  React.useEffect(() => {
-    const onBeforeUnload = () => {
-      flushContent();
-    };
-
-    window.addEventListener("beforeunload", onBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", onBeforeUnload);
-    };
-  }, [flushContent]);
-
-  useEditorChange(() => {
-    persistContent(editor.document);
-  }, editor);
+  const editor = useCreateBlockNote(
+    withCollaboration({
+      schema: blockEditorSchema,
+      uploadFile,
+      collaboration: {
+        provider: { awareness: provider.awareness ?? undefined },
+        fragment: provider.document.getXmlFragment(BLOCKNOTE_FRAGMENT),
+        user: {
+          name: user?.name || user?.email || "Collaborator",
+          color: "#7c3aed",
+        },
+        showCursorLabels: "always",
+      },
+    })
+  );
 
   const editorTheme = resolvedTheme === "dark" ? "dark" : "light";
+  const editable = connectionStatus === "connected" && isSynced && !isReadOnly;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 pb-24">
+      {connectionStatus !== "connected" || !isSynced || isReadOnly ?
+        <p className="py-2 text-sm text-muted-foreground" role="status">
+          {connectionStatus !== "connected" ?
+            "Reconnecting to collaborators..."
+          : !isSynced ?
+            "Syncing page..."
+          : "View only"}
+        </p>
+      : null}
       <BlockNoteView
         editor={editor}
+        editable={editable}
         theme={editorTheme}
         shadCNComponents={lipiBlockNoteShadcnComponents}
         formattingToolbar={false}
