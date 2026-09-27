@@ -24,6 +24,8 @@ import {
 } from "@/lib/validations/document";
 import { db } from "..";
 import { documents } from "../schema";
+import { userHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
+
 import {
   assertDocumentAccess,
   assertWorkspaceAccess,
@@ -31,7 +33,6 @@ import {
   MutationAuthError,
   requireAuthenticatedUser,
 } from "./mutation-auth";
-import { getUserSubscription } from "./subscription";
 
 function documentsCacheTag(workspaceId: string) {
   return `documents_${workspaceId}`;
@@ -71,11 +72,6 @@ async function loadWorkspaceDocuments(workspaceId: string) {
   return toRecords(rows);
 }
 
-async function userHasActiveSubscription(userId: string) {
-  const { data } = await getUserSubscription(userId);
-  return data?.status === "active";
-}
-
 export async function createDocument(input: unknown) {
   const parsed = createDocumentSchema.parse(input);
   let workspaceIdForRevalidate: string | undefined;
@@ -83,12 +79,12 @@ export async function createDocument(input: unknown) {
   try {
     const user = await authorizeWorkspaceMutation(parsed.workspaceId);
     const workspaceDocs = await loadWorkspaceDocuments(parsed.workspaceId);
-    const hasSubscription = await userHasActiveSubscription(user.id);
+    const hasProEntitlement = await userHasProPlanEntitlement(user.id);
 
     assertRootPageQuota(
       workspaceDocs,
       parsed.workspaceId,
-      hasSubscription,
+      hasProEntitlement,
       parsed.parentId ?? null
     );
     validateParentAssignment(workspaceDocs, {
