@@ -1,6 +1,6 @@
 {
-  "id": "56bfee21-4e96-4571-9949-8195ca050af2",
-  "prevId": "87d8fa81-e4c4-4ff0-8abe-dd51f6fd8c50",
+  "id": "f07a7ee5-5bcf-459d-9098-7fa0cbadbc5d",
+  "prevId": "56bfee21-4e96-4571-9949-8195ca050af2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1281,6 +1281,51 @@
           ]
         }
       },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.lipi_stripe_webhook_events": {
+      "name": "lipi_stripe_webhook_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "claim_expires_at": {
+          "name": "claim_expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now() + interval '5 minutes'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},

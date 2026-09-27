@@ -1,11 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  claimStripeWebhookEvent,
+  releaseStripeWebhookEventClaim,
+} from "./billing";
+
 const mocks = vi.hoisted(() => {
   const returning = vi.fn();
   const onConflictDoNothing = vi.fn(() => ({ returning }));
   const values = vi.fn(() => ({ onConflictDoNothing }));
   const insert = vi.fn(() => ({ values }));
-  const where = vi.fn();
+  const where = vi.fn(() => ({ returning }));
   const set = vi.fn(() => ({ where }));
   const update = vi.fn(() => ({ set }));
   const deleteFn = vi.fn(() => ({ where }));
@@ -34,16 +39,11 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-import {
-  claimStripeWebhookEvent,
-  releaseStripeWebhookEventClaim,
-} from "./billing";
-
 describe("claimStripeWebhookEvent", () => {
   it("returns claimed when the insert wins", async () => {
     mocks.returning.mockResolvedValueOnce([{ id: "evt_1" }]);
     await expect(
-      claimStripeWebhookEvent("evt_1", "checkout.session.completed"),
+      claimStripeWebhookEvent("evt_1", "checkout.session.completed")
     ).resolves.toEqual({ status: "claimed" });
   });
 
@@ -55,7 +55,7 @@ describe("claimStripeWebhookEvent", () => {
     });
 
     await expect(
-      claimStripeWebhookEvent("evt_1", "checkout.session.completed"),
+      claimStripeWebhookEvent("evt_1", "checkout.session.completed")
     ).resolves.toEqual({ status: "already_processed" });
   });
 
@@ -65,16 +65,30 @@ describe("claimStripeWebhookEvent", () => {
       id: "evt_1",
       processedAt: null,
     });
+    mocks.returning.mockResolvedValueOnce([]);
 
     await expect(
-      claimStripeWebhookEvent("evt_1", "checkout.session.completed"),
+      claimStripeWebhookEvent("evt_1", "checkout.session.completed")
     ).resolves.toEqual({ status: "in_progress" });
+  });
+
+  it("reclaims an expired in-progress claim", async () => {
+    mocks.returning.mockResolvedValueOnce([]);
+    mocks.findFirst.mockResolvedValueOnce({
+      id: "evt_1",
+      processedAt: null,
+    });
+    mocks.returning.mockResolvedValueOnce([{ id: "evt_1" }]);
+
+    await expect(
+      claimStripeWebhookEvent("evt_1", "checkout.session.completed")
+    ).resolves.toEqual({ status: "claimed" });
+    expect(mocks.update).toHaveBeenCalled();
   });
 });
 
 describe("releaseStripeWebhookEventClaim", () => {
   it("deletes the dedupe row so Stripe can retry", async () => {
-    mocks.where.mockResolvedValueOnce(undefined);
     await releaseStripeWebhookEventClaim("evt_1");
     expect(mocks.deleteFn).toHaveBeenCalled();
     expect(mocks.where).toHaveBeenCalled();

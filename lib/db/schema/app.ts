@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   bigint,
   boolean,
@@ -178,6 +178,12 @@ export const stripeWebhookEvents = createTable("stripe_webhook_events", {
     withTimezone: true,
     mode: "string",
   }),
+  claimExpiresAt: timestamp("claim_expires_at", {
+    withTimezone: true,
+    mode: "string",
+  })
+    .default(sql`now() + interval '5 minutes'`)
+    .notNull(),
 });
 
 export const collaborators = createTable("collaborators", {

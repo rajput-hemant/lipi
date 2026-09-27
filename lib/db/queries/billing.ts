@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, lt, sql } from "drizzle-orm";
 
 import type Stripe from "stripe";
 import type { Subscription } from "@/types/db";
@@ -145,7 +145,7 @@ export type StripeWebhookClaimResult =
 
 export async function claimStripeWebhookEvent(
   eventId: string,
-  eventType: string,
+  eventType: string
 ): Promise<StripeWebhookClaimResult> {
   const [claimed] = await db
     .insert(stripeWebhookEvents)
@@ -167,6 +167,22 @@ export async function claimStripeWebhookEvent(
 
   if (existing.processedAt) {
     return { status: "already_processed" };
+  }
+
+  const [reclaimed] = await db
+    .update(stripeWebhookEvents)
+    .set({ claimExpiresAt: sql`now() + interval '5 minutes'` })
+    .where(
+      and(
+        eq(stripeWebhookEvents.id, eventId),
+        isNull(stripeWebhookEvents.processedAt),
+        lt(stripeWebhookEvents.claimExpiresAt, sql`now()`)
+      )
+    )
+    .returning({ id: stripeWebhookEvents.id });
+
+  if (reclaimed) {
+    return { status: "claimed" };
   }
 
   return { status: "in_progress" };
