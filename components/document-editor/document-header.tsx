@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { ImageAdd02Icon } from "@hugeicons/core-free-icons";
+import {
+  ImageAdd02Icon,
+  Loading03Icon,
+  Upload01Icon,
+} from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
@@ -15,13 +19,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import { useAppState } from "@/hooks/use-app-state";
 import {
   coverStyleForBannerUrl,
   documentCoverPresets,
 } from "@/lib/block-editor/cover-presets";
 import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
 import { updateDocumentInDb } from "@/lib/db/queries";
-import { useAppState } from "@/hooks/use-app-state";
+import { uploadFiles } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
 type DocumentHeaderProps = {
@@ -55,7 +60,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
         toast.error("Could not save document details.");
       }
     },
-    500,
+    500
   );
 
   function onTitleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -82,19 +87,62 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
     persistMetadata({ bannerUrl: nextBannerUrl });
   }
 
+  const [uploading, setUploading] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  async function handleCoverUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("File is too large (max 4MB)");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const res = await uploadFiles("coverBanner", {
+        files: [file],
+        input: { workspaceId: document.workspaceId },
+      });
+      const uploaded = res?.[0];
+      const url = uploaded?.serverData?.url ?? uploaded?.url;
+      if (!url) throw new Error("Upload failed: No URL returned");
+      onBannerChange(url);
+      toast.success("Cover banner updated");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to upload cover banner"
+      );
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
+
   const coverStyle = coverStyleForBannerUrl(bannerUrl);
+  const isCustomBanner =
+    bannerUrl && !documentCoverPresets.some((p) => p.id === bannerUrl);
 
   return (
     <div className="w-full">
-      {coverStyle ? (
+      {coverStyle ?
         <div
           className="h-48 w-full bg-cover bg-center"
           style={{ backgroundImage: coverStyle }}
         />
-      ) : null}
+      : null}
 
       <div className="mx-auto w-full max-w-3xl px-6 pb-2">
         <div className="flex items-center gap-2 pt-4">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handleCoverUpload}
+          />
           <Popover>
             <PopoverTrigger
               render={
@@ -104,32 +152,71 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
                 </Button>
               }
             />
-            <PopoverContent align="start" className="w-72">
-              <p className="mb-2 text-sm font-medium">Cover banner</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  className={cn(
-                    "h-16 rounded-md border text-xs text-muted-foreground",
-                    !bannerUrl && "ring-2 ring-ring",
-                  )}
-                  onClick={() => onBannerChange(null)}
+            <PopoverContent align="start" className="w-72 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium">Cover banner</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1 px-2 text-xs"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
                 >
-                  None
-                </button>
-                {documentCoverPresets.map((preset) => (
-                  <button
-                    key={preset.id}
-                    type="button"
-                    title={preset.label}
-                    className={cn(
-                      "h-16 rounded-md border",
-                      bannerUrl === preset.id && "ring-2 ring-ring",
-                    )}
-                    style={{ backgroundImage: preset.style }}
-                    onClick={() => onBannerChange(preset.id)}
+                  {uploading ?
+                    <HugeiconsIcon
+                      icon={Loading03Icon}
+                      strokeWidth={2}
+                      className="size-3.5 animate-spin"
+                    />
+                  : <HugeiconsIcon
+                      icon={Upload01Icon}
+                      strokeWidth={2}
+                      className="size-3.5"
+                    />
+                  }
+                  {uploading ? "Uploading..." : "Upload"}
+                </Button>
+              </div>
+
+              {isCustomBanner ?
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">
+                    Uploaded image
+                  </p>
+                  <div
+                    className="h-16 w-full rounded-md border bg-cover bg-center ring-2 ring-ring"
+                    style={{ backgroundImage: `url("${bannerUrl}")` }}
                   />
-                ))}
+                </div>
+              : null}
+
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Presets</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    className={cn(
+                      "h-14 rounded-md border text-xs text-muted-foreground",
+                      !bannerUrl && "ring-2 ring-ring"
+                    )}
+                    onClick={() => onBannerChange(null)}
+                  >
+                    None
+                  </button>
+                  {documentCoverPresets.map((preset) => (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      title={preset.label}
+                      className={cn(
+                        "h-14 rounded-md border",
+                        bannerUrl === preset.id && "ring-2 ring-ring"
+                      )}
+                      style={{ backgroundImage: preset.style }}
+                      onClick={() => onBannerChange(preset.id)}
+                    />
+                  ))}
+                </div>
               </div>
             </PopoverContent>
           </Popover>

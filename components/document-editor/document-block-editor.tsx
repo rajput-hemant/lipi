@@ -1,12 +1,11 @@
 "use client";
 
 import React from "react";
+
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/shadcn/style.css";
 
-import type { BlockNoteEditor, PartialBlock } from "@blocknote/core";
 import { filterSuggestionItems } from "@blocknote/core/extensions";
-import { BlockNoteView } from "@blocknote/shadcn";
 import {
   blockTypeSelectItems,
   FormattingToolbar,
@@ -17,9 +16,12 @@ import {
   useCreateBlockNote,
   useEditorChange,
 } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
+import type { BlockNoteEditor, PartialBlock } from "@blocknote/core";
+import type { BlockEditorSchema } from "@/lib/block-editor/editor-schema";
 import type { Document } from "@/types/db";
 
 import {
@@ -27,10 +29,11 @@ import {
   insertCalloutSlashMenuItem,
 } from "@/lib/block-editor/callout-menu-items";
 import { getStoredDocumentContentState } from "@/lib/block-editor/document-content";
-import { blockEditorSchema, type BlockEditorSchema } from "@/lib/block-editor/editor-schema";
+import { blockEditorSchema } from "@/lib/block-editor/editor-schema";
 import { lipiBlockNoteShadcnComponents } from "@/lib/block-editor/lipi-shadcn-components";
 import { saveDocumentContent } from "@/lib/block-editor/save-document-content";
 import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
+import { uploadFiles } from "@/lib/uploadthing";
 
 type BlockEditorInstance = BlockNoteEditor<
   BlockEditorSchema["blockSchema"],
@@ -63,15 +66,12 @@ export function DocumentBlockEditor({ document }: DocumentBlockEditorProps) {
   const { resolvedTheme } = useTheme();
   const contentState = React.useMemo(
     () => getStoredDocumentContentState(document.content),
-    [document.content],
+    [document.content]
   );
 
   if (contentState.status === "corrupt") {
     return (
-      <div
-        className="mx-auto w-full max-w-3xl px-6 py-8"
-        role="alert"
-      >
+      <div className="mx-auto w-full max-w-3xl px-6 py-8" role="alert">
         <p className="font-medium text-destructive">
           This page could not be loaded.
         </p>
@@ -105,13 +105,45 @@ function DocumentBlockEditorLoaded({
   initialContent,
   resolvedTheme,
 }: DocumentBlockEditorLoadedProps) {
+  const uploadFile = React.useCallback(
+    async (file: File) => {
+      if (file.size > 4 * 1024 * 1024) {
+        toast.error("File is too large (max 4MB)");
+        throw new Error("File is too large (max 4MB)");
+      }
+
+      try {
+        const response = await uploadFiles("documentImage", {
+          files: [file],
+          input: { workspaceId: document.workspaceId },
+        });
+
+        const uploaded = response?.[0];
+        const url = uploaded?.serverData?.url ?? uploaded?.url;
+
+        if (!url) {
+          throw new Error("No URL returned from upload");
+        }
+
+        return url;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Image upload failed";
+        toast.error(message);
+        throw error;
+      }
+    },
+    [document.workspaceId]
+  );
+
   const editor = useCreateBlockNote({
     schema: blockEditorSchema,
     initialContent,
+    uploadFile,
   });
 
-  const { debounced: persistContent, flush: flushContent } = useDebouncedCallback(
-    async (blocks: BlockEditorInstance["document"]) => {
+  const { debounced: persistContent, flush: flushContent } =
+    useDebouncedCallback(async (blocks: BlockEditorInstance["document"]) => {
       try {
         await saveDocumentContent({
           documentId: document.id,
@@ -120,9 +152,7 @@ function DocumentBlockEditorLoaded({
       } catch {
         toast.error("Could not save document.");
       }
-    },
-    800,
-  );
+    }, 800);
 
   React.useEffect(() => {
     const onBeforeUnload = () => {
@@ -159,12 +189,12 @@ function DocumentBlockEditorLoaded({
           getItems={async (query) => {
             const defaultItems = getDefaultReactSlashMenuItems(editor);
             const lastBasicBlockIndex = defaultItems.findLastIndex(
-              (item) => item.group === "Basic blocks",
+              (item) => item.group === "Basic blocks"
             );
             defaultItems.splice(
               lastBasicBlockIndex + 1,
               0,
-              insertCalloutSlashMenuItem(editor),
+              insertCalloutSlashMenuItem(editor)
             );
             return filterSuggestionItems(defaultItems, query);
           }}

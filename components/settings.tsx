@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loading03Icon } from "@hugeicons/core-free-icons";
+import { Loading03Icon, Upload01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -51,6 +51,7 @@ import {
   updateCollaboratorRole,
   updateWorkspaceSettings,
 } from "@/lib/db/queries";
+import { uploadFiles } from "@/lib/uploadthing";
 
 const settingsSchema = z.object({
   title: z.string().min(1, "Name is required"),
@@ -75,11 +76,44 @@ export function Settings() {
   const [loading, setLoading] = React.useState(true);
   const [selectedEmoji, setSelectedEmoji] = React.useState("💼");
   const [transferTarget, setTransferTarget] = React.useState("");
+  const [uploadingLogo, setUploadingLogo] = React.useState(false);
+  const logoFileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const settingsForm = useForm<SettingsForm>({
     resolver: zodResolver(settingsSchema),
     defaultValues: { title: "", logo: "" },
   });
+
+  async function handleLogoUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || !workspaceId) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo file is too large (max 2MB)");
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingLogo(true);
+      const res = await uploadFiles("workspaceLogo", {
+        files: [file],
+        input: { workspaceId },
+      });
+      const uploaded = res?.[0];
+      const url = uploaded?.serverData?.url ?? uploaded?.url;
+      if (!url) throw new Error("Upload failed: No URL returned");
+      settingsForm.setValue("logo", url, { shouldDirty: true });
+      toast.success("Workspace logo uploaded");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to upload workspace logo"
+      );
+    } finally {
+      setUploadingLogo(false);
+      event.target.value = "";
+    }
+  }
 
   const inviteForm = useForm<InviteForm>({
     resolver: zodResolver(inviteSchema),
@@ -96,7 +130,7 @@ export function Settings() {
       });
       setLoading(false);
     },
-    [settingsForm],
+    [settingsForm]
   );
 
   const refresh = React.useCallback(async () => {
@@ -106,7 +140,7 @@ export function Settings() {
       applyMembersPayload(payload);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to load settings",
+        error instanceof Error ? error.message : "Failed to load settings"
       );
       setLoading(false);
     }
@@ -123,7 +157,7 @@ export function Settings() {
       .catch((error) => {
         if (!cancelled) {
           toast.error(
-            error instanceof Error ? error.message : "Failed to load settings",
+            error instanceof Error ? error.message : "Failed to load settings"
           );
           setLoading(false);
         }
@@ -151,7 +185,7 @@ export function Settings() {
         },
         error: (error) =>
           error instanceof Error ? error.message : "Failed to update workspace",
-      },
+      }
     );
   }
 
@@ -168,7 +202,7 @@ export function Settings() {
         },
         error: (error) =>
           error instanceof Error ? error.message : "Failed to invite member",
-      },
+      }
     );
   }
 
@@ -184,7 +218,7 @@ export function Settings() {
         },
         error: (error) =>
           error instanceof Error ? error.message : "Failed to update role",
-      },
+      }
     );
   }
 
@@ -216,7 +250,7 @@ export function Settings() {
         },
         error: (error) =>
           error instanceof Error ? error.message : "Transfer failed",
-      },
+      }
     );
   }
 
@@ -295,20 +329,68 @@ export function Settings() {
               name="logo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Logo URL</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="https://..."
-                      disabled={!isOwner}
-                      {...field}
-                    />
-                  </FormControl>
+                  <FormLabel>Logo</FormLabel>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-10 rounded-md border">
+                      <AvatarImage
+                        src={field.value || undefined}
+                        alt="Workspace logo"
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="rounded-md text-xs font-semibold">
+                        {selectedEmoji}
+                      </AvatarFallback>
+                    </Avatar>
+                    <FormControl>
+                      <Input
+                        placeholder="https://... or upload an image"
+                        disabled={!isOwner}
+                        {...field}
+                      />
+                    </FormControl>
+                    {isOwner && (
+                      <>
+                        <input
+                          type="file"
+                          ref={logoFileInputRef}
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleLogoUpload}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="shrink-0 gap-1.5"
+                          disabled={uploadingLogo}
+                          onClick={() => logoFileInputRef.current?.click()}
+                        >
+                          {uploadingLogo ?
+                            <HugeiconsIcon
+                              icon={Loading03Icon}
+                              strokeWidth={2}
+                              className="size-4 animate-spin"
+                            />
+                          : <HugeiconsIcon
+                              icon={Upload01Icon}
+                              strokeWidth={2}
+                              className="size-4"
+                            />
+                          }
+                          {uploadingLogo ? "Uploading..." : "Upload logo"}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
             {isOwner && (
-              <Button type="submit" disabled={settingsForm.formState.isSubmitting}>
+              <Button
+                type="submit"
+                disabled={settingsForm.formState.isSubmitting}
+              >
                 Save changes
               </Button>
             )}
@@ -367,16 +449,24 @@ export function Settings() {
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
-                      <Button size="sm" variant="outline" className="capitalize">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="capitalize"
+                      >
                         {member.role}
                       </Button>
                     }
                   />
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => changeRole(member.id, "editor")}>
+                    <DropdownMenuItem
+                      onClick={() => changeRole(member.id, "editor")}
+                    >
                       Editor
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => changeRole(member.id, "viewer")}>
+                    <DropdownMenuItem
+                      onClick={() => changeRole(member.id, "viewer")}
+                    >
                       Viewer
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -453,7 +543,10 @@ export function Settings() {
                 )}
               />
               <div className="flex items-end">
-                <Button type="submit" disabled={inviteForm.formState.isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={inviteForm.formState.isSubmitting}
+                >
                   Invite
                 </Button>
               </div>
@@ -501,7 +594,9 @@ export function Settings() {
 
               <AlertDialog>
                 <AlertDialogTrigger
-                  render={<Button variant="destructive">Delete workspace</Button>}
+                  render={
+                    <Button variant="destructive">Delete workspace</Button>
+                  }
                 />
                 <AlertDialogContent>
                   <AlertDialogHeader>

@@ -37,5 +37,13 @@ export function coverStyleForBannerUrl(bannerUrl: string | null | undefined) {
     return undefined;
   }
 
-  return documentCoverPresets.find((preset) => preset.id === bannerUrl)?.style;
+  const presetStyle = documentCoverPresets.find(
+    (preset) => preset.id === bannerUrl
+  )?.style;
+
+  if (presetStyle) {
+    return presetStyle;
+  }
+
+  return `url("${bannerUrl}")`;
 }
