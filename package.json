@@ -26,6 +26,9 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@blocknote/core": "^0.55.0",
+    "@blocknote/react": "^0.55.0",
+    "@blocknote/shadcn": "^0.55.0",
     "@hookform/resolvers": "^5.9.1",
     "@hugeicons/core-free-icons": "^4.3.5",
     "@hugeicons/react": "^1.1.10",
