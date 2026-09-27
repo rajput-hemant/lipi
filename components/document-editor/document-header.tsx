@@ -30,6 +30,7 @@ type DocumentHeaderProps = {
 
 export function DocumentHeader({ document }: DocumentHeaderProps) {
   const { updateDocument: updateDocumentState } = useAppState();
+  const savedTitleRef = React.useRef(document.title);
 
   const [title, setTitle] = React.useState(document.title);
   const [icon, setIcon] = React.useState(document.icon);
@@ -47,6 +48,9 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
           ...patch,
         });
         updateDocumentState(updated);
+        if (updated.title) {
+          savedTitleRef.current = updated.title;
+        }
       } catch {
         toast.error("Could not save document details.");
       }
@@ -60,6 +64,8 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
 
     const trimmed = nextTitle.trim();
     if (trimmed.length < 1) {
+      toast.warning("Title is required.");
+      setTitle(savedTitleRef.current);
       return;
     }
 
