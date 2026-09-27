@@ -73,10 +73,10 @@
       "breakpoints": true
     },
     {
-      "idx": 9,
+      "idx": 10,
       "version": "7",
       "when": 1790478700000,
-      "tag": "0009_workspace_invite_email_unique",
+      "tag": "0010_workspace_invite_email_unique",
       "breakpoints": true
     }
   ]
