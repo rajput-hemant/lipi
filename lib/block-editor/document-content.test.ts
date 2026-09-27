@@ -24,6 +24,12 @@ describe("getStoredDocumentContentState", () => {
       status: "corrupt",
     });
   });
+
+  it("marks block arrays with invalid entries as corrupt", () => {
+    expect(getStoredDocumentContentState(JSON.stringify([{ content: "hi" }]))).toEqual({
+      status: "corrupt",
+    });
+  });
 });
 
 describe("parseStoredDocumentContent", () => {

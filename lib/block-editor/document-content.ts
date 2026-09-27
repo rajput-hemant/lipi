@@ -5,6 +5,18 @@ export type StoredDocumentContentState =
   | { status: "ready"; blocks: PartialBlock[] }
   | { status: "corrupt" };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isStoredBlockArray(value: unknown): value is PartialBlock[] {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((entry) => isRecord(entry) && typeof entry.type === "string");
+}
+
 export function getStoredDocumentContentState(
   content: string | null | undefined,
 ): StoredDocumentContentState {
@@ -14,11 +26,11 @@ export function getStoredDocumentContentState(
 
   try {
     const parsed: unknown = JSON.parse(content);
-    if (!Array.isArray(parsed)) {
+    if (!isStoredBlockArray(parsed)) {
       return { status: "corrupt" };
     }
 
-    return { status: "ready", blocks: parsed as PartialBlock[] };
+    return { status: "ready", blocks: parsed };
   } catch {
     return { status: "corrupt" };
   }
