@@ -70,6 +70,10 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: z.string().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().optional(),
     STRIPE_PRICE_ID_PRO: z.string().optional(),
+
+    UPLOADTHING_TOKEN: z.string().optional(),
+    UPLOADTHING_SECRET: z.string().optional(),
+    UPLOADTHING_APP_ID: z.string().optional(),
   },
 
   client: {},
