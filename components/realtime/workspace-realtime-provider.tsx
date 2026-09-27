@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 
 import { fetchRealtimeToken, getRealtimeUrl } from "@/lib/realtime/client";
+import { getSharedHocuspocusWebsocket } from "@/lib/realtime/shared-websocket";
 import { workspaceRoomName } from "@/lib/realtime/rooms";
 
 const WorkspacePageChangesContext = React.createContext<() => void>(() => {});
@@ -26,11 +27,15 @@ export function WorkspaceRealtimeProvider({
   React.useEffect(() => {
     if (!url) return;
 
+    const websocketProvider = getSharedHocuspocusWebsocket();
+    if (!websocketProvider) return;
+
     const connection = new HocuspocusProvider({
-      url,
+      websocketProvider,
       name: roomName,
       token: () => fetchRealtimeToken(roomName),
     });
+    connection.attach();
     const refreshPages = ({ payload }: { payload: string }) => {
       if (payload === "pages:changed") router.refresh();
     };

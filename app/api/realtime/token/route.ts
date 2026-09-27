@@ -12,12 +12,48 @@ import {
 
 const requestSchema = z.object({ roomName: z.string().min(1).max(64) });
 
+function normalizeLoopbackHost(host: string) {
+  const hostname = host.split(":")[0]?.toLowerCase() ?? host;
+  if (hostname === "localhost" || hostname === "127.0.0.1") return "127.0.0.1";
+  return hostname;
+}
+
+function hostsMatch(leftHost: string, rightHost: string) {
+  const left = leftHost.split(":");
+  const right = rightHost.split(":");
+  if (left[1] !== right[1]) return false;
+  return normalizeLoopbackHost(left[0] ?? "") === normalizeLoopbackHost(right[0] ?? "");
+}
+
 function isSameOrigin(request: Request) {
+  const requestUrl = new URL(request.url);
   const origin = request.headers.get("origin");
-  if (!origin) return false;
+  if (origin) {
+    try {
+      const parsed = new URL(origin);
+      if (
+        parsed.protocol === requestUrl.protocol &&
+        hostsMatch(parsed.host, requestUrl.host)
+      ) {
+        return true;
+      }
+    } catch {
+      return false;
+    }
+  }
+
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite === "same-origin") return true;
+
+  const referer = request.headers.get("referer");
+  if (!referer) return false;
 
   try {
-    return new URL(origin).origin === new URL(request.url).origin;
+    const parsed = new URL(referer);
+    return (
+      parsed.protocol === requestUrl.protocol &&
+      hostsMatch(parsed.host, requestUrl.host)
+    );
   } catch {
     return false;
   }

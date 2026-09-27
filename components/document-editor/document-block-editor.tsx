@@ -149,8 +149,12 @@ function DocumentBlockEditorConnected({
 }: DocumentBlockEditorConnectedProps) {
   const { user } = useAppState();
   const { setCollaborators } = useAppActions();
-  const [connectionStatus, setConnectionStatus] = React.useState("connecting");
-  const [isSynced, setIsSynced] = React.useState(false);
+  const [connectionStatus, setConnectionStatus] = React.useState(() =>
+    provider.configuration.websocketProvider?.status === "connected" ?
+      "connected"
+    : "connecting"
+  );
+  const [isSynced, setIsSynced] = React.useState(() => provider.synced);
 
   React.useEffect(() => {
     const onStatus = ({ status }: { status: string }) => {
