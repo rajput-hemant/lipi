@@ -34,7 +34,7 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
   const [icon, setIcon] = React.useState(document?.icon ?? "");
   const [bannerUrl, setBannerUrl] = React.useState(document?.bannerUrl ?? null);
 
-  const persistMetadata = useDebouncedCallback(
+  const { debounced: persistMetadata } = useDebouncedCallback(
     async (patch: {
       title?: string;
       icon?: string;

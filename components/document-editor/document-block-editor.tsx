@@ -71,7 +71,7 @@ export function DocumentBlockEditor({ document }: DocumentBlockEditorProps) {
     initialContent,
   });
 
-  const persistContent = useDebouncedCallback(
+  const { debounced: persistContent, flush: flushContent } = useDebouncedCallback(
     async (blocks: BlockEditorInstance["document"]) => {
       try {
         await saveDocumentContent({
@@ -84,6 +84,17 @@ export function DocumentBlockEditor({ document }: DocumentBlockEditorProps) {
     },
     800,
   );
+
+  React.useEffect(() => {
+    const onBeforeUnload = () => {
+      flushContent();
+    };
+
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [flushContent]);
 
   useEditorChange(() => {
     persistContent(editor.document);
