@@ -8,6 +8,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { hasConfiguredProEntitlement } from "@/lib/billing/entitlement";
 import { getCurrentBillingSubscription } from "@/lib/billing/subscription-access";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Manage your Lipi workspaces, documents, and collaboration.",

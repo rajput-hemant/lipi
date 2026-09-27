@@ -273,6 +273,7 @@ function DocumentTreeItem({
               </form>
             : <>
                 <Link
+                  prefetch={false}
                   id={`document-tree-item-${node.id}`}
                   href={`/dashboard/${workspaceId}/${node.id}`}
                   tabIndex={focusedId === node.id ? 0 : -1}

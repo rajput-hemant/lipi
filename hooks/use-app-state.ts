@@ -36,7 +36,12 @@ export function createAppStore(
     collaborators: [],
 
     addDocument(document) {
-      store.documents.push(document);
+      const index = store.documents.findIndex((entry) => entry.id === document.id);
+      if (index === -1) {
+        store.documents.push(document);
+        return;
+      }
+      store.documents[index] = document;
     },
     updateDocument(document) {
       store.documents = store.documents.map((entry) =>
@@ -62,7 +67,12 @@ export function syncAppStore(
   state: Pick<AppState, "user" | "documents">
 ) {
   store.user = state.user;
-  store.documents = state.documents;
+  const seen = new Set<string>();
+  store.documents = state.documents.filter((document) => {
+    if (seen.has(document.id)) return false;
+    seen.add(document.id);
+    return true;
+  });
 }
 
 export const AppStateContext = React.createContext<Store | null>(null);

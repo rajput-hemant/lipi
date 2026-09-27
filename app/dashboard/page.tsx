@@ -8,6 +8,8 @@ export const metadata = {
   description: "Your workspaces",
 };
 
+export const instant = false;
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
 

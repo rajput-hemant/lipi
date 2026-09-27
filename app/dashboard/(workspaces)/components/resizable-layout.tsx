@@ -10,6 +10,10 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import {
+  RESIZABLE_COLLAPSED_COOKIE,
+  RESIZABLE_LAYOUT_COOKIE,
+} from "@/lib/dashboard/resizable-layout-cookies";
 import { cn } from "@/lib/utils";
 
 type ResizableLayoutProps = {
@@ -37,7 +41,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
         if (sizes.length > 0) {
           const total = sizes.reduce((sum, size) => sum + size, 0);
           setCookie(
-            "react-resizable-panels:layout",
+            RESIZABLE_LAYOUT_COOKIE,
             JSON.stringify(sizes.map((size) => (size / total) * 100))
           );
         }
@@ -54,7 +58,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
           const collapsed = size.asPercentage <= 3;
           setIsCollapsed((previous) => {
             if (previous !== collapsed) {
-              setCookie("react-resizable-panels:collapsed", collapsed);
+              setCookie(RESIZABLE_COLLAPSED_COOKIE, collapsed);
             }
             return collapsed;
           });

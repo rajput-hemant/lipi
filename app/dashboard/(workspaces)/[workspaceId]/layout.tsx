@@ -7,7 +7,13 @@ import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realt
 import { getCurrentUser } from "@/lib/auth";
 import { getDocuments } from "@/lib/db/queries";
 import { assertWorkspaceAccess } from "@/lib/db/queries/mutation-auth";
+import {
+  RESIZABLE_COLLAPSED_COOKIE,
+  RESIZABLE_LAYOUT_COOKIE,
+} from "@/lib/dashboard/resizable-layout-cookies";
 import { ResizableLayout } from "../components/resizable-layout";
+
+export const instant = false;
 
 export const WorkspaceLayout: React.FCC<{
   params: Promise<{ workspaceId: string }>;
@@ -22,8 +28,8 @@ export const WorkspaceLayout: React.FCC<{
 
   const cookieStore = await cookies();
 
-  const layout = cookieStore.get("react-resizable-panels:layout");
-  const collapsed = cookieStore.get("react-resizable-panels:collapsed");
+  const layout = cookieStore.get(RESIZABLE_LAYOUT_COOKIE);
+  const collapsed = cookieStore.get(RESIZABLE_COLLAPSED_COOKIE);
 
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
   const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;

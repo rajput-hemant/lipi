@@ -16,6 +16,8 @@ export const metadata = {
   description: "Create a new workspace to organize your projects.",
 };
 
+export const instant = false;
+
 export default async function WorkspaceSetupPage() {
   const user = await getCurrentUser();
 

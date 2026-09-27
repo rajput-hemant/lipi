@@ -6,8 +6,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import { StripeCheckoutButton } from "@/components/billing/stripe-checkout-button";
 import { Diamond } from "@/components/icons";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { PRICING_CARDS, PRICING_PLANS } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
 
@@ -57,22 +57,25 @@ export function PricingPlans({ isAuthenticated }: Props) {
                     >
                       Go Pro
                     </StripeCheckoutButton>
-                  : <Button
-                      render={<Link href="/login" />}
-                      className="w-full whitespace-nowrap font-semibold"
+                  : <Link
+                      href="/login"
+                      className={cn(
+                        buttonVariants(),
+                        "w-full whitespace-nowrap font-semibold"
+                      )}
                     >
                       Sign in to upgrade
-                    </Button>
+                    </Link>
 
-                : <Button
-                    render={
-                      <Link href={isAuthenticated ? "/dashboard" : "/signup"} />
-                    }
-                    variant="secondary"
-                    className="w-full whitespace-nowrap font-semibold"
+                : <Link
+                    href={isAuthenticated ? "/dashboard" : "/signup"}
+                    className={cn(
+                      buttonVariants({ variant: "secondary" }),
+                      "w-full whitespace-nowrap font-semibold"
+                    )}
                   >
                     Get Started
-                  </Button>
+                  </Link>
                 }
 
                 <div className="flex flex-col gap-2">

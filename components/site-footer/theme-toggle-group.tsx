@@ -14,9 +14,23 @@ type ThemeToggleGroupProps = {
 
 export function ThemeToggleGroup({ className }: ThemeToggleGroupProps) {
   const { theme, setTheme } = useTheme();
+  const mounted = React.useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   function handleThemeChange(value: string) {
     setTheme(value);
+  }
+
+  if (!mounted) {
+    return (
+      <div
+        className={cn("size-8 rounded-full border p-1 opacity-0", className)}
+        aria-hidden
+      />
+    );
   }
 
   return (

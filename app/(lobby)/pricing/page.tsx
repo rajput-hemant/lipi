@@ -10,6 +10,8 @@ export const metadata: Metadata = {
     "Simple, transparent pricing for individuals and collaborative teams.",
 };
 
+export const instant = false;
+
 export default async function PricingPage() {
   const user = await getCurrentUser();
 

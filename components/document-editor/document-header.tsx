@@ -228,14 +228,14 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
         </div>
 
         <div className="flex items-start gap-3 pt-6">
-          <EmojiPicker getValue={onIconChange} side="bottom" align="start">
-            <button
-              type="button"
-              className="flex size-14 shrink-0 items-center justify-center rounded-md text-4xl hover:bg-muted"
-              aria-label="Choose page icon"
-            >
-              {icon || "📄"}
-            </button>
+          <EmojiPicker
+            getValue={onIconChange}
+            side="bottom"
+            align="start"
+            className="flex size-14 shrink-0 items-center justify-center rounded-md text-4xl hover:bg-muted"
+            aria-label="Choose page icon"
+          >
+            {icon || "📄"}
           </EmojiPicker>
 
           <Textarea

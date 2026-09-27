@@ -13,6 +13,10 @@ import {
 } from "vitest";
 
 import { ResizableLayout } from "./resizable-layout";
+import {
+  RESIZABLE_COLLAPSED_COOKIE,
+  RESIZABLE_LAYOUT_COOKIE,
+} from "@/lib/dashboard/resizable-layout-cookies";
 
 const setCookie = vi.fn();
 
@@ -106,12 +110,9 @@ describe("ResizableLayout", () => {
     });
 
     expect(setCookie).toHaveBeenCalledWith(
-      "react-resizable-panels:layout",
+      RESIZABLE_LAYOUT_COOKIE,
       JSON.stringify([16, 84])
     );
-    expect(setCookie).toHaveBeenCalledWith(
-      "react-resizable-panels:collapsed",
-      true
-    );
+    expect(setCookie).toHaveBeenCalledWith(RESIZABLE_COLLAPSED_COOKIE, true);
   });
 });

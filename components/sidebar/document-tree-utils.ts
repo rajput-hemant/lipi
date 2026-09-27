@@ -27,7 +27,12 @@ function toDocumentRecord(document: Document): DocumentRecord | null {
 export function toDocumentRecords(
   documents: readonly Document[]
 ): DocumentRecord[] {
+  const seen = new Set<string>();
+
   return getActiveDocuments(documents).flatMap((document) => {
+    if (seen.has(document.id)) return [];
+    seen.add(document.id);
+
     const record = toDocumentRecord(document);
     return record ? [record] : [];
   });

@@ -10,6 +10,8 @@ type FilePageProps = {
   params: Promise<{ workspaceId: string; fileId: string }>;
 };
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: FilePageProps): Promise<Metadata> {

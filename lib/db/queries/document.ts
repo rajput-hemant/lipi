@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cache as cache, updateTag } from "next/cache";
+import { unstable_cache as cache, updateTag, revalidatePath } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
@@ -38,8 +38,12 @@ function documentsCacheTag(workspaceId: string) {
   return `documents_${workspaceId}`;
 }
 
-function revalidateDocuments(workspaceId: string) {
+function revalidateDocuments(workspaceId: string, documentId?: string) {
   updateTag(documentsCacheTag(workspaceId));
+  revalidatePath(`/dashboard/${workspaceId}`);
+  if (documentId) {
+    revalidatePath(`/dashboard/${workspaceId}/${documentId}`);
+  }
 }
 
 function toRecords(rows: Document[]): DocumentRecord[] {
@@ -111,7 +115,7 @@ export async function createDocument(input: unknown) {
     throw new Error("Failed to create document");
   } finally {
     if (workspaceIdForRevalidate) {
-      revalidateDocuments(workspaceIdForRevalidate);
+      revalidateDocuments(workspaceIdForRevalidate, parsed.id);
     }
   }
 }

@@ -7,6 +7,8 @@ type InvitePageProps = {
   params: Promise<{ token: string }>;
 };
 
+export const instant = false;
+
 export default async function InvitePage({ params }: InvitePageProps) {
   const { token } = await params;
   const user = await getCurrentUser();
