@@ -2,41 +2,25 @@
   display: flex;
   align-items: center;
   flex-grow: 1;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   min-height: 48px;
   padding: 4px;
 }
 
 .alert[data-alert-type="warning"] {
-  background-color: #fff6e6;
+  background-color: color-mix(in oklch, var(--chart-4) 22%, var(--muted));
 }
 
 .alert[data-alert-type="error"] {
-  background-color: #ffe6e6;
+  background-color: color-mix(in oklch, var(--destructive) 18%, var(--muted));
 }
 
 .alert[data-alert-type="info"] {
-  background-color: #e6ebff;
+  background-color: color-mix(in oklch, var(--chart-3) 22%, var(--muted));
 }
 
 .alert[data-alert-type="success"] {
-  background-color: #e6ffe6;
-}
-
-[data-color-scheme="dark"] .alert[data-alert-type="warning"] {
-  background-color: #805d20;
-}
-
-[data-color-scheme="dark"] .alert[data-alert-type="error"] {
-  background-color: #802020;
-}
-
-[data-color-scheme="dark"] .alert[data-alert-type="info"] {
-  background-color: #203380;
-}
-
-[data-color-scheme="dark"] .alert[data-alert-type="success"] {
-  background-color: #208020;
+  background-color: color-mix(in oklch, var(--chart-2) 22%, var(--muted));
 }
 
 .alert-icon-wrapper {
@@ -53,19 +37,19 @@
 }
 
 .alert-icon[data-alert-icon-type="warning"] {
-  color: #e69819;
+  color: var(--chart-4);
 }
 
 .alert-icon[data-alert-icon-type="error"] {
-  color: #d80d0d;
+  color: var(--destructive);
 }
 
 .alert-icon[data-alert-icon-type="info"] {
-  color: #507aff;
+  color: var(--chart-3);
 }
 
 .alert-icon[data-alert-icon-type="success"] {
-  color: #0bc10b;
+  color: var(--chart-2);
 }
 
 .inline-content {
