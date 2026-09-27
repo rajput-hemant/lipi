@@ -3,6 +3,7 @@ import { messageYjsSyncStep2, messageYjsUpdate } from "y-protocols/sync";
 import * as Y from "yjs";
 
 import type { beforeSyncPayload, Connection } from "@hocuspocus/server";
+import type { RealtimeContext } from "./context";
 
 import { assertUserCanCreateBlock } from "@/lib/billing/block-quota";
 import { serializeDocumentContent } from "@/lib/block-editor/document-content";
@@ -19,16 +20,6 @@ function countBlocks(blocks: readonly BlockNode[]): number {
     0
   );
 }
-
-export type RealtimeContext = {
-  userId: string;
-  name: string;
-  image: string | null;
-  roomName: string;
-  workspaceId: string;
-  role: "owner" | "editor" | "viewer";
-  readOnly: boolean;
-};
 
 export class RealtimeBlockQuotaGuard {
   private readonly pending = new Map<

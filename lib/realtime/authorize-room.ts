@@ -1,34 +1,22 @@
 import { and, eq } from "drizzle-orm";
 
-import type { WorkspaceMembershipRole } from "@/lib/workspace/permissions";
+import type { RealtimeRoomAccess } from "./context";
 
 import { db } from "@/lib/db";
 import { collaborators, documents, workspaces } from "@/lib/db/schema";
+import { RealtimeAuthorizationError } from "./context";
 import {
   hasWorkspacePermission,
   resolveWorkspaceMembershipRole,
 } from "@/lib/workspace/permissions";
 import { parseRealtimeRoomName } from "./rooms";
 
-export class RealtimeAuthorizationError extends Error {
-  constructor() {
-    super("Forbidden");
-    this.name = "RealtimeAuthorizationError";
-  }
-}
-
-export type AuthorizedRealtimeRoom = {
-  roomName: string;
-  workspaceId: string;
-  role: WorkspaceMembershipRole;
-  readOnly: boolean;
-  documentId: string | null;
-};
+export { RealtimeAuthorizationError } from "./context";
 
 export async function authorizeRealtimeRoom(
   userId: string,
   roomName: string
-): Promise<AuthorizedRealtimeRoom> {
+): Promise<RealtimeRoomAccess> {
   const room = parseRealtimeRoomName(roomName);
   if (!room) throw new RealtimeAuthorizationError();
 
