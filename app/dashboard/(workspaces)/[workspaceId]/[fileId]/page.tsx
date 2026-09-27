@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
+import type { Metadata } from "next";
+
 import { DocumentPageView } from "@/components/document-editor/document-page-view";
 import { getCurrentUser } from "@/lib/auth";
 import { assertDocumentAccess } from "@/lib/db/queries/mutation-auth";
@@ -7,6 +9,24 @@ import { assertDocumentAccess } from "@/lib/db/queries/mutation-auth";
 type FilePageProps = {
   params: Promise<{ workspaceId: string; fileId: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: FilePageProps): Promise<Metadata> {
+  const { workspaceId, fileId } = await params;
+  const user = await getCurrentUser();
+  if (!user) return { title: "Document" };
+
+  try {
+    const document = await assertDocumentAccess(user.id, fileId);
+    if (document.workspaceId !== workspaceId) return { title: "Document" };
+    return {
+      title: document.title || "Untitled Document",
+    };
+  } catch {
+    return { title: "Document" };
+  }
+}
 
 export default async function FilePage({ params }: FilePageProps) {
   const { workspaceId, fileId } = await params;

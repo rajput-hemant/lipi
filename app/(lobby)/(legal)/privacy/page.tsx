@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
+
 import { Separator } from "@/components/ui/separator";
 import { LEGAL } from "@/lib/constants";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Privacy Policy",
+  description:
+    "Read the Lipi Privacy Policy and learn about data protection and privacy.",
 };
 
 export default function PrivacyPage() {

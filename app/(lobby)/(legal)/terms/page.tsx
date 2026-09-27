@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
+
 import { Separator } from "@/components/ui/separator";
 import { LEGAL } from "@/lib/constants";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Terms of Service",
+  description:
+    "Read the Terms of Service for using the Lipi collaborative workspace application.",
 };
 
 export default function TermsPage() {

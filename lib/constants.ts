@@ -10,99 +10,64 @@ export const CLIENTS = [
 
 export const USERS = [
   {
-    name: "Alice",
+    name: "Alex",
     message:
-      "Lipi has been a game-changer for our team. With its reliable end-to-end testing, we catch bugs early, leading to faster development cycles and improved collaboration.",
+      "Lipi strikes the right balance between markdown simplicity and a modern block editor. Slash commands make drafting specs effortless.",
   },
   {
-    name: "Bob",
+    name: "Sarah",
     message:
-      "I used to spend hours debugging frontend issues, but Lipi simplified everything. Now, I'm more productive, and my colleagues can trust our code thanks to Lipi.",
+      "The real-time multiplayer editing is super responsive. Having live cursor presence and instant sync makes team planning frictionless.",
   },
   {
-    name: "Charlie",
+    name: "Devon",
     message:
-      "Lipi has transformed the way we work. Our QA and development teams are on the same page, and our productivity has skyrocketed. It's a must-have tool.",
+      "Nested document trees make organizing extensive technical documentation and meeting notes clear and structured.",
   },
   {
-    name: "David",
+    name: "Elena",
     message:
-      "I was skeptical at first, but Lipi exceeded my expectations. Our project timelines have improved, and collaboration between teams is seamless.",
+      "Command+K search is blazing fast. Finding any note, spec, or snippet across workspaces happens in milliseconds.",
   },
   {
-    name: "Ella",
+    name: "Marcus",
     message:
-      "Lipi made writing and running tests a breeze. Our team's productivity has never been higher, and we're delivering more reliable software.",
+      "I love having an open-source workspace that feels as polished as commercial tools without sacrificing privacy or speed.",
   },
   {
-    name: "Frank",
+    name: "Priya",
     message:
-      "Thanks to Lipi, we've eliminated testing bottlenecks. Our developers and testers collaborate effortlessly, resulting in quicker releases.",
+      "The distraction-free UI and keyboard-first navigation let me stay completely in flow when writing and planning projects.",
   },
   {
-    name: "Grace",
+    name: "Jordan",
     message:
-      "Lipi has improved our development process significantly. We now have more time for innovation, and our products are of higher quality.",
+      "Inviting teammates to workspaces and managing permissions is straightforward. Everyone knows where to find our project docs.",
   },
   {
-    name: "Hank",
+    name: "Maya",
     message:
-      "Lipi's user-friendly interface made it easy for our non-technical team members to contribute to testing. Our workflow is much more efficient now.",
-  },
-  {
-    name: "Ivy",
-    message:
-      "Our team's collaboration improved immensely with Lipi. We catch issues early, leading to less friction and quicker feature deployments.",
-  },
-  {
-    name: "Jack",
-    message:
-      "Lipi's robust testing capabilities have elevated our development standards. We work more harmoniously, and our releases are more reliable.",
-  },
-  {
-    name: "Katherine",
-    message:
-      "Lipi is a lifesaver for our cross-functional teams. We're more productive, and there's a shared sense of responsibility for product quality.",
+      "Drag-and-drop block reorganization and cover banners make every document look clean and presentation-ready.",
   },
   {
     name: "Liam",
     message:
-      "Lipi has helped us maintain high standards of quality. Our team's collaboration has improved, resulting in faster development cycles.",
+      "The typography, dark mode contrast, and responsive layout make Lipi a pleasure to use whether on desktop or mobile.",
   },
   {
-    name: "Mia",
+    name: "Chloe",
     message:
-      "Lipi is a powerful tool that improved our productivity and collaboration. It's now an integral part of our development process.",
+      "Instant autosave gives me total confidence that my notes and architecture roadmaps are safe and up to date.",
   },
   {
-    name: "Nathan",
+    name: "Kai",
     message:
-      "Lipi's user-friendly interface and detailed reporting have made testing a breeze. Our team's productivity is at an all-time high.",
+      "From daily standup notes to engineering RFCs, having everything organized in one clean workspace keeps our team aligned.",
   },
   {
-    name: "Olivia",
+    name: "Taylor",
     message:
-      "We saw immediate benefits in terms of productivity and collaboration after adopting Lipi. It's an essential tool for our development workflow.",
-  },
-  {
-    name: "Paul",
-    message:
-      "Lipi has streamlined our testing process and brought our teams closer. We're more efficient and deliver better results.",
-  },
-  {
-    name: "Quinn",
-    message:
-      "Lipi has been a game-changer for us. Our productivity and collaboration have improved significantly, leading to better software.",
-  },
-  {
-    name: "Rachel",
-    message:
-      "Thanks to Lipi, our testing process is now a seamless part of our development cycle. Our teams collaborate effortlessly.",
-  },
-  {
-    name: "Sam",
-    message:
-      "Lipi is a fantastic tool that has revolutionized our workflow. Our productivity and collaboration have reached new heights.",
+      "The open-source stack is rock solid. Next.js and Drizzle give it incredible speed and zero perceptible latency.",
   },
 ];
 
@@ -110,7 +75,7 @@ export const PRICING_CARDS = [
   {
     planType: "Free Plan",
     price: "0",
-    description: "Limited block trials for teams",
+    description: "Essential workspace for personal notes and small teams",
     highlightFeature: "",
     features: [
       "1 workspace",
@@ -122,7 +87,7 @@ export const PRICING_CARDS = [
   {
     planType: "Pro Plan",
     price: "499",
-    description: "Billed annually. ₹555 billed monthly",
+    description: "Billed monthly. Complete power for teams and professionals",
     highlightFeature: "Everything in free +",
     features: [
       "Unlimited workspaces",

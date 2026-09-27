@@ -30,11 +30,36 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  authors: {
-    name: siteConfig.author.name,
-    url: siteConfig.author.url,
-  },
+  keywords: [
+    "Lipi",
+    "collaborative workspace",
+    "notion alternative",
+    "block editor",
+    "real-time notes",
+    "open source",
+    "document management",
+  ],
+  authors: [
+    {
+      name: siteConfig.author.name,
+      url: siteConfig.author.url,
+    },
+  ],
   creator: siteConfig.author.name,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: siteConfig.url,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

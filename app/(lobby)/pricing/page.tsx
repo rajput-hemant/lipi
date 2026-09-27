@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
+
 import { siteConfig } from "@/config/site";
 import { getCurrentUser } from "@/lib/auth";
 import { PricingPlans } from "./pricing-plans";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Pricing",
+  description:
+    "Simple, transparent pricing for individuals and collaborative teams.",
 };
 
 export default async function PricingPage() {
@@ -16,7 +20,8 @@ export default async function PricingPage() {
           Simple, transparent pricing
         </h1>
         <h2 className="text-center leading-normal text-muted-foreground sm:text-lg sm:leading-7">
-          Unlock all features including unlimited posts for your blog.
+          Unlock unlimited documents, real-time collaboration, and workspaces
+          for your team.
         </h2>
       </div>
 

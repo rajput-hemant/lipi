@@ -3,6 +3,7 @@
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  AlertCircleIcon,
   File01Icon,
   Loading03Icon,
   Search01Icon,
@@ -48,6 +49,7 @@ export function SearchCommand({
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<SearchDocumentResult[]>([]);
   const [isPending, startTransition] = React.useTransition();
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -71,10 +73,12 @@ export function SearchCommand({
           const items = await searchDocumentsInWorkspace(workspaceId, query);
           if (!cancelled) {
             setResults(items);
+            setError(null);
           }
         } catch {
           if (!cancelled) {
             setResults([]);
+            setError("Failed to search documents. Please try again.");
           }
         }
       });
@@ -91,6 +95,7 @@ export function SearchCommand({
       if (!documentId || !workspaceId) return;
       setOpen(false);
       setQuery("");
+      setError(null);
       router.push(`/dashboard/${workspaceId}/${documentId}`);
     },
     [router, workspaceId]
@@ -203,38 +208,53 @@ export function SearchCommand({
             </div>
 
             <ComboboxList className="max-h-80 overflow-y-auto p-2">
-              {!isPending && results.length === 0 && (
+              {!isPending && error && (
+                <div
+                  role="alert"
+                  className="flex flex-col items-center justify-center gap-1.5 py-6 text-center text-sm text-destructive"
+                >
+                  <HugeiconsIcon
+                    icon={AlertCircleIcon}
+                    strokeWidth={2}
+                    className="size-5"
+                  />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {!isPending && !error && results.length === 0 && (
                 <ComboboxEmpty className="py-6 text-center text-sm text-muted-foreground">
                   No documents found.
                 </ComboboxEmpty>
               )}
 
-              {results.map((doc) => (
-                <ComboboxItem
-                  key={doc.id}
-                  value={doc.id}
-                  className="flex cursor-pointer flex-col items-start gap-1 rounded-md px-3 py-2 text-left"
-                >
-                  <div className="flex w-full items-center gap-2">
-                    {doc.icon ?
-                      <span className="text-base">{doc.icon}</span>
-                    : <HugeiconsIcon
-                        icon={File01Icon}
-                        strokeWidth={2}
-                        className="size-4 text-muted-foreground"
-                      />
-                    }
-                    <span className="font-medium text-foreground">
-                      {doc.title}
-                    </span>
-                  </div>
-                  {doc.snippet && (
-                    <p className="line-clamp-1 pl-6 text-xs text-muted-foreground">
-                      {doc.snippet}
-                    </p>
-                  )}
-                </ComboboxItem>
-              ))}
+              {!error &&
+                results.map((doc) => (
+                  <ComboboxItem
+                    key={doc.id}
+                    value={doc.id}
+                    className="flex cursor-pointer flex-col items-start gap-1 rounded-md px-3 py-2 text-left"
+                  >
+                    <div className="flex w-full items-center gap-2">
+                      {doc.icon ?
+                        <span className="text-base">{doc.icon}</span>
+                      : <HugeiconsIcon
+                          icon={File01Icon}
+                          strokeWidth={2}
+                          className="size-4 text-muted-foreground"
+                        />
+                      }
+                      <span className="font-medium text-foreground">
+                        {doc.title}
+                      </span>
+                    </div>
+                    {doc.snippet && (
+                      <p className="line-clamp-1 pl-6 text-xs text-muted-foreground">
+                        {doc.snippet}
+                      </p>
+                    )}
+                  </ComboboxItem>
+                ))}
             </ComboboxList>
           </Combobox>
         </DialogContent>
