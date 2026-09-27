@@ -30,7 +30,7 @@ type DocumentPageViewProps = {
 export function DocumentPageView({ document }: DocumentPageViewProps) {
   return (
     <div className="min-h-full">
-      <DocumentHeader key={document.id} documentId={document.id} />
+      <DocumentHeader key={document.id} document={document} />
       <DocumentBlockEditor document={document} />
     </div>
   );

@@ -5,6 +5,8 @@ import { ImageAdd02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
+import type { Document } from "@/types/db";
+
 import { EmojiPicker } from "@/components/emoji-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,16 +25,15 @@ import { useAppState } from "@/hooks/use-app-state";
 import { cn } from "@/lib/utils";
 
 type DocumentHeaderProps = {
-  documentId: string;
+  document: Document;
 };
 
-export function DocumentHeader({ documentId }: DocumentHeaderProps) {
-  const { documents, updateDocument: updateDocumentState } = useAppState();
-  const document = documents.find((entry) => entry.id === documentId);
+export function DocumentHeader({ document }: DocumentHeaderProps) {
+  const { updateDocument: updateDocumentState } = useAppState();
 
-  const [title, setTitle] = React.useState(document?.title ?? "");
-  const [icon, setIcon] = React.useState(document?.icon ?? "");
-  const [bannerUrl, setBannerUrl] = React.useState(document?.bannerUrl ?? null);
+  const [title, setTitle] = React.useState(document.title);
+  const [icon, setIcon] = React.useState(document.icon);
+  const [bannerUrl, setBannerUrl] = React.useState(document.bannerUrl);
 
   const { debounced: persistMetadata } = useDebouncedCallback(
     async (patch: {
@@ -42,7 +43,7 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
     }) => {
       try {
         const updated = await updateDocumentInDb({
-          id: documentId,
+          id: document.id,
           ...patch,
         });
         updateDocumentState(updated);
@@ -52,10 +53,6 @@ export function DocumentHeader({ documentId }: DocumentHeaderProps) {
     },
     500,
   );
-
-  if (!document) {
-    return null;
-  }
 
   function onTitleChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
     const nextTitle = event.target.value;
