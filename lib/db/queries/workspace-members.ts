@@ -21,6 +21,7 @@ import {
   requireAuthenticatedUser,
   requireWorkspacePermission,
 } from "./mutation-auth";
+import { ensureOwnerCollaboratorQuota } from "./workspace-member-quota";
 
 const inviteRoleSchema = z.enum(["editor", "viewer"]);
 
@@ -149,6 +150,8 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
     throw new MutationAuthError("This user is already a collaborator");
   }
 
+  await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId);
+
   const token = randomUUID();
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -256,6 +259,14 @@ export async function acceptWorkspaceInvite(token: string) {
     );
   }
 
+  const workspace = await db.query.workspaces.findFirst({
+    where: eq(workspaces.id, invite.workspaceId),
+  });
+
+  if (!workspace) {
+    throw new MutationAuthError("Workspace not found");
+  }
+
   const existing = await db.query.collaborators.findFirst({
     where: and(
       eq(collaborators.workspaceId, invite.workspaceId),
@@ -264,6 +275,8 @@ export async function acceptWorkspaceInvite(token: string) {
   });
 
   if (!existing) {
+    await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId);
+
     await db.insert(collaborators).values({
       workspaceId: invite.workspaceId,
       userId: user.id,

@@ -1,0 +1,144 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  ensureOwnerCollaboratorQuota: vi.fn(),
+  authorizeWorkspaceMemberManagement: vi.fn(),
+  requireAuthenticatedUser: vi.fn(),
+  findWorkspace: vi.fn(),
+  findInvite: vi.fn(),
+  findUser: vi.fn(),
+  findCollaborator: vi.fn(),
+}));
+
+vi.mock("./workspace-member-quota", () => ({
+  ensureOwnerCollaboratorQuota: mocks.ensureOwnerCollaboratorQuota,
+}));
+
+vi.mock("./mutation-auth", () => ({
+  authorizeWorkspaceMemberManagement: mocks.authorizeWorkspaceMemberManagement,
+  requireAuthenticatedUser: mocks.requireAuthenticatedUser,
+  MutationAuthError: class MutationAuthError extends Error {
+    name = "MutationAuthError";
+  },
+  requireWorkspacePermission: vi.fn(),
+  getWorkspaceMembershipRole: vi.fn(),
+}));
+
+vi.mock("@/lib/workspace/send-invite", () => ({
+  sendWorkspaceInviteEmail: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/resolve-auth-base-url", () => ({
+  resolveAuthBaseURL: () => "http://localhost:3000",
+}));
+
+vi.mock("next/cache", () => ({
+  revalidateTag: vi.fn(),
+}));
+
+vi.mock("..", () => ({
+  db: {
+    query: {
+      workspaces: { findFirst: mocks.findWorkspace },
+      workspaceInvites: { findFirst: mocks.findInvite },
+      users: { findFirst: mocks.findUser },
+      collaborators: { findFirst: mocks.findCollaborator },
+    },
+    select: vi.fn(() => ({
+      from: vi.fn(() => ({
+        innerJoin: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn(() => Promise.resolve([])),
+          })),
+        })),
+      })),
+    })),
+    insert: vi.fn(() => ({
+      values: vi.fn(() => ({
+        onConflictDoUpdate: vi.fn(() => Promise.resolve()),
+      })),
+    })),
+    delete: vi.fn(() => ({
+      where: vi.fn(() => Promise.resolve()),
+    })),
+  },
+}));
+
+vi.mock("../schema", () => ({
+  collaborators: {},
+  users: {},
+  workspaceInvites: {},
+  workspaces: {},
+}));
+
+import {
+  acceptWorkspaceInvite,
+  createWorkspaceCollaboratorInvite,
+} from "./workspace-members";
+
+const workspaceId = "11111111-1111-4111-8111-111111111111";
+
+describe("workspace member invite quota enforcement", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.authorizeWorkspaceMemberManagement.mockResolvedValue({ id: "owner-1" });
+    mocks.requireAuthenticatedUser.mockResolvedValue({ id: "invitee-1" });
+    mocks.ensureOwnerCollaboratorQuota.mockResolvedValue(undefined);
+    mocks.findWorkspace.mockResolvedValue({
+      id: workspaceId,
+      workspaceOwnerId: "owner-1",
+      title: "Team",
+    });
+    mocks.findUser.mockResolvedValue({ email: "invitee@example.com" });
+    mocks.findInvite.mockResolvedValue({
+      id: "invite-1",
+      workspaceId,
+      email: "invitee@example.com",
+      role: "editor",
+      expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    });
+    mocks.findCollaborator.mockResolvedValue(undefined);
+  });
+
+  it("checks owner quota before creating an invite", async () => {
+    await createWorkspaceCollaboratorInvite({
+      workspaceId,
+      email: "new@example.com",
+      role: "editor",
+    });
+
+    expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1");
+  });
+
+  it("checks owner quota before accepting an invite", async () => {
+    await acceptWorkspaceInvite("token-1");
+
+    expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1");
+  });
+
+  it("surfaces quota errors when creating an invite", async () => {
+    const { MutationAuthError } = await import("./mutation-auth");
+    mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
+      new MutationAuthError("Free plan allows two collaborators."),
+    );
+
+    await expect(
+      createWorkspaceCollaboratorInvite({
+        workspaceId,
+        email: "new@example.com",
+        role: "editor",
+      }),
+    ).rejects.toThrow("Free plan allows two collaborators.");
+  });
+
+  it("surfaces quota errors when accepting an invite", async () => {
+    const { MutationAuthError } = await import("./mutation-auth");
+    mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
+      new MutationAuthError("Free plan allows two collaborators."),
+    );
+
+    await expect(acceptWorkspaceInvite("token-1")).rejects.toThrow(
+      "Free plan allows two collaborators.",
+    );
+  });
+});
