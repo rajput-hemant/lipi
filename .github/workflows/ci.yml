@@ -8,7 +8,14 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SKIP_ENV_VALIDATION: true
+      AUTH_SECRET: ci-dummy-auth-secret-min-32-characters-long
+      BETTER_AUTH_SECRET: ci-dummy-auth-secret-min-32-characters-long
+      BETTER_AUTH_URL: http://localhost:3000
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      GITHUB_CLIENT_ID: ci-github-client-id
+      GITHUB_CLIENT_SECRET: ci-github-client-secret
 
     steps:
       - name: Checkout repository
