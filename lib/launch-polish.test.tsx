@@ -23,7 +23,12 @@ import Loading from "@/app/loading";
 import NotFound from "@/app/not-found";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
-import { PRICING_CARDS, PRICING_PLANS, USERS } from "@/lib/constants";
+import {
+  LOBBY_CAPABILITIES,
+  PRICING_CARDS,
+  PRICING_PLANS,
+} from "@/lib/constants";
+import { Testimonials } from "@/app/(lobby)/components/testimonials";
 
 const roots: ReturnType<typeof createRoot>[] = [];
 
@@ -37,23 +42,35 @@ afterEach(() => {
 });
 
 describe("Launch Polish Constants & Messaging", () => {
-  it("contains authentic Lipi product messaging without dummy testing copy", () => {
-    expect(USERS.length).toBeGreaterThan(0);
+  it("describes product capabilities without fake personas or quotes", () => {
+    expect(LOBBY_CAPABILITIES.length).toBeGreaterThan(0);
 
-    for (const user of USERS) {
-      expect(user.name).toBeTruthy();
-      expect(user.message).toBeTruthy();
-      // Must not contain legacy copy from unrelated testing tool
-      expect(user.message.toLowerCase()).not.toContain("end-to-end testing");
-      expect(user.message.toLowerCase()).not.toContain("testing bottlenecks");
-      expect(user.message.toLowerCase()).not.toContain("qa and development");
+    for (const item of LOBBY_CAPABILITIES) {
+      expect(item.title).toBeTruthy();
+      expect(item.description).toBeTruthy();
+      expect(item.description.toLowerCase()).not.toContain("end-to-end testing");
+      expect(item.description.toLowerCase()).not.toContain("milliseconds");
+      expect(item.description.toLowerCase()).not.toContain("zero perceptible");
     }
 
-    // Must mention actual collaborative workspace features
-    const allText = USERS.map((u) => u.message).join(" ");
-    expect(allText).toMatch(
-      /block editor|multiplayer|nested|workspace|slash commands/i
-    );
+    const allText = LOBBY_CAPABILITIES.map((c) => c.description).join(" ");
+    expect(allText).toMatch(/block editor|workspace|slash commands/i);
+  });
+
+  it("renders capability highlights without testimonial personas", () => {
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(<Testimonials />);
+    });
+
+    expect(container.textContent).toContain("What you can do with Lipi");
+    expect(container.textContent).not.toContain("Loved by builders");
+    expect(container.querySelector('[src*="avatar"]')).toBeNull();
+    expect(container.textContent).not.toMatch(/@\w+/);
   });
 
   it("defines accurate pricing plans and tier descriptions", () => {
@@ -96,20 +113,16 @@ describe("SEO Metadata: robots & sitemap", () => {
 });
 
 describe("Error Boundaries & Not Found Components", () => {
-  it("renders root error boundary with retry trigger", () => {
+  it("renders root error boundary with reset trigger", () => {
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
     roots.push(root);
 
-    const onRetry = vi.fn();
+    const onReset = vi.fn();
     act(() => {
       root.render(
-        <ErrorBoundary
-          error={new Error("Test failure")}
-          reset={vi.fn()}
-          retry={onRetry}
-        />
+        <ErrorBoundary error={new Error("Test failure")} reset={onReset} />
       );
     });
 
@@ -119,7 +132,7 @@ describe("Error Boundaries & Not Found Components", () => {
     act(() => {
       retryBtn?.click();
     });
-    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(onReset).toHaveBeenCalledTimes(1);
   });
 
   it("renders dashboard error boundary with retry trigger", () => {
@@ -146,20 +159,16 @@ describe("Error Boundaries & Not Found Components", () => {
     expect(onReset).toHaveBeenCalledTimes(1);
   });
 
-  it("renders lobby error boundary with retry trigger", () => {
+  it("renders lobby error boundary with reset trigger", () => {
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
     roots.push(root);
 
-    const onRetry = vi.fn();
+    const onReset = vi.fn();
     act(() => {
       root.render(
-        <LobbyError
-          error={new Error("Lobby load failed")}
-          reset={vi.fn()}
-          retry={onRetry}
-        />
+        <LobbyError error={new Error("Lobby load failed")} reset={onReset} />
       );
     });
 
@@ -168,7 +177,7 @@ describe("Error Boundaries & Not Found Components", () => {
     act(() => {
       retryBtn?.click();
     });
-    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(onReset).toHaveBeenCalledTimes(1);
   });
 
   it("renders root 404 Not Found page", () => {
@@ -238,6 +247,6 @@ describe("Composed Editor Product Visual", () => {
     expect(container.textContent).toContain("Q3 Product Roadmap & Launch Plan");
     expect(container.textContent).toContain("Acme Workspace");
     expect(container.textContent).toContain("Target Deliverables");
-    expect(container.textContent).toContain("Alex typing...");
+    expect(container.textContent).toContain("Collaborator");
   });
 });

@@ -10,7 +10,7 @@ import { Testimonials } from "./components/testimonials";
 export const metadata: Metadata = {
   title: "Lipi - All-In-One Collaborative Workspace",
   description:
-    "An open-source Notion-style collaborative workspace featuring real-time multiplayer editing, block document tree, command search, and customizable workspaces.",
+    "Open-source workspace for nested documents, block editing, Command+K search, shared editing, and team workspaces.",
 };
 
 export default function HomePage() {

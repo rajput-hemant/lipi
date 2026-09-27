@@ -5,23 +5,13 @@ import React from "react";
 export default function GlobalError({
   error,
   reset,
-  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
-  retry?: () => void;
 }) {
   React.useEffect(() => {
     console.error("Critical root error caught by global boundary:", error);
   }, [error]);
-
-  const handleRetry = () => {
-    if (typeof retry === "function") {
-      retry();
-    } else {
-      reset();
-    }
-  };
 
   return (
     <html lang="en">
@@ -57,7 +47,7 @@ export default function GlobalError({
 
           <div className="pt-2">
             <button
-              onClick={handleRetry}
+              onClick={reset}
               className="inline-flex h-9 items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
             >
               Try again

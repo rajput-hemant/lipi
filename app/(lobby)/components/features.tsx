@@ -21,8 +21,8 @@ export function Features() {
         </h2>
 
         <p className="max-w-[85%] text-muted-foreground sm:text-lg">
-          Capture notes, organize nested documents, and collaborate with your
-          team in real time.
+          Capture notes, organize nested documents, and edit together in shared
+          workspaces.
         </p>
       </div>
 
@@ -170,9 +170,9 @@ export function Features() {
               {/* Editor Blocks */}
               <div className="mt-4 space-y-3.5 text-sm">
                 <p className="leading-relaxed text-muted-foreground">
-                  Lipi unites lightweight markdown authoring with full
-                  block-based modularity. Real-time CRDT synchronization keeps
-                  your team in sync with zero edit collisions.
+                  Lipi combines block-based editing with nested pages per
+                  workspace. Teammates can work on the same document with shared
+                  editing and live updates.
                 </p>
 
                 {/* Callout Block */}
@@ -212,7 +212,7 @@ export function Features() {
                       className="size-4 rounded border-input accent-primary"
                     />
                     <span className="text-muted-foreground line-through">
-                      Deploy real-time multiplayer collaboration engine
+                      Shared document editing in workspaces
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -235,9 +235,8 @@ export function Features() {
                     <span className="text-foreground">
                       Finalize production launch polish and SEO metadata
                     </span>
-                    {/* Simulated live cursor */}
                     <span className="inline-flex items-center gap-1 rounded bg-violet-600 px-1.5 py-0.5 text-[10px] font-medium text-white shadow-xs">
-                      Alex typing...
+                      Collaborator
                     </span>
                   </div>
                 </div>

@@ -10,24 +10,13 @@ import { Button } from "@/components/ui/button";
 export default function ErrorPage({
   error,
   reset,
-  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
-  retry?: () => void;
 }) {
   React.useEffect(() => {
-    // Log unexpected runtime errors
     console.error("Runtime error caught by root boundary:", error);
   }, [error]);
-
-  const handleRetry = () => {
-    if (typeof retry === "function") {
-      retry();
-    } else {
-      reset();
-    }
-  };
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
@@ -56,7 +45,7 @@ export default function ErrorPage({
         )}
 
         <div className="flex items-center gap-3 pt-2">
-          <Button onClick={handleRetry} className="gap-2">
+          <Button onClick={reset} className="gap-2">
             <HugeiconsIcon
               icon={RefreshIcon}
               strokeWidth={2}

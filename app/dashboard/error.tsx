@@ -10,23 +10,13 @@ import { Button } from "@/components/ui/button";
 export default function DashboardError({
   error,
   reset,
-  retry,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
-  retry?: () => void;
 }) {
   React.useEffect(() => {
     console.error("Dashboard error caught:", error);
   }, [error]);
-
-  const handleRetry = () => {
-    if (typeof retry === "function") {
-      retry();
-    } else {
-      reset();
-    }
-  };
 
   return (
     <div className="flex h-full min-h-[60vh] flex-col items-center justify-center p-6 text-center">
@@ -54,7 +44,7 @@ export default function DashboardError({
         )}
 
         <div className="flex items-center gap-3 pt-2">
-          <Button onClick={handleRetry} className="gap-2">
+          <Button onClick={reset} className="gap-2">
             <HugeiconsIcon
               icon={RefreshIcon}
               strokeWidth={2}

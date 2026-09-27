@@ -8,66 +8,46 @@ export const CLIENTS = [
   { alt: "client5", logo: "/placeholders/client-5.png" },
 ];
 
-export const USERS = [
+export const LOBBY_CAPABILITIES = [
   {
-    name: "Alex",
-    message:
-      "Lipi strikes the right balance between markdown simplicity and a modern block editor. Slash commands make drafting specs effortless.",
+    title: "Block editor",
+    description:
+      "Write with a Notion-style block editor, slash commands, and drag-and-drop blocks for headings, lists, and code.",
   },
   {
-    name: "Sarah",
-    message:
-      "The real-time multiplayer editing is super responsive. Having live cursor presence and instant sync makes team planning frictionless.",
+    title: "Nested documents",
+    description:
+      "Organize pages in a tree inside each workspace so specs, notes, and folders stay easy to browse.",
   },
   {
-    name: "Devon",
-    message:
-      "Nested document trees make organizing extensive technical documentation and meeting notes clear and structured.",
+    title: "Workspace search",
+    description:
+      "Open Command+K from the dashboard to jump to documents across your workspace.",
   },
   {
-    name: "Elena",
-    message:
-      "Command+K search is blazing fast. Finding any note, spec, or snippet across workspaces happens in milliseconds.",
+    title: "Shared editing",
+    description:
+      "Edit documents together in the same workspace with live updates while you collaborate.",
   },
   {
-    name: "Marcus",
-    message:
-      "I love having an open-source workspace that feels as polished as commercial tools without sacrificing privacy or speed.",
+    title: "Workspaces and invites",
+    description:
+      "Create workspaces, invite teammates, and keep project docs in one place with role-based access.",
   },
   {
-    name: "Priya",
-    message:
-      "The distraction-free UI and keyboard-first navigation let me stay completely in flow when writing and planning projects.",
+    title: "Covers and layout",
+    description:
+      "Add cover banners and icons so documents are easy to spot in the sidebar and on the page.",
   },
   {
-    name: "Jordan",
-    message:
-      "Inviting teammates to workspaces and managing permissions is straightforward. Everyone knows where to find our project docs.",
+    title: "Autosave",
+    description:
+      "Changes save as you type so drafts and roadmaps stay up to date without a manual save step.",
   },
   {
-    name: "Maya",
-    message:
-      "Drag-and-drop block reorganization and cover banners make every document look clean and presentation-ready.",
-  },
-  {
-    name: "Liam",
-    message:
-      "The typography, dark mode contrast, and responsive layout make Lipi a pleasure to use whether on desktop or mobile.",
-  },
-  {
-    name: "Chloe",
-    message:
-      "Instant autosave gives me total confidence that my notes and architecture roadmaps are safe and up to date.",
-  },
-  {
-    name: "Kai",
-    message:
-      "From daily standup notes to engineering RFCs, having everything organized in one clean workspace keeps our team aligned.",
-  },
-  {
-    name: "Taylor",
-    message:
-      "The open-source stack is rock solid. Next.js and Drizzle give it incredible speed and zero perceptible latency.",
+    title: "Open source",
+    description:
+      "Self-host or inspect the codebase: Lipi is MIT-licensed and built with Next.js and Drizzle.",
   },
 ];
 
