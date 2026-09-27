@@ -6,6 +6,13 @@ export const documentTitleSchema = z
   .min(1, "Title is required")
   .max(200, "Title is too long");
 
+export const DOCUMENT_CONTENT_MAX_LENGTH = 512_000;
+
+export const documentContentSchema = z
+  .string()
+  .max(DOCUMENT_CONTENT_MAX_LENGTH, "Document content is too large")
+  .nullable();
+
 export const createDocumentSchema = z.object({
   id: z.uuid(),
   workspaceId: z.uuid(),
@@ -19,7 +26,7 @@ export const updateDocumentSchema = z.object({
   title: documentTitleSchema.optional(),
   icon: z.string().max(32).optional(),
   bannerUrl: z.string().nullable().optional(),
-  content: z.string().nullable().optional(),
+  content: documentContentSchema.optional(),
   inTrash: z.boolean().optional(),
   parentId: z.uuid().nullable().optional(),
 });
