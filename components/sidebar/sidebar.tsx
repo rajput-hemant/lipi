@@ -1,66 +1,15 @@
 "use client";
 
 import React from "react";
-import {
-  Delete02Icon,
-  GridIcon,
-  Settings01Icon,
-  UserIcon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { IconSvgElement } from "@hugeicons/react";
-
-import { siteConfig } from "@/config/site";
-import { useAppState } from "@/hooks/use-app-state";
 import { cn } from "@/lib/utils";
-import { Logo } from "../icons";
-import { Settings } from "../settings";
-import { SignOut } from "../sign-out";
-import { Trash } from "../trash";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Separator } from "../ui/separator";
-import { Workspaces } from "../workspaces";
-import { DocumentTree } from "./document-tree";
-import { DocumentTreeCollapsed } from "./document-tree-collapsed";
-import { NavDialog } from "./nav-dialog";
+import { SidebarPanel } from "./sidebar-panel";
 
 type SidebarProps = React.ComponentProps<"aside"> & {
   isCollapsed: boolean;
 };
 
-type NavItem = {
-  title: string;
-  description: string;
-  icon: IconSvgElement;
-  content: React.FC;
-};
-
-const navItems: NavItem[] = [
-  {
-    title: "My Workspaces",
-    description: "Manage your workspaces",
-    icon: GridIcon,
-    content: Workspaces,
-  },
-  {
-    title: "Settings",
-    description: "Manage your settings",
-    icon: Settings01Icon,
-    content: Settings,
-  },
-  {
-    title: "Trash",
-    description: "Manage your trash",
-    icon: Delete02Icon,
-    content: Trash,
-  },
-];
-
 export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
-  const { user } = useAppState();
-
   return (
     <aside
       className={cn("relative z-40 hidden lg:block", className)}
@@ -69,134 +18,10 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
       <div
         className={cn(
           "sticky inset-y-0 flex h-screen flex-col gap-2",
-          !isCollapsed && "overflow-hidden"
+          !isCollapsed && "overflow-hidden",
         )}
       >
-        <div
-          className={cn(
-            "flex",
-            isCollapsed ?
-              "my-px h-14 border-b"
-            : "my-1 ml-4 mr-2 items-center gap-2"
-          )}
-        >
-          <Logo size={44} className={cn("shrink-0", isCollapsed && "m-auto")} />
-          {!isCollapsed && (
-            <span className="font-handwriting text-2xl font-medium lowercase">
-              {siteConfig.name}
-            </span>
-          )}
-        </div>
-
-        <nav className="flex flex-col items-center justify-center gap-1 px-4">
-          {navItems.map(({ title, description, icon, content: Content }) =>
-            isCollapsed ?
-              <NavDialog
-                key={title}
-                title={title}
-                icon={icon}
-                description={description}
-                isCollapsed
-              >
-                <Content />
-              </NavDialog>
-            : <NavDialog
-                key={title}
-                title={title}
-                icon={icon}
-                description={description}
-              >
-                <Content />
-              </NavDialog>
-          )}
-        </nav>
-
-        <Separator className={isCollapsed ? "block" : "hidden"} />
-
-        <div
-          data-testid={
-            isCollapsed ? "document-tree-collapsed" : "document-tree"
-          }
-          className="flex min-h-0 flex-1 flex-col overflow-hidden"
-        >
-          {isCollapsed ?
-            <DocumentTreeCollapsed />
-          : <DocumentTree />}
-        </div>
-
-        <div
-          className={cn(
-            "absolute z-10 transition-all animate-in fade-in-0 zoom-in-0 slide-in-from-bottom-full [animation-duration:500ms]",
-            isCollapsed ? "inset-x-0 bottom-1" : (
-              "inset-x-2 bottom-2 flex items-center gap-2 rounded-full border bg-background/10 p-2 shadow backdrop-blur-md hover:shadow-xl"
-            )
-          )}
-        >
-          {isCollapsed ?
-            <Popover>
-              <PopoverTrigger className="mx-auto flex rounded-full border p-0.5 shadow hover:shadow-xl">
-                <Avatar>
-                  <AvatarImage
-                    src={user?.image ?? undefined}
-                    className="rounded-full"
-                  />
-
-                  <AvatarFallback className="cursor-pointer bg-background hover:bg-muted">
-                    <HugeiconsIcon
-                      icon={UserIcon}
-                      strokeWidth={2}
-                      className="size-5"
-                    />
-                  </AvatarFallback>
-                </Avatar>
-              </PopoverTrigger>
-
-              <PopoverContent side="right" className="flex justify-between">
-                <div className="w-full font-medium">
-                  <p className="line-clamp-1 text-sm">
-                    {user?.name ?? "Update your profile"}
-                  </p>
-                  <p className="line-clamp-1 text-xs text-muted-foreground">
-                    Free plan
-                  </p>
-                </div>
-
-                <SignOut
-                  size="icon"
-                  variant="ghost"
-                  className="ml-auto shrink-0 rounded-full text-muted-foreground"
-                />
-              </PopoverContent>
-            </Popover>
-          : <>
-              <Avatar className="m-auto">
-                <AvatarImage src={user?.image ?? undefined} />
-                <AvatarFallback>
-                  <HugeiconsIcon
-                    icon={UserIcon}
-                    strokeWidth={2}
-                    className="size-6 text-muted-foreground"
-                  />
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="w-full font-medium">
-                <p className="line-clamp-1 text-sm">
-                  {user?.name ?? "Update your profile"}
-                </p>
-                <p className="line-clamp-1 text-xs text-muted-foreground">
-                  Free plan
-                </p>
-              </div>
-
-              <SignOut
-                size="icon"
-                variant="ghost"
-                className="ml-auto shrink-0 rounded-full text-muted-foreground"
-              />
-            </>
-          }
-        </div>
+        <SidebarPanel isCollapsed={isCollapsed} />
       </div>
     </aside>
   );
