@@ -29,6 +29,7 @@ describe("Better Auth configuration", () => {
       "test-secret-key-that-is-at-least-32-chars";
     process.env.BETTER_AUTH_URL = "http://localhost:3000";
     process.env.SKIP_ENV_VALIDATION = "true";
+    process.env.DISABLE_AUTH_RATE_LIMIT = "true";
   });
 
   it("disables implicit account linking", () => {
@@ -45,6 +46,16 @@ describe("Better Auth configuration", () => {
     expect(auth.options.user?.fields?.emailVerified).toBe(
       "emailVerifiedBoolean"
     );
+  });
+
+  it("uses uuid ids for shared user primary keys", () => {
+    const auth = createAuth(makeFakeDb());
+    expect(auth.options.advanced?.database?.generateId).toBe("uuid");
+  });
+
+  it("disables rate limiting only when DISABLE_AUTH_RATE_LIMIT is set", () => {
+    const auth = createAuth(makeFakeDb());
+    expect(auth.options.rateLimit?.enabled).toBe(false);
   });
 
   it("configures bcrypt password hashing", async () => {

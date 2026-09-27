@@ -20,6 +20,7 @@ import {
   USERNAME_REGEX,
 } from "./constants";
 import { credentialAccountWhere } from "./credential-account";
+import { resolveAuthRateLimitEnabled } from "./auth-rate-limit";
 import { resolveAuthBaseURL } from "./resolve-auth-base-url";
 
 export function createAuth(
@@ -42,6 +43,9 @@ export function createAuth(
   return betterAuth({
     secret: process.env.BETTER_AUTH_SECRET || env.AUTH_SECRET,
     baseURL: resolveAuthBaseURL(),
+    rateLimit: {
+      enabled: resolveAuthRateLimitEnabled(),
+    },
     database: drizzleAdapter(database, {
       provider: "pg",
       usePlural: false,
@@ -161,7 +165,9 @@ export function createAuth(
         secure: env.NODE_ENV === "production",
         httpOnly: true,
       },
-      generateId: () => crypto.randomUUID(),
+      database: {
+        generateId: "uuid",
+      },
       crossSubDomainCookies: {
         enabled: false,
       },
