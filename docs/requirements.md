@@ -66,7 +66,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 ### 3.4 Document Trash & Lifecycle
 - [x] **Soft-Delete Architecture:** Documents are soft-deleted via `inTrash` flag with cascade handling and restore target collection (`lib/db/document-operations.ts`, `lib/db/document-operations.test.ts`, `lib/db/client-document-state.ts`).
 - [x] **Permanent Delete Authorization:** Restricts permanent document deletion to authorized workspace roles with correct dependency ordering (`lib/db/document-operations.ts`, `lib/db/document-operations.test.ts`).
-- [ ] **Trash UI Polish (Unlanded):** Mobile 375px responsive dialog layout, `size-4 shrink-0` fallback icon, accessible labels (`Restore {title}` / `Delete {title} permanently`), and confirmation dialog verified on local branch `fm/lipi-trash-ui-polish` (`components/trash.tsx`, `components/trash.test.tsx`), ready but pending landing into `feat/complete-lipi`.
+- [x] **Trash UI Polish:** Responsive dialog layout, `size-4 shrink-0` fallback icon, accessible labels (`Restore ${title}` / `Delete ${title} permanently`), and confirmation dialog (`components/trash.tsx`, `components/trash.test.tsx`).
 
 ### 3.5 Search & File Uploads
 - [x] **Workspace Search Command:** Command palette dialog (⌘K / Ctrl+K) with debounced input, keyboard selection, and error handling (`components/search-command.tsx`, `components/search-command.test.tsx`, `lib/search/search-utils.test.ts`).
@@ -101,5 +101,3 @@ The following items are tracked as open and require operational execution or inf
    - Decision remains open between:
      - **Option A:** Same cookie-owning host running Next.js and Hocuspocus behind a reverse proxy.
      - **Option B:** Separate WebSocket host terminating `wss://` using short-lived signed tokens ([research note](./research/realtime-collaboration.md)).
-3. **Trash UI Polish Integration:**
-   - Enhanced trash drawer controls, empty state, and responsive confirmation dialog are validated on local branch `fm/lipi-trash-ui-polish` and await review and integration into `feat/complete-lipi`.

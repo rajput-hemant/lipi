@@ -10,9 +10,9 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [x] Real-time collaboration (Hocuspocus + Yjs, signed room tokens, presence) - `realtime/server.ts`, `app/api/realtime/token/route.ts`, `tests/e2e/collaboration.spec.ts`; see [realtime](./realtime.md)
 - [x] Free/Pro quotas and Stripe checkout/portal/webhook - `lib/billing/plan-quotas.ts`, `app/api/stripe/`, `tests/e2e/stripe-checkout.spec.ts`
 - [x] Product requirements and portfolio showcase scope - [requirements](./requirements.md)
+- [x] Trash controls and empty-state polish - `components/trash.tsx`, `components/trash.test.tsx`
 
 ## Open
 
 - [ ] Run Infinitunes' shared-table migrations and `BACKFILL_ALL` against the shared database so legacy users can sign in ([shared-database-auth](./shared-database-auth.md))
 - [ ] Choose the production realtime endpoint arrangement (same cookie-owning host vs separate host with `wss://` and the signed token) ([research](./research/realtime-collaboration.md))
-- [ ] Trash controls and empty-state polish - ready on local branch `fm/lipi-trash-ui-polish`, pending integration into `feat/complete-lipi`
