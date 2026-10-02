@@ -32,3 +32,13 @@ Research date: 2026-09-27. This checkout has no `data/lipi-discovery-plan/report
 - The Hocuspocus generic database extension has no Postgres-specific adapter requirement; its documented contract is async byte fetch and store callbacks, which can use Lipi's existing Postgres/Drizzle setup. [Hocuspocus database extension](https://tiptap.dev/docs/hocuspocus/server/extensions/database)
 - Cursor identity sent through Yjs awareness is client-writable by default; Hocuspocus v4's `beforeHandleAwareness` hook exposes decoded state for server rewriting. Use it to replace the claimed user identity with verified room context. [Hocuspocus awareness hook](https://tiptap.dev/docs/hocuspocus/server/hooks), [Hocuspocus awareness guide](https://tiptap.dev/docs/hocuspocus/guides/awareness)
 - A separate realtime hostname will not receive the current host-only session cookie. The owner should select the concrete endpoint arrangement before deployment; this does not block implementing and testing the server's authorization boundary. [Better Auth cookies](https://better-auth.com/docs/concepts/cookies)
+
+## Implementation status
+
+- [x] Hocuspocus v4 server, provider and database extension pinned to `4.7.0` - `package.json`
+- [x] Authenticate before room load; viewers read-only; permissions refreshed on token sync - `lib/realtime/server-factory.ts`
+- [x] Short-lived room-scoped token instead of client-supplied identity - `app/api/realtime/token/route.ts`
+- [x] Yjs state in a `lipi_*` table with one-time bootstrap from `documents.content` - `lib/db/schema/app.ts` (`realtime_documents`), `lib/realtime/persistence.ts`
+- [x] Editor wired with `withCollaboration`; awareness identity rewritten server-side - `components/document-editor/document-block-editor.tsx`, `lib/realtime/server-factory.ts`
+- [x] Workspace room with stateless refresh events - `components/realtime/workspace-realtime-provider.tsx`
+- [ ] Select the production endpoint arrangement (see the last caveat above)
