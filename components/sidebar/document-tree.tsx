@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowDown01Icon,
   ArrowRight01Icon,
@@ -77,6 +77,7 @@ function DocumentTreeItem({
   setFocusedId,
 }: DocumentTreeItemProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
   const {
     addDocument,
@@ -195,6 +196,11 @@ function DocumentTreeItem({
       const documentId = document.id;
       if (!documentId || !trashIds.has(documentId)) continue;
       updateDocumentState({ ...document, inTrash: true });
+    }
+
+    const openDocumentId = pathname.split("/")[3];
+    if (openDocumentId && trashIds.has(openDocumentId)) {
+      router.push(`/dashboard/${workspaceId}`);
     }
 
     toast.promise(softDeleteDocumentTree(node.id), {

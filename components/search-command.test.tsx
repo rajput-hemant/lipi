@@ -110,5 +110,7 @@ describe("SearchCommand", () => {
 
     expect(document.querySelector('[role="alert"]')).toBeNull();
     expect(document.body.textContent).toContain("No documents found.");
+    const empty = document.querySelector('[data-slot="combobox-empty"]');
+    expect(empty?.classList.contains("flex")).toBe(true);
   });
 });

@@ -34,6 +34,7 @@ export function ResizableLayout(props: ResizableLayoutProps) {
   return (
     <ResizablePanelGroup
       orientation="horizontal"
+      className="max-lg:[&>[id=sidebar]]:!hidden"
       onLayoutChange={(layout) => {
         const sizes = [layout.sidebar, layout.main].filter(
           (size): size is number => typeof size === "number"

@@ -150,9 +150,11 @@ export function SearchCommand({
           variant="outline"
           size="sm"
           className={cn(
-            "relative h-9 w-full justify-between rounded-lg bg-background text-sm text-muted-foreground shadow-none sm:w-64 sm:pr-2 md:w-80",
+            "relative h-9 w-9 shrink-0 justify-center rounded-lg bg-background px-0 text-sm text-muted-foreground shadow-none sm:w-64 sm:justify-between sm:px-2.5 sm:pr-2 md:w-80",
             className
           )}
+          title="Search (⌘K)"
+          aria-label="Search documents"
           onClick={() => setOpen(true)}
         >
           <span className="inline-flex items-center gap-2">
@@ -162,7 +164,6 @@ export function SearchCommand({
               className="size-4"
             />
             <span className="hidden sm:inline">Search documents...</span>
-            <span className="sm:hidden">Search...</span>
           </span>
           <Kbd className="hidden sm:inline-flex text-[10px]">⌘K</Kbd>
         </Button>
@@ -176,6 +177,9 @@ export function SearchCommand({
 
           <Combobox
             open={true}
+            onOpenChange={(next) => {
+              if (!next) setOpen(false);
+            }}
             value={null}
             onValueChange={(val) => {
               if (typeof val === "string") {
@@ -223,7 +227,7 @@ export function SearchCommand({
               )}
 
               {!isPending && !error && results.length === 0 && (
-                <ComboboxEmpty className="py-6 text-center text-sm text-muted-foreground">
+                <ComboboxEmpty className="flex py-6 text-center text-sm text-muted-foreground">
                   No documents found.
                 </ComboboxEmpty>
               )}

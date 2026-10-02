@@ -20,14 +20,14 @@ export function DocumentCollaborators() {
 
   return (
     <div
-      className="flex items-center -space-x-2"
+      className="flex shrink-0 items-center -space-x-2"
       aria-label="Page collaborators"
       role="list"
     >
       {visibleCollaborators.map((collaborator) => (
         <Avatar
           key={collaborator.id}
-          className="size-8 border-2 border-background"
+          className="size-8 shrink-0 border-2 border-background"
           title={collaborator.name}
           role="listitem"
         >

@@ -73,7 +73,12 @@ Do this once per run. Steps are the documented e2e path adapted to isolated name
      -p 127.0.0.1:5561:5432 --tmpfs /var/lib/postgresql postgres:18
    until docker exec lipi-verify-pg pg_isready -U postgres -h 127.0.0.1; do sleep 1; done
    ```
-2. Schema. **Do not use `bun run db:migrate`**: on an empty database it fails at migration 0004 (`LIP-V001`). Use what the e2e suite uses (shared auth tables first, then `lipi_*`):
+2. Schema. `bun run db:migrate` now applies on an empty database (`LIP-V001` fixed): push the shared auth tables first, then run it. The e2e suite still uses `drizzle-kit push` for `lipi_*`, which is the faster alternative:
+   ```sh
+   bunx drizzle-kit push --force --config tests/e2e/drizzle-shared-auth.config.ts
+   bun run db:migrate
+   ```
+   Push alternative (shared auth tables first, then `lipi_*`):
    ```sh
    bunx drizzle-kit push --force --config tests/e2e/drizzle-shared-auth.config.ts
    bunx drizzle-kit push --force --config tests/e2e/drizzle-lipi.config.ts
