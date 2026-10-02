@@ -18,6 +18,8 @@
 
 **[<kbd> <br> &nbsp;**Live Demo**&nbsp; <br> </kbd>][site]**
 
+> Lipi is a portfolio showcase project (declared goal), not a commercial product.
+
 ## Building from Source
 
 </div>

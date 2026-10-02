@@ -15,4 +15,4 @@ Canonical task index. Checked items cite implementation or test files present on
 - [ ] Run Infinitunes' shared-table migrations and `BACKFILL_ALL` against the shared database so legacy users can sign in ([shared-database-auth](./shared-database-auth.md))
 - [ ] Choose the production realtime endpoint arrangement (same cookie-owning host vs separate host with `wss://` and the signed token) ([research](./research/realtime-collaboration.md))
 - [ ] Trash controls and empty-state polish - tracked on the separate `lipi-trash-ui-polish` task, not part of this branch
-- [ ] Write product requirements (target users, scope versus Notion, pricing intent); none exist beyond the tagline in [project](./project.md), which is still marked `[WIP]`
+- [ ] Write product requirements (target users, scope versus Notion, which features the showcase must demonstrate); none exist beyond the tagline in [project](./project.md), which is still marked `[WIP]`. Declared goal: portfolio showcase; the Stripe tiers are implemented but no commercial goal is asserted
