@@ -15,4 +15,4 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 
 - [ ] Run Infinitunes' shared-table migrations and `BACKFILL_ALL` against the shared database so legacy users can sign in ([shared-database-auth](./shared-database-auth.md))
 - [ ] Choose the production realtime endpoint arrangement (same cookie-owning host vs separate host with `wss://` and the signed token) ([research](./research/realtime-collaboration.md))
-- [ ] Trash controls and empty-state polish - ready on separate branch `fm/lipi-trash-ui-polish` (validation evidence at `/Users/rajput-hemant/Desktop/firstmate/data/lipi-trash-ui-polish/validation.md`), not yet landed on `feat/complete-lipi`
+- [ ] Trash controls and empty-state polish - ready on local branch `fm/lipi-trash-ui-polish`, pending integration into `feat/complete-lipi`

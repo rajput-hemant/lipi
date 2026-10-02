@@ -30,12 +30,13 @@ Lipi focuses on the core collaborative document editing and workspace mechanics 
 - **Asset Uploads:** Secure image, banner, and logo uploads via UploadThing with workspace permission validation.
 - **Quota & Billing Infrastructure:** Multi-tier quota enforcement (Free vs. Pro limits on workspaces, collaborators, and blocks) and Stripe checkout/portal/webhook integration.
 
-### Explicit Non-Goals (Out of Scope vs. Notion)
-- **Notion Databases & Multi-View Tables:** Relational databases, kanban boards, calendar/timeline/gallery views, rollups, and formula properties are explicitly out of scope.
-- **Public Page Publishing & Custom Domains:** Documents are strictly private to authorized workspace members; no public web publishing or custom domain mapping is provided.
-- **Third-Party Integrations & Embeds:** No external integrations (Slack, Jira, GitHub, Figma) or public REST API / webhook platform.
-- **Native Applications:** No desktop (Electron) or native mobile (iOS/Android) wrappers; Lipi is designed and responsive for modern desktop and mobile web browsers.
-- **Commercial Monetization & Support:** No real payment collection, pricing plans, billing support, or enterprise SSO (SAML/SCIM).
+### Capabilities Beyond Current Showcase Scope (Unimplemented / Unrequested Future Work)
+The following capabilities represent functionality beyond the current demonstrated showcase scope and unrequested future work (not established as active requirements):
+- **Notion Databases & Multi-View Tables:** Relational databases, kanban boards, calendar/timeline/gallery views, rollups, and formula properties.
+- **Public Page Publishing & Custom Domains:** Public web publishing or custom domain mapping for documents; current documents are private to authorized workspace members.
+- **Third-Party Integrations & Embeds:** External integrations (Slack, Jira, GitHub, Figma) and public developer API / webhook endpoints.
+- **Native Applications:** Desktop (Electron) or native mobile (iOS/Android) applications; Lipi is currently delivered as a responsive web application.
+- **Commercial Monetization & Enterprise Infrastructure:** Production payment processing, live customer billing operations, paid support tiers, or enterprise SSO (SAML/SCIM).
 
 ---
 
@@ -65,7 +66,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 ### 3.4 Document Trash & Lifecycle
 - [x] **Soft-Delete Architecture:** Documents are soft-deleted via `inTrash` flag with cascade handling and restore target collection (`lib/db/document-operations.ts`, `lib/db/document-operations.test.ts`, `lib/db/client-document-state.ts`).
 - [x] **Permanent Delete Authorization:** Restricts permanent document deletion to authorized workspace roles with correct dependency ordering (`lib/db/document-operations.ts`, `lib/db/document-operations.test.ts`).
-- [ ] **Trash UI Polish (Unlanded):** Mobile 375px responsive dialog layout, `size-4 shrink-0` fallback icon, accessible labels (`Restore {title}` / `Delete {title} permanently`), and confirmation dialog verified on branch `fm/lipi-trash-ui-polish` (`components/trash.tsx`, `components/trash.test.tsx`, evidence at `/Users/rajput-hemant/Desktop/firstmate/data/lipi-trash-ui-polish/validation.md`), ready but not yet landed on `feat/complete-lipi`.
+- [ ] **Trash UI Polish (Unlanded):** Mobile 375px responsive dialog layout, `size-4 shrink-0` fallback icon, accessible labels (`Restore {title}` / `Delete {title} permanently`), and confirmation dialog verified on local branch `fm/lipi-trash-ui-polish` (`components/trash.tsx`, `components/trash.test.tsx`), ready but pending landing into `feat/complete-lipi`.
 
 ### 3.5 Search & File Uploads
 - [x] **Workspace Search Command:** Command palette dialog (⌘K / Ctrl+K) with debounced input, keyboard selection, and error handling (`components/search-command.tsx`, `components/search-command.test.tsx`, `lib/search/search-utils.test.ts`).
@@ -101,4 +102,4 @@ The following items are tracked as open and require operational execution or inf
      - **Option A:** Same cookie-owning host running Next.js and Hocuspocus behind a reverse proxy.
      - **Option B:** Separate WebSocket host terminating `wss://` using short-lived signed tokens ([research note](./research/realtime-collaboration.md)).
 3. **Trash UI Polish Integration:**
-   - Enhanced trash drawer controls, empty state, and responsive confirmation dialog are validated on branch `fm/lipi-trash-ui-polish` (`/Users/rajput-hemant/Desktop/firstmate/data/lipi-trash-ui-polish/validation.md`) and await review/landing into `feat/complete-lipi`.
+   - Enhanced trash drawer controls, empty state, and responsive confirmation dialog are validated on local branch `fm/lipi-trash-ui-polish` and await review and integration into `feat/complete-lipi`.
