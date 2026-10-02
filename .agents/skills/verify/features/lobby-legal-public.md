@@ -1,6 +1,6 @@
 # Lobby, legal pages and footer
 
-Status: DRAFT, not live-verified. Last live proof: none.
+Status: PARTIAL live proof (home, pricing, terms and privacy render and titles correct, no console errors). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/lobby-legal-public/` (private task data dir, not in the repo).
 Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V006, LIP-V013
 
@@ -9,7 +9,7 @@ Public marketing site: `/` (hero, features, tech stack, testimonials, open sourc
 ## Sub-features
 
 - [ ] `/` renders sections, nav links, `Toggle Dark Mode` / `Light` / `System`.
-- [ ] `/terms`, `/privacy` render with layout; `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` respond.
+- [x] `/terms`, `/privacy` render with layout; `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` respond. - live: `/`, `/pricing`, `/terms`, `/privacy` loaded anonymously with correct titles; screenshots only; robots/sitemap/manifest NOT exercised.
 - [ ] Footer newsletter form (stub, LIP-V006).
 - [ ] Unknown route shows the not-found page; error boundaries (`app/error.tsx`).
 - [ ] Mobile navigation `Open navigation menu`.

@@ -1,6 +1,6 @@
 # Workspaces, roles and invites
 
-Status: DRAFT, not live-verified. Last live proof: none.
+Status: PARTIAL live proof (create, invite, accept, viewer role). Invite acceptance has a confirmed bug, LIP-V019. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/workspaces-roles-invites/` (private task data dir, not in the repo).
 Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V005, LIP-V008, LIP-V011
 
@@ -8,9 +8,9 @@ Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts
 
 ## Sub-features
 
-- [ ] Create workspace (`/dashboard/new-workspace`, `Workspace name`, `Create workspace`). Free plan allows 1 owned workspace (`lib/billing/plan-quotas.ts`).
+- [x] Create workspace (`/dashboard/new-workspace`, `Workspace name`, `Create workspace`). Free plan allows 1 owned workspace (`lib/billing/plan-quotas.ts`). - live: `Alpha Space` created; toast `Your workspace "Alpha Space" was created successfully.`; second-workspace limit NOT exercised.
 - [ ] Settings dialog: rename, logo, members list with `Owner` badge.
-- [ ] Invite by email as `editor` or `viewer`; toast `Invite created`; duplicate active invite rejected.
+- [x] Invite by email as `editor` or `viewer`; toast `Invite created`; duplicate active invite rejected. - live: editor invite for user B; toast `Invite created`, `PENDING INVITES` shown; duplicate-invite rejection NOT exercised.
 - [ ] Accept invite at `/invite/<token>` as a signed-in user; lands on `/dashboard/<workspaceId>`.
 - [ ] Role effects: editor edits; viewer sees `View only` and cannot edit; only owner sees invite form, `Transfer ownership`, `Delete workspace`.
 - [ ] Collaborator quota (Free: 2) shown or enforced when inviting.

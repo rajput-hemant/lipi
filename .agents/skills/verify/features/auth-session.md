@@ -1,6 +1,6 @@
 # Authentication and session
 
-Status: DRAFT, not live-verified. Last live proof: none.
+Status: PARTIAL live proof (email/password sign-up, sign-in, sign-out, wrong password, gating). Unexercised sub-features stay unticked. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/auth-session/` (private task data dir, not in the repo).
 Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V002, LIP-V003, LIP-V004, LIP-V007, LIP-V014
 
@@ -8,14 +8,14 @@ Email/password sign-up, sign-in, sign-out and password reset on Better Auth with
 
 ## Sub-features
 
-- [ ] Sign-up with email + password + confirm (`signUpSchema` in `lib/validations.ts`), lands on `/dashboard/new-workspace` or `/dashboard/<id>`.
-- [ ] Sign-in by email (`Login with Email`), and the username toggle (`@username`) (see LIP-V002).
+- [x] Sign-up with email + password + confirm (`signUpSchema` in `lib/validations.ts`), lands on `/dashboard/new-workspace` or `/dashboard/<id>`. - live: validation errors `Email is Required`/`Password is Required`, `Passwords do not match`; valid sign-up lands on `/dashboard/new-workspace`; user row created.
+- [x] Sign-in by email (`Login with Email`), and the username toggle (`@username`) (see LIP-V002). - live: email sign-in lands on `/dashboard/<id>`; username toggle NOT exercised (LIP-V002).
 - [ ] Validation messages: password rules (upper/lower/digit/special/8+), mismatched confirm, bad email.
-- [ ] Sign-out (`title="Sign out"` button) clears the session; `/dashboard` redirects to login afterwards.
+- [x] Sign-out (`title="Sign out"` button) clears the session; `/dashboard` redirects to login afterwards. - live: `Sign out` button returns to `/login`; `/dashboard` then redirects to `/login?from=%2Fdashboard`.
 - [ ] `?from=` return path honored after login and safely constrained (`lib/auth/redirect.ts`, unit-tested only).
-- [ ] Authenticated users visiting `/login`, `/signup` are redirected away (`AuthPageGate`, `redirectIfAuthenticated`).
+- [x] Authenticated users visiting `/login`, `/signup` are redirected away (`AuthPageGate`, `redirectIfAuthenticated`). - live: signed-in user B opening `/login` is redirected to the dashboard.
 - [ ] Reset password (`/reset-password`: email, old password, new password) then sign in with the new one (LIP-V003).
-- [ ] Wrong-password and unknown-user error toasts.
+- [x] Wrong-password and unknown-user error toasts. - live: wrong password shows `Invalid email or password`; unknown-user NOT exercised.
 - [ ] OAuth buttons (Google/GitHub) render; the round trip is not drivable locally (LIP-V014).
 
 ## How to get to it (user POV)
