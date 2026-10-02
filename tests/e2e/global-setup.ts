@@ -2,13 +2,9 @@ import { execSync } from "node:child_process";
 
 import type { FullConfig } from "@playwright/test";
 
-import { applySharedAuthDatabase } from "./apply-shared-database";
 import { applyLipiDatabase } from "./apply-lipi-database";
-import {
-  E2E_DATABASE_URL,
-  E2E_PG_CONTAINER,
-  E2E_PG_PORT,
-} from "./env";
+import { applySharedAuthDatabase } from "./apply-shared-database";
+import { E2E_DATABASE_URL, E2E_PG_CONTAINER, E2E_PG_PORT } from "./env";
 
 function run(command: string) {
   execSync(command, { stdio: "inherit" });

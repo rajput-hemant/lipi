@@ -1,11 +1,11 @@
 "use client";
 
-import type { BlockNoteEditor } from "@blocknote/core";
 import { insertOrUpdateBlockForSlashMenu } from "@blocknote/core/extensions";
 import { InformationCircleIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import type { BlockEditorSchema } from "./editor-schema";
+import type { BlockNoteEditor } from "@blocknote/core";
 
 const calloutSlashIcon = (
   <HugeiconsIcon
@@ -20,7 +20,7 @@ export function insertCalloutSlashMenuItem(
     BlockEditorSchema["blockSchema"],
     BlockEditorSchema["inlineContentSchema"],
     BlockEditorSchema["styleSchema"]
-  >,
+  >
 ) {
   return {
     title: "Callout",

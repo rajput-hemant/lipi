@@ -6,7 +6,6 @@ import { serializeDocumentContent } from "@/lib/block-editor/document-content";
 import { realtimeBlockNoteEditor } from "@/lib/block-editor/realtime-schema";
 import { db } from "@/lib/db";
 import { realtimeDocuments } from "@/lib/db/schema";
-
 import { BLOCKNOTE_FRAGMENT } from "./constants";
 
 export function serializedContentFromYjsState(state: Uint8Array): string {

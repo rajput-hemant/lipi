@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import type Stripe from "stripe";
 
+import { deliverStripeWebhookEvent } from "./webhook-delivery";
+
 const mocks = vi.hoisted(() => ({
   claimStripeWebhookEvent: vi.fn(),
   markStripeWebhookEventProcessed: vi.fn(),
@@ -18,8 +20,6 @@ vi.mock("@/lib/db/queries/billing", () => ({
 vi.mock("./webhook-handlers", () => ({
   handleStripeWebhookEvent: mocks.handleStripeWebhookEvent,
 }));
-
-import { deliverStripeWebhookEvent } from "./webhook-delivery";
 
 const event = {
   id: "evt_1",

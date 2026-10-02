@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  acceptWorkspaceInvite,
+  createWorkspaceCollaboratorInvite,
+} from "./workspace-members";
+
 const mocks = vi.hoisted(() => ({
   ensureOwnerCollaboratorQuota: vi.fn(),
   authorizeWorkspaceMemberManagement: vi.fn(),
@@ -71,17 +76,14 @@ vi.mock("../schema", () => ({
   workspaces: {},
 }));
 
-import {
-  acceptWorkspaceInvite,
-  createWorkspaceCollaboratorInvite,
-} from "./workspace-members";
-
 const workspaceId = "11111111-1111-4111-8111-111111111111";
 
 describe("workspace member invite quota enforcement", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.authorizeWorkspaceMemberManagement.mockResolvedValue({ id: "owner-1" });
+    mocks.authorizeWorkspaceMemberManagement.mockResolvedValue({
+      id: "owner-1",
+    });
     mocks.requireAuthenticatedUser.mockResolvedValue({ id: "invitee-1" });
     mocks.ensureOwnerCollaboratorQuota.mockResolvedValue(undefined);
     mocks.findWorkspace.mockResolvedValue({
@@ -119,7 +121,7 @@ describe("workspace member invite quota enforcement", () => {
   it("surfaces quota errors when creating an invite", async () => {
     const { MutationAuthError } = await import("./mutation-auth");
     mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
-      new MutationAuthError("Free plan allows two collaborators."),
+      new MutationAuthError("Free plan allows two collaborators.")
     );
 
     await expect(
@@ -127,18 +129,18 @@ describe("workspace member invite quota enforcement", () => {
         workspaceId,
         email: "new@example.com",
         role: "editor",
-      }),
+      })
     ).rejects.toThrow("Free plan allows two collaborators.");
   });
 
   it("surfaces quota errors when accepting an invite", async () => {
     const { MutationAuthError } = await import("./mutation-auth");
     mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
-      new MutationAuthError("Free plan allows two collaborators."),
+      new MutationAuthError("Free plan allows two collaborators.")
     );
 
     await expect(acceptWorkspaceInvite("token-1")).rejects.toThrow(
-      "Free plan allows two collaborators.",
+      "Free plan allows two collaborators."
     );
   });
 });

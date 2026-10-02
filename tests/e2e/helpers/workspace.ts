@@ -7,7 +7,9 @@ export async function createRootPage(page: Page, title: string) {
   const input = page.getByRole("tree").locator("form input").first();
   await input.fill(title);
   await input.press("Enter");
-  await expect(page.getByText("Page created.")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("Page created.")).toBeVisible({
+    timeout: 60_000,
+  });
   await expect(page.getByRole("link", { name: title })).toBeVisible({
     timeout: 30_000,
   });
@@ -15,7 +17,9 @@ export async function createRootPage(page: Page, title: string) {
 
 export async function openPageFromSidebar(page: Page, title: string) {
   await closeWorkspaceSettingsIfOpen(page);
-  const href = await page.getByRole("link", { name: title }).getAttribute("href");
+  const href = await page
+    .getByRole("link", { name: title })
+    .getAttribute("href");
   if (!href) throw new Error(`Sidebar link not found for page "${title}"`);
   await page.goto(href);
   await expect(page).toHaveURL(/\/dashboard\/[0-9a-f-]{36}\/[0-9a-f-]{36}/, {
@@ -34,13 +38,17 @@ export async function createSubpage(
   parentTitle: string,
   childTitle: string
 ) {
-  await page.getByRole("link", { name: parentTitle }).click({ button: "right" });
+  await page
+    .getByRole("link", { name: parentTitle })
+    .click({ button: "right" });
   await page.getByRole("menuitem", { name: "New subpage" }).click();
   const childInput = page.getByRole("tree").locator("input").last();
   await expect(childInput).toBeVisible({ timeout: 15_000 });
   await childInput.fill(childTitle);
   await childInput.press("Enter");
-  await expect(page.getByText("Page created.")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByText("Page created.")).toBeVisible({
+    timeout: 60_000,
+  });
   await expect(page.getByRole("link", { name: childTitle })).toBeVisible({
     timeout: 30_000,
   });

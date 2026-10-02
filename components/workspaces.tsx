@@ -37,7 +37,7 @@ function WorkspaceRow({
       href={`/dashboard/${workspace.id}`}
       className={cn(
         "flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/60",
-        isActive && "border-primary bg-muted/40",
+        isActive && "border-primary bg-muted/40"
       )}
     >
       <span className="text-2xl leading-none" aria-hidden>
@@ -126,7 +126,9 @@ export function Workspaces() {
 
   if (!groups) {
     return (
-      <p className="text-sm text-muted-foreground">Unable to load workspaces.</p>
+      <p className="text-sm text-muted-foreground">
+        Unable to load workspaces.
+      </p>
     );
   }
 

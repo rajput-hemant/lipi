@@ -1,16 +1,16 @@
 import { Server } from "@hocuspocus/server";
+
+import type { RealtimeContext, RealtimeRoomAccess } from "./context";
 import type {
   beforeSyncPayload,
   Connection,
   Extension,
 } from "@hocuspocus/server";
 
-import type { RealtimeContext, RealtimeRoomAccess } from "./context";
-
+import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 import { RealtimeAuthorizationError } from "./context";
 import { parseRealtimeRoomName } from "./rooms";
 import { verifyRealtimeToken } from "./token";
-import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 
 type RealtimeQuotaGuard = {
   beforeSync(payload: beforeSyncPayload<RealtimeContext>): Promise<void>;
@@ -20,10 +20,7 @@ type RealtimeQuotaGuard = {
 type RealtimeServerOptions = {
   address: string;
   allowedOrigins: ReadonlySet<string>;
-  authorizeRoom(
-    userId: string,
-    roomName: string
-  ): Promise<RealtimeRoomAccess>;
+  authorizeRoom(userId: string, roomName: string): Promise<RealtimeRoomAccess>;
   extensions: Extension[];
   port: number;
   debounce?: number;

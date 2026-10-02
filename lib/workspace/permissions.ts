@@ -27,7 +27,7 @@ const ROLE_PERMISSIONS: Record<
 };
 
 export function workspaceRoleFromCollaborator(
-  collaboratorRole: "editor" | "viewer",
+  collaboratorRole: "editor" | "viewer"
 ): WorkspaceMembershipRole {
   return collaboratorRole;
 }
@@ -35,7 +35,7 @@ export function workspaceRoleFromCollaborator(
 export function resolveWorkspaceMembershipRole(
   userId: string,
   workspace: { workspaceOwnerId: string },
-  collaboratorRole: "editor" | "viewer" | null,
+  collaboratorRole: "editor" | "viewer" | null
 ): WorkspaceMembershipRole | null {
   if (workspace.workspaceOwnerId === userId) {
     return "owner";
@@ -48,14 +48,14 @@ export function resolveWorkspaceMembershipRole(
 
 export function hasWorkspacePermission(
   role: WorkspaceMembershipRole,
-  permission: WorkspacePermission,
+  permission: WorkspacePermission
 ): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
 }
 
 export function assertWorkspacePermission(
   role: WorkspaceMembershipRole | null,
-  permission: WorkspacePermission,
+  permission: WorkspacePermission
 ): void {
   if (!role || !hasWorkspacePermission(role, permission)) {
     throw new Error("Forbidden");

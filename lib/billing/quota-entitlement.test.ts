@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { userHasProPlanEntitlement } from "./quota-entitlement";
+
 const mocks = vi.hoisted(() => ({
   getCurrentBillingSubscription: vi.fn(),
 }));
@@ -7,8 +9,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock("./subscription-access", () => ({
   getCurrentBillingSubscription: mocks.getCurrentBillingSubscription,
 }));
-
-import { userHasProPlanEntitlement } from "./quota-entitlement";
 
 describe("userHasProPlanEntitlement", () => {
   it("requires the configured pro price and trialing status", async () => {

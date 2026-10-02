@@ -13,6 +13,7 @@ import {
 } from "vitest";
 
 import { Features } from "@/app/(lobby)/components/features";
+import { Testimonials } from "@/app/(lobby)/components/testimonials";
 import LobbyError from "@/app/(lobby)/error";
 import LobbyLoading from "@/app/(lobby)/loading";
 import DocumentNotFound from "@/app/dashboard/(workspaces)/[workspaceId]/not-found";
@@ -28,7 +29,6 @@ import {
   PRICING_CARDS,
   PRICING_PLANS,
 } from "@/lib/constants";
-import { Testimonials } from "@/app/(lobby)/components/testimonials";
 
 const roots: ReturnType<typeof createRoot>[] = [];
 
@@ -48,7 +48,9 @@ describe("Launch Polish Constants & Messaging", () => {
     for (const item of LOBBY_CAPABILITIES) {
       expect(item.title).toBeTruthy();
       expect(item.description).toBeTruthy();
-      expect(item.description.toLowerCase()).not.toContain("end-to-end testing");
+      expect(item.description.toLowerCase()).not.toContain(
+        "end-to-end testing"
+      );
       expect(item.description.toLowerCase()).not.toContain("milliseconds");
       expect(item.description.toLowerCase()).not.toContain("zero perceptible");
     }

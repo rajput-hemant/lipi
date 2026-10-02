@@ -1,4 +1,4 @@
-import { test, expect } from "./fixtures";
+import { expect, test } from "./fixtures";
 import { createWorkspace, signUp, uniqueUser } from "./helpers/auth";
 
 test.describe("Stripe checkout redirect", () => {

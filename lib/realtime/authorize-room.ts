@@ -4,11 +4,11 @@ import type { RealtimeRoomAccess } from "./context";
 
 import { db } from "@/lib/db";
 import { collaborators, documents, workspaces } from "@/lib/db/schema";
-import { RealtimeAuthorizationError } from "./context";
 import {
   hasWorkspacePermission,
   resolveWorkspaceMembershipRole,
 } from "@/lib/workspace/permissions";
+import { RealtimeAuthorizationError } from "./context";
 import { parseRealtimeRoomName } from "./rooms";
 
 export { RealtimeAuthorizationError } from "./context";

@@ -72,7 +72,9 @@ describe("useDebouncedCallback", () => {
 
     const container = mountHarness(onSave);
     container.querySelector<HTMLButtonElement>("[data-testid='save']")?.click();
-    container.querySelector<HTMLButtonElement>("[data-testid='flush']")?.click();
+    container
+      .querySelector<HTMLButtonElement>("[data-testid='flush']")
+      ?.click();
 
     expect(onSave).toHaveBeenCalledWith(1);
     expect(onSave).toHaveBeenCalledTimes(1);

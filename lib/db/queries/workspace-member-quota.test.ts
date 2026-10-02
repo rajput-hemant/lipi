@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { PlanQuotaError } from "@/lib/billing/errors";
+import { MutationAuthError } from "./mutation-auth";
+import { ensureOwnerCollaboratorQuota } from "./workspace-member-quota";
 
 const assertUserCanAddCollaborator = vi.fn();
 
@@ -8,9 +10,6 @@ vi.mock("@/lib/billing/enforce-quotas", () => ({
   assertUserCanAddCollaborator: (...args: unknown[]) =>
     assertUserCanAddCollaborator(...args),
 }));
-
-import { MutationAuthError } from "./mutation-auth";
-import { ensureOwnerCollaboratorQuota } from "./workspace-member-quota";
 
 describe("ensureOwnerCollaboratorQuota", () => {
   it("delegates to billing enforcement for the workspace owner", async () => {
@@ -23,14 +22,14 @@ describe("ensureOwnerCollaboratorQuota", () => {
 
   it("maps collaborator plan quota errors to mutation auth errors", async () => {
     assertUserCanAddCollaborator.mockRejectedValue(
-      new PlanQuotaError("collaborator", "Free plan allows two collaborators."),
+      new PlanQuotaError("collaborator", "Free plan allows two collaborators.")
     );
 
     await expect(ensureOwnerCollaboratorQuota("owner-1")).rejects.toThrow(
-      MutationAuthError,
+      MutationAuthError
     );
     await expect(ensureOwnerCollaboratorQuota("owner-1")).rejects.toThrow(
-      "Free plan allows two collaborators.",
+      "Free plan allows two collaborators."
     );
   });
 });

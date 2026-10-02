@@ -1,9 +1,6 @@
-import {
-  test as base,
-  expect,
-  type ConsoleMessage,
-  type Page,
-} from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
+
+import type { ConsoleMessage, Page } from "@playwright/test";
 
 type ConsoleIssue = { type: string; text: string };
 

@@ -36,7 +36,9 @@ export function createAppStore(
     collaborators: [],
 
     addDocument(document) {
-      const index = store.documents.findIndex((entry) => entry.id === document.id);
+      const index = store.documents.findIndex(
+        (entry) => entry.id === document.id
+      );
       if (index === -1) {
         store.documents.push(document);
         return;

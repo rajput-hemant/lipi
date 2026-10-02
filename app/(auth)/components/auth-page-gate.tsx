@@ -1,4 +1,6 @@
-import { Suspense, type ReactNode } from "react";
+import { Suspense } from "react";
+
+import type { ReactNode } from "react";
 
 import { redirectIfAuthenticated } from "@/lib/auth/redirect-authenticated";
 

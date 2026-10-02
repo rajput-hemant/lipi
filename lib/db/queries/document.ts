@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cache as cache, updateTag, revalidatePath } from "next/cache";
+import { unstable_cache as cache, revalidatePath, updateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
@@ -18,12 +18,12 @@ import {
   validateParentAssignment,
 } from "@/lib/db/document-operations";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
+import { loadAuthoritativeDocumentContentBySourceIds } from "@/lib/realtime/authoritative-content";
 import {
   createDocumentSchema,
   duplicateDocumentSchema,
   updateDocumentSchema,
 } from "@/lib/validations/document";
-import { loadAuthoritativeDocumentContentBySourceIds } from "@/lib/realtime/authoritative-content";
 import { db } from "..";
 import { documents } from "../schema";
 import {

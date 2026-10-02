@@ -5,7 +5,7 @@ type WorkspaceInviteEmail = {
 };
 
 export async function sendWorkspaceInviteEmail(
-  payload: WorkspaceInviteEmail,
+  payload: WorkspaceInviteEmail
 ): Promise<void> {
   if (process.env.NODE_ENV === "development") {
     console.info("[workspace-invite]", payload);

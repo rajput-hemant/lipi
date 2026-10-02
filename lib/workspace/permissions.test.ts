@@ -10,20 +10,20 @@ const workspace = { workspaceOwnerId: "owner-id" };
 describe("resolveWorkspaceMembershipRole", () => {
   it("returns owner for the workspace owner", () => {
     expect(resolveWorkspaceMembershipRole("owner-id", workspace, null)).toBe(
-      "owner",
+      "owner"
     );
   });
 
   it("returns editor for editor collaborators", () => {
-    expect(
-      resolveWorkspaceMembershipRole("user-1", workspace, "editor"),
-    ).toBe("editor");
+    expect(resolveWorkspaceMembershipRole("user-1", workspace, "editor")).toBe(
+      "editor"
+    );
   });
 
   it("returns viewer for viewer collaborators", () => {
-    expect(
-      resolveWorkspaceMembershipRole("user-1", workspace, "viewer"),
-    ).toBe("viewer");
+    expect(resolveWorkspaceMembershipRole("user-1", workspace, "viewer")).toBe(
+      "viewer"
+    );
   });
 
   it("returns null for unrelated users", () => {

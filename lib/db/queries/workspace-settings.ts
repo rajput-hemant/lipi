@@ -6,7 +6,6 @@ import { z } from "zod";
 
 import { db } from "..";
 import { collaborators, workspaces } from "../schema";
-
 import {
   authorizeWorkspaceDelete,
   authorizeWorkspaceOwnerAction,
@@ -79,8 +78,8 @@ export async function transferWorkspaceOwnership(input: unknown) {
     .where(
       and(
         eq(collaborators.userId, parsed.newOwnerUserId),
-        eq(collaborators.workspaceId, parsed.workspaceId),
-      ),
+        eq(collaborators.workspaceId, parsed.workspaceId)
+      )
     )
     .limit(1);
 
@@ -101,7 +100,7 @@ export async function transferWorkspaceOwnership(input: unknown) {
     const previousOwnerMembership = await tx.query.collaborators.findFirst({
       where: and(
         eq(collaborators.userId, user.id),
-        eq(collaborators.workspaceId, parsed.workspaceId),
+        eq(collaborators.workspaceId, parsed.workspaceId)
       ),
     });
 

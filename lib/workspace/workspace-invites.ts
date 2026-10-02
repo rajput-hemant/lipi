@@ -1,7 +1,6 @@
-import {
-  hasWorkspacePermission,
-  type WorkspaceMembershipRole,
-} from "./permissions";
+import type { WorkspaceMembershipRole } from "./permissions";
+
+import { hasWorkspacePermission } from "./permissions";
 
 export type PublicPendingInvite = {
   id: string;
@@ -20,7 +19,7 @@ type PendingInviteRow = {
 
 export function publicPendingInvitesForRole(
   role: WorkspaceMembershipRole,
-  rows: PendingInviteRow[],
+  rows: PendingInviteRow[]
 ): PublicPendingInvite[] {
   if (!hasWorkspacePermission(role, "member:manage")) {
     return [];

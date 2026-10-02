@@ -4,7 +4,7 @@ import React from "react";
 
 export function useDebouncedCallback<TArgs extends unknown[]>(
   callback: (...args: TArgs) => void,
-  delayMs: number,
+  delayMs: number
 ) {
   const callbackRef = React.useRef(callback);
   const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,7 +49,7 @@ export function useDebouncedCallback<TArgs extends unknown[]>(
         callbackRef.current(...args);
       }, delayMs);
     },
-    [delayMs],
+    [delayMs]
   );
 
   return { debounced, flush };

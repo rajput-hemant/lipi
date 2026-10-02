@@ -1,6 +1,5 @@
 import { assertUserCanAddCollaborator } from "@/lib/billing/enforce-quotas";
 import { PlanQuotaError } from "@/lib/billing/errors";
-
 import { MutationAuthError } from "./mutation-auth";
 
 export async function ensureOwnerCollaboratorQuota(ownerId: string) {

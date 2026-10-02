@@ -19,10 +19,7 @@ export function SidebarMobile() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
-        className="lg:hidden"
-        aria-label="Open navigation menu"
-      >
+      <SheetTrigger className="lg:hidden" aria-label="Open navigation menu">
         <HugeiconsIcon
           icon={Menu01Icon}
           strokeWidth={2}

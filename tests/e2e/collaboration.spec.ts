@@ -1,18 +1,9 @@
-import {
-  test,
-  expect,
-  trackConsole,
-  assertNoConsoleIssues,
-} from "./fixtures";
-import {
-  createWorkspace,
-  signUp,
-  uniqueUser,
-} from "./helpers/auth";
+import { assertNoConsoleIssues, expect, test, trackConsole } from "./fixtures";
+import { createWorkspace, signUp, uniqueUser } from "./helpers/auth";
 import { getWorkspaceInviteToken } from "./helpers/db";
 import {
-  createRootPage,
   closeWorkspaceSettingsIfOpen,
+  createRootPage,
   expectEditorContains,
   inviteMember,
   openPageFromSidebar,

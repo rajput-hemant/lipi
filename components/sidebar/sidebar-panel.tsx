@@ -75,7 +75,7 @@ export function SidebarPanel({
             "flex",
             isCollapsed ?
               "my-px h-14 border-b"
-            : "my-1 ml-4 mr-2 items-center gap-2",
+            : "my-1 ml-4 mr-2 items-center gap-2"
           )}
         >
           <Logo size={44} className={cn("shrink-0", isCollapsed && "m-auto")} />
@@ -88,25 +88,26 @@ export function SidebarPanel({
       )}
 
       <nav className="flex flex-col items-center justify-center gap-1 px-4">
-        {sidebarNavItems.map(({ title, description, icon, content: Content }) =>
-          isCollapsed ?
-            <NavDialog
-              key={title}
-              title={title}
-              icon={icon}
-              description={description}
-              isCollapsed
-            >
-              <Content />
-            </NavDialog>
-          : <NavDialog
-              key={title}
-              title={title}
-              icon={icon}
-              description={description}
-            >
-              <Content />
-            </NavDialog>,
+        {sidebarNavItems.map(
+          ({ title, description, icon, content: Content }) =>
+            isCollapsed ?
+              <NavDialog
+                key={title}
+                title={title}
+                icon={icon}
+                description={description}
+                isCollapsed
+              >
+                <Content />
+              </NavDialog>
+            : <NavDialog
+                key={title}
+                title={title}
+                icon={icon}
+                description={description}
+              >
+                <Content />
+              </NavDialog>
         )}
       </nav>
 
@@ -124,9 +125,9 @@ export function SidebarPanel({
       <div
         className={cn(
           "z-10 transition-all animate-in fade-in-0 zoom-in-0 slide-in-from-bottom-full [animation-duration:500ms]",
-          isCollapsed ?
-            "mt-auto pb-1"
-          : "mx-2 mb-2 flex items-center gap-2 rounded-full border bg-background/10 p-2 shadow backdrop-blur-md hover:shadow-xl",
+          isCollapsed ? "mt-auto pb-1" : (
+            "mx-2 mb-2 flex items-center gap-2 rounded-full border bg-background/10 p-2 shadow backdrop-blur-md hover:shadow-xl"
+          )
         )}
       >
         {isCollapsed ?

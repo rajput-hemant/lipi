@@ -6,8 +6,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import { StripeCheckoutButton } from "@/components/billing/stripe-checkout-button";
 import { Diamond } from "@/components/icons";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PRICING_CARDS, PRICING_PLANS } from "@/lib/constants";
 import { cn, formatCurrency } from "@/lib/utils";
 

@@ -1,19 +1,16 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-
 import { revalidateTag } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { resolveAuthBaseURL } from "@/lib/auth/resolve-auth-base-url";
+import { hasWorkspacePermission } from "@/lib/workspace/permissions";
+import { sendWorkspaceInviteEmail } from "@/lib/workspace/send-invite";
+import { publicPendingInvitesForRole } from "@/lib/workspace/workspace-invites";
 import { db } from "..";
 import { collaborators, users, workspaceInvites, workspaces } from "../schema";
-import { sendWorkspaceInviteEmail } from "@/lib/workspace/send-invite";
-import { resolveAuthBaseURL } from "@/lib/auth/resolve-auth-base-url";
-
-import { hasWorkspacePermission } from "@/lib/workspace/permissions";
-import { publicPendingInvitesForRole } from "@/lib/workspace/workspace-invites";
-
 import {
   authorizeWorkspaceMemberManagement,
   getWorkspaceMembershipRole,
@@ -84,7 +81,7 @@ export async function listWorkspaceMembers(workspaceId: string) {
 
   const { role: currentRole } = await getWorkspaceMembershipRole(
     user.id,
-    workspaceId,
+    workspaceId
   );
 
   const inviteRows =
@@ -141,8 +138,8 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
     .where(
       and(
         eq(collaborators.workspaceId, parsed.workspaceId),
-        eq(users.email, email),
-      ),
+        eq(users.email, email)
+      )
     )
     .limit(1);
 
@@ -153,7 +150,9 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
   await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId);
 
   const token = randomUUID();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(
+    Date.now() + 7 * 24 * 60 * 60 * 1000
+  ).toISOString();
 
   await db
     .insert(workspaceInvites)
@@ -199,8 +198,8 @@ export async function updateCollaboratorRole(input: unknown) {
     .where(
       and(
         eq(collaborators.id, parsed.collaboratorId),
-        eq(collaborators.workspaceId, parsed.workspaceId),
-      ),
+        eq(collaborators.workspaceId, parsed.workspaceId)
+      )
     )
     .returning();
 
@@ -221,8 +220,8 @@ export async function removeWorkspaceMember(input: unknown) {
     .where(
       and(
         eq(collaborators.id, parsed.collaboratorId),
-        eq(collaborators.workspaceId, parsed.workspaceId),
-      ),
+        eq(collaborators.workspaceId, parsed.workspaceId)
+      )
     )
     .returning();
 
@@ -255,7 +254,7 @@ export async function acceptWorkspaceInvite(token: string) {
 
   if (!account?.email || normalizeEmail(account.email) !== invite.email) {
     throw new MutationAuthError(
-      "Sign in with the email address that received this invite",
+      "Sign in with the email address that received this invite"
     );
   }
 
@@ -270,7 +269,7 @@ export async function acceptWorkspaceInvite(token: string) {
   const existing = await db.query.collaborators.findFirst({
     where: and(
       eq(collaborators.workspaceId, invite.workspaceId),
-      eq(collaborators.userId, user.id),
+      eq(collaborators.userId, user.id)
     ),
   });
 
@@ -284,9 +283,7 @@ export async function acceptWorkspaceInvite(token: string) {
     });
   }
 
-  await db
-    .delete(workspaceInvites)
-    .where(eq(workspaceInvites.id, invite.id));
+  await db.delete(workspaceInvites).where(eq(workspaceInvites.id, invite.id));
 
   revalidateWorkspaceLists();
 

@@ -1,14 +1,12 @@
 import { blocksToYDoc, yDocToBlocks } from "@blocknote/core/yjs";
-import type { PartialBlock } from "@blocknote/core";
-import * as Y from "yjs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as Y from "yjs";
+
+import type { PartialBlock } from "@blocknote/core";
+import type { RealtimeBlockEditorSchema } from "@/lib/block-editor/realtime-schema";
 
 import { serializeDocumentContent } from "@/lib/block-editor/document-content";
-import {
-  realtimeBlockNoteEditor,
-  type RealtimeBlockEditorSchema,
-} from "@/lib/block-editor/realtime-schema";
-
+import { realtimeBlockNoteEditor } from "@/lib/block-editor/realtime-schema";
 import {
   loadAuthoritativeDocumentContentBySourceIds,
   serializedContentFromYjsState,
@@ -79,9 +77,9 @@ describe("loadAuthoritativeDocumentContentBySourceIds", () => {
   it("prefers Yjs state over stale documents.content fallback", async () => {
     const queryBuilder = {
       from: vi.fn().mockReturnThis(),
-      where: vi.fn().mockResolvedValue([
-        { documentId: docId, state: liveState },
-      ]),
+      where: vi
+        .fn()
+        .mockResolvedValue([{ documentId: docId, state: liveState }]),
     };
     mockSelect.mockReturnValue(queryBuilder);
 

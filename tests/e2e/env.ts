@@ -7,8 +7,7 @@ export const E2E_DATABASE_URL = `postgresql://postgres:test@127.0.0.1:${E2E_PG_P
 
 export const E2E_APP_ORIGIN = `http://127.0.0.1:${E2E_APP_PORT}`;
 
-export const E2E_AUTH_SECRET =
-  "e2e-local-auth-secret-min-32-characters-long";
+export const E2E_AUTH_SECRET = "e2e-local-auth-secret-min-32-characters-long";
 
 export function e2eProcessEnv(): Record<string, string> {
   return {

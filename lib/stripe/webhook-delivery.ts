@@ -5,16 +5,13 @@ import {
   markStripeWebhookEventProcessed,
   releaseStripeWebhookEventClaim,
 } from "@/lib/db/queries/billing";
-
 import { handleStripeWebhookEvent } from "./webhook-handlers";
 
 export type StripeWebhookDeliveryResult =
-  | { kind: "duplicate" }
-  | { kind: "in_progress" }
-  | { kind: "processed" };
+  { kind: "duplicate" } | { kind: "in_progress" } | { kind: "processed" };
 
 export async function deliverStripeWebhookEvent(
-  event: Stripe.Event,
+  event: Stripe.Event
 ): Promise<StripeWebhookDeliveryResult> {
   const claim = await claimStripeWebhookEvent(event.id, event.type);
 

@@ -22,7 +22,10 @@ function hostsMatch(leftHost: string, rightHost: string) {
   const left = leftHost.split(":");
   const right = rightHost.split(":");
   if (left[1] !== right[1]) return false;
-  return normalizeLoopbackHost(left[0] ?? "") === normalizeLoopbackHost(right[0] ?? "");
+  return (
+    normalizeLoopbackHost(left[0] ?? "") ===
+    normalizeLoopbackHost(right[0] ?? "")
+  );
 }
 
 function isSameOrigin(request: Request) {

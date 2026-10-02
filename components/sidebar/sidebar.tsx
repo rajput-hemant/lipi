@@ -18,7 +18,7 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
       <div
         className={cn(
           "sticky inset-y-0 flex h-screen flex-col gap-2",
-          !isCollapsed && "overflow-hidden",
+          !isCollapsed && "overflow-hidden"
         )}
       >
         <SidebarPanel isCollapsed={isCollapsed} />

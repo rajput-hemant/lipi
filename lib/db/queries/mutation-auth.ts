@@ -1,13 +1,15 @@
 import { and, eq } from "drizzle-orm";
 
+import type {
+  WorkspaceMembershipRole,
+  WorkspacePermission,
+} from "@/lib/workspace/permissions";
+
 import { getCurrentUser } from "@/lib/auth";
 import {
   hasWorkspacePermission,
   resolveWorkspaceMembershipRole,
-  type WorkspaceMembershipRole,
-  type WorkspacePermission,
 } from "@/lib/workspace/permissions";
-
 import { db } from "..";
 import { collaborators, documents, workspaces } from "../schema";
 
@@ -21,7 +23,7 @@ export class MutationAuthError extends Error {
 export function isWorkspaceMember(
   userId: string,
   workspace: { workspaceOwnerId: string },
-  collaboratorUserIds: string[],
+  collaboratorUserIds: string[]
 ) {
   return (
     workspace.workspaceOwnerId === userId ||
@@ -31,7 +33,7 @@ export function isWorkspaceMember(
 
 export async function getWorkspaceMembershipRole(
   userId: string,
-  workspaceId: string,
+  workspaceId: string
 ): Promise<{
   workspace: typeof workspaces.$inferSelect;
   role: WorkspaceMembershipRole;
@@ -51,14 +53,14 @@ export async function getWorkspaceMembershipRole(
   const collaborator = await db.query.collaborators.findFirst({
     where: and(
       eq(collaborators.workspaceId, workspaceId),
-      eq(collaborators.userId, userId),
+      eq(collaborators.userId, userId)
     ),
   });
 
   const role = resolveWorkspaceMembershipRole(
     userId,
     workspace,
-    collaborator?.role ?? null,
+    collaborator?.role ?? null
   );
 
   if (!role) {
@@ -71,11 +73,11 @@ export async function getWorkspaceMembershipRole(
 export async function requireWorkspacePermission(
   userId: string,
   workspaceId: string,
-  permission: WorkspacePermission,
+  permission: WorkspacePermission
 ) {
   const { workspace, role } = await getWorkspaceMembershipRole(
     userId,
-    workspaceId,
+    workspaceId
   );
 
   if (!hasWorkspacePermission(role, permission)) {
@@ -93,7 +95,7 @@ export async function requireAuthenticatedUser() {
 
 export async function assertWorkspaceAccess(
   userId: string,
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   if (!workspaceId) {
     throw new MutationAuthError("Invalid workspace");
@@ -102,7 +104,7 @@ export async function assertWorkspaceAccess(
   const { workspace } = await requireWorkspacePermission(
     userId,
     workspaceId,
-    "workspace:read",
+    "workspace:read"
   );
 
   return workspace;
@@ -134,14 +136,14 @@ export async function authorizeDocumentMutation(documentId: string) {
   await requireWorkspacePermission(
     user.id,
     document.workspaceId,
-    "document:write",
+    "document:write"
   );
 
   return { user, document };
 }
 
 export async function authorizeWorkspaceMutation(
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   const user = await requireAuthenticatedUser();
   if (!workspaceId) {
@@ -152,7 +154,7 @@ export async function authorizeWorkspaceMutation(
 }
 
 export async function authorizeWorkspaceOwnerAction(
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   const user = await requireAuthenticatedUser();
   if (!workspaceId) {
@@ -163,7 +165,7 @@ export async function authorizeWorkspaceOwnerAction(
 }
 
 export async function authorizeWorkspaceMemberManagement(
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   const user = await requireAuthenticatedUser();
   if (!workspaceId) {
@@ -174,7 +176,7 @@ export async function authorizeWorkspaceMemberManagement(
 }
 
 export async function authorizeWorkspaceTransfer(
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   const user = await requireAuthenticatedUser();
   if (!workspaceId) {
@@ -185,7 +187,7 @@ export async function authorizeWorkspaceTransfer(
 }
 
 export async function authorizeWorkspaceDelete(
-  workspaceId: string | null | undefined,
+  workspaceId: string | null | undefined
 ) {
   const user = await requireAuthenticatedUser();
   if (!workspaceId) {

@@ -3,7 +3,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function extractPlainTextFromDocumentContent(
-  content: string | null | undefined,
+  content: string | null | undefined
 ): string {
   if (!content || !content.trim()) {
     return "";

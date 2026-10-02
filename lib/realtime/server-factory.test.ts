@@ -6,9 +6,9 @@ import * as Y from "yjs";
 import type { RealtimeRoomAccess } from "./context";
 
 import { RealtimeAuthorizationError } from "./context";
+import { parseRealtimeRoomName } from "./rooms";
 import { createRealtimeServer } from "./server-factory";
 import { createRealtimeToken } from "./token";
-import { parseRealtimeRoomName } from "./rooms";
 
 const workspaceId = "11111111-1111-4111-8111-111111111111";
 const documentId = "22222222-2222-4222-8222-222222222222";
@@ -44,10 +44,7 @@ function waitUntil(predicate: () => boolean, label: string) {
 }
 
 function tokenFor(userId: string, name: string, roomName = documentRoom) {
-  return createRealtimeToken(
-    { userId, roomName, name, image: null },
-    secret
-  );
+  return createRealtimeToken({ userId, roomName, name, image: null }, secret);
 }
 
 function createPeer(
@@ -110,8 +107,7 @@ function createTestServer(states: Map<string, Uint8Array>) {
   return createRealtimeServer({
     address: "127.0.0.1",
     allowedOrigins,
-    originIsAllowed: (origin) =>
-      origin === null || allowedOrigins.has(origin),
+    originIsAllowed: (origin) => origin === null || allowedOrigins.has(origin),
     authorizeRoom,
     extensions: [persistence],
     port: 0,

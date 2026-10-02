@@ -3,14 +3,13 @@ import { Database } from "@hocuspocus/extension-database";
 import { and, eq } from "drizzle-orm";
 import * as Y from "yjs";
 
+import type { RealtimeBlockEditorSchema } from "@/lib/block-editor/realtime-schema";
+
 import {
   getStoredDocumentContentState,
   serializeDocumentContent,
 } from "@/lib/block-editor/document-content";
-import {
-  realtimeBlockNoteEditor,
-  type RealtimeBlockEditorSchema,
-} from "@/lib/block-editor/realtime-schema";
+import { realtimeBlockNoteEditor } from "@/lib/block-editor/realtime-schema";
 import { db } from "@/lib/db";
 import { documents, realtimeDocuments } from "@/lib/db/schema";
 import { DOCUMENT_CONTENT_MAX_LENGTH } from "@/lib/validations/document";

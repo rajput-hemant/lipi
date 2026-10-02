@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  hasWorkspacePermission,
-  type WorkspaceMembershipRole,
-  type WorkspacePermission,
+import type {
+  WorkspaceMembershipRole,
+  WorkspacePermission,
 } from "./permissions";
+
+import { hasWorkspacePermission } from "./permissions";
 
 const ROLES: WorkspaceMembershipRole[] = ["owner", "editor", "viewer"];
 
@@ -29,7 +30,7 @@ describe("workspace authorization matrix", () => {
     for (const permission of PERMISSIONS) {
       it(`${role} ${EXPECTED[role].includes(permission) ? "allows" : "denies"} ${permission}`, () => {
         expect(hasWorkspacePermission(role, permission)).toBe(
-          EXPECTED[role].includes(permission),
+          EXPECTED[role].includes(permission)
         );
       });
     }

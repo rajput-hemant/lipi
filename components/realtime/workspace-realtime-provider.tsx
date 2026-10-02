@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 
 import { fetchRealtimeToken, getRealtimeUrl } from "@/lib/realtime/client";
-import { getSharedHocuspocusWebsocket } from "@/lib/realtime/shared-websocket";
 import { workspaceRoomName } from "@/lib/realtime/rooms";
+import { getSharedHocuspocusWebsocket } from "@/lib/realtime/shared-websocket";
 
 const WorkspacePageChangesContext = React.createContext<() => void>(() => {});
 

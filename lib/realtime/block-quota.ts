@@ -2,8 +2,8 @@ import { yDocToBlocks } from "@blocknote/core/yjs";
 import { messageYjsSyncStep2, messageYjsUpdate } from "y-protocols/sync";
 import * as Y from "yjs";
 
-import type { beforeSyncPayload, Connection } from "@hocuspocus/server";
 import type { RealtimeContext } from "./context";
+import type { beforeSyncPayload, Connection } from "@hocuspocus/server";
 
 import { assertUserCanCreateBlock } from "@/lib/billing/block-quota";
 import { serializeDocumentContent } from "@/lib/block-editor/document-content";

@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     if (result.kind === "in_progress") {
       return NextResponse.json(
         { error: "Webhook event is still processing" },
-        { status: 500 },
+        { status: 500 }
       );
     }
     return NextResponse.json({ received: true });

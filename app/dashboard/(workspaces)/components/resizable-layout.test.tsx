@@ -12,11 +12,11 @@ import {
   vi,
 } from "vitest";
 
-import { ResizableLayout } from "./resizable-layout";
 import {
   RESIZABLE_COLLAPSED_COOKIE,
   RESIZABLE_LAYOUT_COOKIE,
 } from "@/lib/dashboard/resizable-layout-cookies";
+import { ResizableLayout } from "./resizable-layout";
 
 const setCookie = vi.fn();
 

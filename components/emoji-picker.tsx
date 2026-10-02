@@ -6,7 +6,6 @@ import { useTheme } from "next-themes";
 import type { EmojiClickData, Theme } from "emoji-picker-react";
 
 import { cn } from "@/lib/utils";
-
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 const Picker = dynamic(() => import("emoji-picker-react"));

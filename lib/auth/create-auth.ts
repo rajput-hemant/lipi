@@ -14,13 +14,13 @@ import {
   users,
 } from "@/lib/db/schema";
 import { env } from "@/lib/env";
+import { resolveAuthRateLimitEnabled } from "./auth-rate-limit";
 import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   USERNAME_REGEX,
 } from "./constants";
 import { credentialAccountWhere } from "./credential-account";
-import { resolveAuthRateLimitEnabled } from "./auth-rate-limit";
 import { resolveAuthBaseURL } from "./resolve-auth-base-url";
 
 export function createAuth(

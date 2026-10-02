@@ -1,5 +1,6 @@
-import type { PartialBlock } from "@blocknote/core";
 import { describe, expect, it } from "vitest";
+
+import type { PartialBlock } from "@blocknote/core";
 
 import {
   getStoredDocumentContentState,
@@ -20,13 +21,17 @@ describe("getStoredDocumentContentState", () => {
   });
 
   it("marks non-array JSON as corrupt", () => {
-    expect(getStoredDocumentContentState(JSON.stringify({ type: "paragraph" }))).toEqual({
+    expect(
+      getStoredDocumentContentState(JSON.stringify({ type: "paragraph" }))
+    ).toEqual({
       status: "corrupt",
     });
   });
 
   it("marks block arrays with invalid entries as corrupt", () => {
-    expect(getStoredDocumentContentState(JSON.stringify([{ content: "hi" }]))).toEqual({
+    expect(
+      getStoredDocumentContentState(JSON.stringify([{ content: "hi" }]))
+    ).toEqual({
       status: "corrupt",
     });
   });
@@ -40,9 +45,7 @@ describe("parseStoredDocumentContent", () => {
   });
 
   it("returns blocks for a valid JSON array", () => {
-    const blocks: PartialBlock[] = [
-      { type: "paragraph", content: "Hello" },
-    ];
+    const blocks: PartialBlock[] = [{ type: "paragraph", content: "Hello" }];
     expect(parseStoredDocumentContent(JSON.stringify(blocks))).toEqual(blocks);
   });
 
@@ -51,7 +54,9 @@ describe("parseStoredDocumentContent", () => {
   });
 
   it("returns undefined when JSON is not an array", () => {
-    expect(parseStoredDocumentContent(JSON.stringify({ type: "paragraph" }))).toBeUndefined();
+    expect(
+      parseStoredDocumentContent(JSON.stringify({ type: "paragraph" }))
+    ).toBeUndefined();
   });
 });
 
