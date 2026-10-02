@@ -97,20 +97,23 @@ export function Trash() {
       <p className="px-4 text-sm font-medium text-muted-foreground">Trash</p>
 
       {trashed.length ?
-        <ScrollArea className="h-64 px-4">
+        <ScrollArea className="h-[min(24rem,50vh)] px-4">
           <ul className="space-y-1">
             {trashed.map((document) => (
               <li
                 key={document.id}
                 className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5"
               >
-                <span className="flex min-w-0 items-center gap-2 truncate text-sm">
+                <span
+                  className="flex min-w-0 items-center gap-2 truncate text-sm"
+                  title={document.title}
+                >
                   {document.icon ?
                     document.icon
                   : <HugeiconsIcon
                       icon={File01Icon}
                       strokeWidth={2}
-                      className="size-4"
+                      className="size-4 shrink-0"
                     />
                   }
                   {document.title}
@@ -124,7 +127,7 @@ export function Trash() {
                           size="icon"
                           variant="ghost"
                           className="size-7"
-                          aria-label="Restore document"
+                          aria-label={`Restore ${document.title}`}
                           onClick={() => restore(document.id)}
                         >
                           <HugeiconsIcon
@@ -145,7 +148,7 @@ export function Trash() {
                           size="icon"
                           variant="ghost"
                           className="size-7 text-destructive"
-                          aria-label="Delete document permanently"
+                          aria-label={`Delete ${document.title} permanently`}
                           onClick={() => setPendingDeleteId(document.id)}
                         >
                           <HugeiconsIcon
@@ -164,9 +167,21 @@ export function Trash() {
           </ul>
           <ScrollBar />
         </ScrollArea>
-      : <div className="flex flex-col items-center justify-center gap-2 px-4 py-8 text-muted-foreground">
-          <HugeiconsIcon icon={GhostIcon} strokeWidth={2} size={28} />
-          <p className="text-center text-sm">Trash is empty.</p>
+      : <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 py-8 text-center">
+          <span className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+            <HugeiconsIcon
+              icon={GhostIcon}
+              strokeWidth={2}
+              size={24}
+              aria-hidden="true"
+            />
+          </span>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Nothing in the trash</p>
+            <p className="text-sm text-muted-foreground">
+              Pages you delete will appear here.
+            </p>
+          </div>
         </div>
       }
 
