@@ -5,7 +5,6 @@ import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
 import type { DocumentRecord } from "@/lib/db/documents-tree";
-import type { MutationResult } from "@/lib/db/mutation-result";
 import type { Document } from "@/types/db";
 
 import { workspaceOwnerHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
@@ -34,6 +33,7 @@ import {
   MutationAuthError,
   requireAuthenticatedUser,
 } from "./mutation-auth";
+import { mutationFailure } from "./mutation-failure";
 
 function documentsCacheTag(workspaceId: string) {
   return `documents_${workspaceId}`;
@@ -71,7 +71,7 @@ function rethrowKnownErrors(error: unknown) {
 
 function forbiddenResult(error: unknown) {
   if (error instanceof MutationAuthError && error.code === "FORBIDDEN") {
-    return { ok: false, code: "FORBIDDEN" } satisfies MutationResult<never>;
+    return mutationFailure(error);
   }
 }
 
@@ -267,9 +267,10 @@ export async function restoreDocument(documentId: string) {
       .set({ inTrash: false, updatedAt: new Date().toISOString() })
       .where(inArray(documents.id, ids));
 
-    return ids.length;
+    return { ok: true, data: ids.length } as const;
   } catch (e) {
-    rethrowKnownErrors(e);
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     console.error((e as Error).message);
     throw new Error("Failed to restore document");
   } finally {
@@ -293,9 +294,10 @@ export async function deleteDocumentPermanently(documentId: string) {
       await db.delete(documents).where(eq(documents.id, id));
     }
 
-    return ids.length;
+    return { ok: true, data: ids.length } as const;
   } catch (e) {
-    rethrowKnownErrors(e);
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     console.error((e as Error).message);
     throw new Error("Failed to delete document");
   } finally {

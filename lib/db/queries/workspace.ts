@@ -5,10 +5,10 @@ import { revalidateTag } from "next/cache";
 import type { Workspace } from "@/types/db";
 
 import { assertUserCanCreateWorkspace } from "@/lib/billing/enforce-quotas";
-import { PlanQuotaError } from "@/lib/billing/errors";
 import { db } from "..";
 import { workspaces } from "../schema";
 import { MutationAuthError, requireAuthenticatedUser } from "./mutation-auth";
+import { mutationFailure } from "./mutation-failure";
 import { listWorkspacesForSwitcher } from "./workspace-lists";
 
 export async function listWorkspacesForCurrentUser() {
@@ -33,11 +33,10 @@ export async function createWorkspace(workspace: Workspace) {
 
     const [data] = await db.insert(workspaces).values(workspace).returning();
 
-    return data;
+    return { ok: true, data } as const;
   } catch (e) {
-    if (e instanceof PlanQuotaError) {
-      throw e;
-    }
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     console.error((e as Error).message);
     throw new Error("Failed to create Workspace.");
   } finally {

@@ -22,6 +22,11 @@ import {
   patchDocumentsForRestore,
   permanentDeleteTargetIds,
 } from "@/lib/db/client-document-state";
+import {
+  isMutationDenied,
+  mutationErrorMessage,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import { deleteDocumentPermanently, restoreDocument } from "@/lib/db/queries";
 import {
   AlertDialog,
@@ -60,12 +65,14 @@ export function Trash() {
 
     replaceDocuments(next);
 
-    toast.promise(restoreDocument(documentId), {
+    toast.promise(unwrapMutation(restoreDocument(documentId)), {
       loading: "Restoring page...",
       success: "Page restored",
-      error: () => {
+      error: (error) => {
         replaceDocuments(previous);
-        return "Failed to restore page";
+        return isMutationDenied(error) ?
+            "You do not have permission to restore pages."
+          : mutationErrorMessage(error, "Failed to restore page");
       },
     });
   }
@@ -83,12 +90,17 @@ export function Trash() {
         previous.filter((document) => !deleteIds.has(document.id))
       );
 
-      toast.promise(deleteDocumentPermanently(documentId), {
+      toast.promise(unwrapMutation(deleteDocumentPermanently(documentId)), {
         loading: "Deleting page...",
         success: "Page deleted permanently.",
-        error: () => {
+        error: (error) => {
           replaceDocuments(previous);
-          return "Something went wrong! Unable to delete page.";
+          return isMutationDenied(error) ?
+              "You do not have permission to delete pages."
+            : mutationErrorMessage(
+                error,
+                "Something went wrong! Unable to delete page."
+              );
         },
       });
     } catch {
