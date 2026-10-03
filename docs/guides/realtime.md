@@ -10,7 +10,7 @@ list of exact browser origins. `LIPI_REALTIME_PORT` defaults to `1234` and
 
 This implementation pins Hocuspocus server, provider, and database extension
 to `4.7.0`, with Yjs `13.6.33`, `y-protocols` `1.0.7`, and `y-prosemirror`
-`1.3.7`. The [research note](./research/realtime-collaboration.md) links the
+`1.3.7`. The [research note](../research/realtime-collaboration.md) links the
 official Hocuspocus, BlockNote, and Better Auth guidance used for this setup.
 
 For a separate realtime host, terminate TLS at a WebSocket-capable reverse
