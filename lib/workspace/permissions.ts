@@ -26,12 +26,6 @@ const ROLE_PERMISSIONS: Record<
   viewer: ["workspace:read", "document:read"],
 };
 
-export function workspaceRoleFromCollaborator(
-  collaboratorRole: "editor" | "viewer"
-): WorkspaceMembershipRole {
-  return collaboratorRole;
-}
-
 export function resolveWorkspaceMembershipRole(
   userId: string,
   workspace: { workspaceOwnerId: string },
@@ -43,7 +37,7 @@ export function resolveWorkspaceMembershipRole(
   if (!collaboratorRole) {
     return null;
   }
-  return workspaceRoleFromCollaborator(collaboratorRole);
+  return collaboratorRole;
 }
 
 export function hasWorkspacePermission(
