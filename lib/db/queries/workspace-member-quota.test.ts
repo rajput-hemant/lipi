@@ -12,12 +12,27 @@ vi.mock("@/lib/billing/enforce-quotas", () => ({
 }));
 
 describe("ensureOwnerCollaboratorQuota", () => {
+  it("forwards the invite so pending invites are counted", async () => {
+    assertUserCanAddCollaborator.mockResolvedValue(undefined);
+    const invite = { workspaceId: "w1", email: "a@b.c" };
+
+    await ensureOwnerCollaboratorQuota("owner-1", invite);
+
+    expect(assertUserCanAddCollaborator).toHaveBeenCalledWith(
+      "owner-1",
+      invite
+    );
+  });
+
   it("delegates to billing enforcement for the workspace owner", async () => {
     assertUserCanAddCollaborator.mockResolvedValue(undefined);
 
     await ensureOwnerCollaboratorQuota("owner-1");
 
-    expect(assertUserCanAddCollaborator).toHaveBeenCalledWith("owner-1");
+    expect(assertUserCanAddCollaborator).toHaveBeenCalledWith(
+      "owner-1",
+      undefined
+    );
   });
 
   it("maps collaborator plan quota errors to mutation auth errors", async () => {

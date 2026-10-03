@@ -11,6 +11,7 @@ import {
 } from "./config/routes";
 import { hasValidProxySession } from "./lib/auth/proxy-session";
 import { env } from "./lib/env";
+import { getClientIp } from "./lib/proxy/client-ip";
 import { getProxyRateLimitMode } from "./lib/proxy/rate-limiting";
 
 function createRatelimit() {
@@ -34,7 +35,7 @@ export async function proxy(req: NextRequest) {
 
   if (rateLimitMode === "active") {
     const ratelimit = createRatelimit();
-    const id = getIP(req) || "anonymous";
+    const id = getClientIp(req) || "anonymous";
     const { limit, pending, remaining, reset, success } =
       await ratelimit.limit(id);
 
@@ -95,13 +96,3 @@ export async function proxy(req: NextRequest) {
 export const config = {
   matcher: ["/((?!.+\\.[\\w]+$|_next|api/auth).*)"],
 };
-
-function getIP(req: NextRequest): string {
-  // @ts-expect-error ip is not available in NextRequest
-  let ip = req.ip ?? req.headers.get("x-real-ip");
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  if (!ip && forwardedFor) {
-    ip = forwardedFor.split(",").at(0) ?? "";
-  }
-  return ip;
-}

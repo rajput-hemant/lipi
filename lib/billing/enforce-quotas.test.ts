@@ -24,7 +24,11 @@ vi.mock("@/lib/db", () => {
   return { db: chain };
 });
 
-vi.mock("@/lib/db/schema", () => ({ collaborators: {}, workspaces: {} }));
+vi.mock("@/lib/db/schema", () => ({
+  collaborators: {},
+  workspaceInvites: {},
+  workspaces: {},
+}));
 
 const proSubscription = { status: "active", priceId: "price_pro" };
 
@@ -72,6 +76,31 @@ describe("plan quota enforcement", () => {
     );
     expect(error).toBeInstanceOf(PlanQuotaError);
     expect((error as PlanQuotaError).code).toBe("collaborator");
+  });
+
+  it("counts other pending invites toward the free collaborator limit", async () => {
+    mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+    mocks.rows = [[{ value: 1 }], [{ value: 1 }]];
+
+    await expect(
+      assertUserCanAddCollaborator("u1", { workspaceId: "w1", email: "a@b.c" })
+    ).rejects.toBeInstanceOf(PlanQuotaError);
+  });
+
+  it("allows an invite when members plus pending invites stay under the limit", async () => {
+    mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+    mocks.rows = [[{ value: 1 }], [{ value: 0 }]];
+
+    await expect(
+      assertUserCanAddCollaborator("u1", { workspaceId: "w1", email: "a@b.c" })
+    ).resolves.toBeUndefined();
+  });
+
+  it("ignores pending invites when no invite is being issued", async () => {
+    mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+    mocks.rows = [[{ value: 1 }], [{ value: 5 }]];
+
+    await expect(assertUserCanAddCollaborator("u1")).resolves.toBeUndefined();
   });
 
   it("treats a pro subscription as free when the pro price is unconfigured", async () => {

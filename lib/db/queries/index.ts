@@ -31,11 +31,9 @@ export {
   duplicateDocument,
   getDocumentBreadcrumbs,
   getDocuments,
-  getDocumentsFromDb,
   restoreDocument,
   softDeleteDocumentTree,
   updateDocument,
-  updateDocumentInDb,
 } from "./document";
 export {
   searchDocumentsInWorkspace,

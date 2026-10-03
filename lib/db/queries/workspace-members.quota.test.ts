@@ -109,7 +109,10 @@ describe("workspace member invite quota enforcement", () => {
       })
     ).resolves.toMatchObject({ ok: true });
 
-    expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1");
+    expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1", {
+      workspaceId,
+      email: "new@example.com",
+    });
   });
 
   it("checks owner quota before accepting an invite", async () => {

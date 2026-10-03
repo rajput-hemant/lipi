@@ -159,8 +159,6 @@ export async function getDocuments(workspaceId: string) {
   )();
 }
 
-export const getDocumentsFromDb = getDocuments;
-
 export async function updateDocument(input: unknown) {
   const parsed = updateDocumentSchema.parse(input);
   let workspaceIdForRevalidate: string | undefined;
@@ -210,8 +208,6 @@ export async function updateDocument(input: unknown) {
     }
   }
 }
-
-export const updateDocumentInDb = updateDocument;
 
 export async function softDeleteDocumentTree(documentId: string) {
   let workspaceIdForRevalidate: string | undefined;

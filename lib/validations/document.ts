@@ -21,7 +21,6 @@ export const updateDocumentSchema = z.object({
   title: documentTitleSchema.optional(),
   icon: z.string().max(32).optional(),
   bannerUrl: z.string().nullable().optional(),
-  inTrash: z.boolean().optional(),
   parentId: z.uuid().nullable().optional(),
 });
 

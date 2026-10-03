@@ -26,7 +26,7 @@ import {
   documentCoverPresets,
 } from "@/lib/block-editor/cover-presets";
 import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
-import { updateDocumentInDb } from "@/lib/db/queries";
+import { updateDocument } from "@/lib/db/queries";
 import { uploadFiles } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
       bannerUrl?: string | null;
     }) => {
       try {
-        const updated = await updateDocumentInDb({
+        const updated = await updateDocument({
           id: document.id,
           ...patch,
         });

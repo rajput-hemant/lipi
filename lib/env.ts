@@ -2,6 +2,7 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 import { ensureHttpsUrl } from "./auth/ensure-https-url";
+import { isEnvValidationSkipped } from "./env-flags";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -10,7 +11,7 @@ function requiredInProduction(message: string) {
 }
 
 export const env = createEnv({
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation: isEnvValidationSkipped(),
 
   server: {
     NODE_ENV: z
@@ -52,7 +53,7 @@ export const env = createEnv({
       .superRefine((value, ctx) => {
         if (
           process.env.NODE_ENV === "production" &&
-          process.env.SKIP_ENV_VALIDATION !== "true" &&
+          !isEnvValidationSkipped() &&
           !value
         ) {
           ctx.addIssue({
