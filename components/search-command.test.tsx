@@ -15,9 +15,10 @@ import {
 import { SearchCommand } from "./search-command";
 
 const mockSearchDocuments = vi.fn();
+const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mockPush }),
   usePathname: () => "/dashboard/ws-123/doc-456",
 }));
 
@@ -160,5 +161,95 @@ describe("SearchCommand", () => {
     });
 
     expect(document.activeElement).toBe(trigger);
+  });
+
+  it("opens with Cmd+K and toggles closed on a second press", () => {
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(<SearchCommand />);
+    });
+    expect(document.querySelector('[data-slot="dialog-content"]')).toBeNull();
+
+    const press = () =>
+      act(() => {
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: "k",
+            metaKey: true,
+            bubbles: true,
+            cancelable: true,
+          })
+        );
+      });
+
+    press();
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]')
+    ).toBeTruthy();
+
+    press();
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]')
+    ).toBeNull();
+  });
+
+  it("navigates on select and restores focus to the element focused before Cmd+K", async () => {
+    mockSearchDocuments.mockResolvedValue([
+      { id: "doc-9", title: "Roadmap", icon: null, snippet: "" },
+    ]);
+
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(
+        <>
+          <button id="before">Before</button>
+          <SearchCommand />
+        </>
+      );
+    });
+
+    const before = container.querySelector<HTMLElement>("#before");
+    act(() => {
+      before?.focus();
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "k",
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
+    const item = document.querySelector<HTMLElement>(
+      '[data-slot="combobox-item"]'
+    );
+    expect(item?.textContent).toContain("Roadmap");
+
+    act(() => {
+      item?.click();
+    });
+
+    expect(mockPush).toHaveBeenCalledWith("/dashboard/ws-123/doc-9");
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]')
+    ).toBeNull();
+
+    await act(async () => {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    });
+    expect(document.activeElement).toBe(before);
   });
 });

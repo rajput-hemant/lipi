@@ -14,8 +14,11 @@ import {
 
 import { Sidebar } from "./sidebar";
 
+const mockAccess = vi.hoisted(() => ({ value: "edit" }));
+
 vi.mock("@/hooks/use-app-state", () => ({
   useAppState: () => ({ user: null }),
+  usePageAccess: () => mockAccess.value,
 }));
 
 vi.mock("../icons", () => ({
@@ -70,6 +73,7 @@ function renderSidebar(isCollapsed: boolean) {
 }
 
 afterEach(() => {
+  mockAccess.value = "edit";
   act(() => roots.splice(0).forEach((root) => root.unmount()));
   document.body.replaceChildren();
 });
@@ -115,5 +119,22 @@ describe("sidebar navigation", () => {
     expect(
       container.querySelector('[data-testid="document-tree"]')
     ).toBeTruthy();
+  });
+
+  it.each([
+    ["edit", "Restore or delete trashed pages"],
+    ["unknown", "Restore or delete trashed pages"],
+    ["view", "Browse pages in the trash"],
+  ])("describes the Trash dialog for %s access", (access, description) => {
+    mockAccess.value = access;
+    const container = renderSidebar(false);
+    const trash = [...container.querySelectorAll("nav button")].find(
+      (button) => button.textContent?.trim() === "Trash"
+    );
+    act(() => (trash as HTMLElement).click());
+
+    expect(
+      document.querySelector('[data-slot="dialog-description"]')?.textContent
+    ).toBe(description);
   });
 });

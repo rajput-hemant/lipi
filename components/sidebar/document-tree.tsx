@@ -29,7 +29,11 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useAppState, useCanEditPages } from "@/hooks/use-app-state";
+import {
+  useAppState,
+  useCanEditPages,
+  usePageAccess,
+} from "@/hooks/use-app-state";
 import { buildOptimisticDuplicateDocuments } from "@/lib/db/client-document-state";
 import {
   flattenVisibleTreeNodes,
@@ -84,7 +88,6 @@ function DocumentTreeItem({
     addDocument,
     deleteDocument,
     updateDocument: updateDocumentState,
-    replaceDocuments,
     documents: allDocuments,
   } = useAppState();
   const canEdit = useCanEditPages();
@@ -198,7 +201,9 @@ function DocumentTreeItem({
       ...collectDescendantIds(records, node.id),
     ]);
 
-    const previous = allDocuments.map((document) => ({ ...document }));
+    const previous = allDocuments.filter((document) =>
+      trashIds.has(document.id)
+    );
 
     for (const document of allDocuments) {
       const documentId = document.id;
@@ -217,7 +222,9 @@ function DocumentTreeItem({
         return "Moved to trash.";
       },
       error: (error) => {
-        replaceDocuments(previous);
+        for (const document of previous) {
+          updateDocumentState({ ...document });
+        }
         return error instanceof Error && error.message === "Forbidden" ?
             "You do not have permission to move this page to trash."
           : "Could not move to trash.";
@@ -360,7 +367,8 @@ function DocumentTreeItem({
               Duplicate
             </ContextMenuItem>
             <ContextMenuItem
-              className="cursor-pointer !text-red-500"
+              variant="destructive"
+              className="cursor-pointer"
               onClick={moveToTrash}
             >
               <HugeiconsIcon
@@ -438,8 +446,9 @@ export function DocumentTree() {
   const workspaceId = pathname.split("/")[2] ?? "";
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
-  const { documents, addDocument } = useAppState();
-  const canEdit = useCanEditPages();
+  const { documents, addDocument, deleteDocument } = useAppState();
+  const access = usePageAccess();
+  const canEdit = access === "edit";
 
   const forest = useMemo(() => getDocumentForest(documents), [documents]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -552,7 +561,10 @@ export function DocumentTree() {
         notifyPageChanges();
         return "Page created.";
       },
-      error: "Could not create page.",
+      error: () => {
+        deleteDocument(newDocument.id);
+        return "Could not create page.";
+      },
     });
   }
 
@@ -590,9 +602,11 @@ export function DocumentTree() {
               {isCreatingRoot ? "Cancel" : "New page"}
             </TooltipContent>
           </Tooltip>
-        : <Badge variant="secondary" className="text-[10px] uppercase">
-            View only
-          </Badge>
+        : access === "view" && (
+            <Badge variant="secondary" className="text-xs">
+              View only
+            </Badge>
+          )
         }
       </div>
 

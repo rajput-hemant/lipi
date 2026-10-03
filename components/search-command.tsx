@@ -78,20 +78,14 @@ export function SearchCommand({
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen((prev) => {
-          if (!prev) {
-            lastFocusedElementRef.current =
-              (document.activeElement as HTMLElement) || triggerRef.current;
-            return true;
-          }
-          return false;
-        });
+        if (open) setOpen(false);
+        else handleOpen();
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [open, handleOpen]);
 
   React.useEffect(() => {
     if (!open || !workspaceId) return;
