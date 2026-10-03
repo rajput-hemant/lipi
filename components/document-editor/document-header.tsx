@@ -247,7 +247,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
             rows={1}
             aria-label="Page title"
             placeholder="Untitled"
-            className="min-h-14 resize-none border-none bg-transparent px-0 text-3xl font-bold shadow-none sm:text-4xl focus-visible:ring-0"
+            className="min-h-14 min-w-0 resize-none border-none bg-transparent px-0 text-3xl font-bold shadow-none sm:text-4xl focus-visible:ring-0"
           />
         </div>
       </div>

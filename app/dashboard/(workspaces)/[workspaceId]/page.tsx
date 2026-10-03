@@ -82,10 +82,13 @@ export default async function WorkspacePage({
         <div className="flex flex-col gap-3 pb-8 border-b">
           <div className="flex items-center gap-3">
             {workspace.iconId ?
-              <span className="text-4xl sm:text-5xl select-none" aria-hidden>
+              <span
+                className="shrink-0 text-4xl sm:text-5xl select-none"
+                aria-hidden
+              >
                 {workspace.iconId}
               </span>
-            : <div className="flex size-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+            : <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
                 <HugeiconsIcon
                   icon={Folder01Icon}
                   strokeWidth={2}
@@ -93,8 +96,8 @@ export default async function WorkspacePage({
                 />
               </div>
             }
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <div className="min-w-0">
+              <h1 className="break-words text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {workspace.title}
               </h1>
               <p className="flex items-center gap-2 text-sm text-muted-foreground">
