@@ -30,6 +30,8 @@ function assertMigrationUuid(value: string, field: string) {
   }
 }
 
+type LegacyDocumentRecord = DocumentRecord & { content: string | null };
+
 export function assertLegacyDocumentRow(row: DocumentRecord) {
   assertMigrationUuid(row.id, "document id");
   assertMigrationUuid(row.workspaceId, "workspace id");
@@ -40,13 +42,13 @@ export function mapLegacyFoldersAndFilesToDocuments(
   folders: LegacyFolderRow[],
   files: LegacyFileRow[],
   fallbackTimestamp: string
-): DocumentRecord[] {
-  const documents: DocumentRecord[] = [];
+): LegacyDocumentRecord[] {
+  const documents: LegacyDocumentRecord[] = [];
 
   for (const folder of folders) {
     if (!folder.workspaceId) continue;
     const createdAt = folder.createdAt ?? fallbackTimestamp;
-    const row: DocumentRecord = {
+    const row: LegacyDocumentRecord = {
       id: folder.id,
       workspaceId: folder.workspaceId,
       parentId: null,
@@ -65,7 +67,7 @@ export function mapLegacyFoldersAndFilesToDocuments(
   for (const file of files) {
     if (!file.workspaceId) continue;
     const createdAt = file.createdAt ?? fallbackTimestamp;
-    const row: DocumentRecord = {
+    const row: LegacyDocumentRecord = {
       id: file.id,
       workspaceId: file.workspaceId,
       parentId: file.folderId,

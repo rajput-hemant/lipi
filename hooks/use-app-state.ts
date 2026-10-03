@@ -4,7 +4,7 @@ import { proxy, useSnapshot } from "valtio";
 import type { SessionUser } from "@/lib/auth/types";
 import type { workspaces } from "@/lib/db/schema";
 import type { WorkspaceMembershipRole } from "@/lib/workspace/permissions";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 
@@ -14,7 +14,7 @@ export type AppState = {
   user: SessionUser | null;
   workspace?: WorkspaceRecord | null;
   role?: WorkspaceMembershipRole | null;
-  documents: Document[];
+  documents: DocumentSummary[];
   collaborators: CollaboratorPresence[];
 };
 
@@ -26,10 +26,10 @@ export type CollaboratorPresence = {
 };
 
 export type AppAction = {
-  addDocument: (document: Document) => void;
-  updateDocument: (document: Document) => void;
+  addDocument: (document: DocumentSummary) => void;
+  updateDocument: (document: DocumentSummary) => void;
   deleteDocument: (documentId: string) => void;
-  replaceDocuments: (documents: Document[]) => void;
+  replaceDocuments: (documents: DocumentSummary[]) => void;
   setCollaborators: (collaborators: CollaboratorPresence[]) => void;
   setWorkspace: (workspace: WorkspaceRecord | null) => void;
   setRole: (role: WorkspaceMembershipRole | null) => void;

@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 
 import type { DocumentTreeNode } from "./document-tree-utils";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import { useNotifyWorkspacePageChanges } from "@/components/realtime/workspace-realtime-provider";
 import {
@@ -132,14 +132,13 @@ function DocumentTreeItem({
       return;
     }
 
-    const newDocument: Document = {
+    const newDocument: DocumentSummary = {
       id: uuid(),
       workspaceId,
       parentId: node.id,
       title,
       icon: childIcon,
       bannerUrl: null,
-      content: null,
       inTrash: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -170,7 +169,7 @@ function DocumentTreeItem({
     const newId = uuid();
     const records = toDocumentRecords(allDocuments);
     const copies = buildOptimisticDuplicateDocuments(
-      allDocuments as Document[],
+      allDocuments as DocumentSummary[],
       records,
       node.id,
       newId,
@@ -554,14 +553,13 @@ export function DocumentTree() {
       return;
     }
 
-    const newDocument: Document = {
+    const newDocument: DocumentSummary = {
       id: uuid(),
       workspaceId,
       parentId: null,
       title,
       icon: rootIcon,
       bannerUrl: null,
-      content: null,
       inTrash: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
