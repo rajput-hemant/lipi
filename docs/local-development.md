@@ -36,7 +36,7 @@ bun run db:setup
 bun run dev
 ```
 
-`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user in `lib/local-dev/credentials.ts` (`local@example.test`, `LocalDev123!`).
+`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user documented in `fixtures/local-dev-credentials.json` (`local@example.test`, `LocalDev123!`). On dev server startup these credentials are logged to the terminal (only when `DATABASE_URL` points to loopback).
 
 `DATABASE_URL` must be set (the `.env.example` value is `postgresql://postgres:postgrespassword@127.0.0.1:5432/local_platforms`). If it is missing, the app, `drizzle-kit` and the seed stop with `DATABASE_URL is not set` instead of connecting as your OS user.
 
