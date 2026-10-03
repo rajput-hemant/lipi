@@ -3,18 +3,17 @@ import { and, eq } from "drizzle-orm";
 
 import { db } from ".";
 import { CREDENTIAL_PROVIDER_ID } from "../auth/credential-account";
-import {
-  assertLocalDevEnvironment,
-  loadLocalDevFixture,
-} from "../local-dev/fixture";
-import { assertSharedAuthBaseline } from "../local-dev/preflight";
+import { LOCAL_DEV_USER } from "../local-dev/credentials";
+import { requireLocalDatabaseUrl } from "./database-url";
 import { betterAuthAccounts, documents, users, workspaces } from "./schema";
 import { LOCAL_DOCUMENTS, LOCAL_WORKSPACE } from "./seed-data";
 
 async function seed() {
-  assertLocalDevEnvironment();
-  const { user } = loadLocalDevFixture();
-  await assertSharedAuthBaseline(db);
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Refusing to seed with NODE_ENV=production");
+  }
+  requireLocalDatabaseUrl(process.env.DATABASE_URL);
+  const user = LOCAL_DEV_USER;
 
   await db.transaction(async (tx) => {
     const byEmail = await tx.query.users.findFirst({
@@ -22,7 +21,7 @@ async function seed() {
     });
     if (byEmail && byEmail.id !== user.id) {
       throw new Error(
-        `A user with ${user.email} already exists with a different id; refusing to overwrite. Reset the local database or change the fixture.`
+        `A user with ${user.email} already exists with a different id; refusing to overwrite. Reset the local database.`
       );
     }
 
@@ -33,10 +32,8 @@ async function seed() {
         email: user.email,
         name: user.name,
         betterAuthName: user.name,
-        username: user.username,
-        displayUsername: user.displayUsername ?? user.username,
-        emailVerified: user.emailVerified ? new Date() : null,
-        emailVerifiedBoolean: user.emailVerified,
+        emailVerified: new Date(),
+        emailVerifiedBoolean: true,
       })
       .onConflictDoNothing();
 

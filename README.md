@@ -33,17 +33,14 @@ git clone https://github.com/rajput-hemant/lipi
 cd lipi
 ```
 
-- Install Bun 1.4.2, then follow [docs/local-development.md](docs/local-development.md). In short: copy **.env.example** to **.env.local**, export `LOCAL_DEV_CONFIG` as the absolute path to the shared fixture (Infinitunes `local-dev/fixtures.json`), then:
+- Install Bun 1.4.2, then follow [docs/local-development.md](docs/local-development.md). In short: copy **.env.example** to **.env.local**, then:
 
 ```
 bun i
 bun run db:up        # Postgres, Redis, REST adapter only (no app container)
-bun run db:migrate   # run Infinitunes' migrations first
-bun run db:seed
+bun run db:setup     # auth tables, Lipi tables, local seed
 bun run dev
 ```
-
-- Shared auth tables and legacy-user backfill are documented in [docs/shared-database-auth.md](docs/shared-database-auth.md).
 
 <div align=center>
 

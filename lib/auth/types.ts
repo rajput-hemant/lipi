@@ -3,5 +3,4 @@ export type SessionUser = {
   name: string | null;
   email: string;
   image?: string | null;
-  username?: string | null;
 };

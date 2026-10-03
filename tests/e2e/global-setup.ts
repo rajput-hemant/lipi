@@ -2,8 +2,8 @@ import { execSync } from "node:child_process";
 
 import type { FullConfig } from "@playwright/test";
 
+import { applyAuthDatabase } from "./apply-auth-database";
 import { applyLipiDatabase } from "./apply-lipi-database";
-import { applySharedAuthDatabase } from "./apply-shared-database";
 import { E2E_DATABASE_URL, E2E_PG_CONTAINER, E2E_PG_PORT } from "./env";
 
 function run(command: string) {
@@ -40,7 +40,7 @@ export default async function globalSetup(_config: FullConfig) {
     );
     await waitForPostgres();
 
-    applySharedAuthDatabase(E2E_DATABASE_URL, process.cwd());
+    applyAuthDatabase(E2E_DATABASE_URL, process.cwd());
     applyLipiDatabase(E2E_DATABASE_URL, process.cwd());
   } catch (error) {
     try {

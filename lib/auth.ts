@@ -66,7 +66,6 @@ export const getCurrentUser = cache(
       name: session.user.name,
       email: session.user.email,
       image: session.user.image,
-      username: session.user.username,
     };
   }
 );

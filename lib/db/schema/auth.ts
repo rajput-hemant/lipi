@@ -10,14 +10,13 @@ import {
 } from "drizzle-orm/pg-core";
 
 /* ---------------------------------------------------------------------------
- * Legacy Auth.js tables (preserved for rollback; owned by Infinitunes migrations)
+ * Legacy Auth.js tables (preserved for rollback)
  * ------------------------------------------------------------------------- */
 
 export const users = pgTable("user", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name"),
   email: text("email").notNull().unique(),
-  username: text("username").unique(),
   password: text("password"),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
@@ -26,7 +25,6 @@ export const users = pgTable("user", {
   emailVerifiedBoolean: boolean("emailVerifiedBoolean")
     .notNull()
     .default(false),
-  displayUsername: text("displayUsername"),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
 });

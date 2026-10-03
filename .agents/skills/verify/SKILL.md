@@ -29,7 +29,7 @@ Primary surface is the web UI (Next.js App Router, port 3000 by default; 3161 in
 - `bun`, `docker` (disposable Postgres only), a free set of ports (below), Node for `realtime/bootstrap.mjs` (Hocuspocus does not run under Bun).
 - Dependencies installed (`bun i`). `node_modules` is not shared between worktrees.
 - No real credentials are needed or allowed. Use the throwaway env block below. OAuth (Google/GitHub), Stripe, UploadThing and Upstash need real credentials and are therefore GAPs, not drive targets.
-- Never point `DATABASE_URL` at the shared Lipi/Infinitunes database or any production database.
+- Never point `DATABASE_URL` at the shared local development database or any production database.
 
 ## Isolation: data and ports
 
@@ -73,17 +73,17 @@ Do this once per run. Steps are the documented e2e path adapted to isolated name
      -p 127.0.0.1:5561:5432 --tmpfs /var/lib/postgresql postgres:18
    until docker exec lipi-verify-pg pg_isready -U postgres -h 127.0.0.1; do sleep 1; done
    ```
-2. Schema. `bun run db:migrate` now applies on an empty database (`LIP-V001` fixed): push the shared auth tables first, then run it. The e2e suite still uses `drizzle-kit push` for `lipi_*`, which is the faster alternative:
+2. Schema. The throwaway database is loopback, so the local migration scripts apply on an empty database:
    ```sh
-   bunx drizzle-kit push --force --config tests/e2e/drizzle-shared-auth.config.ts
+   bun run db:auth
    bun run db:migrate
    ```
-   Push alternative (shared auth tables first, then `lipi_*`):
+   Push alternative (auth tables first, then `lipi_*`; this is what the e2e suite uses):
    ```sh
-   bunx drizzle-kit push --force --config tests/e2e/drizzle-shared-auth.config.ts
+   bunx drizzle-kit push --force --config tests/e2e/drizzle-auth.config.ts
    bunx drizzle-kit push --force --config tests/e2e/drizzle-lipi.config.ts
    ```
-   (`tests/e2e/apply-shared-database.ts` / `apply-lipi-database.ts` document these.) If an Infinitunes checkout is available, `INFINITUNES_ROOT` makes the first step run Infinitunes' own migrations; that is the closer-to-production variant but is optional.
+   (`tests/e2e/apply-auth-database.ts` / `apply-lipi-database.ts` document these.)
 3. Realtime server (background, log to the scratch dir). `bun run` forks a node child that owns the port; record both PIDs:
    ```sh
    bun run realtime:start > "$SCRATCH/lipi-verify/realtime.log" 2>&1 &
@@ -131,7 +131,7 @@ Tool behaviors learned live: element refs (`@g1:1_20`) go stale after every acti
 
 Stable handles, confirmed live unless marked otherwise:
 
-- Auth forms: placeholder `you@domain.com` (email), `••••••••••` (password; two on `/signup`, the second is confirm), buttons `Sign Up`, `Login with Email`; login toggle switches to username mode (placeholder `@username`). Routes `/login`, `/signup`, `/reset-password`.
+- Auth forms: placeholder `you@domain.com` (email), `••••••••••` (password; two on `/signup`, the second is confirm), buttons `Sign Up`, `Login with Email`. Routes `/login`, `/signup`, `/reset-password`.
 - Dashboard: `/dashboard` redirects to `/dashboard/<workspaceId>` or `/dashboard/new-workspace`; workspace form placeholder `Workspace name`, button `Create workspace`.
 - Sidebar: `aria-label="Workspace pages"`, tree role `tree`, button `New page` / `Cancel new page`, link by page title, context menu item `New subpage`, toast `Page created.`.
 - Editor: `.bn-editor`, text `Syncing page...`, `Reconnecting to collaborators...`, `View only` (viewer), `aria-label="Page collaborators"`, `aria-label="Breadcrumb"`, `aria-label="Choose page icon"`.

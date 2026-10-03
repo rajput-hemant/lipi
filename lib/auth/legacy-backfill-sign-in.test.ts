@@ -24,11 +24,8 @@ function makeFakeDb() {
   } as unknown as Parameters<typeof createAuth>[0];
 }
 
-/** Shape produced by Infinitunes BACKFILL_CREDENTIAL_ACCOUNTS (packages/db/src/backfill.ts). */
-export function infinitunesBackfillCredentialRow(
-  userId: string,
-  passwordHash: string
-) {
+/** Credential row shape a legacy-user backfill inserts. */
+export function backfilledCredentialRow(userId: string, passwordHash: string) {
   return {
     userId,
     accountId: userId,
@@ -49,7 +46,7 @@ describe("legacy credential backfill sign-in", () => {
     const auth = createAuth(makeFakeDb());
     const password = "LegacyPass1!";
     const passwordHash = await hash(password, 10);
-    const row = infinitunesBackfillCredentialRow(
+    const row = backfilledCredentialRow(
       "11111111-1111-4111-8111-111111111111",
       passwordHash
     );

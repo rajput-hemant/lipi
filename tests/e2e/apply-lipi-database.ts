@@ -3,7 +3,7 @@ import { execSync } from "node:child_process";
 /**
  * Apply Lipi application tables (lipi_*) on the throwaway e2e database.
  *
- * Production uses `bun lib/db/migrate.ts`. For e2e we sync the current Drizzle
+ * Local and production use `drizzle-kit migrate` (`bun run db:migrate`). For e2e we sync the current Drizzle
  * schema via Kit push (tablesFilter lipi_*), which is faster than replaying the
  * migration chain and matches its end state.
  */

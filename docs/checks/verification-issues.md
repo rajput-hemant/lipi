@@ -45,15 +45,11 @@ Not re-run here and not counted as new verification:
 - Re-run 2026-10-02 (`815ceda`): exit 1 again; the failing statement is `ALTER TABLE "lipi_files" ALTER COLUMN "in_trash" SET DATA TYPE boolean;`. Everything else in the browser pass used the e2e `drizzle-kit push` path on a throwaway database; that alternate setup is **not** evidence that production migrations pass.
 - Fix: `0004_minor_micromacro.sql` now drops the text default, casts with `USING "in_trash"::boolean`, then restores `DEFAULT false`, for each of the three tables. Drizzle's migrator skips migrations whose `created_at` is not newer than the last applied one, so databases that already applied 0004 are untouched; the journal and every other migration are unchanged. Proof on a disposable `postgres:18` (127.0.0.1:5562): empty database, shared auth tables via the e2e push config, then `bun run db:migrate` applied all 13 migrations (`__drizzle_migrations` count 13), a second run was a no-op, `in_trash` is `boolean` default `false`, and the 0004 statements converted rows `'true'`/`'false'` to `t`/`f` in a scratch table. Not proven: a database that really applied the old 0004 (none exists locally); `drizzle-kit push` was not used for the migrated schema.
 
-### LIP-V002 Username sign-in may not match the shared auth schema
+### LIP-V002 Username sign-in removed (email-only)
 
-- Class: HYPOTHESIS. Severity: medium. State: open.
-- Surface: `/login` username toggle, `lib/auth/create-auth.ts` username plugin.
-- Evidence: `app/(auth)/components/login-form.tsx` calls `signIn.username(...)` in username mode; `lib/auth/create-auth.ts` registers the `username` plugin and `additionalFields.username`; `lib/db/shared-auth-schema.snapshot.json` and `lib/db/schema/auth.ts:20` still carry a `username` column; `docs/requirements.md` §3.1 says "email/username sign-in". The fleet research report (private) notes that Infinitunes, which owns the shared auth tables, removed username in its own history (`1e73ae3`).
-- Reproduction (needs a stack with Infinitunes' migrations, `INFINITUNES_ROOT`): sign up by email, try username sign-in; inspect the `user` table columns on the Infinitunes-migrated DB.
-- Expected: username sign-in works or is removed consistently across docs, UI and schema. Actual: unknown.
-- Gap: the Infinitunes checkout was not available; behavior unexercised.
-- Follow-up: source check against Infinitunes' schema, then decide to keep or remove the toggle.
+- Class: RESOLVED. State: fixed.
+- Change: the login toggle, `signIn.username`, the Better Auth `username` plugin, `additionalFields` and the `user.username` / `displayUsername` columns were removed. Sign-in is email and password only.
+- Evidence: `app/(auth)/components/login-form.tsx`, `lib/auth/create-auth.ts`, `lib/db/schema/auth.ts`.
 
 ### LIP-V003 Reset-password server action: unauthenticated, enumerating, unthrottled
 
@@ -127,7 +123,7 @@ Not re-run here and not counted as new verification:
 ### LIP-V012 Verify skill run once, with corrections
 
 - Class: GAP (partial). Severity: medium (process). State: open.
-- 2026-10-02: Launch (container, `drizzle-kit push`, realtime, production build, `next start`), Doctor and Cleanup ran as written except: anonymous `POST /api/realtime/token` returns 307 (not 403); `bun run realtime:start` leaves a bun and a node PID, both recorded; the app PID is the `lsof` listener. SKILL.md was corrected. Production-build startup only; the dev server path and the Infinitunes-migrated database variant were not run.
+- 2026-10-02: Launch (container, `drizzle-kit push`, realtime, production build, `next start`), Doctor and Cleanup ran as written except: anonymous `POST /api/realtime/token` returns 307 (not 403); `bun run realtime:start` leaves a bun and a node PID, both recorded; the app PID is the `lsof` listener. SKILL.md was corrected. Production-build startup only; the dev server path was not run.
 - Scope: Launch, Doctor, Drive, Evidence and Cleanup in SKILL.md are unexecuted text. In particular the ports 3161/1261/5561, the `drizzle-kit push` schema step, the production-build start and the doctor curl expectations (`/dashboard` redirect, token route 403) are derived from source and from `tests/e2e/`, not observed. Only the `postgres:18` container start and a `db:migrate` attempt (LIP-V001) were observed.
 - Follow-up: Stage B run by one worker with the chosen browser skill; update `Last live proof` in each feature file.
 
@@ -150,7 +146,7 @@ Not re-run here and not counted as new verification:
 ### LIP-V016 Shared-database backfill and production realtime topology undecided
 
 - Class: GAP (operational/decision). Severity: medium. State: open.
-- Scope: `BACKFILL_ALL` on the shared database for legacy users, and the same-host vs separate-host realtime arrangement. Tracked in [todo](../todo.md), [shared-database-auth](../shared-database-auth.md), [requirements](../requirements.md) §4. Local runs cannot answer either.
+- Scope: the credential backfill on the production database for legacy users, and the same-host vs separate-host realtime arrangement. Tracked in [todo](../todo.md), [shared-database-auth](../shared-database-auth.md), [requirements](../requirements.md) §4. Local runs cannot answer either.
 
 ### LIP-V017 Free-plan single-workspace limit constrains verification scenarios
 

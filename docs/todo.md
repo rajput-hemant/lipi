@@ -4,7 +4,7 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 
 ## Done
 
-- [x] Better Auth sign-in on the shared database - `lib/auth/create-auth.ts`, `lib/auth/*.test.ts`, `tests/e2e/auth-workspace.spec.ts`; see [shared-database-auth](./shared-database-auth.md)
+- [x] Better Auth email and password sign-in - `lib/auth/create-auth.ts`, `lib/auth/*.test.ts`, `tests/e2e/auth-workspace.spec.ts`
 - [x] Workspaces with owner/editor/viewer roles and email invites - `lib/workspace/permissions.ts`, `lib/workspace/workspace-invites.test.ts`, migration `0009_workspace_roles_invites.sql`
 - [x] Block-based document pages in a tree sidebar - `components/document-editor/`, `lib/db/documents-tree.ts`, `tests/e2e/documents-editor.spec.ts`
 - [x] Real-time collaboration (Hocuspocus + Yjs, signed room tokens, presence) - `realtime/server.ts`, `app/api/realtime/token/route.ts`, `tests/e2e/collaboration.spec.ts`; see [realtime](./realtime.md)
@@ -14,12 +14,12 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 
 ## Open
 
-- [ ] Run Infinitunes' shared-table migrations and `BACKFILL_ALL` against the shared database so legacy users can sign in ([shared-database-auth](./shared-database-auth.md))
+- [ ] Backfill credential accounts for legacy users on the production database so they can sign in ([requirements](./requirements.md))
 - [ ] Choose the production realtime endpoint arrangement (same cookie-owning host vs separate host with `wss://` and the signed token) ([research](./research/realtime-collaboration.md))
 
-- [ ] Production adoption of Lipi's separate migration history is unproven: local mode uses `drizzle.__lipi_migrations`, production still shares `drizzle.__drizzle_migrations` with Infinitunes, whose newer timestamps make Drizzle skip Lipi migrations and whose migrator rejects foreign rows. Agree one history strategy before the next production migration. Priority: high. Evidence: `lib/db/migration-history.ts`, local runs on a disposable PostgreSQL 18.6 database. Status: open
+- [ ] Production keeps the default Drizzle history table (`drizzle.__drizzle_migrations`); only loopback `DATABASE_URL` uses `drizzle.__lipi_migrations`. If production shares that default table with another app, confirm its newer timestamps do not make Drizzle skip Lipi migrations before the next production migration. Priority: medium. Evidence: `drizzle.config.ts`. Status: open, unexercised
+- [ ] Browser-verify the email-only login page (light/dark, keyboard focus) after username removal; only HTTP sign-in and page markup were checked. Priority: medium. Evidence: `app/(auth)/components/login-form.tsx`. Status: open
 - [ ] Hocuspocus 4.7 does not start under Bun (`crossws` Node adapter), so `realtime:*` still needs Node 22. Revisit when Hocuspocus supports Bun. Priority: low. Evidence: `bun realtime/server.ts` fails at startup. Status: open
-- [ ] Infinitunes docs list a `lipi_passkey` table that Lipi does not have; confirm intent with the Infinitunes owner. Priority: low. Status: open
 
 ## Verification (PStack, partial)
 

@@ -1,7 +1,6 @@
 import { compare, hash } from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { username } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 import type { BetterAuthPlugin } from "better-auth";
@@ -15,11 +14,6 @@ import {
 } from "@/lib/db/schema";
 import { env } from "@/lib/env";
 import { resolveAuthRateLimitEnabled } from "./auth-rate-limit";
-import {
-  USERNAME_MAX_LENGTH,
-  USERNAME_MIN_LENGTH,
-  USERNAME_REGEX,
-} from "./constants";
 import { credentialAccountWhere } from "./credential-account";
 import { resolveAuthBaseURL } from "./resolve-auth-base-url";
 
@@ -61,17 +55,6 @@ export function createAuth(
       fields: {
         name: "betterAuthName",
         emailVerified: "emailVerifiedBoolean",
-      },
-      additionalFields: {
-        username: {
-          type: "string",
-          required: false,
-          unique: true,
-        },
-        displayUsername: {
-          type: "string",
-          required: false,
-        },
       },
     },
 
@@ -117,7 +100,6 @@ export function createAuth(
           after: async (user) => {
             const patch: Record<string, unknown> = {};
             if (user.name !== undefined) patch.name = user.name;
-            if (user.username !== undefined) patch.username = user.username;
             if (Object.keys(patch).length > 0) {
               await database
                 .update(users)
@@ -131,7 +113,6 @@ export function createAuth(
           after: async (user) => {
             const patch: Record<string, unknown> = {};
             if (user.name !== undefined) patch.name = user.name;
-            if (user.username !== undefined) patch.username = user.username;
             if (Object.keys(patch).length > 0) {
               await database
                 .update(users)
@@ -173,14 +154,7 @@ export function createAuth(
       },
     },
 
-    plugins: [
-      username({
-        minUsernameLength: USERNAME_MIN_LENGTH,
-        maxUsernameLength: USERNAME_MAX_LENGTH,
-        usernameValidator: (value) => USERNAME_REGEX.test(value),
-      }),
-      ...(options.plugins ?? []),
-    ],
+    plugins: [...(options.plugins ?? [])],
   });
 }
 

@@ -5,10 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  AtSignIcon,
   EyeIcon,
   EyeOffIcon,
-  FingerPrintIcon,
   Loading03Icon,
   Mail01Icon,
 } from "@hugeicons/core-free-icons";
@@ -33,7 +31,6 @@ import { Input } from "@/components/ui/input";
 import { TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signIn } from "@/lib/auth/auth-client";
-import { buildLoginFormStateAfterToggle } from "@/lib/auth/login-toggle";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
 import { loginSchema } from "@/lib/validations";
@@ -42,14 +39,12 @@ import { OAuthButtons } from "./oauth-buttons";
 type FormData = z.infer<typeof loginSchema>;
 
 const defaultValues: FormData = {
-  type: "email",
   email: "",
   password: "",
 };
 
 export function LoginForm() {
   const router = useRouter();
-  const [isEmailMode, setIsEmailMode] = React.useState(true);
   const [isPassVisible, setIsPassVisible] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -72,29 +67,15 @@ export function LoginForm() {
     defaultValues,
   });
 
-  function toggleLoginMode() {
-    const password = form.getValues("password");
-    const nextValues = buildLoginFormStateAfterToggle(isEmailMode, password);
-    setIsEmailMode(nextValues.type === "email");
-    form.reset(nextValues);
-  }
-
   async function onSubmit(formData: FormData) {
     setIsSubmitting(true);
 
     try {
-      const result =
-        formData.type === "email" ?
-          await signIn.email({
-            email: formData.email,
-            password: formData.password,
-            callbackURL,
-          })
-        : await signIn.username({
-            username: formData.username,
-            password: formData.password,
-            callbackURL,
-          });
+      const result = await signIn.email({
+        email: formData.email,
+        password: formData.password,
+        callbackURL,
+      });
 
       if (result.error) {
         toast.error(result.error.message ?? "Something went wrong.");
@@ -117,57 +98,19 @@ export function LoginForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-2">
         <FormField
-          name={isEmailMode ? "email" : "username"}
+          name="email"
           control={form.control}
           render={({ field }) => (
             <FormItem className="space-y-1">
-              <FormLabel className="sr-only">
-                {isEmailMode ? "Email" : "Username"}
-              </FormLabel>
+              <FormLabel className="sr-only">Email</FormLabel>
               <FormControl>
-                <div className="relative">
-                  <Input
-                    type={isEmailMode ? "email" : "text"}
-                    disabled={isSubmitting}
-                    placeholder={isEmailMode ? "you@domain.com" : "@username"}
-                    className="pr-8 shadow-sm"
-                    {...field}
-                  />
-                  <TooltipDelayed delay={150}>
-                    <TooltipTrigger
-                      aria-label={
-                        isEmailMode ?
-                          "Use Username instead"
-                        : "Use Email instead"
-                      }
-                      tabIndex={-1}
-                      type="button"
-                      onClick={toggleLoginMode}
-                      className="absolute inset-y-0 right-2 my-auto text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
-                    >
-                      {isEmailMode ?
-                        <HugeiconsIcon
-                          icon={AtSignIcon}
-                          strokeWidth={2}
-                          className="size-5"
-                        />
-                      : <HugeiconsIcon
-                          icon={Mail01Icon}
-                          strokeWidth={2}
-                          className="size-5"
-                        />
-                      }
-                    </TooltipTrigger>
-
-                    <TooltipContent>
-                      <p className="text-xs">
-                        {isEmailMode ?
-                          "Use Username instead"
-                        : "Use Email instead"}
-                      </p>
-                    </TooltipContent>
-                  </TooltipDelayed>
-                </div>
+                <Input
+                  type="email"
+                  disabled={isSubmitting}
+                  placeholder="you@domain.com"
+                  className="shadow-sm"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -239,20 +182,13 @@ export function LoginForm() {
               strokeWidth={2}
               className="mr-2 size-4 animate-spin"
             />
-          : isEmailMode ?
-            <HugeiconsIcon
+          : <HugeiconsIcon
               icon={Mail01Icon}
               strokeWidth={2}
               className="mr-2 size-4"
             />
-          : <HugeiconsIcon
-              icon={FingerPrintIcon}
-              strokeWidth={2}
-              className="mr-2 size-4"
-            />
           }
-
-          {isEmailMode ? "Login with Email" : "Login"}
+          Login with Email
         </Button>
       </form>
 

@@ -1,10 +1,10 @@
 # Local development
 
-Docker runs **resources only** (PostgreSQL, Redis, and a Redis REST adapter). The Next.js app, migrations and seeds always run on the host with Bun. Lipi and Infinitunes share one local PostgreSQL database.
+Docker runs **resources only** (PostgreSQL, Redis and a Redis REST adapter). The Next.js app, migrations and seeds run on the host with Bun.
 
-## Ownership
+## Resources
 
-Both Lipi and Infinitunes ship their own `docker-compose.yml` for the shared resources, so you can start the database from either checkout without the other. The two files are byte-identical and define one shared identity:
+`docker-compose.yml` defines one stack that other local projects may reuse:
 
 | Item                  | Value                                                                             |
 | :-------------------- | :-------------------------------------------------------------------------------- |
@@ -16,15 +16,7 @@ Both Lipi and Infinitunes ship their own `docker-compose.yml` for the shared res
 | Ports (loopback only) | 5432, 6379, 8079                                                                  |
 | Database              | `local_platforms` (user `postgres`)                                               |
 
-Starting from either checkout reuses the same containers and data. The Postgres init SQL is inlined in the compose file (`configs.content`) instead of a bind mount, because a bind-mount path differs per checkout and would make Compose recreate the container whenever you switch. If you change one file, change the other the same way.
-
-Infinitunes owns the canonical fixture. It is the single constant file for the shared credentials, and Lipi reads it through `LOCAL_DEV_CONFIG` (this is a seed-time path, not needed to start the containers):
-
-| Asset                             | Where                                 | Lipi consumes it through |
-| :-------------------------------- | :------------------------------------ | :----------------------- |
-| Credentials and canonical user ID | Infinitunes `local-dev/fixtures.json` | `LOCAL_DEV_CONFIG`       |
-
-Lipi does not keep a copy of the credentials. Find them in that file (`user.email`, `user.password`).
+The Postgres init SQL is inlined in the compose file (`configs.content`) so the file works from any checkout path. The Redis REST adapter runs in `env` mode (`SRH_MODE=env`, `SRH_CONNECTION_STRING`, `SRH_TOKEN`); version 0.0.10 has no other single-server mode.
 
 ## Prerequisites
 
@@ -32,82 +24,63 @@ Lipi does not keep a copy of the credentials. Find them in that file (`user.emai
 - Docker with Compose
 - Node 22 only for the realtime process (see [Realtime](#realtime))
 
-`dev`, `build` and `start` run Next.js through `bun --bun`. Without `--bun`, `bun run next ...` follows the `next` binary's Node shebang and runs on Node even though the package manager is Bun. Verified: the dev and production servers run as the Bun 1.4.2 process. `eslint`, `tsc`, `vitest` and `drizzle-kit` still follow their Node shebangs; only the app runtime and the migrate/seed scripts (`bun lib/db/*.ts`) run on Bun.
+`dev`, `build` and `start` run Next.js through `bun --bun`. `eslint`, `tsc`, `vitest` and `drizzle-kit` follow their Node shebangs.
 
 ## Start once
 
 ```bash
-cp .env.example .env.local        # local defaults are already filled in
-export LOCAL_DEV_CONFIG=/path/to/infinitunes/local-dev/fixtures.json   # only for migrate/seed
-
+cp .env.example .env.local
 bun i
-bun run db:up                     # Postgres, Redis, REST adapter (waits for healthy); safe if Infinitunes already started them
+bun run db:up
+bun run db:setup
+bun run dev
 ```
 
-Then, from the Infinitunes checkout, run its migrations first (it owns the shared `user` and `better_auth_*` tables):
+`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user in `lib/local-dev/credentials.ts` (`local@example.test`, `LocalDev123!`).
 
-```bash
-bun run db:migrate                # in Infinitunes
-```
-
-Back in Lipi:
-
-```bash
-bun run db:migrate                # Lipi tables only (lipi_*)
-bun run db:seed
-bun run dev                       # host Next.js on http://localhost:3000
-```
-
-Sign in with the email and password from the fixture file (`user.email`, `user.password`; the username also works).
+`DATABASE_URL` must be set (the `.env.example` value is `postgresql://postgres:postgrespassword@127.0.0.1:5432/local_platforms`). If it is missing, the app, `drizzle-kit` and the seed stop with `DATABASE_URL is not set` instead of connecting as your OS user.
 
 ## Commands
 
-| Command                              | Does                                                                                                              |
-| :----------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `bun run db:up` / `db:down`          | `docker compose up -d --wait` / `docker compose down` for the shared containers. `down` keeps the named volumes.  |
-| `bun run db:migrate`                 | Apply Lipi migrations. With `LOCAL_DEV_CONFIG` set, history is stored in `drizzle.__lipi_migrations` (see below). |
-| `bun run db:seed`                    | Idempotent local seed: shared user, credential account, one workspace with three pages.                           |
-| `bun run dev`                        | Next.js dev server on the host.                                                                                   |
-| `bun run realtime:dev`               | Hocuspocus server on Node (optional, only for live collaboration).                                                |
-| `bun run test`, `type-check`, `lint` | Unit tests (Vitest), TypeScript, ESLint. `bun run test:e2e` needs a running stack.                                |
+| Command                              | Does                                                                                                                                                     |
+| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bun run db:up` / `db:down`          | `docker compose up -d --wait` / `docker compose down`. `down` keeps the named volumes.                                                                   |
+| `bun run db:auth`                    | Create the auth tables (`user`, `better_auth_*`, legacy `account`, `verificationToken`) from `lib/db/auth-migrations`. Loopback only, idempotent.        |
+| `bun run db:migrate`                 | `drizzle-kit migrate` for the `lipi_*` tables. History goes to `drizzle.__lipi_migrations` when `DATABASE_URL` is loopback, otherwise the default table. |
+| `bun run db:seed`                    | Idempotent local seed: the local user, a credential account, one workspace with three pages.                                                             |
+| `bun run db:setup`                   | `db:auth`, `db:migrate`, `db:seed`.                                                                                                                      |
+| `bun run dev`                        | Next.js dev server on the host.                                                                                                                          |
+| `bun run realtime:dev`               | Hocuspocus server on Node (optional, only for live collaboration).                                                                                       |
+| `bun run test`, `type-check`, `lint` | Unit tests (Vitest), TypeScript, ESLint. `bun run test:e2e` starts its own throwaway database.                                                           |
 
 ## Ports and env
 
-| Service            | Port | Env                                                          |
-| :----------------- | :--- | :----------------------------------------------------------- |
-| App                | 3000 | `AUTH_URL`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`         |
-| PostgreSQL         | 5432 | `DATABASE_URL` (shared database name comes from the fixture) |
-| Redis              | 6379 | not used directly by Lipi                                    |
-| Redis REST adapter | 8079 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`         |
-| Realtime           | 1234 | `NEXT_PUBLIC_LIPI_REALTIME_URL`, `LIPI_REALTIME_PORT`        |
+| Service            | Port | Env                                                   |
+| :----------------- | :--- | :---------------------------------------------------- |
+| App                | 3000 | `AUTH_URL`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`  |
+| PostgreSQL         | 5432 | `DATABASE_URL`                                        |
+| Redis              | 6379 | not used directly by Lipi                             |
+| Redis REST adapter | 8079 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`  |
+| Realtime           | 1234 | `NEXT_PUBLIC_LIPI_REALTIME_URL`, `LIPI_REALTIME_PORT` |
 
-Keep the same local `AUTH_SECRET` / `BETTER_AUTH_SECRET` as Infinitunes (the `.env.example` default, `local-development-secret-must-be-at-least-32-chars-long`, is identical in both). Lipi seeds no Redis data: it only uses Redis for rate limiting, which is off locally (`ENABLE_RATE_LIMITING=false`).
+Redis is only used for rate limiting, which is off locally (`ENABLE_RATE_LIMITING=false`).
 
-## Shared database, user and prefixes
+## Tables and prefixes
 
-- One database, one physical `public."user"` table. The seed inserts the fixture user (fixed UUID) plus a `better_auth_account` row with `providerId = 'credential'` and a bcrypt (cost 10) hash. Both apps verify that same hash, so both accept the same login against the same row.
-- Shared (unprefixed, owned by Infinitunes migrations): `user`, `account`, `verificationToken`, `better_auth_account`, `better_auth_session`, `better_auth_verification`.
-- Lipi tables are prefixed `lipi_`; Infinitunes tables are `infinitunes_`. `drizzle.config.ts` filters on `lipi_*`.
-- Sessions live in the shared `better_auth_session` table and the cookie name is Better Auth's default, so on `localhost` a session signed with the same secret is accepted by either app. Both apps run on `localhost` and cookies are not port-scoped, so the shared secret is deliberate: with different secrets the two apps would overwrite each other's cookie and keep signing you out. The trade-off is that one sign-in is valid in both apps.
+- Auth tables are unprefixed: `user`, `account`, `verificationToken`, `better_auth_account`, `better_auth_session`, `better_auth_verification`. Sign-in is email and password only.
+- Application tables are prefixed `lipi_`; `drizzle.config.ts` filters on `lipi_*`, so `db:generate` never emits auth tables. The auth baseline is generated separately with `drizzle.auth.config.ts`.
+- Production keeps the auth tables it already has: `db:auth` refuses non-loopback URLs and `db:migrate` keeps the default history table there.
 
-## Migration history
+## Seed safety
 
-Both projects use Drizzle. Their default history table is shared, and Infinitunes' newer timestamps would make Drizzle skip every Lipi migration. When `LOCAL_DEV_CONFIG` is set (and `DATABASE_URL` is loopback), Lipi records its history in `drizzle.__lipi_migrations` instead. Without `LOCAL_DEV_CONFIG`, behavior is unchanged and production keeps using the default table.
-
-- Existing local database whose default history holds only Lipi rows: those rows are copied (not moved) on first run.
-- Default history that mixes Lipi and other rows: the migration stops with instructions. Reset the local database and migrate Infinitunes first, then Lipi.
-- Production adoption is not automated and has not been exercised. See the open item in [todo](./todo.md).
-
-## Seed behavior and safety
-
-`db:seed` refuses to run when `NODE_ENV=production`, when `LOCAL_DEV_CONFIG` is unset, or when `DATABASE_URL` is not `localhost`, `127.0.0.1` or `::1`. It runs in one transaction with `ON CONFLICT DO NOTHING`, so running it twice leaves row counts unchanged. It never updates or deletes existing rows, and it stops if the fixture email already belongs to a different user ID.
+`db:seed` refuses to run when `NODE_ENV=production` or when `DATABASE_URL` is not `localhost`, `127.0.0.1` or `::1`. It runs in one transaction with `ON CONFLICT DO NOTHING`, never updates or deletes rows, and stops if the local email already belongs to a different user ID.
 
 ## Realtime
 
-`@hocuspocus/server` 4.7 fails under Bun (`crossws` rejects its Node adapter), so `realtime:dev` and `realtime:start` still run on Node 22. Everything else uses Bun.
+`@hocuspocus/server` 4.7 fails under Bun (`crossws` rejects its Node adapter), so `realtime:dev` and `realtime:start` run on Node 22.
 
-## Safe reset
+## Reset
 
-- `bun run db:down` stops the shared containers (Infinitunes' too) and keeps the data volumes.
-- Do not run `docker system prune` or delete the shared volumes from here: other projects use them.
-- To start Lipi data over, drop only the `lipi_*` tables and `drizzle.__lipi_migrations` in the shared database, then rerun `db:migrate` and `db:seed`.
+- `bun run db:down` stops the containers and keeps the data volumes.
+- To start Lipi data over without touching other data in the database, drop the `lipi_*` tables and `drizzle.__lipi_migrations`, then rerun `db:setup`.
+- To wipe everything, run `docker compose down -v` (deletes both volumes), then `bun run db:up` and `bun run db:setup`.
