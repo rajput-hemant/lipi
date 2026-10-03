@@ -12,6 +12,7 @@ import {
   vi,
 } from "vitest";
 
+import { SidebarProvider } from "../ui/sidebar";
 import { DocumentTree } from "./document-tree";
 
 const mockDocuments = [
@@ -86,7 +87,11 @@ describe("DocumentTree Keyboard Context Menu", () => {
     roots.push(root);
 
     act(() => {
-      root.render(<DocumentTree />);
+      root.render(
+        <SidebarProvider>
+          <DocumentTree />
+        </SidebarProvider>
+      );
     });
 
     const link = document.getElementById("document-tree-item-doc-1");

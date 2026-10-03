@@ -12,7 +12,8 @@ import {
   vi,
 } from "vitest";
 
-import { Sidebar } from "./sidebar";
+import { SidebarProvider, SidebarTrigger } from "../ui/sidebar";
+import { AppSidebar } from "./app-sidebar";
 
 const mockAccess = vi.hoisted(() => ({ value: "edit" }));
 
@@ -50,75 +51,151 @@ vi.mock("../ui/popover", () => ({
     <div>{children}</div>
   ),
   PopoverTrigger: ({ children }: React.PropsWithChildren) => (
-    <button>{children}</button>
+    <button data-testid="account-trigger">{children}</button>
   ),
 }));
 
-vi.mock("../ui/separator", () => ({
-  Separator: () => <hr />,
-}));
-
 const roots: ReturnType<typeof createRoot>[] = [];
+const desktopWidth = window.innerWidth;
 
 beforeAll(() => vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true));
 afterAll(() => vi.unstubAllGlobals());
 
-function renderSidebar(isCollapsed: boolean) {
+function renderSidebar(defaultOpen: boolean, width = desktopWidth) {
+  window.innerWidth = width;
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
   roots.push(root);
-  act(() => root.render(<Sidebar isCollapsed={isCollapsed} />));
+  act(() =>
+    root.render(
+      <SidebarProvider defaultOpen={defaultOpen}>
+        <SidebarTrigger />
+        <AppSidebar />
+      </SidebarProvider>
+    )
+  );
   return container;
 }
 
+const navButtons = (container: ParentNode) => [
+  ...container.querySelectorAll<HTMLElement>(
+    '[data-slot="sidebar-group-content"] button'
+  ),
+];
+
 afterEach(() => {
   mockAccess.value = "edit";
+  window.innerWidth = desktopWidth;
   act(() => roots.splice(0).forEach((root) => root.unmount()));
   document.body.replaceChildren();
 });
 
-describe("sidebar navigation", () => {
-  it("uses labeled icon-only dialog triggers with tooltips when collapsed", () => {
-    const container = renderSidebar(true);
-    const buttons = [...container.querySelectorAll("nav button")];
+describe("app sidebar", () => {
+  it("collapses to an icon rail with dialog triggers, tooltips and the popover tree", () => {
+    const container = renderSidebar(false);
+    const sidebar = container.querySelector('[data-slot="sidebar"]');
+    const buttons = navButtons(container);
 
-    expect(buttons).toHaveLength(3);
+    expect(sidebar?.getAttribute("data-state")).toBe("collapsed");
+    expect(sidebar?.getAttribute("data-collapsible")).toBe("icon");
     expect(buttons.map((button) => button.textContent?.trim())).toEqual([
-      "",
-      "",
-      "",
-    ]);
-    expect(buttons.map((button) => button.getAttribute("aria-label"))).toEqual([
       "My Workspaces",
       "Settings",
       "Trash",
     ]);
+    expect(buttons.map((b) => b.getAttribute("aria-haspopup"))).toEqual([
+      "dialog",
+      "dialog",
+      "dialog",
+    ]);
     expect(
-      buttons.map((button) => button.getAttribute("aria-haspopup"))
-    ).toEqual(["dialog", "dialog", "dialog"]);
-    expect(
-      buttons.every((button) =>
-        button.hasAttribute("data-base-ui-tooltip-trigger")
-      )
+      buttons.every((b) => b.hasAttribute("data-base-ui-tooltip-trigger"))
     ).toBe(true);
     expect(
       container.querySelector('[data-testid="document-tree-collapsed"]')
     ).toBeTruthy();
+    expect(container.querySelector('[data-testid="document-tree"]')).toBeNull();
+    expect(
+      container.querySelector('[data-testid="account-trigger"]')
+    ).toBeTruthy();
   });
 
-  it("shows text labels when expanded", () => {
-    const container = renderSidebar(false);
-    const buttons = [...container.querySelectorAll("nav button")];
+  it("shows the full tree and user card when expanded", () => {
+    const container = renderSidebar(true);
 
-    expect(buttons.map((button) => button.textContent?.trim())).toEqual([
-      "My Workspaces",
-      "Settings",
-      "Trash",
-    ]);
+    expect(
+      container
+        .querySelector('[data-slot="sidebar"]')
+        ?.getAttribute("data-state")
+    ).toBe("expanded");
     expect(
       container.querySelector('[data-testid="document-tree"]')
     ).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="account-trigger"]')
+    ).toBeNull();
+    expect(container.textContent).toContain("Sign out");
+  });
+
+  it("renders a keyboard-reachable rail that toggles the sidebar", () => {
+    const container = renderSidebar(true);
+    const rail = container.querySelector<HTMLElement>(
+      '[data-slot="sidebar-rail"]'
+    );
+
+    act(() => rail?.click());
+
+    expect(
+      container
+        .querySelector('[data-slot="sidebar"]')
+        ?.getAttribute("data-state")
+    ).toBe("collapsed");
+  });
+
+  it("toggles with Ctrl+B and persists the choice in the shadcn cookie", () => {
+    const container = renderSidebar(true);
+    const state = () =>
+      container
+        .querySelector('[data-slot="sidebar"]')
+        ?.getAttribute("data-state");
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "b", ctrlKey: true })
+      );
+    });
+
+    expect(state()).toBe("collapsed");
+    expect(document.cookie).toContain("sidebar_state=false");
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "b", metaKey: true })
+      );
+    });
+
+    expect(state()).toBe("expanded");
+    expect(document.cookie).toContain("sidebar_state=true");
+  });
+
+  it("opens the full sidebar in a sheet on mobile even when the desktop state is collapsed", () => {
+    const container = renderSidebar(false, 500);
+
+    expect(container.querySelector('[data-slot="sidebar"]')).toBeNull();
+
+    act(() =>
+      container
+        .querySelector<HTMLElement>('[data-slot="sidebar-trigger"]')
+        ?.click()
+    );
+
+    const sheet = document.querySelector('[data-mobile="true"]');
+    expect(sheet).toBeTruthy();
+    expect(sheet?.querySelector('[data-testid="document-tree"]')).toBeTruthy();
+    expect(
+      sheet?.querySelector('[data-testid="document-tree-collapsed"]')
+    ).toBeNull();
   });
 
   it.each([
@@ -127,38 +204,36 @@ describe("sidebar navigation", () => {
     ["view", "Browse pages in the trash"],
   ])("describes the Trash dialog for %s access", (access, description) => {
     mockAccess.value = access;
-    const container = renderSidebar(false);
-    const trash = [...container.querySelectorAll("nav button")].find(
+    const container = renderSidebar(true);
+    const trash = navButtons(container).find(
       (button) => button.textContent?.trim() === "Trash"
     );
-    act(() => (trash as HTMLElement).click());
+    act(() => trash?.click());
 
     expect(
       document.querySelector('[data-slot="dialog-description"]')?.textContent
     ).toBe(description);
   });
 
-  it("animates width without clipping expanded content and honours reduced motion", () => {
-    const expanded = renderSidebar(false).querySelector("aside")!;
-    expect(expanded.className).toContain("transition-[width]");
-    expect(expanded.className).toContain("motion-reduce:transition-none");
-    expect(
-      expanded.querySelector('[data-testid="document-tree"]')
-    ).toBeTruthy();
-    expect(expanded.firstElementChild?.firstElementChild?.className).toContain(
-      "w-64"
-    );
-  });
-
   it("keeps dialogs within the viewport on small screens", () => {
-    const container = renderSidebar(false);
-    const settings = [...container.querySelectorAll("nav button")].find(
+    const container = renderSidebar(true);
+    const settings = navButtons(container).find(
       (button) => button.textContent?.trim() === "Settings"
     );
-    act(() => (settings as HTMLElement).click());
+    act(() => settings?.click());
 
     const content = document.querySelector('[data-slot="dialog-content"]');
     expect(content?.className).toContain("max-h-[calc(100dvh-2rem)]");
     expect(content?.className).toContain("sm:max-w-4xl");
+  });
+
+  it("sizes the fixed sidebar with dvh instead of svh", () => {
+    const container = renderSidebar(true);
+    const className = container.querySelector(
+      '[data-slot="sidebar-container"]'
+    )?.className;
+
+    expect(className).toContain("h-dvh");
+    expect(className).not.toContain("h-svh");
   });
 });

@@ -51,9 +51,22 @@ import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
 import { Badge } from "../ui/badge";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import {
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  useSidebar,
+} from "../ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import {
   countChildren,
@@ -92,6 +105,7 @@ function DocumentTreeItem({
     documents: allDocuments,
   } = useAppState();
   const canEdit = useCanEditPages();
+  const { setOpenMobile } = useSidebar();
 
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(node.title);
@@ -239,14 +253,32 @@ function DocumentTreeItem({
     });
   }
 
+  const isNested = depth > 0;
+  const Item = isNested ? SidebarMenuSubItem : SidebarMenuItem;
+  const link = (
+    <Link
+      prefetch={false}
+      id={`document-tree-item-${node.id}`}
+      href={`/dashboard/${workspaceId}/${node.id}`}
+      tabIndex={focusedId === node.id ? 0 : -1}
+      onFocus={() => setFocusedId(node.id)}
+      onClick={() => setOpenMobile(false)}
+    />
+  );
+  const label = (
+    <>
+      <span className="shrink-0">
+        {node.icon ?
+          node.icon
+        : <HugeiconsIcon icon={File01Icon} strokeWidth={2} />}
+      </span>
+      <span>{node.title}</span>
+    </>
+  );
+
   const row = (
     <div
-      className={cn(
-        "group flex items-center gap-0.5 rounded-md pr-1",
-        buttonVariants({ size: "sm", variant: "ghost" }),
-        isActive && "bg-secondary"
-      )}
-      style={{ paddingLeft: `${depth * 12 + 4}px` }}
+      className="relative"
       onKeyDown={(e) => {
         if (isRenaming) return;
         if (
@@ -268,24 +300,8 @@ function DocumentTreeItem({
         }
       }}
     >
-      {hasChildren ?
-        <button
-          type="button"
-          aria-label={isExpanded ? "Collapse" : "Expand"}
-          aria-expanded={isExpanded}
-          className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
-          onClick={() => toggleExpanded(node.id)}
-        >
-          <HugeiconsIcon
-            icon={isExpanded ? ArrowDown01Icon : ArrowRight01Icon}
-            strokeWidth={2}
-            className="size-3.5"
-          />
-        </button>
-      : <span className="inline-block size-6 shrink-0" />}
-
       {isRenaming ?
-        <form onSubmit={submitRename} className="flex min-w-0 flex-1 gap-1">
+        <form onSubmit={submitRename} className="flex min-w-0 gap-1">
           <Input
             autoFocus
             value={renameValue}
@@ -315,38 +331,42 @@ function DocumentTreeItem({
           </Button>
         </form>
       : <>
-          <Link
-            prefetch={false}
-            id={`document-tree-item-${node.id}`}
-            href={`/dashboard/${workspaceId}/${node.id}`}
-            tabIndex={focusedId === node.id ? 0 : -1}
-            onFocus={() => setFocusedId(node.id)}
-            className="flex min-w-0 flex-1 items-center gap-2 truncate"
-          >
-            <span className="shrink-0">
-              {node.icon ?
-                node.icon
-              : <HugeiconsIcon
-                  icon={File01Icon}
-                  strokeWidth={2}
-                  className="size-4"
-                />
-              }
-            </span>
-            <span className="truncate">{node.title}</span>
-          </Link>
+          {isNested ?
+            <SidebarMenuSubButton
+              isActive={isActive}
+              render={link}
+              className={cn(hasChildren && "pr-8")}
+            >
+              {label}
+            </SidebarMenuSubButton>
+          : <SidebarMenuButton isActive={isActive} render={link}>
+              {label}
+            </SidebarMenuButton>
+          }
+          {hasChildren && (
+            <SidebarMenuAction
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+              aria-expanded={isExpanded}
+              className={cn(isNested && "top-1")}
+              onClick={() => toggleExpanded(node.id)}
+            >
+              <HugeiconsIcon
+                icon={isExpanded ? ArrowDown01Icon : ArrowRight01Icon}
+                strokeWidth={2}
+              />
+            </SidebarMenuAction>
+          )}
         </>
       }
     </div>
   );
 
   return (
-    <li
+    <Item
       role="treeitem"
       aria-level={depth + 1}
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-selected={isActive}
-      className="list-none"
     >
       {canEdit ?
         <ContextMenu>
@@ -397,63 +417,61 @@ function DocumentTreeItem({
         </ContextMenu>
       : row}
 
-      {creatingChild && (
-        <form
-          onSubmit={createChildPage}
-          className="relative my-1 mr-2"
-          style={{ paddingLeft: `${(depth + 1) * 12 + 28}px` }}
-        >
-          <EmojiPicker
-            title="Select an emoji"
-            side="right"
-            align="start"
-            getValue={setChildIcon}
-            className="absolute inset-y-0 left-0 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
-          >
-            {childIcon || (
-              <HugeiconsIcon
-                icon={File01Icon}
-                strokeWidth={2}
-                className="size-4"
+      {(creatingChild || (hasChildren && isExpanded)) && (
+        <SidebarMenuSub role="group" className="ml-3 mr-0 pl-2 pr-0">
+          {creatingChild && (
+            <SidebarMenuSubItem>
+              <form onSubmit={createChildPage} className="relative my-1">
+                <EmojiPicker
+                  title="Select an emoji"
+                  side="right"
+                  align="start"
+                  getValue={setChildIcon}
+                  className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
+                >
+                  {childIcon || (
+                    <HugeiconsIcon
+                      icon={File01Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
+                  )}
+                </EmojiPicker>
+                <Input
+                  autoFocus
+                  value={childTitle}
+                  onChange={(e) => setChildTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      setCreatingChild(false);
+                      setChildTitle("Untitled");
+                      setChildIcon("");
+                    }
+                  }}
+                  aria-label="New page title"
+                  className="h-9 pl-9"
+                />
+              </form>
+            </SidebarMenuSubItem>
+          )}
+          {isExpanded &&
+            node.children.map((child) => (
+              <DocumentTreeItem
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                workspaceId={workspaceId}
+                expandedIds={expandedIds}
+                toggleExpanded={toggleExpanded}
+                expandNode={expandNode}
+                focusedId={focusedId}
+                setFocusedId={setFocusedId}
               />
-            )}
-          </EmojiPicker>
-          <Input
-            autoFocus
-            value={childTitle}
-            onChange={(e) => setChildTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") {
-                e.preventDefault();
-                setCreatingChild(false);
-                setChildTitle("Untitled");
-                setChildIcon("");
-              }
-            }}
-            aria-label="New page title"
-            className="h-9 pl-9"
-          />
-        </form>
+            ))}
+        </SidebarMenuSub>
       )}
-
-      {hasChildren && isExpanded && (
-        <ul role="group" className="m-0 p-0">
-          {node.children.map((child) => (
-            <DocumentTreeItem
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              workspaceId={workspaceId}
-              expandedIds={expandedIds}
-              toggleExpanded={toggleExpanded}
-              expandNode={expandNode}
-              focusedId={focusedId}
-              setFocusedId={setFocusedId}
-            />
-          ))}
-        </ul>
-      )}
-    </li>
+    </Item>
   );
 }
 
@@ -586,123 +604,109 @@ export function DocumentTree() {
   }
 
   return (
-    <>
-      <div className="flex items-center justify-between px-4">
-        <p className="text-sm font-medium text-muted-foreground">Pages</p>
-        {canEdit ?
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={createRootToggle}
-                  className="size-7 text-muted-foreground"
-                  aria-label={isCreatingRoot ? "Cancel new page" : "New page"}
-                >
-                  {isCreatingRoot ?
-                    <HugeiconsIcon
-                      icon={Cancel01Icon}
-                      strokeWidth={2}
-                      className="size-4"
-                    />
-                  : <HugeiconsIcon
-                      icon={PlusSignIcon}
-                      strokeWidth={2}
-                      className="size-[18px]"
-                    />
-                  }
-                </Button>
-              }
+    <SidebarGroup>
+      <SidebarGroupLabel>
+        Pages
+        {!canEdit && access === "view" && (
+          <Badge variant="secondary" className="ml-auto text-xs">
+            View only
+          </Badge>
+        )}
+      </SidebarGroupLabel>
+      {canEdit && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <SidebarGroupAction
+                onClick={createRootToggle}
+                aria-label={isCreatingRoot ? "Cancel new page" : "New page"}
+              />
+            }
+          >
+            <HugeiconsIcon
+              icon={isCreatingRoot ? Cancel01Icon : PlusSignIcon}
+              strokeWidth={2}
             />
-            <TooltipContent>
-              {isCreatingRoot ? "Cancel" : "New page"}
-            </TooltipContent>
-          </Tooltip>
-        : access === "view" && (
-            <Badge variant="secondary" className="text-xs">
-              View only
-            </Badge>
-          )
-        }
-      </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            {isCreatingRoot ? "Cancel" : "New page"}
+          </TooltipContent>
+        </Tooltip>
+      )}
 
-      <div className="-mb-2 flex grow flex-col gap-1 overflow-hidden">
+      <SidebarGroupContent>
         {isCreatingRoot || forest.length ?
-          <ScrollArea>
-            <ul
-              role="tree"
-              aria-label="Workspace pages"
-              className="m-0 px-2 py-1"
-              onKeyDown={onTreeKeyDown}
-            >
-              {isCreatingRoot && (
-                <li className="list-none px-2">
-                  <form onSubmit={createRootPage} className="relative mb-1">
-                    <EmojiPicker
-                      title="Select an emoji"
-                      side="right"
-                      align="start"
-                      getValue={setRootIcon}
-                      className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
-                    >
-                      {rootIcon || (
-                        <HugeiconsIcon
-                          icon={File01Icon}
-                          strokeWidth={2}
-                          className="size-4"
-                        />
-                      )}
-                    </EmojiPicker>
-                    <Input
-                      autoFocus
-                      value={rootTitle}
-                      onChange={(e) => setRootTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Escape") {
-                          e.preventDefault();
-                          setIsCreatingRoot(false);
-                          setRootTitle("Untitled");
-                          setRootIcon("");
-                        }
-                      }}
-                      aria-label="New page title"
-                      className="h-9 px-9"
-                    />
-                    <Button
-                      type="submit"
-                      size="icon"
-                      variant="ghost"
-                      className="absolute inset-y-0 right-1 my-auto size-7"
-                      aria-label="Create page"
-                    >
+          <SidebarMenu
+            role="tree"
+            aria-label="Workspace pages"
+            className="gap-0.5"
+            onKeyDown={onTreeKeyDown}
+          >
+            {isCreatingRoot && (
+              <SidebarMenuItem>
+                <form onSubmit={createRootPage} className="relative mb-1">
+                  <EmojiPicker
+                    title="Select an emoji"
+                    side="right"
+                    align="start"
+                    getValue={setRootIcon}
+                    className="absolute inset-y-0 left-1 my-auto inline-flex size-7 items-center justify-center rounded-md hover:bg-muted"
+                  >
+                    {rootIcon || (
                       <HugeiconsIcon
-                        icon={Tick02Icon}
+                        icon={File01Icon}
                         strokeWidth={2}
                         className="size-4"
                       />
-                    </Button>
-                  </form>
-                </li>
-              )}
+                    )}
+                  </EmojiPicker>
+                  <Input
+                    autoFocus
+                    value={rootTitle}
+                    onChange={(e) => setRootTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") {
+                        e.preventDefault();
+                        setIsCreatingRoot(false);
+                        setRootTitle("Untitled");
+                        setRootIcon("");
+                      }
+                    }}
+                    aria-label="New page title"
+                    className="h-9 px-9"
+                  />
+                  <Button
+                    type="submit"
+                    size="icon"
+                    variant="ghost"
+                    className="absolute inset-y-0 right-1 my-auto size-7"
+                    aria-label="Create page"
+                  >
+                    <HugeiconsIcon
+                      icon={Tick02Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
+                  </Button>
+                </form>
+              </SidebarMenuItem>
+            )}
 
-              {forest.map((node) => (
-                <DocumentTreeItem
-                  key={node.id}
-                  node={node}
-                  depth={0}
-                  workspaceId={workspaceId}
-                  expandedIds={expandedIds}
-                  toggleExpanded={toggleExpanded}
-                  expandNode={expandNode}
-                  focusedId={activeFocusId}
-                  setFocusedId={setFocusedId}
-                />
-              ))}
-            </ul>
-            <ScrollBar />
-          </ScrollArea>
-        : <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
+            {forest.map((node) => (
+              <DocumentTreeItem
+                key={node.id}
+                node={node}
+                depth={0}
+                workspaceId={workspaceId}
+                expandedIds={expandedIds}
+                toggleExpanded={toggleExpanded}
+                expandNode={expandNode}
+                focusedId={activeFocusId}
+                setFocusedId={setFocusedId}
+              />
+            ))}
+          </SidebarMenu>
+        : <div className="flex flex-col items-center justify-center gap-4 px-2 py-6 text-muted-foreground">
             <HugeiconsIcon icon={FileNotFoundIcon} strokeWidth={2} size={32} />
             <p className="text-center text-sm">
               {canEdit ?
@@ -711,7 +715,7 @@ export function DocumentTree() {
             </p>
           </div>
         }
-      </div>
-    </>
+      </SidebarGroupContent>
+    </SidebarGroup>
   );
 }
