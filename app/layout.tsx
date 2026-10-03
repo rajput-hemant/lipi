@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 import type { Metadata, Viewport } from "next";
 
 import { Providers } from "@/components/providers";
+import { RouteFocus } from "@/components/route-focus";
 import { SkipLink } from "@/components/skip-link";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
@@ -102,6 +103,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
         )}
       >
         <SkipLink />
+        <RouteFocus />
         <Providers>
           {children}
           <Toaster />

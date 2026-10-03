@@ -50,7 +50,8 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
 
       <main
         id="main-content"
-        className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0"
+        tabIndex={-1}
+        className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0 outline-none"
       >
         <Logo className="mx-auto size-14 drop-shadow" />
         {children}
