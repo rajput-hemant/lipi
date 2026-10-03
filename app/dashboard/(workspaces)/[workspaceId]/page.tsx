@@ -19,9 +19,13 @@ import {
   getWorkspaceMembershipRole,
 } from "@/lib/db/queries/mutation-auth";
 import { hasWorkspacePermission } from "@/lib/workspace/permissions";
+import { InviteNotice, isInvalidInvite } from "../../invite-notice";
+import { UpdatedDate } from "./updated-date";
+import { sortByRecentlyUpdated, withParentTitles } from "./workspace-pages";
 
 type WorkspacePageProps = {
   params: Promise<{ workspaceId: string }>;
+  searchParams: Promise<{ invite?: string | string[] }>;
 };
 
 export const instant = false;
@@ -43,8 +47,12 @@ export async function generateMetadata({
   }
 }
 
-export default async function WorkspacePage({ params }: WorkspacePageProps) {
+export default async function WorkspacePage({
+  params,
+  searchParams,
+}: WorkspacePageProps) {
   const { workspaceId } = await params;
+  const { invite } = await searchParams;
   const user = await getCurrentUser();
 
   if (!user) {
@@ -61,11 +69,15 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
   const canEdit = hasWorkspacePermission(role, "document:write");
 
   const documents = await getDocuments(workspaceId);
-  const activeDocuments = documents.filter((doc) => !doc.inTrash);
+  const activeDocuments = withParentTitles(
+    sortByRecentlyUpdated(documents.filter((doc) => !doc.inTrash))
+  );
 
   return (
     <div className="flex h-full w-full flex-col overflow-y-auto">
-      <div className="mx-auto w-full max-w-4xl px-6 py-10 sm:px-8">
+      <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-8">
+        {isInvalidInvite(invite) && <InviteNotice className="mb-6" />}
+
         {/* Workspace Header */}
         <div className="flex flex-col gap-3 pb-8 border-b">
           <div className="flex items-center gap-3">
@@ -132,23 +144,18 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
                       <p className="truncate font-medium group-hover:text-primary">
                         {doc.title || "Untitled"}
                       </p>
+                      {doc.parentTitle && (
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                          in {doc.parentTitle}
+                        </p>
+                      )}
                       <div className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
                         <HugeiconsIcon
                           icon={Clock01Icon}
                           strokeWidth={2}
                           className="size-3.5 shrink-0"
                         />
-                        <span>
-                          {doc.updatedAt ?
-                            new Date(doc.updatedAt).toLocaleDateString(
-                              undefined,
-                              {
-                                month: "short",
-                                day: "numeric",
-                              }
-                            )
-                          : "Recently"}
-                        </span>
+                        <UpdatedDate iso={doc.updatedAt} />
                       </div>
                     </div>
                     <HugeiconsIcon
