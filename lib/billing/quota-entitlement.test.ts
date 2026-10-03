@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { userHasProPlanEntitlement } from "./quota-entitlement";
 
@@ -11,9 +11,12 @@ vi.mock("./subscription-access", () => ({
 }));
 
 describe("userHasProPlanEntitlement", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("requires the configured pro price and trialing status", async () => {
-    const previous = process.env.STRIPE_PRICE_ID_PRO;
-    process.env.STRIPE_PRICE_ID_PRO = "price_pro";
+    vi.stubEnv("STRIPE_PRICE_ID_PRO", "price_pro");
 
     mocks.getCurrentBillingSubscription.mockResolvedValueOnce({
       status: "trialing",
@@ -26,7 +29,5 @@ describe("userHasProPlanEntitlement", () => {
       priceId: "price_other",
     });
     await expect(userHasProPlanEntitlement("user-1")).resolves.toBe(false);
-
-    process.env.STRIPE_PRICE_ID_PRO = previous;
   });
 });
