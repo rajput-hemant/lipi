@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   assertUserCanAddCollaborator,
   assertUserCanCreateWorkspace,
+  assertUserCanReceiveWorkspaceTransfer,
 } from "./enforce-quotas";
 import { PlanQuotaError } from "./errors";
 
@@ -123,5 +124,44 @@ describe("plan quota enforcement", () => {
     await expect(assertUserCanAddCollaborator("u1")).rejects.toBeInstanceOf(
       PlanQuotaError
     );
+  });
+
+  describe("workspace transfer", () => {
+    // rows: [other collaborators in this workspace], [new owner's collaborators]
+    it("rejects a free new owner when the result exceeds the limit", async () => {
+      mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+      mocks.rows = [[{ value: 2 }], [{ value: 0 }]];
+
+      await expect(
+        assertUserCanReceiveWorkspaceTransfer("u2", "w1")
+      ).rejects.toMatchObject({ name: "PlanQuotaError", code: "collaborator" });
+    });
+
+    it("counts collaborators in workspaces the new owner already owns", async () => {
+      mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+      mocks.rows = [[{ value: 1 }], [{ value: 1 }]];
+
+      await expect(
+        assertUserCanReceiveWorkspaceTransfer("u2", "w1")
+      ).rejects.toBeInstanceOf(PlanQuotaError);
+    });
+
+    it("allows a free new owner within the limit", async () => {
+      mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+      mocks.rows = [[{ value: 1 }], [{ value: 0 }]];
+
+      await expect(
+        assertUserCanReceiveWorkspaceTransfer("u2", "w1")
+      ).resolves.toBeUndefined();
+    });
+
+    it("allows a pro new owner regardless of size", async () => {
+      mocks.getCurrentBillingSubscription.mockResolvedValue(proSubscription);
+      mocks.rows = [[{ value: 10 }], [{ value: 10 }]];
+
+      await expect(
+        assertUserCanReceiveWorkspaceTransfer("u2", "w1")
+      ).resolves.toBeUndefined();
+    });
   });
 });

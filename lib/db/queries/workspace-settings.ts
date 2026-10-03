@@ -4,6 +4,7 @@ import { revalidateTag } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { assertUserCanReceiveWorkspaceTransfer } from "@/lib/billing/enforce-quotas";
 import { db } from "..";
 import { collaborators, workspaces } from "../schema";
 import {
@@ -90,6 +91,11 @@ export async function transferWorkspaceOwnership(input: unknown) {
     if (!targetCollaborator) {
       throw new MutationAuthError("New owner must be an existing collaborator");
     }
+
+    await assertUserCanReceiveWorkspaceTransfer(
+      parsed.newOwnerUserId,
+      parsed.workspaceId
+    );
 
     await db.transaction(async (tx) => {
       await tx

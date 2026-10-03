@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { PlanQuotaError } from "@/lib/billing/errors";
 import { MutationAuthError } from "./mutation-auth";
 
 const mocks = vi.hoisted(() => ({
@@ -10,9 +11,13 @@ const mocks = vi.hoisted(() => ({
   deleteReturning: vi.fn(),
   updateReturning: vi.fn(),
   selectLimit: vi.fn(),
+  assertReceive: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+vi.mock("@/lib/billing/enforce-quotas", () => ({
+  assertUserCanReceiveWorkspaceTransfer: mocks.assertReceive,
+}));
 vi.mock("./mutation-auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./mutation-auth")>()),
   authorizeWorkspaceOwnerAction: mocks.authorizeWorkspaceOwnerAction,
@@ -131,6 +136,24 @@ describe("workspace settings actions", () => {
     ).resolves.toMatchObject({
       ok: false,
       message: "New owner must be an existing collaborator",
+    });
+  });
+
+  it("returns QUOTA_EXCEEDED when the new owner cannot hold the workspace", async () => {
+    mocks.selectLimit.mockResolvedValue([{ id: "c1" }]);
+    mocks.assertReceive.mockRejectedValue(
+      new PlanQuotaError("collaborator", "Ask them to upgrade to Pro")
+    );
+
+    await expect(
+      transferWorkspaceOwnership({
+        workspaceId,
+        newOwnerUserId: "33333333-3333-4333-8333-333333333333",
+      })
+    ).resolves.toEqual({
+      ok: false,
+      code: "QUOTA_EXCEEDED",
+      message: "Ask them to upgrade to Pro",
     });
   });
 
