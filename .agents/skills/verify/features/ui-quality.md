@@ -1,7 +1,7 @@
 # UI quality pass (cross-cutting)
 
 Status: PARTIAL live proof (dark theme, 390 px layout, console cleanliness on exercised pages). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/ui-quality/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
+Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V013
 
 Checklist applied per feature screen once drivable; not a separate route.

@@ -1,7 +1,7 @@
 # Authentication and session
 
 Status: PARTIAL live proof (email/password sign-up, sign-in, sign-out, wrong password, gating). Unexercised sub-features stay unticked. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/auth-session/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
+Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V002, LIP-V003, LIP-V004, LIP-V007, LIP-V014
 
 Email/password sign-up, sign-in, sign-out and password reset on Better Auth with a bcrypt hash against the local database. Pages live in `app/(auth)/{login,signup,reset-password}`; the API is `app/api/auth/[...all]/route.ts`; auth wiring is `lib/auth/create-auth.ts`.

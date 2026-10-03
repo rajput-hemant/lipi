@@ -1,7 +1,7 @@
 # Lobby, legal pages and footer
 
 Status: PARTIAL live proof (home, pricing, terms and privacy render and titles correct, no console errors). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/lobby-legal-public/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
+Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V006, LIP-V013
 
 Public marketing site: `/` (hero, features, tech stack, testimonials, open source), `/pricing`, `/terms`, `/privacy`, 404/error pages, footer newsletter form, theme toggle, robots/sitemap/manifest.

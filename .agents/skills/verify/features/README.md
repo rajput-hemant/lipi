@@ -1,6 +1,6 @@
 # Lipi feature map (DRAFT)
 
-Features marked PARTIAL were driven in a real browser on 2026-10-02 at commit `815ceda`; only their ticked sub-features carry live proof. Unmarked DRAFT rows were not exercised. Canonical problems, hypotheses and gaps: [docs/checks/verification-issues.md](../../../../docs/checks/verification-issues.md). Harness recipes: [../SKILL.md](../SKILL.md). Browser driving uses `chrome-devtools-axi` per the harness.
+Features marked PARTIAL were driven in a real browser on 2026-10-02 at commit `815ceda`; only their ticked sub-features carry live proof. Unmarked DRAFT rows were not exercised. Canonical problems, hypotheses and gaps: [docs/verification/verification-issues.md](../../../../docs/verification/verification-issues.md). Harness recipes: [../SKILL.md](../SKILL.md). Browser driving uses `chrome-devtools-axi` per the harness.
 
 | Feature                             | File                                                       | Status  | Last live proof      | Ledger                           |
 | ----------------------------------- | ---------------------------------------------------------- | ------- | -------------------- | -------------------------------- |
@@ -17,4 +17,4 @@ Features marked PARTIAL were driven in a real browser on 2026-10-02 at commit `8
 
 Not mapped as features: the data layer, quota math and token signing have unit tests only (`bun run test`) and are covered through the features above.
 
-Prior browser proofs (not new verification): the Playwright specs in `tests/e2e/` (`auth-workspace`, `documents-editor`, `collaboration`, `stripe-checkout`) are cited in `docs/requirements.md` and `docs/todo.md`. They were produced before this task and were not re-run here.
+Prior browser proofs (not new verification): the Playwright specs in `tests/e2e/` (`auth-workspace`, `documents-editor`, `collaboration`, `stripe-checkout`) are cited in `docs/requirements/requirements.md` and `docs/TODO.md`. They were produced before this task and were not re-run here.

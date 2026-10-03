@@ -20,7 +20,7 @@
 
 > Lipi is a portfolio showcase project (declared goal), not a commercial product.
 
-Product requirements: [docs/requirements.md](docs/requirements.md). Open work: [docs/todo.md](docs/todo.md). Other docs live in [docs/](docs/).
+Product requirements: [docs/requirements/requirements.md](docs/requirements/requirements.md). Open work: [docs/TODO.md](docs/TODO.md). Other docs live in [docs/](docs/).
 
 ## Building from Source
 

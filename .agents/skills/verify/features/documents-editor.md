@@ -1,7 +1,7 @@
 # Documents, page tree and editor
 
 Status: PARTIAL live proof (create page, edit, persistence, not-found page). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/documents-editor/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
+Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V009, LIP-V010, LIP-V013
 
 Nested pages in the sidebar tree and the BlockNote editor (`components/sidebar/`, `components/document-editor/`, `lib/db/documents-tree.ts`, route `app/dashboard/(workspaces)/[workspaceId]/[fileId]/page.tsx`).

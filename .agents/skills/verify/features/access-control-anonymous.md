@@ -1,7 +1,7 @@
 # Anonymous access and route gating
 
 Status: PARTIAL live proof (anonymous route matrix by curl, non-member workspace denial in the browser). API status expectations below were corrected from live results. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/access-control-anonymous/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
+Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V004, LIP-V005, LIP-V008
 
 What an unauthenticated visitor can and cannot reach. The gate is `proxy.ts` (public routes in `config/routes.ts`: `/`, `/terms`, `/privacy`, `/pricing`; auth routes `/login`, `/signup`, `/reset-password`; everything else needs a valid Better Auth session, otherwise redirect to `/login?from=<path>`), plus per-route checks in server components and API handlers. There is no anonymous identity concept in Lipi: unauthenticated means no access to workspace data.

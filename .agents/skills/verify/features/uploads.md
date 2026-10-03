@@ -1,7 +1,7 @@
 # Image and logo uploads
 
 Status: DRAFT, not live-verified. Last live proof: none.
-Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
+Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V010, LIP-V018
 
 UploadThing endpoints `documentImage`, `coverBanner`, `workspaceLogo` (`app/api/uploadthing/core.ts`) used by page cover/icon and the workspace logo field (`placeholder="https://... or upload an image"`).

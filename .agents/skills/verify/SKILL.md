@@ -18,7 +18,7 @@ Invoke it standalone:
 
 Read `AGENTS.md` first: this is a breaking-changes Next.js 16; read the relevant guide in `node_modules/next/dist/docs/` before changing app code. This skill does not change product code.
 
-Project overview and setup: [README.md](../../../README.md). Scope and acceptance criteria: [docs/requirements.md](../../../docs/requirements.md). Open work: [docs/todo.md](../../../docs/todo.md). Known problems, hypotheses and coverage gaps live in exactly one place: [docs/checks/verification-issues.md](../../../docs/checks/verification-issues.md) (IDs `LIP-Vnnn`). Feature files link to it and do not repeat it.
+Project overview and setup: [README.md](../../../README.md). Scope and acceptance criteria: [docs/requirements/requirements.md](../../../docs/requirements/requirements.md). Open work: [docs/TODO.md](../../../docs/TODO.md). Known problems, hypotheses and coverage gaps live in exactly one place: [docs/verification/verification-issues.md](../../../docs/verification/verification-issues.md) (IDs `LIP-Vnnn`). Feature files link to it and do not repeat it.
 
 ## Surface
 
