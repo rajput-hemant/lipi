@@ -33,35 +33,17 @@ git clone https://github.com/rajput-hemant/lipi
 cd lipi
 ```
 
-- Rename **.env.example** => **.env.local**, add your own environment variables.
-
-- Shared auth tables and legacy-user backfill are documented in [docs/shared-database-auth.md](docs/shared-database-auth.md) (run Infinitunes' `packages/db/src/backfill.ts` against the shared database).
-
-- Run the app with VS Code or the command line:
+- Install Bun 1.4.2, then follow [docs/local-development.md](docs/local-development.md). In short: copy **.env.example** to **.env.local**, set `LOCAL_DEV_COMPOSE` and `LOCAL_DEV_CONFIG` (shared Infinitunes assets), then:
 
 ```
-bun i || pnpm i || npm i || yarn
-bun dev || pnpm dev || npm run dev || yarn dev
+bun i
+bun run db:up        # Postgres, Redis, REST adapter only (no app container)
+bun run db:migrate   # run Infinitunes' migrations first
+bun run db:seed
+bun run dev
 ```
 
-<div align=center>
-
-### Docker and Makefile
-
-</div>
-
-- Build the Docker Image and start the container:
-
-```
-make build
-make start
-```
-
-- Stop the Docker container:
-
-```
-make stop
-```
+- Shared auth tables and legacy-user backfill are documented in [docs/shared-database-auth.md](docs/shared-database-auth.md).
 
 <div align=center>
 

@@ -26,7 +26,7 @@ Primary surface is the web UI (Next.js App Router, port 3000 by default; 3161 in
 
 ## Prerequisites
 
-- `bun`, `docker` (disposable Postgres only), a free set of ports (below), Node for `realtime/bootstrap.mjs`.
+- `bun`, `docker` (disposable Postgres only), a free set of ports (below), Node for `realtime/bootstrap.mjs` (Hocuspocus does not run under Bun).
 - Dependencies installed (`bun i`). `node_modules` is not shared between worktrees.
 - No real credentials are needed or allowed. Use the throwaway env block below. OAuth (Google/GitHub), Stripe, UploadThing and Upstash need real credentials and are therefore GAPs, not drive targets.
 - Never point `DATABASE_URL` at the shared Lipi/Infinitunes database or any production database.

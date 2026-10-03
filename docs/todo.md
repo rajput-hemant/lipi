@@ -17,6 +17,10 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [ ] Run Infinitunes' shared-table migrations and `BACKFILL_ALL` against the shared database so legacy users can sign in ([shared-database-auth](./shared-database-auth.md))
 - [ ] Choose the production realtime endpoint arrangement (same cookie-owning host vs separate host with `wss://` and the signed token) ([research](./research/realtime-collaboration.md))
 
+- [ ] Production adoption of Lipi's separate migration history is unproven: local mode uses `drizzle.__lipi_migrations`, production still shares `drizzle.__drizzle_migrations` with Infinitunes, whose newer timestamps make Drizzle skip Lipi migrations and whose migrator rejects foreign rows. Agree one history strategy before the next production migration. Priority: high. Evidence: `lib/db/migration-history.ts`, local runs on a disposable PostgreSQL 18.6 database. Status: open
+- [ ] Hocuspocus 4.7 does not start under Bun (`crossws` Node adapter), so `realtime:*` still needs Node 22. Revisit when Hocuspocus supports Bun. Priority: low. Evidence: `bun realtime/server.ts` fails at startup. Status: open
+- [ ] Infinitunes docs list a `lipi_passkey` table that Lipi does not have; confirm intent with the Infinitunes owner. Priority: low. Status: open
+
 ## Verification (PStack, partial)
 
 - [x] Source-grounded DRAFT verification skill and feature map - [.agents/skills/verify](../.agents/skills/verify/SKILL.md), symlinked at `.claude/skills/verify`
