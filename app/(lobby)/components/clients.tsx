@@ -26,7 +26,7 @@ export function Clients() {
         {[...Array(2)].map((_, i) => (
           <div
             key={i}
-            className="flex animate-[15s_slide_linear_infinite] flex-nowrap"
+            className="flex animate-[15s_slide_linear_infinite] flex-nowrap motion-reduce:animate-none"
           >
             {CLIENTS.map(({ alt, logo }) => (
               <div

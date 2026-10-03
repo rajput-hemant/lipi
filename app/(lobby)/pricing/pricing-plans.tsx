@@ -26,7 +26,7 @@ export function PricingPlans({ isAuthenticated }: Props) {
             <Card
               key={planType}
               className={cn(
-                "w-80 rounded-2xl py-6 transition-shadow ease-in-out hover:shadow-xl",
+                "w-full max-w-80 self-center rounded-2xl py-6 transition-shadow ease-in-out hover:shadow-xl",
                 isProPlan &&
                   "ring-4 ring-ring ring-offset-4 ring-offset-background hover:shadow-2xl"
               )}

@@ -47,7 +47,7 @@ export async function SiteFooter() {
                 href={siteConfig.links.github}
                 target="_blank"
                 rel="noreferrer"
-                className="duration-200 hover:text-foreground"
+                className="-m-2.5 p-2.5 duration-200 hover:text-foreground"
               >
                 <GitHub className="size-4 shrink-0" />
               </a>
@@ -59,7 +59,7 @@ export async function SiteFooter() {
                 href={siteConfig.links.x}
                 target="_blank"
                 rel="noreferrer"
-                className="duration-200 hover:text-foreground"
+                className="-m-2.5 p-2.5 duration-200 hover:text-foreground"
               >
                 <X className="size-4 shrink-0" />
               </a>
@@ -68,9 +68,9 @@ export async function SiteFooter() {
 
           {footerLinks.map((section) => (
             <div key={section.title} className="flex flex-col gap-2.5">
-              <h3 className="mb-1 text-sm font-semibold lg:text-sm">
+              <h2 className="mb-1 text-sm font-semibold lg:text-sm">
                 {section.title}
-              </h3>
+              </h2>
 
               {section.links.map((link) => (
                 <a
@@ -86,9 +86,9 @@ export async function SiteFooter() {
             </div>
           ))}
           <div className="col-span-full flex w-full flex-col gap-2 lg:max-w-[240px]">
-            <h3 className="mb-1.5 text-sm font-semibold lg:text-sm">
+            <h2 className="mb-1.5 text-sm font-semibold lg:text-sm">
               Subscribe to our newsletter
-            </h3>
+            </h2>
 
             <p className="mb-1.5 text-[13px] leading-6 text-muted-foreground lg:text-sm">
               Join Our Community! Get exclusive travel offers and insider tips.

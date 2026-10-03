@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 export function Testimonials() {
   return (
-    <section id="capabilities" className="container">
+    <section id="capabilities">
       <div className="mx-auto flex max-w-3xl flex-col items-center space-y-4 text-center">
         <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
           What you can do with Lipi
@@ -24,7 +24,7 @@ export function Testimonials() {
 
       <div
         className={cn(
-          "relative -mx-10 flex flex-col overflow-hidden pb-10 md:mx-0",
+          "relative -mx-4 flex flex-col overflow-hidden pb-10 md:mx-0",
           "before:absolute before:left-0 before:top-0 before:z-10 before:h-full before:w-20 before:bg-gradient-to-r before:from-background md:before:w-72",
           "after:absolute after:right-0 after:top-0 after:z-10 after:h-full after:w-20 after:bg-gradient-to-l after:from-background md:after:w-72"
         )}
@@ -38,9 +38,9 @@ export function Testimonials() {
                 "flex-row-reverse": rowIndex === 1,
                 "animate-[slide_250s_linear_infinite]": true,
                 "animate-[slide_250s_linear_infinite_reverse]": rowIndex === 1,
-                "ml-[100vw]": rowIndex === 1,
+                "ml-[100vw] motion-reduce:ml-0": rowIndex === 1,
               },
-              "hover:paused"
+              "hover:paused motion-reduce:animate-none"
             )}
           >
             {LOBBY_CAPABILITIES.map(({ title, description }) => (
