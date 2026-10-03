@@ -197,9 +197,9 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V023 Tree context menu not opened by keyboard
 
-- Class: CONFIRMED. Severity: low. State: fixed (2026-10-03, fix branch).
-- Evidence: Base UI's ContextMenuTrigger listens exclusively to the `contextmenu` event and ignores keyboard interactions; on macOS / Chrome (and standard browser accessibility flows), `Shift+F10` or the `ContextMenu` key on focused tree item links does not synthesize a `contextmenu` event natively, leaving tree actions (New subpage, Rename, Duplicate, Move to trash) inaccessible via keyboard.
-- Fix: `components/sidebar/document-tree.tsx` TreeNodeItem now listens for `ContextMenu` key or `Shift+F10` on the item row, calculates the element bounds, and dispatches a synthetic `contextmenu` MouseEvent directly to the trigger wrapper. Verified live in Chrome: focusing tree link and pressing `Shift+F10` opens the context menu with keyboard focus on the menu items; pressing Escape closes it and restores focus to the tree item link. Unit test `components/sidebar/document-tree-keyboard.test.tsx` passes.
+- Class: HYPOTHESIS (tool-dispatched proof). Severity: low. State: fixed (2026-10-03, fix branch).
+- Evidence: Base UI's ContextMenuTrigger listens exclusively to DOM `contextmenu` events. In tool-driven runs (`chrome-devtools-axi`), focusing a tree item link and sending key events does not trigger Base UI's listener unless a `contextmenu` event is explicitly dispatched. Native hardware keyboard behavior (`Shift+F10` / `ContextMenu` key) across OS/browser configurations remains unverified on physical hardware.
+- Fix: `components/sidebar/document-tree.tsx` `DocumentTreeItem` now listens for `ContextMenu` key or `Shift+F10` on the item row, calculates the element bounds, and dispatches a synthetic `contextmenu` MouseEvent directly to the trigger wrapper. Verified in Chrome via `chrome-devtools-axi`: focusing tree link and dispatching `Shift+F10` opens the context menu with keyboard focus on menu items; pressing Escape closes it and restores focus to the tree item link. Unit test `components/sidebar/document-tree-keyboard.test.tsx` passes.
 
 ### LIP-V024 Workspace name not shown in breadcrumb or page heading
 
