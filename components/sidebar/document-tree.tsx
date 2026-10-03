@@ -29,7 +29,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useAppState } from "@/hooks/use-app-state";
+import { useAppState, useCanEditPages } from "@/hooks/use-app-state";
 import { buildOptimisticDuplicateDocuments } from "@/lib/db/client-document-state";
 import {
   flattenVisibleTreeNodes,
@@ -45,6 +45,7 @@ import {
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
+import { Badge } from "../ui/badge";
 import { Button, buttonVariants } from "../ui/button";
 import { Input } from "../ui/input";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
@@ -83,8 +84,10 @@ function DocumentTreeItem({
     addDocument,
     deleteDocument,
     updateDocument: updateDocumentState,
+    replaceDocuments,
     documents: allDocuments,
   } = useAppState();
+  const canEdit = useCanEditPages();
 
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(node.title);
@@ -150,7 +153,10 @@ function DocumentTreeItem({
         notifyPageChanges();
         return "Page created.";
       },
-      error: "Could not create page.",
+      error: () => {
+        deleteDocument(newDocument.id);
+        return "Could not create page.";
+      },
     });
   }
 
@@ -192,26 +198,125 @@ function DocumentTreeItem({
       ...collectDescendantIds(records, node.id),
     ]);
 
+    const previous = allDocuments.map((document) => ({ ...document }));
+
     for (const document of allDocuments) {
       const documentId = document.id;
       if (!documentId || !trashIds.has(documentId)) continue;
       updateDocumentState({ ...document, inTrash: true });
     }
 
-    const openDocumentId = pathname.split("/")[3];
-    if (openDocumentId && trashIds.has(openDocumentId)) {
-      router.push(`/dashboard/${workspaceId}`);
-    }
-
     toast.promise(softDeleteDocumentTree(node.id), {
       loading: "Moving to trash...",
       success: () => {
+        const openDocumentId = pathname.split("/")[3];
+        if (openDocumentId && trashIds.has(openDocumentId)) {
+          router.push(`/dashboard/${workspaceId}`);
+        }
         notifyPageChanges();
         return "Moved to trash.";
       },
-      error: "Could not move to trash.",
+      error: (error) => {
+        replaceDocuments(previous);
+        return error instanceof Error && error.message === "Forbidden" ?
+            "You do not have permission to move this page to trash."
+          : "Could not move to trash.";
+      },
     });
   }
+
+  const row = (
+    <div
+      className={cn(
+        "group flex items-center gap-0.5 rounded-md pr-1",
+        buttonVariants({ size: "sm", variant: "ghost" }),
+        isActive && "bg-secondary"
+      )}
+      style={{ paddingLeft: `${depth * 12 + 4}px` }}
+      onKeyDown={(e) => {
+        if (isRenaming) return;
+        if (
+          e.key === "ContextMenu" ||
+          (e.shiftKey && (e.key === "F10" || e.code === "F10"))
+        ) {
+          e.preventDefault();
+          e.stopPropagation();
+          const target = e.currentTarget;
+          const rect = target.getBoundingClientRect();
+          target.dispatchEvent(
+            new MouseEvent("contextmenu", {
+              bubbles: true,
+              cancelable: true,
+              clientX: rect.left + rect.width / 2,
+              clientY: rect.top + rect.height / 2,
+            })
+          );
+        }
+      }}
+    >
+      {hasChildren ?
+        <button
+          type="button"
+          aria-label={isExpanded ? "Collapse" : "Expand"}
+          className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+          onClick={() => toggleExpanded(node.id)}
+        >
+          <HugeiconsIcon
+            icon={isExpanded ? ArrowDown01Icon : ArrowRight01Icon}
+            strokeWidth={2}
+            className="size-3.5"
+          />
+        </button>
+      : <span className="inline-block size-6 shrink-0" />}
+
+      {isRenaming ?
+        <form onSubmit={submitRename} className="flex min-w-0 flex-1 gap-1">
+          <Input
+            autoFocus
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                e.preventDefault();
+                setRenameValue(node.title);
+                setIsRenaming(false);
+              }
+            }}
+            className="h-8"
+          />
+          <Button type="submit" size="icon" variant="ghost" className="size-8">
+            <HugeiconsIcon
+              icon={Tick02Icon}
+              strokeWidth={2}
+              className="size-4"
+            />
+          </Button>
+        </form>
+      : <>
+          <Link
+            prefetch={false}
+            id={`document-tree-item-${node.id}`}
+            href={`/dashboard/${workspaceId}/${node.id}`}
+            tabIndex={focusedId === node.id ? 0 : -1}
+            onFocus={() => setFocusedId(node.id)}
+            className="flex min-w-0 flex-1 items-center gap-2 truncate"
+          >
+            <span className="shrink-0">
+              {node.icon ?
+                node.icon
+              : <HugeiconsIcon
+                  icon={File01Icon}
+                  strokeWidth={2}
+                  className="size-4"
+                />
+              }
+            </span>
+            <span className="truncate">{node.title}</span>
+          </Link>
+        </>
+      }
+    </div>
+  );
 
   return (
     <li
@@ -221,150 +326,53 @@ function DocumentTreeItem({
       aria-selected={isActive}
       className="list-none"
     >
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <div
-            className={cn(
-              "group flex items-center gap-0.5 rounded-md pr-1",
-              buttonVariants({ size: "sm", variant: "ghost" }),
-              isActive && "bg-secondary"
-            )}
-            style={{ paddingLeft: `${depth * 12 + 4}px` }}
-            onKeyDown={(e) => {
-              if (isRenaming) return;
-              if (
-                e.key === "ContextMenu" ||
-                (e.shiftKey && (e.key === "F10" || e.code === "F10"))
-              ) {
-                e.preventDefault();
-                e.stopPropagation();
-                const target = e.currentTarget;
-                const rect = target.getBoundingClientRect();
-                target.dispatchEvent(
-                  new MouseEvent("contextmenu", {
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: rect.left + rect.width / 2,
-                    clientY: rect.top + rect.height / 2,
-                  })
-                );
-              }
-            }}
-          >
-            {hasChildren ?
-              <button
-                type="button"
-                aria-label={isExpanded ? "Collapse" : "Expand"}
-                className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
-                onClick={() => toggleExpanded(node.id)}
-              >
-                <HugeiconsIcon
-                  icon={isExpanded ? ArrowDown01Icon : ArrowRight01Icon}
-                  strokeWidth={2}
-                  className="size-3.5"
-                />
-              </button>
-            : <span className="inline-block size-6 shrink-0" />}
+      {canEdit ?
+        <ContextMenu>
+          <ContextMenuTrigger>{row}</ContextMenuTrigger>
 
-            {isRenaming ?
-              <form
-                onSubmit={submitRename}
-                className="flex min-w-0 flex-1 gap-1"
-              >
-                <Input
-                  autoFocus
-                  value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      setRenameValue(node.title);
-                      setIsRenaming(false);
-                    }
-                  }}
-                  className="h-8"
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  variant="ghost"
-                  className="size-8"
-                >
-                  <HugeiconsIcon
-                    icon={Tick02Icon}
-                    strokeWidth={2}
-                    className="size-4"
-                  />
-                </Button>
-              </form>
-            : <>
-                <Link
-                  prefetch={false}
-                  id={`document-tree-item-${node.id}`}
-                  href={`/dashboard/${workspaceId}/${node.id}`}
-                  tabIndex={focusedId === node.id ? 0 : -1}
-                  onFocus={() => setFocusedId(node.id)}
-                  className="flex min-w-0 flex-1 items-center gap-2 truncate"
-                >
-                  <span className="shrink-0">
-                    {node.icon ?
-                      node.icon
-                    : <HugeiconsIcon
-                        icon={File01Icon}
-                        strokeWidth={2}
-                        className="size-4"
-                      />
-                    }
-                  </span>
-                  <span className="truncate">{node.title}</span>
-                </Link>
-              </>
-            }
-          </div>
-        </ContextMenuTrigger>
-
-        <ContextMenuContent className="w-52">
-          <ContextMenuItem
-            className="cursor-pointer"
-            onClick={() => setCreatingChild(true)}
-          >
-            <HugeiconsIcon
-              icon={PlusSignIcon}
-              strokeWidth={2}
-              className="mr-2 size-4"
-            />
-            New subpage
-          </ContextMenuItem>
-          <ContextMenuItem
-            className="cursor-pointer"
-            onClick={() => {
-              setRenameValue(node.title);
-              setIsRenaming(true);
-            }}
-          >
-            Rename
-          </ContextMenuItem>
-          <ContextMenuItem className="cursor-pointer" onClick={duplicatePage}>
-            <HugeiconsIcon
-              icon={Copy01Icon}
-              strokeWidth={2}
-              className="mr-2 size-4"
-            />
-            Duplicate
-          </ContextMenuItem>
-          <ContextMenuItem
-            className="cursor-pointer !text-red-500"
-            onClick={moveToTrash}
-          >
-            <HugeiconsIcon
-              icon={Delete02Icon}
-              strokeWidth={2}
-              className="mr-2 size-4"
-            />
-            Move to trash
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
+          <ContextMenuContent className="w-52">
+            <ContextMenuItem
+              className="cursor-pointer"
+              onClick={() => setCreatingChild(true)}
+            >
+              <HugeiconsIcon
+                icon={PlusSignIcon}
+                strokeWidth={2}
+                className="mr-2 size-4"
+              />
+              New subpage
+            </ContextMenuItem>
+            <ContextMenuItem
+              className="cursor-pointer"
+              onClick={() => {
+                setRenameValue(node.title);
+                setIsRenaming(true);
+              }}
+            >
+              Rename
+            </ContextMenuItem>
+            <ContextMenuItem className="cursor-pointer" onClick={duplicatePage}>
+              <HugeiconsIcon
+                icon={Copy01Icon}
+                strokeWidth={2}
+                className="mr-2 size-4"
+              />
+              Duplicate
+            </ContextMenuItem>
+            <ContextMenuItem
+              className="cursor-pointer !text-red-500"
+              onClick={moveToTrash}
+            >
+              <HugeiconsIcon
+                icon={Delete02Icon}
+                strokeWidth={2}
+                className="mr-2 size-4"
+              />
+              Move to trash
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      : row}
 
       {creatingChild && (
         <form
@@ -431,6 +439,7 @@ export function DocumentTree() {
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
   const { documents, addDocument } = useAppState();
+  const canEdit = useCanEditPages();
 
   const forest = useMemo(() => getDocumentForest(documents), [documents]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -551,35 +560,40 @@ export function DocumentTree() {
     <>
       <div className="flex items-center justify-between px-4">
         <p className="text-sm font-medium text-muted-foreground">Pages</p>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={createRootToggle}
-                className="size-7 text-muted-foreground"
-                aria-label={isCreatingRoot ? "Cancel new page" : "New page"}
-              >
-                {isCreatingRoot ?
-                  <HugeiconsIcon
-                    icon={Cancel01Icon}
-                    strokeWidth={2}
-                    className="size-4"
-                  />
-                : <HugeiconsIcon
-                    icon={PlusSignIcon}
-                    strokeWidth={2}
-                    className="size-[18px]"
-                  />
-                }
-              </Button>
-            }
-          />
-          <TooltipContent>
-            {isCreatingRoot ? "Cancel" : "New page"}
-          </TooltipContent>
-        </Tooltip>
+        {canEdit ?
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={createRootToggle}
+                  className="size-7 text-muted-foreground"
+                  aria-label={isCreatingRoot ? "Cancel new page" : "New page"}
+                >
+                  {isCreatingRoot ?
+                    <HugeiconsIcon
+                      icon={Cancel01Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
+                  : <HugeiconsIcon
+                      icon={PlusSignIcon}
+                      strokeWidth={2}
+                      className="size-[18px]"
+                    />
+                  }
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {isCreatingRoot ? "Cancel" : "New page"}
+            </TooltipContent>
+          </Tooltip>
+        : <Badge variant="secondary" className="text-[10px] uppercase">
+            View only
+          </Badge>
+        }
       </div>
 
       <div className="-mb-2 flex grow flex-col gap-1 overflow-hidden">
@@ -658,7 +672,9 @@ export function DocumentTree() {
         : <div className="flex h-full flex-col items-center justify-center gap-4 px-4 text-muted-foreground">
             <HugeiconsIcon icon={FileNotFoundIcon} strokeWidth={2} size={32} />
             <p className="text-center text-sm">
-              No pages yet. Create your first page.
+              {canEdit ?
+                "No pages yet. Create your first page."
+              : "No pages yet. Only editors and the owner can add pages."}
             </p>
           </div>
         }

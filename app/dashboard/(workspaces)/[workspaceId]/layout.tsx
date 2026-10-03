@@ -10,7 +10,7 @@ import {
   RESIZABLE_LAYOUT_COOKIE,
 } from "@/lib/dashboard/resizable-layout-cookies";
 import { getDocuments } from "@/lib/db/queries";
-import { assertWorkspaceAccess } from "@/lib/db/queries/mutation-auth";
+import { getWorkspaceMembershipRole } from "@/lib/db/queries/mutation-auth";
 import { ResizableLayout } from "../components/resizable-layout";
 
 export const instant = false;
@@ -24,7 +24,10 @@ export const WorkspaceLayout: React.FCC<{
 
   if (!user) redirect("/login");
 
-  const workspace = await assertWorkspaceAccess(user.id, workspaceId);
+  const { workspace, role } = await getWorkspaceMembershipRole(
+    user.id,
+    workspaceId
+  );
 
   const cookieStore = await cookies();
 
@@ -41,6 +44,7 @@ export const WorkspaceLayout: React.FCC<{
       key={workspaceId}
       user={user}
       workspace={workspace}
+      role={role}
       documents={documents}
     >
       <WorkspaceRealtimeProvider workspaceId={workspaceId}>

@@ -39,7 +39,12 @@ vi.mock("@/hooks/use-app-state", () => ({
     documents: mockDocuments,
     user: { id: "user-1", email: "test@example.com" },
     workspace: { id: "ws-1", title: "Test WS" },
+    replaceDocuments: vi.fn(),
+    addDocument: vi.fn(),
+    updateDocument: vi.fn(),
+    deleteDocument: vi.fn(),
   }),
+  useCanEditPages: () => true,
   useAppActions: () => ({
     addDocument: vi.fn(),
     updateDocument: vi.fn(),

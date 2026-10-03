@@ -13,6 +13,7 @@ import {
 type AppStateProviderProps = React.PropsWithChildren<
   Pick<AppState, "user" | "documents"> & {
     workspace?: AppState["workspace"];
+    role?: AppState["role"];
   }
 >;
 
@@ -20,15 +21,16 @@ export function AppStateProvider({
   children,
   user,
   workspace,
+  role,
   documents,
 }: AppStateProviderProps) {
   const [store] = React.useState(() =>
-    createAppStore({ user, workspace, documents })
+    createAppStore({ user, workspace, role, documents })
   );
 
   React.useEffect(() => {
-    syncAppStore(store, { user, workspace, documents });
-  }, [store, user, workspace, documents]);
+    syncAppStore(store, { user, workspace, role, documents });
+  }, [store, user, workspace, role, documents]);
 
   return (
     <AppStateContext.Provider value={store}>

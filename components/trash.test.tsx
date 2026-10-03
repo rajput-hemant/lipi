@@ -37,8 +37,11 @@ function doc(id: string, title: string) {
   };
 }
 
-function render(documents = [doc("a", "Alpha"), doc("b", "Beta")]) {
-  const store = createAppStore({ user: null, documents });
+function render(
+  documents = [doc("a", "Alpha"), doc("b", "Beta")],
+  role: "owner" | "editor" | "viewer" = "owner"
+) {
+  const store = createAppStore({ user: null, documents, role });
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
@@ -107,5 +110,20 @@ describe("Trash", () => {
     await act(async () => byText("Delete permanently")!.click());
     expect(deleteDocumentPermanently).toHaveBeenCalledWith("a");
     expect(store.documents.map((d) => d.id)).toEqual(["b"]);
+  });
+
+  it("hides restore and delete controls for viewers", () => {
+    render(undefined, "viewer");
+    expect(document.body.textContent).toContain("Alpha");
+    expect(document.body.textContent).toContain("view-only access");
+    expect(document.querySelector('button[aria-label^="Restore"]')).toBeNull();
+    expect(
+      document.querySelector('button[aria-label$="permanently"]')
+    ).toBeNull();
+  });
+
+  it("keeps restore and delete controls for editors", () => {
+    render(undefined, "editor");
+    expect(byLabel("Restore Alpha")).toBeTruthy();
   });
 });

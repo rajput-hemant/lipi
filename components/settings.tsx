@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { EmojiPicker } from "@/components/emoji-picker";
+import { useNotifyWorkspacePageChanges } from "@/components/realtime/workspace-realtime-provider";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +43,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useAppActions } from "@/hooks/use-app-state";
 import {
   createWorkspaceCollaboratorInvite,
   deleteWorkspace,
@@ -71,6 +73,8 @@ type MembersPayload = Awaited<ReturnType<typeof listWorkspaceMembers>>;
 export function Settings() {
   const pathname = usePathname();
   const router = useRouter();
+  const appStore = useAppActions();
+  const notifyPageChanges = useNotifyWorkspacePageChanges();
   const workspaceId = pathname.split("/")[2];
   const [data, setData] = React.useState<MembersPayload | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -180,6 +184,16 @@ export function Settings() {
       {
         loading: "Saving workspace settings...",
         success: () => {
+          if (appStore.workspace) {
+            appStore.setWorkspace({
+              ...appStore.workspace,
+              title: values.title,
+              iconId: selectedEmoji,
+              logo: values.logo || null,
+            });
+          }
+          router.refresh();
+          notifyPageChanges();
           refresh();
           return "Workspace updated";
         },
@@ -213,6 +227,8 @@ export function Settings() {
       {
         loading: "Updating role...",
         success: () => {
+          router.refresh();
+          notifyPageChanges();
           refresh();
           return "Role updated";
         },
@@ -227,6 +243,7 @@ export function Settings() {
     toast.promise(removeWorkspaceMember({ workspaceId, collaboratorId }), {
       loading: "Removing member...",
       success: () => {
+        notifyPageChanges();
         refresh();
         return "Member removed";
       },
@@ -245,6 +262,8 @@ export function Settings() {
       {
         loading: "Transferring ownership...",
         success: () => {
+          router.refresh();
+          notifyPageChanges();
           refresh();
           return "Ownership transferred";
         },

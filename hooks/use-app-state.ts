@@ -3,13 +3,17 @@ import { proxy, useSnapshot } from "valtio";
 
 import type { SessionUser } from "@/lib/auth/types";
 import type { workspaces } from "@/lib/db/schema";
+import type { WorkspaceMembershipRole } from "@/lib/workspace/permissions";
 import type { Document } from "@/types/db";
+
+import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 
 export type WorkspaceRecord = typeof workspaces.$inferSelect;
 
 export type AppState = {
   user: SessionUser | null;
   workspace?: WorkspaceRecord | null;
+  role?: WorkspaceMembershipRole | null;
   documents: Document[];
   collaborators: CollaboratorPresence[];
 };
@@ -28,6 +32,7 @@ export type AppAction = {
   replaceDocuments: (documents: Document[]) => void;
   setCollaborators: (collaborators: CollaboratorPresence[]) => void;
   setWorkspace: (workspace: WorkspaceRecord | null) => void;
+  setRole: (role: WorkspaceMembershipRole | null) => void;
 };
 
 export type Store = AppState & AppAction;
@@ -35,16 +40,21 @@ export type Store = AppState & AppAction;
 export function createAppStore(
   initial: Pick<AppState, "user" | "documents"> & {
     workspace?: WorkspaceRecord | null;
+    role?: WorkspaceMembershipRole | null;
   }
 ): Store {
   const store = proxy<Store>({
     user: initial.user,
     workspace: initial.workspace ?? null,
+    role: initial.role ?? null,
     documents: initial.documents,
     collaborators: [],
 
     setWorkspace(workspace) {
       store.workspace = workspace;
+    },
+    setRole(role) {
+      store.role = role;
     },
     addDocument(document) {
       const index = store.documents.findIndex(
@@ -79,9 +89,13 @@ export function syncAppStore(
   store: Store,
   state: Pick<AppState, "user" | "documents"> & {
     workspace?: WorkspaceRecord | null;
+    role?: WorkspaceMembershipRole | null;
   }
 ) {
   store.user = state.user;
+  if (state.role !== undefined) {
+    store.role = state.role;
+  }
   if (state.workspace !== undefined) {
     store.workspace = state.workspace;
   }
@@ -109,4 +123,9 @@ export function useAppActions() {
     throw new Error("Cannot use `useAppActions` outside of a `StoreProvider`");
 
   return store;
+}
+
+export function useCanEditPages() {
+  const { role } = useAppState();
+  return !role || hasWorkspacePermission(role, "document:write");
 }

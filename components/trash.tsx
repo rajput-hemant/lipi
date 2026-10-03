@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import type { Document } from "@/types/db";
 
 import { toAllDocumentRecords } from "@/components/sidebar/document-tree-utils";
-import { useAppState } from "@/hooks/use-app-state";
+import { useAppState, useCanEditPages } from "@/hooks/use-app-state";
 import {
   patchDocumentsForRestore,
   permanentDeleteTargetIds,
@@ -40,6 +40,7 @@ function cloneDocuments(documents: readonly Document[]): Document[] {
 
 export function Trash() {
   const { documents, replaceDocuments } = useAppState();
+  const canEdit = useCanEditPages();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const trashed = documents.filter((document) => document.inTrash);
@@ -95,6 +96,12 @@ export function Trash() {
   return (
     <div className="flex h-full flex-col gap-2">
       <p className="px-4 text-sm font-medium text-muted-foreground">Trash</p>
+      {!canEdit && trashed.length > 0 && (
+        <p className="px-4 text-xs text-muted-foreground">
+          You have view-only access. Ask an editor or the owner to restore or
+          delete pages.
+        </p>
+      )}
 
       {trashed.length ?
         <ScrollArea className="h-[min(24rem,50vh)] px-4">
@@ -119,49 +126,51 @@ export function Trash() {
                   {document.title}
                 </span>
 
-                <div className="flex shrink-0 gap-1">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="size-7"
-                          aria-label={`Restore ${document.title}`}
-                          onClick={() => restore(document.id)}
-                        >
-                          <HugeiconsIcon
-                            icon={Undo02Icon}
-                            strokeWidth={2}
-                            className="size-4"
-                          />
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>Restore</TooltipContent>
-                  </Tooltip>
+                {canEdit && (
+                  <div className="flex shrink-0 gap-1">
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="size-7"
+                            aria-label={`Restore ${document.title}`}
+                            onClick={() => restore(document.id)}
+                          >
+                            <HugeiconsIcon
+                              icon={Undo02Icon}
+                              strokeWidth={2}
+                              className="size-4"
+                            />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>Restore</TooltipContent>
+                    </Tooltip>
 
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="size-7 text-destructive"
-                          aria-label={`Delete ${document.title} permanently`}
-                          onClick={() => setPendingDeleteId(document.id)}
-                        >
-                          <HugeiconsIcon
-                            icon={Delete01Icon}
-                            strokeWidth={2}
-                            className="size-4"
-                          />
-                        </Button>
-                      }
-                    />
-                    <TooltipContent>Delete permanently</TooltipContent>
-                  </Tooltip>
-                </div>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="size-7 text-destructive"
+                            aria-label={`Delete ${document.title} permanently`}
+                            onClick={() => setPendingDeleteId(document.id)}
+                          >
+                            <HugeiconsIcon
+                              icon={Delete01Icon}
+                              strokeWidth={2}
+                              className="size-4"
+                            />
+                          </Button>
+                        }
+                      />
+                      <TooltipContent>Delete permanently</TooltipContent>
+                    </Tooltip>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -179,7 +188,9 @@ export function Trash() {
           <div className="space-y-1">
             <p className="text-sm font-medium">Nothing in the trash</p>
             <p className="text-sm text-muted-foreground">
-              Pages you delete will appear here.
+              {canEdit ?
+                "Pages you delete will appear here."
+              : "Pages deleted by editors will appear here."}
             </p>
           </div>
         </div>

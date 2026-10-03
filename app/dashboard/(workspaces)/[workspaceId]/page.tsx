@@ -10,10 +10,15 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import type { Metadata } from "next";
 
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth";
 import { getDocuments } from "@/lib/db/queries";
-import { assertWorkspaceAccess } from "@/lib/db/queries/mutation-auth";
+import {
+  assertWorkspaceAccess,
+  getWorkspaceMembershipRole,
+} from "@/lib/db/queries/mutation-auth";
+import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 
 type WorkspacePageProps = {
   params: Promise<{ workspaceId: string }>;
@@ -46,12 +51,14 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
     redirect("/login");
   }
 
-  let workspace;
+  let membership;
   try {
-    workspace = await assertWorkspaceAccess(user.id, workspaceId);
+    membership = await getWorkspaceMembershipRole(user.id, workspaceId);
   } catch {
     notFound();
   }
+  const { workspace, role } = membership;
+  const canEdit = hasWorkspacePermission(role, "document:write");
 
   const documents = await getDocuments(workspaceId);
   const activeDocuments = documents.filter((doc) => !doc.inTrash);
@@ -78,10 +85,17 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
               <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {workspace.title}
               </h1>
-              <p className="text-sm text-muted-foreground">
-                {activeDocuments.length === 1 ?
-                  "1 page"
-                : `${activeDocuments.length} pages`}
+              <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {activeDocuments.length === 1 ?
+                    "1 page"
+                  : `${activeDocuments.length} pages`}
+                </span>
+                {!canEdit && (
+                  <Badge variant="secondary" className="text-[10px] uppercase">
+                    View only
+                  </Badge>
+                )}
               </p>
             </div>
           </div>
@@ -159,8 +173,10 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
                   No pages yet
                 </h3>
                 <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
-                  Create a new page from the sidebar to start writing, taking
-                  notes, and collaborating.
+                  {canEdit ?
+                    "Use the + button next to Pages in the sidebar to start writing, taking notes, and collaborating."
+                  : "You have view-only access. Pages added by the owner or an editor will show up here."
+                  }
                 </p>
               </CardContent>
             </Card>

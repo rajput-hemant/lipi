@@ -261,7 +261,9 @@ export function SearchCommand({
 
               {!isPending && !error && results.length === 0 && (
                 <ComboboxEmpty className="flex py-6 text-center text-sm text-muted-foreground">
-                  No documents found.
+                  {query.trim() ?
+                    `No pages match “${query.trim()}”.`
+                  : "No pages in this workspace yet."}
                 </ComboboxEmpty>
               )}
 

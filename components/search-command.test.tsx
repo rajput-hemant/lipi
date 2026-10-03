@@ -83,7 +83,9 @@ describe("SearchCommand", () => {
     expect(alert?.textContent).toContain(
       "Failed to search documents. Please try again."
     );
-    expect(document.body.textContent).not.toContain("No documents found.");
+    expect(document.body.textContent).not.toContain(
+      "No pages in this workspace yet."
+    );
   });
 
   it("shows empty state when search returns no documents successfully", async () => {
@@ -109,7 +111,9 @@ describe("SearchCommand", () => {
     });
 
     expect(document.querySelector('[role="alert"]')).toBeNull();
-    expect(document.body.textContent).toContain("No documents found.");
+    expect(document.body.textContent).toContain(
+      "No pages in this workspace yet."
+    );
     const empty = document.querySelector('[data-slot="combobox-empty"]');
     expect(empty?.classList.contains("flex")).toBe(true);
   });
