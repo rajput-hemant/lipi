@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { authorizeRealtimeRoom } from "@/lib/realtime/authorize-room";
 import { RealtimeBlockQuotaGuard } from "@/lib/realtime/block-quota";
 import { createRealtimePersistence } from "@/lib/realtime/persistence";
@@ -42,7 +43,7 @@ export const realtimeServer = createRealtimeServer({
 });
 
 void realtimeServer.listen().catch((error: unknown) => {
-  console.error("Lipi realtime server failed to start", error);
+  logger.error("Lipi realtime server failed to start", error);
   process.exitCode = 1;
 });
 
@@ -55,7 +56,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
         process.exitCode = 0;
       })
       .catch((error: unknown) => {
-        console.error("Lipi realtime shutdown failed", error);
+        logger.error("Lipi realtime shutdown failed", error);
         process.exitCode = 1;
       });
   });

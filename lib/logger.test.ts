@@ -2,6 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { formatLog, logger, redact } from "./logger";
 
+type ParsedLog = {
+  time: string;
+  error: { stack: string };
+  context?: unknown;
+};
+
 describe("formatLog", () => {
   it("emits one JSON line with error details in production", () => {
     const cause = new TypeError("root cause");
@@ -16,7 +22,7 @@ describe("formatLog", () => {
       { workspaceId: "w1" },
       true
     );
-    const parsed = JSON.parse(line);
+    const parsed = JSON.parse(line) as ParsedLog;
 
     expect(line).not.toContain("\n");
     expect(parsed).toMatchObject({
@@ -51,7 +57,7 @@ describe("formatLog", () => {
   it("handles non-Error values", () => {
     const parsed = JSON.parse(
       formatLog("error", "x", { code: 7 }, undefined, true)
-    );
+    ) as ParsedLog;
 
     expect(parsed.error).toEqual({ name: "NonError", message: '{"code":7}' });
     expect(parsed.context).toBeUndefined();
