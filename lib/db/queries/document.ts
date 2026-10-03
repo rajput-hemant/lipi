@@ -134,19 +134,20 @@ export async function getDocuments(workspaceId: string) {
     throw new Error("Invalid workspace ID");
   }
 
+  // Authorize on every call: the cached loader is keyed by workspace only, and
+  // this exported server action must not serve cached rows to non-members.
+  const user = await requireAuthenticatedUser();
+  await assertWorkspaceAccess(user.id, workspaceId);
+
   return cache(
     async () => {
       try {
-        const user = await requireAuthenticatedUser();
-        await assertWorkspaceAccess(user.id, workspaceId);
-
         return await db
           .select()
           .from(documents)
           .where(eq(documents.workspaceId, workspaceId))
           .orderBy(documents.createdAt);
       } catch (e) {
-        if (e instanceof MutationAuthError) throw e;
         console.error((e as Error).message);
         throw new Error("Failed to fetch documents from the database");
       }
@@ -167,9 +168,20 @@ export async function updateDocument(input: unknown) {
       throw new MutationAuthError("Invalid document");
     }
 
-    const { document: existing } = await authorizeDocumentMutation(parsed.id);
+    const { user, document: existing } = await authorizeDocumentMutation(
+      parsed.id
+    );
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
+
+    if (parsed.parentId === null && existing.parentId) {
+      assertRootPageQuota(
+        workspaceDocs,
+        existing.workspaceId,
+        await userHasProPlanEntitlement(user.id),
+        null
+      );
+    }
 
     if (parsed.parentId !== undefined) {
       validateParentAssignment(workspaceDocs, {
