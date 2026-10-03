@@ -2,6 +2,8 @@ import type Stripe from "stripe";
 
 import { prices, products } from "@/lib/db/schema";
 
+const PRICE_INTERVALS = ["year", "month", "week", "day"] as const;
+
 type PriceRow = typeof prices.$inferInsert;
 type ProductRow = typeof products.$inferInsert;
 
@@ -26,12 +28,6 @@ export function priceRowFromStripe(price: Stripe.Price): PriceRow | null {
   if (!productId) return null;
 
   const recurring = price.recurring;
-  let interval: PriceRow["interval"] = null;
-  if (recurring?.interval === "year") interval = "year";
-  else if (recurring?.interval === "month") interval = "month";
-  else if (recurring?.interval === "week") interval = "week";
-  else if (recurring?.interval === "day") interval = "day";
-
   return {
     id: price.id,
     productId,
@@ -40,7 +36,7 @@ export function priceRowFromStripe(price: Stripe.Price): PriceRow | null {
     unitAmount: price.unit_amount ?? null,
     currency: price.currency ?? null,
     type: price.type === "recurring" ? "recurring" : "one_time",
-    interval,
+    interval: PRICE_INTERVALS.find((i) => i === recurring?.interval) ?? null,
     intervalCount: recurring?.interval_count ?? null,
     trialPeriodDays: recurring?.trial_period_days ?? null,
     metadata: price.metadata ?? null,
@@ -51,20 +47,12 @@ export function catalogRowsFromStripePrice(price: Stripe.Price): {
   product: ProductRow | null;
   price: PriceRow | null;
 } {
-  if (typeof price.product === "string") {
-    return { product: null, price: priceRowFromStripe(price) };
-  }
-
-  if (
-    price.product &&
-    typeof price.product === "object" &&
-    price.product.object === "product"
-  ) {
-    return {
-      product: productRowFromStripe(price.product as Stripe.Product),
-      price: priceRowFromStripe(price),
-    };
-  }
-
-  return { product: null, price: priceRowFromStripe(price) };
+  const { product } = price;
+  return {
+    product:
+      product && typeof product === "object" && product.object === "product" ?
+        productRowFromStripe(product as Stripe.Product)
+      : null,
+    price: priceRowFromStripe(price),
+  };
 }
