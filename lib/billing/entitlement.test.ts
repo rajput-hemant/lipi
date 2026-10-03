@@ -1,10 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { hasConfiguredProEntitlement, hasProEntitlement } from "./entitlement";
 
 const PRO_PRICE = "price_pro_monthly";
 
 describe("hasProEntitlement", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("requires the configured pro price", () => {
     expect(
       hasProEntitlement({ status: "active", priceId: "price_other" }, PRO_PRICE)
@@ -15,8 +19,7 @@ describe("hasProEntitlement", () => {
   });
 
   it("treats billing as free when STRIPE_PRICE_ID_PRO is unset", () => {
-    const previous = process.env.STRIPE_PRICE_ID_PRO;
-    delete process.env.STRIPE_PRICE_ID_PRO;
+    vi.stubEnv("STRIPE_PRICE_ID_PRO", undefined);
 
     expect(
       hasConfiguredProEntitlement({
@@ -24,8 +27,6 @@ describe("hasProEntitlement", () => {
         priceId: PRO_PRICE,
       })
     ).toBe(false);
-
-    process.env.STRIPE_PRICE_ID_PRO = previous;
   });
 
   it("rejects canceled subscriptions even on the pro price", () => {
