@@ -1,8 +1,10 @@
+import { env } from "@/lib/env";
+
 export function resolveAuthRateLimitEnabled(): boolean | undefined {
   if (process.env.NODE_ENV === "production") {
     return undefined;
   }
 
-  if (process.env.DISABLE_AUTH_RATE_LIMIT === "true") return false;
+  if (env.DISABLE_AUTH_RATE_LIMIT === "true") return false;
   return undefined;
 }

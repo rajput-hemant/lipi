@@ -6,6 +6,8 @@ import { assertDatabaseUrlConfigured } from "./database-url";
 import * as schema from "./schema";
 import { lipiTableName } from "./table-prefix";
 
+// process.env on purpose: the standalone realtime process imports this module
+// and cannot load t3-env (see lib/env.ts).
 const databaseUrl = process.env.DATABASE_URL;
 assertDatabaseUrlConfigured(databaseUrl);
 

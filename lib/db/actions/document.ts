@@ -18,6 +18,7 @@ import {
 } from "@/lib/db/document-operations";
 import { documentSummaryColumns } from "@/lib/db/document-summary";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
+import { logger } from "@/lib/logger";
 import { loadAuthoritativeDocumentContentBySourceIds } from "@/lib/realtime/authoritative-content";
 import {
   createDocumentSchema,
@@ -128,7 +129,7 @@ export async function createDocument(input: unknown) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
     rethrowKnownErrors(e);
-    console.error((e as Error).message);
+    logger.error("Failed to create document", e);
     throw new Error("Failed to create document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -156,7 +157,7 @@ export async function getDocuments(workspaceId: string) {
           .where(eq(documents.workspaceId, workspaceId))
           .orderBy(documents.createdAt);
       } catch (e) {
-        console.error((e as Error).message);
+        logger.error("Failed to fetch documents from the database", e);
         throw new Error("Failed to fetch documents from the database");
       }
     },
@@ -217,7 +218,7 @@ export async function updateDocument(input: unknown) {
     });
   } catch (e) {
     rethrowKnownErrors(e);
-    console.error((e as Error).message);
+    logger.error("Failed to update document", e);
     throw new Error("Failed to update document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -252,7 +253,7 @@ export async function softDeleteDocumentTree(documentId: string) {
   } catch (e) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
-    console.error((e as Error).message);
+    logger.error("Failed to move document to trash", e);
     throw new Error("Failed to move document to trash");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -300,7 +301,7 @@ export async function restoreDocument(documentId: string) {
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    console.error((e as Error).message);
+    logger.error("Failed to restore document", e);
     throw new Error("Failed to restore document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -335,7 +336,7 @@ export async function deleteDocumentPermanently(documentId: string) {
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    console.error((e as Error).message);
+    logger.error("Failed to delete document", e);
     throw new Error("Failed to delete document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -400,7 +401,7 @@ export async function duplicateDocument(input: unknown) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
     rethrowKnownErrors(e);
-    console.error((e as Error).message);
+    logger.error("Failed to duplicate document", e);
     throw new Error("Failed to duplicate document");
   } finally {
     if (workspaceIdForRevalidate) {

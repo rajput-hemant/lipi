@@ -1,19 +1,20 @@
 import { BillingNotConfiguredError } from "@/lib/billing/errors";
+import { env } from "@/lib/env";
 
 export function getStripeSecretKey(): string {
-  const key = process.env.STRIPE_SECRET_KEY;
+  const key = env.STRIPE_SECRET_KEY;
   if (!key) throw new BillingNotConfiguredError();
   return key;
 }
 
 export function getStripeWebhookSecret(): string {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  const secret = env.STRIPE_WEBHOOK_SECRET;
   if (!secret) throw new BillingNotConfiguredError();
   return secret;
 }
 
 export function tryGetStripeProPriceId(): string | undefined {
-  return process.env.STRIPE_PRICE_ID_PRO;
+  return env.STRIPE_PRICE_ID_PRO;
 }
 
 export function getStripeProPriceId(): string {

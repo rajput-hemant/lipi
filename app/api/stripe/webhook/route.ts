@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import type Stripe from "stripe";
 
+import { logger } from "@/lib/logger";
 import { getStripeWebhookSecret } from "@/lib/stripe/billing-env";
 import { getStripe } from "@/lib/stripe/client";
 import { deliverStripeWebhookEvent } from "@/lib/stripe/webhook-delivery";
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
       getStripeWebhookSecret()
     );
   } catch (error) {
-    console.error("Stripe webhook verification failed:", error);
+    logger.error("Stripe webhook verification failed", error);
     return NextResponse.json(
       { error: "Invalid webhook signature" },
       { status: 400 }
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Stripe webhook handler failed:", error);
+    logger.error("Stripe webhook handler failed", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },
       { status: 500 }

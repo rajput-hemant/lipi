@@ -3,6 +3,7 @@
 import type { Workspace } from "@/types/db";
 
 import { assertUserCanCreateWorkspace } from "@/lib/billing/enforce-quotas";
+import { logger } from "@/lib/logger";
 import { db } from "..";
 import {
   MutationAuthError,
@@ -39,7 +40,7 @@ export async function createWorkspace(workspace: Workspace) {
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    console.error((e as Error).message);
+    logger.error("Failed to create Workspace.", e);
     throw new Error("Failed to create Workspace.");
   } finally {
     revalidateWorkspaceLists([workspace.workspaceOwnerId]);
