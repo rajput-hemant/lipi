@@ -35,3 +35,9 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [ ] Prove `Shift+F10` and the `ContextMenu` key on real hardware keyboards (LIP-V023 is tool-dispatched only)
 - [ ] Search: add tests for Cmd+K open and select-to-navigate focus restoration; `lastFocusedElementRef` is written inside a state updater (`components/search-command.tsx`)
 - [ ] Trash dialog and tree are not covered by a browser-driven viewer test in `tests/e2e`; add owner/editor/viewer role cases
+- [ ] `createRootPage` has no rollback on failure (a demoted editor leaves a ghost root page until reload), same class as LIP-V025 (`components/sidebar/document-tree.tsx`)
+- [ ] `moveToTrash` rollback restores the whole click-time snapshot and can overwrite concurrent realtime changes; restore only the affected ids
+- [ ] `useCanEditPages` fails open when `role` is null; make the unknown-role state explicit (UI only, the server still enforces)
+- [ ] Add unit tests for tree viewer gating and trash rollback (the keyboard test mocks `useCanEditPages: () => true`)
+- [ ] `View only` badge is `text-[10px]`; raise it for readability
+- [ ] Removed member with an open session hits the layout's `MutationAuthError`; show a friendly state (pre-existing); `pages:changed` stateless messages can be sent by any connected client (pre-existing)
