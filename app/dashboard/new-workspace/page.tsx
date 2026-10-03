@@ -8,7 +8,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getCurrentUser } from "@/lib/auth";
 import { InviteNotice, isInvalidInvite } from "../invite-notice";
 import { WorkspaceForm } from "./workspace-form";
 
@@ -25,7 +24,6 @@ export default async function WorkspaceSetupPage({
   searchParams: Promise<{ invite?: string | string[] }>;
 }) {
   const { invite } = await searchParams;
-  const user = await getCurrentUser();
 
   return (
     <div className="flex min-h-screen items-center justify-center">
@@ -65,7 +63,7 @@ export default async function WorkspaceSetupPage({
           </CardHeader>
 
           <CardContent>
-            <WorkspaceForm user={user!} />
+            <WorkspaceForm />
           </CardContent>
         </Card>
       </section>
