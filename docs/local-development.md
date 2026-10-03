@@ -32,6 +32,8 @@ Lipi does not keep a copy of the credentials. Find them in that file (`user.emai
 - Docker with Compose
 - Node 22 only for the realtime process (see [Realtime](#realtime))
 
+`dev`, `build` and `start` run Next.js through `bun --bun`. Without `--bun`, `bun run next ...` follows the `next` binary's Node shebang and runs on Node even though the package manager is Bun. Verified: the dev and production servers run as the Bun 1.4.2 process. `eslint`, `tsc`, `vitest` and `drizzle-kit` still follow their Node shebangs; only the app runtime and the migrate/seed scripts (`bun lib/db/*.ts`) run on Bun.
+
 ## Start once
 
 ```bash
