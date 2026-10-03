@@ -2,9 +2,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardLoading() {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background [&_[data-slot=skeleton]]:motion-reduce:animate-none">
+    <div className="flex h-dvh w-full overflow-hidden bg-background [&_[data-slot=skeleton]]:motion-reduce:animate-none">
       {/* Sidebar Skeleton */}
-      <div className="hidden w-64 flex-col border-r border-border p-4 lg:flex space-y-4">
+      <div className="hidden w-64 flex-col border-r border-border p-4 md:flex space-y-4">
         <div className="flex items-center gap-2">
           <Skeleton className="size-8 rounded-lg" />
           <Skeleton className="h-4 w-32" />

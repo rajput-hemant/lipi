@@ -10,3 +10,5 @@ build
 .contentlayer
 migrations
 components/ui
+# shadcn-generated, kept as the CLI emits it
+hooks/use-mobile.ts

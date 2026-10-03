@@ -2,8 +2,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 
 import type { IconSvgElement } from "@hugeicons/react";
 
-import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
 import {
   Dialog,
   DialogContent,
@@ -12,62 +10,42 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../ui/dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 
 type NavDialogProps = {
   title: string;
   description: string;
   icon: IconSvgElement;
-  isCollapsed?: boolean;
   children?: React.ReactNode;
 };
 
 export function NavDialog(props: NavDialogProps) {
-  const { title, description, icon, isCollapsed, children } = props;
-  const trigger = (
-    <DialogTrigger
-      render={
-        <Button
-          aria-label={isCollapsed ? title : undefined}
-          size={isCollapsed ? "icon" : "sm"}
-          variant="ghost"
-          className={cn(!isCollapsed && "w-full justify-start")}
-        >
-          <HugeiconsIcon
-            icon={icon}
-            strokeWidth={2}
-            className={cn(isCollapsed ? "size-5" : "mr-2 size-4 shrink-0")}
-          />
-          {!isCollapsed && title}
-        </Button>
-      }
-    />
-  );
+  const { title, description, icon, children } = props;
 
   return (
-    <Dialog>
-      {isCollapsed ?
-        <Tooltip>
-          <TooltipTrigger render={trigger} />
-          <TooltipContent side="right">{title}</TooltipContent>
-        </Tooltip>
-      : trigger}
+    <SidebarMenuItem>
+      <Dialog>
+        <SidebarMenuButton tooltip={title} render={<DialogTrigger />}>
+          <HugeiconsIcon icon={icon} strokeWidth={2} />
+          <span>{title}</span>
+        </SidebarMenuButton>
 
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center font-heading text-xl [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] md:text-3xl">
-            <HugeiconsIcon
-              icon={icon}
-              strokeWidth={2}
-              className="mb-1 mr-2 size-7"
-            />
-            {title}
-          </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-4xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center font-heading text-xl [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] md:text-3xl">
+              <HugeiconsIcon
+                icon={icon}
+                strokeWidth={2}
+                className="mb-1 mr-2 size-7"
+              />
+              {title}
+            </DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </DialogHeader>
 
-        {children}
-      </DialogContent>
-    </Dialog>
+          {children}
+        </DialogContent>
+      </Dialog>
+    </SidebarMenuItem>
   );
 }
