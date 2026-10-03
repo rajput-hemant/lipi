@@ -50,6 +50,18 @@ describe("proxy auth routes", () => {
     );
   });
 
+  it.each(["/dashboard/change-password", "/reset-password"])(
+    "requires a session for %s",
+    async (path) => {
+      const res = await proxy(new NextRequest(`http://localhost:3000${path}`));
+
+      expect(res.status).toBe(307);
+      expect(res.headers.get("location")).toBe(
+        `http://localhost:3000/login?from=${encodeURIComponent(path)}`
+      );
+    }
+  );
+
   it.each(["/api/stripe/webhook", "/api/uploadthing"])(
     "lets third-party callbacks reach %s without a session",
     async (path) => {

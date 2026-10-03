@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -192,15 +191,6 @@ export function LoginForm() {
           Login with Email
         </Button>
       </form>
-
-      <p className="mx-auto mt-2 text-xs text-muted-foreground hover:text-foreground">
-        <Link
-          href="/reset-password"
-          className="underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
-        >
-          Forgot password?
-        </Link>
-      </p>
 
       <OAuthButtons
         isFormDisabled={isSubmitting}
