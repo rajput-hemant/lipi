@@ -50,7 +50,8 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 ### 3.1 Authentication & Session Management
 
 - [x] **Database Authentication:** Better Auth email and password sign-in against PostgreSQL; the auth tables (`user`, `better_auth_*`) are created by `bun run db:auth` locally (`lib/auth/create-auth.ts`, `lib/auth/create-auth.test.ts`, `lib/db/auth-migrations/`).
-- [x] **Credential Accounts:** Secure password hashing and credential validation for email sign-in (`lib/auth/credential-account.ts`, `lib/auth/credential-account.test.ts`).
+- [x] **Credential Accounts:** bcrypt password hashing for email sign-in and credential account lookup (`lib/auth/create-auth.ts`, `lib/auth/credential-account.ts`, `lib/auth/credential-account.test.ts`).
+- [x] **Password Recovery:** Emailed forgotten-password flow through Resend (`/forgot-password`, then the emailed link to `/reset-password?token=`), plus signed-in change password at `/dashboard/change-password` that revokes other sessions (`app/(auth)/components/forgot-password-form.tsx`, `app/(auth)/components/reset-password-form.tsx`, `app/dashboard/change-password/`, `lib/email/send-email.ts`). Not exercised in a browser or against Resend.
 - [x] **Auth Rate Limiting:** Protects sign-in and sign-up endpoints against brute force using Upstash Redis rate limiters (`lib/auth/auth-rate-limit.ts`, `lib/auth/auth-rate-limit.test.ts`).
 - [x] **Session & Navigation Flow:** Verified end-to-end sign-up, sign-out, sign-in, and initial workspace redirect flow (`tests/e2e/auth-workspace.spec.ts`).
 - [ ] **Legacy User Backfill:** Users created before Better Auth may only have `user.password`; a credential account row (`better_auth_account`, `providerId = 'credential'`) must exist before they can sign in. Running that backfill on the production database remains an open operational prerequisite.
@@ -66,7 +67,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 
 - [x] **BlockNote Editor Integration:** Rich-text block editing with custom callout/alert blocks and custom styling (`components/document-editor/`, `lib/block-editor/editor-schema.ts`, `lib/block-editor/alert-block.tsx`).
 - [x] **Hierarchical Document Trees:** Nested parent-child document relationships in PostgreSQL with cycle detection and cross-workspace validation (`lib/db/document-operations.ts`, `lib/db/document-operations.test.ts`, `lib/db/documents-tree.ts`).
-- [x] **Sidebar Tree Navigation:** Dynamic sidebar document tree with collapsible folder triggers and document navigation (`components/sidebar/document-tree-utils.test.ts`, `components/sidebar/folder-accordion-trigger.test.tsx`).
+- [x] **Sidebar Tree Navigation:** Dynamic sidebar document tree with collapsible folder triggers and document navigation (`components/sidebar/document-tree.tsx`, `components/sidebar/document-tree.test.tsx`, `components/sidebar/document-tree-utils.test.ts`).
 - [x] **End-to-End Page & Subpage Creation:** Verified creating parent pages, nesting subpages, and typing in BlockNote (`tests/e2e/documents-editor.spec.ts`).
 
 ### 3.4 Document Trash & Lifecycle
@@ -96,7 +97,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 - [x] **Free vs. Pro Quota Model:** Purely operational showcase quotas: Free plan allows 1 workspace, 2 collaborators, and 500 blocks; Pro plan allows unlimited (`lib/billing/plan-quotas.ts`, `lib/billing/plan-quotas.test.ts`, `lib/billing/quota-entitlement.test.ts`).
 - [x] **Subscription Entitlement:** Maps active and trialing subscriptions to Pro tier privileges (`lib/billing/entitlement.ts`, `lib/billing/entitlement.test.ts`).
 - [x] **Checkout Redirection:** End-to-end verified checkout session flow redirecting user to Stripe Checkout with mocked billing API (`app/api/stripe/checkout/route.ts`, `tests/e2e/stripe-checkout.spec.ts`).
-- [x] **Stripe Webhook Synchronization:** Validates Stripe signatures and updates subscription status in `lipi_subscriptions` (`lib/stripe/webhook-verify.ts`, `lib/stripe/webhook-handlers.ts`, `lib/stripe/subscription-sync.ts`, `lib/stripe/*.test.ts`).
+- [x] **Stripe Webhook Synchronization:** Validates Stripe signatures and updates subscription status in `lipi_subscriptions` (`app/api/stripe/webhook/route.ts`, `lib/stripe/webhook-verify.test.ts`, `lib/stripe/webhook-handlers.ts`, `lib/stripe/subscription-sync.ts`, `lib/stripe/*.test.ts`).
 - [ ] **Live Commercial Payment Processing:** Mocked in automated tests; production billing endpoints and live payment collection are intentionally unconfigured, consistent with showcase status.
 
 ---
@@ -107,7 +108,5 @@ The following items are tracked as open and require operational execution or inf
 
 1. **Legacy Credential Backfill:**
    - Insert a `better_auth_account` credential row (`accountId = user.id`, `providerId = 'credential'`, `password` copied from `user.password`) for every legacy user without one, on the production database, before those users can sign in.
-2. **Production Realtime Server Host Arrangement:**
-   - Decision remains open between:
-     - **Option A:** Same cookie-owning host running Next.js and Hocuspocus behind a reverse proxy.
-     - **Option B:** Separate WebSocket host terminating `wss://` using short-lived signed tokens ([research note](./research/realtime-collaboration.md)).
+2. **Production Realtime Server Host Deployment:**
+   - Decided (D-1 in [todo](../TODO.md)): a separate always-on Node 22 host with its own `wss://` URL, using short-lived signed room tokens ([realtime guide](../guides/realtime.md), [research note](../research/realtime-collaboration.md)). Remaining work is deployment: the host, `LIPI_REALTIME_ALLOWED_ORIGINS`, `NEXT_PUBLIC_LIPI_REALTIME_URL` and TLS.
