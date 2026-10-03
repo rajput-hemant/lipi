@@ -46,7 +46,11 @@ bun run dev
 
 ### Deploy Your Own
 
-You can deploy your own hosted version of `lipi`. Just click the link below to deploy a ready-to-go version to Vercel.
+The button below clones the repository into Vercel and prompts for the core variables (auth, database, Redis). It deploys the Next.js app only, so the result is not complete on its own:
+
+- Real-time collaboration needs the standalone Hocuspocus process (`bun run realtime:start`) on an always-on Node.js host. It is not a Vercel function. Set `NEXT_PUBLIC_LIPI_REALTIME_URL` and `LIPI_REALTIME_ALLOWED_ORIGINS` as described in [docs/guides/realtime.md](docs/guides/realtime.md). Without them the editor has no realtime endpoint in production.
+- Billing (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`) and uploads (`UPLOADTHING_TOKEN`, `UPLOADTHING_SECRET`, `UPLOADTHING_APP_ID`) are optional and not prompted for. Those features stay disabled until you add them.
+- The database schema is not migrated by the deploy; run `bun run db:auth` and `bun run db:migrate` against your database. See [.env.example](.env.example) for every variable.
 
 [![Deploy with Vercel](https://vercel.com/button)][deploy]
 
