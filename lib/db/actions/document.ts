@@ -4,9 +4,6 @@ import { unstable_cache as cache, revalidatePath, updateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
-import type { DocumentRecord } from "@/lib/db/documents-tree";
-import type { DocumentSummary } from "@/types/db";
-
 import { workspaceOwnerHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
 import {
   assertPermanentDeleteAllowed,
@@ -52,25 +49,16 @@ function revalidateDocuments(workspaceId: string, documentId?: string) {
   }
 }
 
-function toRecords(rows: DocumentSummary[]): DocumentRecord[] {
-  return rows.map((row) => ({
-    id: row.id!,
-    workspaceId: row.workspaceId,
-    parentId: row.parentId ?? null,
-    title: row.title,
-    icon: row.icon ?? "",
-    bannerUrl: row.bannerUrl ?? null,
-    inTrash: row.inTrash ?? false,
-    createdAt: row.createdAt ?? new Date(0).toISOString(),
-    updatedAt: row.updatedAt ?? new Date(0).toISOString(),
-  }));
-}
-
 function rethrowKnownErrors(error: unknown) {
   if (error instanceof MutationAuthError) throw error;
   if (error instanceof DocumentOperationError) {
     throw new MutationAuthError(error.message);
   }
+}
+
+function failDocumentMutation(message: string, error: unknown): never {
+  logger.error(message, error);
+  throw new Error(message);
 }
 
 function forbiddenResult(error: unknown) {
@@ -87,7 +75,7 @@ async function loadWorkspaceDocuments(
     .select(documentSummaryColumns)
     .from(documents)
     .where(eq(documents.workspaceId, workspaceId));
-  return toRecords(rows);
+  return rows;
 }
 
 export async function createDocument(input: unknown) {
@@ -129,8 +117,7 @@ export async function createDocument(input: unknown) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
     rethrowKnownErrors(e);
-    logger.error("Failed to create document", e);
-    throw new Error("Failed to create document");
+    return failDocumentMutation("Failed to create document", e);
   } finally {
     if (workspaceIdForRevalidate) {
       revalidateDocuments(workspaceIdForRevalidate, parsed.id);
@@ -171,10 +158,6 @@ export async function updateDocument(input: unknown) {
   let workspaceIdForRevalidate: string | undefined;
 
   try {
-    if (!parsed.id) {
-      throw new MutationAuthError("Invalid document");
-    }
-
     const { document: existing } = await authorizeDocumentMutation(parsed.id);
     workspaceIdForRevalidate = existing.workspaceId;
     const movesToRoot = parsed.parentId === null && !!existing.parentId;
@@ -218,8 +201,7 @@ export async function updateDocument(input: unknown) {
     });
   } catch (e) {
     rethrowKnownErrors(e);
-    logger.error("Failed to update document", e);
-    throw new Error("Failed to update document");
+    return failDocumentMutation("Failed to update document", e);
   } finally {
     if (workspaceIdForRevalidate) {
       revalidateDocuments(workspaceIdForRevalidate);
@@ -253,8 +235,7 @@ export async function softDeleteDocumentTree(documentId: string) {
   } catch (e) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
-    logger.error("Failed to move document to trash", e);
-    throw new Error("Failed to move document to trash");
+    return failDocumentMutation("Failed to move document to trash", e);
   } finally {
     if (workspaceIdForRevalidate) {
       revalidateDocuments(workspaceIdForRevalidate);
@@ -301,8 +282,7 @@ export async function restoreDocument(documentId: string) {
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    logger.error("Failed to restore document", e);
-    throw new Error("Failed to restore document");
+    return failDocumentMutation("Failed to restore document", e);
   } finally {
     if (workspaceIdForRevalidate) {
       revalidateDocuments(workspaceIdForRevalidate);
@@ -336,8 +316,7 @@ export async function deleteDocumentPermanently(documentId: string) {
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    logger.error("Failed to delete document", e);
-    throw new Error("Failed to delete document");
+    return failDocumentMutation("Failed to delete document", e);
   } finally {
     if (workspaceIdForRevalidate) {
       revalidateDocuments(workspaceIdForRevalidate);
@@ -401,36 +380,10 @@ export async function duplicateDocument(input: unknown) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
     rethrowKnownErrors(e);
-    logger.error("Failed to duplicate document", e);
-    throw new Error("Failed to duplicate document");
+    return failDocumentMutation("Failed to duplicate document", e);
   } finally {
     if (workspaceIdForRevalidate) {
       revalidateDocuments(workspaceIdForRevalidate);
     }
   }
-}
-
-export async function getDocumentBreadcrumbs(
-  workspaceId: string,
-  documentId: string
-) {
-  if (!validateUuid(workspaceId) || !validateUuid(documentId)) {
-    return [];
-  }
-
-  const rows = await getDocuments(workspaceId);
-  const byId = new Map(rows.map((row) => [row.id, row]));
-  const chain: DocumentSummary[] = [];
-  let current = byId.get(documentId);
-  const visited = new Set<string>();
-
-  while (current) {
-    chain.unshift(current);
-    if (!current.parentId) break;
-    if (visited.has(current.parentId)) break;
-    visited.add(current.parentId);
-    current = byId.get(current.parentId);
-  }
-
-  return chain;
 }
