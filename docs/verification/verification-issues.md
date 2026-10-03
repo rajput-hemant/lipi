@@ -25,13 +25,13 @@ These pass/fail results prove only the code paths the unit tests cover. They do 
 
 Not re-run here and not counted as new verification:
 
-- Playwright specs `tests/e2e/auth-workspace.spec.ts`, `documents-editor.spec.ts`, `collaboration.spec.ts`, `stripe-checkout.spec.ts`, added in `4b4b717` (`test(e2e): add playwright suite with throwaway postgres setup`) and cited as evidence in [requirements](../requirements.md) and [todo](../todo.md). Stripe is mocked there.
+- Playwright specs `tests/e2e/auth-workspace.spec.ts`, `documents-editor.spec.ts`, `collaboration.spec.ts`, `stripe-checkout.spec.ts`, added in `4b4b717` (`test(e2e): add playwright suite with throwaway postgres setup`) and cited as evidence in [requirements](../requirements/requirements.md) and [todo](../TODO.md). Stripe is mocked there.
 - Earlier trash UI polish is cited as landed (`0b86a64`), proved by `components/trash.test.tsx` only.
 
 ## Corrected stale process items
 
 - Root `README.md` had been reduced to a pointer to `docs/project.md`. The body is restored to `README.md` and the duplicate `docs/project.md` removed (commit "docs: restore root README body and drop duplicate docs/project.md"). Links in other docs to `docs/project.md`: none existed.
-- [todo](../todo.md) says its checked items cite files but "the tests were not re-run when this index was written". This pass re-ran type-check, lint and unit tests (table above); it did not re-run e2e.
+- [todo](../TODO.md) says its checked items cite files but "the tests were not re-run when this index was written". This pass re-ran type-check, lint and unit tests (table above); it did not re-run e2e.
 
 ## Issues
 
@@ -119,7 +119,7 @@ Not re-run here and not counted as new verification:
 ### LIP-V011 Billing and quotas not exercised live
 
 - Class: GAP. Severity: medium (coverage). State: open.
-- Scope: `Go Pro` with billing unconfigured, portal, webhook signature failures, Free-plan quota messages (1 workspace, 2 collaborators, 500 blocks). Live Stripe stays out of scope per [requirements](../requirements.md). Feature: [billing-pricing](../../.agents/skills/verify/features/billing-pricing.md).
+- Scope: `Go Pro` with billing unconfigured, portal, webhook signature failures, Free-plan quota messages (1 workspace, 2 collaborators, 500 blocks). Live Stripe stays out of scope per [requirements](../requirements/requirements.md). Feature: [billing-pricing](../../.agents/skills/verify/features/billing-pricing.md).
 
 ### LIP-V012 Verify skill run once, with corrections
 
@@ -147,7 +147,7 @@ Not re-run here and not counted as new verification:
 ### LIP-V016 Shared-database backfill and production realtime topology undecided
 
 - Class: GAP (operational/decision). Severity: medium. State: open.
-- Scope: the credential backfill on the production database for legacy users, and the same-host vs separate-host realtime arrangement. Tracked in [todo](../todo.md) and [requirements](../requirements.md) §4. Local runs cannot answer either.
+- Scope: the credential backfill on the production database for legacy users, and the same-host vs separate-host realtime arrangement. Tracked in [todo](../TODO.md) and [requirements](../requirements/requirements.md) §4. Local runs cannot answer either.
 
 ### LIP-V017 Free-plan single-workspace limit constrains verification scenarios
 
@@ -226,7 +226,7 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V027 Failed root page creation is not rolled back
 
-- Class: CONFIRMED (deterministic source). Severity: low. State: open (added 2026-10-03 from the UI follow-ups in [todo](../todo.md)).
+- Class: CONFIRMED (deterministic source). Severity: low. State: open (added 2026-10-03 from the UI follow-ups in [todo](../TODO.md)).
 - Surface: sidebar `New page` (`createRootPage` in `components/sidebar/document-tree.tsx`).
 - Evidence: `createRootPage` calls `addDocument(newDocument)` before the server call, then `toast.promise(createDocument(newDocument), { ..., error: "Could not create page." })`; the error branch only returns text and never removes the optimistic document. `New subpage` creation and `moveToTrash` do roll back (LIP-V025). Re-run: `sed -n 523,557p components/sidebar/document-tree.tsx`.
 - Reproduction (not run): as an editor in an open session, have the owner demote the editor to viewer, then create a root page; the server rejects it.

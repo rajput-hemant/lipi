@@ -84,7 +84,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 
 ### 3.6 Real-Time Collaboration
 
-- [x] **Standalone Realtime Server:** Dedicated Hocuspocus 4.7.0 server with Yjs CRDT synchronization and PostgreSQL persistence (`realtime/server.ts`, `realtime/bootstrap.mjs`, [realtime](./realtime.md)).
+- [x] **Standalone Realtime Server:** Dedicated Hocuspocus 4.7.0 server with Yjs CRDT synchronization and PostgreSQL persistence (`realtime/server.ts`, `realtime/bootstrap.mjs`, [realtime](../guides/realtime.md)).
 - [x] **Signed Room Tokens:** Cryptographic HMAC tokens with 60-second expiration and 30-second refresh cadence scoped to document or workspace rooms (`lib/realtime/token.ts`, `lib/realtime/token.test.ts`, `app/api/realtime/token/route.ts`).
 - [x] **Room Authorization & Viewer Enforcement:** Validates session and workspace membership on connection and synchronization; enforces read-only access for viewers (`lib/realtime/authorize-room.ts`, `lib/realtime/authorize-room.test.ts`).
 - [x] **Authoritative State Snapshots:** Yjs document state in `lipi_realtime_documents.state` serves as editing truth, with debounced snapshots written to `documents.content` (`lib/realtime/authoritative-content.ts`, `lib/realtime/authoritative-content.test.ts`).
