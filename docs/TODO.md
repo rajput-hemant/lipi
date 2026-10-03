@@ -553,3 +553,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) rewrites UI that is out of scope here.
 ### Coverage
 
 Private ledger `coverage.tsv` (path, blob hash, category, deslop status, ponytail status, disposition, finding IDs) covers all 463 tracked files plus 6 ignored local paths. Every tracked path has a disposition for both passes; excluded paths carry `excluded-by-captain-test` or `excluded-by-captain-ui` and are not claimed as reviewed (excluded count: 214): 124 with at least one finding, 80 reviewed with no finding, and the rest are generated history, lockfile, binary assets or the secret fixture (structure and variable names only, no values read into notes). Migrations are append-only history and are not proposed for change.
+
+## Env example grouping outcome (2026-10-03)
+
+The grouped `.env.example` (hash headings, blank line between groups, one `KEY=` per line) is ready on `fm/lipi-env-example-groups` (`9472258`). It is NOT landed on `feat/complete-lipi` and not pushed. End of day: no further work planned here today.
