@@ -141,7 +141,6 @@ export function SignUpForm() {
                       aria-label={
                         isPassVisible ? "Hide Password" : "Show Password"
                       }
-                      tabIndex={-1}
                       type="button"
                       disabled={!field.value}
                       onClick={() => setIsPassVisible(!isPassVisible)}
@@ -194,7 +193,6 @@ export function SignUpForm() {
                       aria-label={
                         isConfirmPassVisible ? "Hide Password" : "Show Password"
                       }
-                      tabIndex={-1}
                       type="button"
                       disabled={!field.value}
                       onClick={() =>

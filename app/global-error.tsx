@@ -15,10 +15,11 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col items-center justify-center bg-white p-4 font-sans text-neutral-900 antialiased dark:bg-neutral-950 dark:text-neutral-100">
+      <body className="flex min-h-screen flex-col items-center justify-center bg-white p-4 font-sans text-neutral-900 antialiased [@media(prefers-color-scheme:dark)]:bg-neutral-950 [@media(prefers-color-scheme:dark)]:text-neutral-100">
         <div className="mx-auto flex max-w-md flex-col items-center space-y-4 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 [@media(prefers-color-scheme:dark)]:bg-red-950/50 [@media(prefers-color-scheme:dark)]:text-red-400">
             <svg
+              aria-hidden="true"
               className="size-7"
               fill="none"
               viewBox="0 0 24 24"
@@ -35,7 +36,7 @@ export default function GlobalError({
             Application Error
           </h1>
 
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="text-sm text-neutral-600 [@media(prefers-color-scheme:dark)]:text-neutral-400">
             A critical error occurred. Please try reloading the application.
           </p>
 
@@ -48,7 +49,7 @@ export default function GlobalError({
           <div className="pt-2">
             <button
               onClick={reset}
-              className="inline-flex h-9 items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-neutral-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-200"
+              className="inline-flex h-9 items-center justify-center rounded-md bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-neutral-800 [@media(prefers-color-scheme:dark)]:bg-neutral-100 [@media(prefers-color-scheme:dark)]:text-neutral-900 [@media(prefers-color-scheme:dark)]:hover:bg-neutral-200"
             >
               Try again
             </button>

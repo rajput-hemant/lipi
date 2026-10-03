@@ -48,7 +48,10 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
 
       <AuthModeToggle />
 
-      <main className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0">
+      <main
+        id="main-content"
+        className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0"
+      >
         <Logo className="mx-auto size-14 drop-shadow" />
         {children}
         <p className="mx-auto px-10 text-center text-sm text-muted-foreground">

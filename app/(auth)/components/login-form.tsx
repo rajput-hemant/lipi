@@ -139,7 +139,6 @@ export function LoginForm() {
                       aria-label={
                         isPassVisible ? "Hide Password" : "Show Password"
                       }
-                      tabIndex={-1}
                       type="button"
                       disabled={!field.value}
                       onClick={() => setIsPassVisible(!isPassVisible)}
