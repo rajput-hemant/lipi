@@ -282,10 +282,7 @@ function DocumentTreeItem({
       className="relative"
       onKeyDown={(e) => {
         if (isRenaming) return;
-        if (
-          e.key === "ContextMenu" ||
-          (e.shiftKey && (e.key === "F10" || e.code === "F10"))
-        ) {
+        if (e.key === "ContextMenu" || (e.shiftKey && e.key === "F10")) {
           e.preventDefault();
           e.stopPropagation();
           const target = e.currentTarget;
