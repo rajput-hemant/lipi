@@ -44,7 +44,7 @@ export function assertLocalDevEnvironment(
   }
   if (!env.LOCAL_DEV_CONFIG) {
     throw new Error(
-      "LOCAL_DEV_CONFIG is not set. Point it at the shared fixture (Infinitunes config/local-dev-fixture.json), see docs/local-development.md"
+      "LOCAL_DEV_CONFIG is not set. Point it at the shared fixture (Infinitunes local-dev/fixtures.json), see docs/local-development.md"
     );
   }
   if (!isLoopbackDatabaseUrl(env.DATABASE_URL)) {

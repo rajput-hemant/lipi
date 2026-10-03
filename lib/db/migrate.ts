@@ -5,6 +5,7 @@ import {
   assertLocalDevEnvironment,
   isLocalDevConfigured,
 } from "../local-dev/fixture";
+import { assertSharedAuthBaseline } from "../local-dev/preflight";
 import {
   adoptLegacyLocalHistory,
   LIPI_MIGRATIONS_SCHEMA,
@@ -22,6 +23,7 @@ const runMigrate = async () => {
   const start = Date.now();
 
   if (local) {
+    await assertSharedAuthBaseline(db);
     const { adopted } = await adoptLegacyLocalHistory(db, migrationsFolder);
     if (adopted) console.log(`Adopted ${adopted} existing Lipi migration rows`);
     await migrate(db, {

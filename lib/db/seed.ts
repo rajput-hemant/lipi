@@ -7,12 +7,14 @@ import {
   assertLocalDevEnvironment,
   loadLocalDevFixture,
 } from "../local-dev/fixture";
+import { assertSharedAuthBaseline } from "../local-dev/preflight";
 import { betterAuthAccounts, documents, users, workspaces } from "./schema";
 import { LOCAL_DOCUMENTS, LOCAL_WORKSPACE } from "./seed-data";
 
 async function seed() {
   assertLocalDevEnvironment();
   const { user } = loadLocalDevFixture();
+  await assertSharedAuthBaseline(db);
 
   await db.transaction(async (tx) => {
     const byEmail = await tx.query.users.findFirst({
