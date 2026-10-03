@@ -4,7 +4,6 @@ import { connection } from "next/server";
 import { siteConfig } from "@/config/site";
 import { GitHub, Logo, X } from "../icons";
 import { Separator } from "../ui/separator";
-import { NewsletterSubscriptionForm } from "./newsletter-subscription-form";
 import { ThemeToggleGroup } from "./theme-toggle-group";
 
 const footerLinks = [
@@ -85,16 +84,6 @@ export async function SiteFooter() {
               ))}
             </div>
           ))}
-          <div className="col-span-full flex w-full flex-col gap-2 lg:max-w-[240px]">
-            <h2 className="mb-1.5 text-sm font-semibold lg:text-sm">
-              Subscribe to our newsletter
-            </h2>
-
-            <p className="mb-1.5 text-[13px] leading-6 text-muted-foreground lg:text-sm">
-              Join Our Community! Get exclusive travel offers and insider tips.
-            </p>
-            <NewsletterSubscriptionForm />
-          </div>
         </div>
 
         <div className="mt-8 flex items-center justify-between lg:mt-12">
