@@ -1,5 +1,3 @@
-"use server";
-
 import { and, count, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";

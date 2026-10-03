@@ -1,5 +1,3 @@
-"use server";
-
 import { hasConfiguredProEntitlement } from "./entitlement";
 import { getCurrentBillingSubscription } from "./subscription-access";
 

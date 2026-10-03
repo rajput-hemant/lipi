@@ -1,5 +1,3 @@
-"use server";
-
 import { eq } from "drizzle-orm";
 
 import type { Subscription } from "@/types/db";

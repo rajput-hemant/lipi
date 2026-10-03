@@ -1,5 +1,3 @@
-"use server";
-
 import { tryGetStripeProPriceId } from "@/lib/stripe/billing-env";
 import { hasProEntitlement } from "./entitlement";
 import { PlanQuotaError } from "./errors";
