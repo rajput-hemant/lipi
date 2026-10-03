@@ -1,6 +1,5 @@
 import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 
 import { isLoopbackDatabaseUrl } from "./db/database-url";
 
@@ -19,18 +18,16 @@ interface LocalDevCredentials {
   };
 }
 
-export async function logLocalDevCredentials() {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!isLoopbackDatabaseUrl(databaseUrl)) return;
+export function logLocalDevCredentials() {
+  if (!isLoopbackDatabaseUrl(process.env.DATABASE_URL)) return;
 
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const fixturePath = join(__dirname, "../fixtures/local-dev-credentials.json");
-
-  const credentials = JSON.parse(
+  const fixturePath = join(
+    process.cwd(),
+    "fixtures/local-dev-credentials.json"
+  );
+  const { user, database } = JSON.parse(
     readFileSync(fixturePath, "utf-8")
   ) as LocalDevCredentials;
-  const { user, database } = credentials;
 
   console.log("\n=== Local development credentials ===");
   console.log(
@@ -40,5 +37,3 @@ export async function logLocalDevCredentials() {
   console.log(`Password: ${user.password}`);
   console.log("=====================================\n");
 }
-
-logLocalDevCredentials();

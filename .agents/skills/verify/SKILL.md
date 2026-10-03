@@ -127,7 +127,7 @@ unset CHROME_DEVTOOLS_AXI_AUTO_CONNECT CHROME_DEVTOOLS_AXI_USER_DATA_DIR CHROME_
 chrome-devtools-axi open http://127.0.0.1:3161/signup
 ```
 
-Tool behaviors learned live: element refs (`@g1:1_20`) go stale after every action, so re-run `snapshot` and pick the fresh ref before each `click`/`fill`; wrap that in a tiny shell helper that greps the snapshot line by role and name and acts on its `uid`. `fill` replaces a field's value, `type` appends to the focused element. There is no right-click: open the sidebar tree context menu by dispatching a `contextmenu` MouseEvent on the `[id^=document-tree-item]` link via `eval` (state this when citing it; `Shift+F10` did not open it, see ledger). `screenshot <path>`, `console --type error` and `network` give evidence; `resize 390 844` emulates mobile.
+Tool behaviors learned live: element refs (`@g1:1_20`) go stale after every action, so re-run `snapshot` and pick the fresh ref before each `click`/`fill`; wrap that in a tiny shell helper that greps the snapshot line by role and name and acts on its `uid`. `fill` replaces a field's value, `type` appends to the focused element. There is no right-click: open the sidebar tree context menu by dispatching a `contextmenu` MouseEvent on the `[id^=document-tree-item]` link via `eval` (state this when citing it; hardware-keyboard `Shift+F10` is unproven). `screenshot <path>`, `console --type error` and `network` give evidence; `resize 390 844` emulates mobile.
 
 Stable handles, confirmed live unless marked otherwise:
 
