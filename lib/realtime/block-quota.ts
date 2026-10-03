@@ -5,7 +5,7 @@ import * as Y from "yjs";
 import type { RealtimeContext } from "./context";
 import type { beforeSyncPayload, Connection } from "@hocuspocus/server";
 
-import { assertUserCanCreateBlock } from "@/lib/billing/block-quota";
+import { assertWorkspaceCanCreateBlock } from "@/lib/billing/block-quota";
 import { serializeDocumentContent } from "@/lib/block-editor/document-content";
 import { realtimeBlockNoteEditor } from "@/lib/block-editor/realtime-schema";
 import { DOCUMENT_CONTENT_MAX_LENGTH } from "@/lib/validations/document";
@@ -81,8 +81,8 @@ export class RealtimeBlockQuotaGuard {
     this.pending.set(documentName, pendingForRoom);
 
     try {
-      await assertUserCanCreateBlock(
-        context.userId,
+      await assertWorkspaceCanCreateBlock(
+        context.workspaceId,
         currentCount + pendingDelta + delta - 1
       );
     } catch (error) {

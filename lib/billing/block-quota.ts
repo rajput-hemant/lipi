@@ -1,21 +1,16 @@
-import { tryGetStripeProPriceId } from "@/lib/stripe/billing-env";
-import { hasProEntitlement } from "./entitlement";
 import { PlanQuotaError } from "./errors";
 import { canCreateBlock } from "./plan-quotas";
-import { getCurrentBillingSubscription } from "./subscription-access";
+import { workspaceOwnerHasProPlanEntitlement } from "./quota-entitlement";
 
 /**
- * Enforces the free-plan block limit. Wire this at editor block-create paths when
- * Phase 4 lands; callers pass the live block count for the workspace or document.
+ * Enforces the free-plan block limit using the workspace owner's plan.
+ * Callers pass the live block count for the document.
  */
-export async function assertUserCanCreateBlock(
-  userId: string,
+export async function assertWorkspaceCanCreateBlock(
+  workspaceId: string,
   blockCount: number
 ): Promise<void> {
-  const subscription = await getCurrentBillingSubscription(userId);
-  const proPriceId = tryGetStripeProPriceId();
-  const isPro =
-    proPriceId ? hasProEntitlement(subscription, proPriceId) : false;
+  const isPro = await workspaceOwnerHasProPlanEntitlement(workspaceId);
 
   if (!canCreateBlock({ isPro, blockCount })) {
     throw new PlanQuotaError(

@@ -17,7 +17,7 @@ vi.mock("next/cache", () => ({
 }));
 vi.mock("..", () => ({ db: {} }));
 vi.mock("@/lib/billing/quota-entitlement", () => ({
-  userHasProPlanEntitlement: vi.fn(),
+  workspaceOwnerHasProPlanEntitlement: vi.fn(),
 }));
 vi.mock("@/lib/realtime/authoritative-content", () => ({
   loadAuthoritativeDocumentContentBySourceIds: vi.fn(),

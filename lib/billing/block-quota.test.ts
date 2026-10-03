@@ -1,44 +1,41 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { assertUserCanCreateBlock } from "./block-quota";
+import { assertWorkspaceCanCreateBlock } from "./block-quota";
 import { FREE_PLAN_MAX_BLOCKS } from "./plan-quotas";
 
 const mocks = vi.hoisted(() => ({
-  getCurrentBillingSubscription: vi.fn(),
+  workspaceOwnerHasProPlanEntitlement: vi.fn(),
 }));
 
-vi.mock("./subscription-access", () => ({
-  getCurrentBillingSubscription: mocks.getCurrentBillingSubscription,
+vi.mock("./quota-entitlement", () => ({
+  workspaceOwnerHasProPlanEntitlement:
+    mocks.workspaceOwnerHasProPlanEntitlement,
 }));
 
-describe("assertUserCanCreateBlock", () => {
+describe("assertWorkspaceCanCreateBlock", () => {
   beforeEach(() => {
-    vi.stubEnv("STRIPE_PRICE_ID_PRO", "price_pro");
+    vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it("allows the last free block and rejects the next", async () => {
-    mocks.getCurrentBillingSubscription.mockResolvedValue(null);
+  it("allows the last free block and rejects the next on a Free owner", async () => {
+    mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(false);
 
     await expect(
-      assertUserCanCreateBlock("u1", FREE_PLAN_MAX_BLOCKS - 1)
+      assertWorkspaceCanCreateBlock("ws1", FREE_PLAN_MAX_BLOCKS - 1)
     ).resolves.toBeUndefined();
     await expect(
-      assertUserCanCreateBlock("u1", FREE_PLAN_MAX_BLOCKS)
+      assertWorkspaceCanCreateBlock("ws1", FREE_PLAN_MAX_BLOCKS)
     ).rejects.toMatchObject({ name: "PlanQuotaError", code: "block" });
+    expect(mocks.workspaceOwnerHasProPlanEntitlement).toHaveBeenCalledWith(
+      "ws1"
+    );
   });
 
-  it("is unlimited for pro subscribers", async () => {
-    mocks.getCurrentBillingSubscription.mockResolvedValue({
-      status: "trialing",
-      priceId: "price_pro",
-    });
+  it("is unlimited when the workspace owner is on Pro", async () => {
+    mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(true);
 
     await expect(
-      assertUserCanCreateBlock("u1", FREE_PLAN_MAX_BLOCKS * 10)
+      assertWorkspaceCanCreateBlock("ws1", FREE_PLAN_MAX_BLOCKS * 10)
     ).resolves.toBeUndefined();
   });
 });

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDocuments, updateDocument } from "./document";
+import { getDocuments, restoreDocument, updateDocument } from "./document";
 import { MutationAuthError } from "./mutation-auth";
 
 const WORKSPACE_ID = "11111111-1111-4111-8111-111111111111";
@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   assertWorkspaceAccess: vi.fn(),
   authorizeDocumentMutation: vi.fn(),
   requireAuthenticatedUser: vi.fn(),
-  userHasProPlanEntitlement: vi.fn(),
+  workspaceOwnerHasProPlanEntitlement: vi.fn(),
   selectRows: vi.fn(),
   update: vi.fn(),
 }));
@@ -22,7 +22,8 @@ vi.mock("next/cache", () => ({
 }));
 
 vi.mock("@/lib/billing/quota-entitlement", () => ({
-  userHasProPlanEntitlement: mocks.userHasProPlanEntitlement,
+  workspaceOwnerHasProPlanEntitlement:
+    mocks.workspaceOwnerHasProPlanEntitlement,
 }));
 
 vi.mock("@/lib/realtime/authoritative-content", () => ({
@@ -66,7 +67,7 @@ beforeEach(() => {
   mocks.requireAuthenticatedUser.mockResolvedValue({ id: "user-1" });
   mocks.assertWorkspaceAccess.mockResolvedValue({});
   mocks.selectRows.mockResolvedValue([]);
-  mocks.userHasProPlanEntitlement.mockResolvedValue(false);
+  mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(false);
 });
 
 describe("getDocuments", () => {
@@ -99,10 +100,13 @@ describe("updateDocument root page quota", () => {
       updateDocument({ id: DOCUMENT_ID, parentId: null })
     ).rejects.toThrow("Root page limit reached");
     expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.workspaceOwnerHasProPlanEntitlement).toHaveBeenCalledWith(
+      WORKSPACE_ID
+    );
   });
 
   it("allows the move on a Pro plan", async () => {
-    mocks.userHasProPlanEntitlement.mockResolvedValue(true);
+    mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(true);
     mocks.update.mockReturnValue({
       set: () => ({
         where: () => ({
@@ -114,5 +118,36 @@ describe("updateDocument root page quota", () => {
     await expect(
       updateDocument({ id: DOCUMENT_ID, parentId: null })
     ).resolves.toMatchObject({ id: DOCUMENT_ID, parentId: null });
+  });
+});
+
+describe("restoreDocument root page quota", () => {
+  const trashed = { ...row("t", null), inTrash: true };
+
+  beforeEach(() => {
+    mocks.authorizeDocumentMutation.mockResolvedValue({
+      user: { id: "user-1" },
+      document: trashed,
+    });
+    mocks.selectRows.mockResolvedValue([
+      row("a", null),
+      row("b", null),
+      row("c", null),
+      trashed,
+    ]);
+  });
+
+  it("rejects restoring a root page past the owner's free limit", async () => {
+    await expect(restoreDocument("t")).rejects.toThrow(
+      "Root page limit reached"
+    );
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it("restores a root page when the owner is on Pro", async () => {
+    mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(true);
+    mocks.update.mockReturnValue({ set: () => ({ where: () => undefined }) });
+
+    await expect(restoreDocument("t")).resolves.toBe(1);
   });
 });
