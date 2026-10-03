@@ -105,10 +105,10 @@
   },
   "lint-staged": {
     "*.{ts,tsx,md,mdx}": [
-      "prettier --write \"**/*.{ts,tsx,mdx}\" --cache"
+      "prettier --write"
     ],
     "*.{ts,tsx,mdx}": [
-      "eslint --fix ."
+      "eslint --fix --no-warn-ignored"
     ]
   },
   "commitlint": {

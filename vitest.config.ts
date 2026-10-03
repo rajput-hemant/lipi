@@ -8,6 +8,7 @@ export default defineConfig({
     exclude: [
       ...configDefaults.exclude,
       ".next/**",
+      ".claude/worktrees/**",
       ".opencode/**",
       "tests/e2e/**",
     ],

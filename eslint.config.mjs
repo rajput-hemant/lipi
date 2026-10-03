@@ -6,6 +6,7 @@ import reactCompiler from "eslint-plugin-react-compiler";
 export default defineConfig([
   globalIgnores([
     ".next/**",
+    ".claude/worktrees/**",
     "node_modules/**",
     "**/public/**",
     "**/*.esm.js",
