@@ -46,7 +46,7 @@ export function Testimonials() {
             {LOBBY_CAPABILITIES.map(({ title, description }) => (
               <Card
                 key={`${rowIndex}-${title}`}
-                className="w-[28rem] shrink-0 rounded-xl duration-300 hover:shadow-md dark:bg-gradient-to-br dark:from-border/50 dark:to-background"
+                className="w-[min(28rem,80vw)] shrink-0 rounded-xl duration-300 hover:shadow-md dark:bg-gradient-to-br dark:from-border/50 dark:to-background"
               >
                 <CardHeader>
                   <CardTitle className="drop-shadow-2xl">{title}</CardTitle>
