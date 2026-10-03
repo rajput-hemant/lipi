@@ -50,7 +50,7 @@ Not re-run here and not counted as new verification:
 ### LIP-V004 Invite page sends `callbackUrl`, login reads `from`
 
 - Class: HYPOTHESIS. Severity: low. State: open.
-- Surface: `app/invite/[token]/page.tsx`, `app/(auth)/components/login-form.tsx`.
+- Surface: `app/invite/[token]/route.ts` (was `page.tsx`), `app/(auth)/components/login-form.tsx`.
 - Evidence: `redirect(\`/login?callbackUrl=...\`)`in the invite page versus`searchParams.get("from")`in the login form;`proxy.ts`already redirects unauthenticated`/invite/...`requests to`/login?from=...` first, so the page branch is probably unreachable in practice.
 - Reproduction (not run): open `/invite/<token>` logged out, log in, check the landing URL.
 - Expected: land on the invite and accept it. Actual: expected to work via the proxy `from` path; unverified.

@@ -90,7 +90,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 - [x] **Room Authorization & Viewer Enforcement:** Validates session and workspace membership on connection and synchronization; enforces read-only access for viewers (`lib/realtime/authorize-room.ts`, `lib/realtime/authorize-room.test.ts`).
 - [x] **Authoritative State Snapshots:** Yjs document state in `lipi_realtime_documents.state` serves as editing truth, with debounced snapshots written to `documents.content` (`lib/realtime/authoritative-content.ts`, `lib/realtime/authoritative-content.test.ts`).
 - [x] **End-to-End Multi-Client Synchronization:** Verified simultaneous multi-user editing, cursor presence, and viewer write rejection in a 3-context browser session (`tests/e2e/collaboration.spec.ts`).
-- [ ] **Production Realtime Endpoint Topology:** Architectural choice between single cookie-owning host vs. separate host with `wss://` and signed token remains an open deployment decision ([research note](./research/realtime-collaboration.md)).
+- [ ] **Production Realtime Endpoint:** Decided (D-1): a separate always-on Node host with its own `wss://` URL and signed room tokens ([realtime guide](../guides/realtime.md), [research note](../research/realtime-collaboration.md)). Deployment of that host is still open.
 
 ### 3.7 Plan Quotas & Stripe Billing Demonstration
 
