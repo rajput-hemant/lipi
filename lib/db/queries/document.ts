@@ -352,9 +352,6 @@ export async function getDocumentBreadcrumbs(
     return [];
   }
 
-  const user = await requireAuthenticatedUser();
-  await assertWorkspaceAccess(user.id, workspaceId);
-
   const rows = await getDocuments(workspaceId);
   const byId = new Map(rows.map((row) => [row.id, row]));
   const chain: Document[] = [];

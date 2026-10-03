@@ -78,7 +78,20 @@ export function createAppStore(
       store.documents = documents;
     },
     setCollaborators(collaborators) {
-      store.collaborators = collaborators;
+      // Awareness fires on every cursor move; skip no-op roster updates.
+      const current = store.collaborators;
+      const unchanged =
+        current.length === collaborators.length &&
+        current.every((entry, index) => {
+          const next = collaborators[index];
+          return (
+            entry.id === next.id &&
+            entry.name === next.name &&
+            entry.image === next.image &&
+            entry.color === next.color
+          );
+        });
+      if (!unchanged) store.collaborators = collaborators;
     },
   });
 
