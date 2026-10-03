@@ -1,3 +1,4 @@
+import { ilike } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { searchDocumentsInWorkspace } from "./search";
@@ -15,6 +16,11 @@ vi.mock("./mutation-auth", () => ({
   requireWorkspacePermission: mockRequirePermission,
   MutationAuthError: class MutationAuthError extends Error {},
 }));
+
+vi.mock("drizzle-orm", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("drizzle-orm")>();
+  return { ...actual, ilike: vi.fn(actual.ilike) };
+});
 
 vi.mock("@/lib/db", () => ({
   db: {
@@ -135,5 +141,23 @@ describe("searchDocumentsInWorkspace", () => {
     expect(results[0]?.id).toBe("doc-2");
     expect(results[0]?.snippet).toBeDefined();
     expect(results[0]?.snippet).toContain("roadmap");
+  });
+
+  it("escapes LIKE wildcards in the user query", async () => {
+    mockRequireUser.mockResolvedValue({ id: "user-1" });
+    mockRequirePermission.mockResolvedValue({ role: "editor" });
+    mockSelect.mockReturnValue({
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([]),
+    });
+
+    await searchDocumentsInWorkspace(validWorkspaceId, " 50%_off ");
+
+    expect(vi.mocked(ilike).mock.calls.map(([, pattern]) => pattern)).toEqual([
+      "%50\\%\\_off%",
+      "%50\\%\\_off%",
+    ]);
   });
 });

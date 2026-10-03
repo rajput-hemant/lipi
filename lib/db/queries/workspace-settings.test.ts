@@ -12,9 +12,17 @@ const mocks = vi.hoisted(() => ({
   updateReturning: vi.fn(),
   selectLimit: vi.fn(),
   assertReceive: vi.fn(),
+  revalidateWorkspaceLists: vi.fn(),
+  getWorkspaceListAudience: vi.fn(),
+  getWorkspaceOwnerId: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+vi.mock("./workspace-list-tags", () => ({
+  revalidateWorkspaceLists: mocks.revalidateWorkspaceLists,
+  getWorkspaceListAudience: mocks.getWorkspaceListAudience,
+  getWorkspaceOwnerId: mocks.getWorkspaceOwnerId,
+}));
 vi.mock("@/lib/billing/enforce-quotas", () => ({
   assertUserCanReceiveWorkspaceTransfer: mocks.assertReceive,
 }));
@@ -69,6 +77,8 @@ beforeEach(() => {
   mocks.authorizeWorkspaceTransfer.mockResolvedValue({ id: "owner" });
   mocks.authorizeWorkspaceDelete.mockResolvedValue({ id: "owner" });
   mocks.authorizeWorkspaceMemberManagement.mockResolvedValue({ id: "owner" });
+  mocks.getWorkspaceListAudience.mockResolvedValue(["owner", "member"]);
+  mocks.getWorkspaceOwnerId.mockResolvedValue("owner");
 });
 
 describe("workspace settings actions", () => {
@@ -164,5 +174,59 @@ describe("workspace settings actions", () => {
       ok: true,
       data: { id: workspaceId },
     });
+  });
+});
+
+describe("workspace list revalidation targets", () => {
+  it("revalidates the owner and members when settings change", async () => {
+    mocks.updateReturning.mockResolvedValue([{ id: workspaceId }]);
+
+    await updateWorkspaceSettings({ workspaceId, title: "Renamed" });
+
+    expect(mocks.revalidateWorkspaceLists).toHaveBeenCalledWith([
+      "owner",
+      "member",
+    ]);
+  });
+
+  it("reads the audience before deleting, as collaborators cascade", async () => {
+    const order: string[] = [];
+    mocks.getWorkspaceListAudience.mockImplementation(async () => {
+      order.push("audience");
+      return ["owner", "member"];
+    });
+    mocks.deleteReturning.mockImplementation(async () => {
+      order.push("delete");
+      return [{ id: workspaceId }];
+    });
+
+    await deleteWorkspace({ workspaceId });
+
+    expect(order).toEqual(["audience", "delete"]);
+    expect(mocks.revalidateWorkspaceLists).toHaveBeenCalledWith([
+      "owner",
+      "member",
+    ]);
+  });
+
+  it("revalidates the owner and the affected member on role change and removal", async () => {
+    const collaboratorId = "33333333-3333-4333-8333-333333333333";
+    mocks.updateReturning.mockResolvedValue([{ id: "c1", userId }]);
+    await updateCollaboratorRole({
+      workspaceId,
+      collaboratorId,
+      role: "viewer",
+    });
+    expect(mocks.revalidateWorkspaceLists).toHaveBeenLastCalledWith([
+      userId,
+      "owner",
+    ]);
+
+    mocks.deleteReturning.mockResolvedValue([{ id: "c1", userId }]);
+    await removeWorkspaceMember({ workspaceId, collaboratorId });
+    expect(mocks.revalidateWorkspaceLists).toHaveBeenLastCalledWith([
+      userId,
+      "owner",
+    ]);
   });
 });

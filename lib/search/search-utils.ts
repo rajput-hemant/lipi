@@ -2,6 +2,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
+/** Escapes `\`, `%` and `_` so user input matches literally in LIKE/ILIKE. */
+export function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
+
 export function extractPlainTextFromDocumentContent(
   content: string | null | undefined
 ): string {

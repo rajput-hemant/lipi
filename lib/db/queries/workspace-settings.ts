@@ -1,6 +1,5 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -14,6 +13,10 @@ import {
   MutationAuthError,
 } from "./mutation-auth";
 import { runMutation } from "./mutation-failure";
+import {
+  getWorkspaceListAudience,
+  revalidateWorkspaceLists,
+} from "./workspace-list-tags";
 
 const updateWorkspaceSchema = z.object({
   workspaceId: z.uuid(),
@@ -30,12 +33,6 @@ const transferOwnershipSchema = z.object({
 const deleteWorkspaceSchema = z.object({
   workspaceId: z.uuid(),
 });
-
-function revalidateWorkspaceLists() {
-  revalidateTag("get_private_workspaces", "max");
-  revalidateTag("get_collaborating_workspaces", "max");
-  revalidateTag("get_shared_workspaces", "max");
-}
 
 export async function updateWorkspaceSettings(input: unknown) {
   const parsed = updateWorkspaceSchema.parse(input);
@@ -63,7 +60,9 @@ export async function updateWorkspaceSettings(input: unknown) {
       throw new MutationAuthError("Workspace not found");
     }
 
-    revalidateWorkspaceLists();
+    revalidateWorkspaceLists(
+      await getWorkspaceListAudience(parsed.workspaceId)
+    );
     return updated;
   });
 }
@@ -128,7 +127,9 @@ export async function transferWorkspaceOwnership(input: unknown) {
       }
     });
 
-    revalidateWorkspaceLists();
+    revalidateWorkspaceLists(
+      await getWorkspaceListAudience(parsed.workspaceId)
+    );
   });
 }
 
@@ -136,6 +137,9 @@ export async function deleteWorkspace(input: unknown) {
   const parsed = deleteWorkspaceSchema.parse(input);
   return runMutation(async () => {
     await authorizeWorkspaceDelete(parsed.workspaceId);
+
+    // Collaborators cascade with the workspace, so read the audience first.
+    const audience = await getWorkspaceListAudience(parsed.workspaceId);
 
     const [deleted] = await db
       .delete(workspaces)
@@ -146,7 +150,7 @@ export async function deleteWorkspace(input: unknown) {
       throw new MutationAuthError("Workspace not found");
     }
 
-    revalidateWorkspaceLists();
+    revalidateWorkspaceLists(audience);
     return deleted;
   });
 }

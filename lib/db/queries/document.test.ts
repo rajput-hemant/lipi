@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
+  deleteDocumentPermanently,
   duplicateDocument,
   getDocuments,
   restoreDocument,
@@ -22,6 +23,8 @@ const mocks = vi.hoisted(() => ({
   selectRows: vi.fn(),
   insert: vi.fn(),
   update: vi.fn(),
+  delete: vi.fn(),
+  transaction: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -53,14 +56,22 @@ vi.mock("..", () => {
       where: () => Object.assign(rows(), { orderBy: rows }),
     });
   };
+  const tx = {
+    select: (columns: unknown) => {
+      mocks.select(columns);
+      return { from: query };
+    },
+    insert: mocks.insert,
+    update: mocks.update,
+    delete: mocks.delete,
+  };
   return {
     db: {
-      select: (columns: unknown) => {
-        mocks.select(columns);
-        return { from: query };
+      ...tx,
+      transaction: (fn: (tx: unknown) => unknown) => {
+        mocks.transaction();
+        return fn(tx);
       },
-      insert: mocks.insert,
-      update: mocks.update,
     },
   };
 });
@@ -224,5 +235,76 @@ describe("restoreDocument root page quota", () => {
     mocks.update.mockReturnValue({ set: () => ({ where: () => undefined }) });
 
     await expect(restoreDocument("t")).resolves.toEqual({ ok: true, data: 1 });
+  });
+});
+
+describe("multi-row mutations run in a transaction", () => {
+  const trashedRoot = { ...row("t", null), inTrash: true };
+  const trashedChild = { ...row("u", "t"), inTrash: true };
+
+  beforeEach(() => {
+    mocks.authorizeDocumentMutation.mockResolvedValue({
+      user: { id: "user-1" },
+      document: trashedRoot,
+    });
+    mocks.selectRows.mockResolvedValue([trashedRoot, trashedChild]);
+  });
+
+  it("deletes the whole subtree with one delete inside the transaction", async () => {
+    const where = vi.fn();
+    mocks.delete.mockReturnValue({ where });
+
+    await expect(deleteDocumentPermanently("t")).resolves.toEqual({
+      ok: true,
+      data: 2,
+    });
+
+    expect(mocks.transaction).toHaveBeenCalledOnce();
+    expect(mocks.delete).toHaveBeenCalledOnce();
+    expect(where).toHaveBeenCalledOnce();
+  });
+
+  it("does not delete when the tree read inside the transaction has active descendants", async () => {
+    mocks.selectRows.mockResolvedValue([
+      trashedRoot,
+      { ...trashedChild, inTrash: false },
+    ]);
+
+    await expect(deleteDocumentPermanently("t")).resolves.toMatchObject({
+      ok: false,
+    });
+    expect(mocks.delete).not.toHaveBeenCalled();
+  });
+
+  it("trashes the subtree in one transaction", async () => {
+    mocks.update.mockReturnValue({ set: () => ({ where: () => undefined }) });
+
+    await expect(softDeleteDocumentTree("t")).resolves.toEqual({
+      ok: true,
+      data: 2,
+    });
+    expect(mocks.transaction).toHaveBeenCalledOnce();
+  });
+
+  it("passes the transaction executor to the authoritative content loader", async () => {
+    mocks.authorizeDocumentMutation.mockResolvedValue({
+      user: { id: "user-1" },
+      document: row(DOCUMENT_ID, null),
+    });
+    mocks.selectRows.mockResolvedValue([row(DOCUMENT_ID, null)]);
+    mocks.loadAuthoritativeContent.mockResolvedValue(new Map());
+    mocks.insert.mockReturnValue({
+      values: () => ({ returning: () => Promise.resolve([]) }),
+    });
+
+    await duplicateDocument({
+      sourceId: DOCUMENT_ID,
+      newId: "33333333-3333-4333-8333-333333333333",
+    });
+
+    expect(mocks.transaction).toHaveBeenCalledOnce();
+    expect(mocks.loadAuthoritativeContent.mock.calls[0][2]).toHaveProperty(
+      "select"
+    );
   });
 });

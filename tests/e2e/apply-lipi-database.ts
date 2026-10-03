@@ -1,5 +1,7 @@
 import { execSync } from "node:child_process";
 
+import { E2E_PG_CONTAINER } from "./env";
+
 /**
  * Apply Lipi application tables (lipi_*) on the throwaway e2e database.
  *
@@ -13,6 +15,12 @@ export function applyLipiDatabase(databaseUrl: string, repoRoot: string) {
     DATABASE_URL: databaseUrl,
     SKIP_ENV_VALIDATION: "true",
   };
+
+  // Kit push does not create extensions; the documents trigram indexes need it.
+  execSync(
+    `docker exec ${E2E_PG_CONTAINER} psql -U postgres -h 127.0.0.1 -c "CREATE EXTENSION IF NOT EXISTS pg_trgm"`,
+    { stdio: "inherit" }
+  );
 
   console.log("⏳ Pushing Lipi schema (lipi_* via drizzle-lipi e2e config)…");
   execSync(

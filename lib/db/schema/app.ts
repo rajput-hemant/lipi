@@ -79,6 +79,15 @@ export const documents = createTable(
     documentsWorkspaceParentIdx: index(
       "lipi_documents_workspace_parent_idx"
     ).on(table.workspaceId, table.parentId),
+    // Serve the `ilike '%q%'` search; need the pg_trgm extension.
+    documentsTitleTrgmIdx: index("lipi_documents_title_trgm_idx").using(
+      "gin",
+      table.title.op("gin_trgm_ops")
+    ),
+    documentsContentTrgmIdx: index("lipi_documents_content_trgm_idx").using(
+      "gin",
+      table.content.op("gin_trgm_ops")
+    ),
     documentsParentIdFkey: foreignKey({
       columns: [table.parentId],
       foreignColumns: [table.id],
