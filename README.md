@@ -33,7 +33,7 @@ git clone https://github.com/rajput-hemant/lipi
 cd lipi
 ```
 
-- Install Bun 1.4.2, then follow [docs/local-development.md](docs/local-development.md). In short: copy **.env.example** to **.env.local**, set `LOCAL_DEV_COMPOSE` and `LOCAL_DEV_CONFIG` (shared Infinitunes assets), then:
+- Install Bun 1.4.2, then follow [docs/local-development.md](docs/local-development.md). In short: copy **.env.example** to **.env.local**, set `LOCAL_DEV_CONFIG` to the shared fixture (Infinitunes `local-dev/fixtures.json`), then:
 
 ```
 bun i

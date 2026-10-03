@@ -4,14 +4,27 @@ Docker runs **resources only** (PostgreSQL, Redis, and a Redis REST adapter). Th
 
 ## Ownership
 
-Infinitunes owns the shared local assets: the resource-only `docker-compose.yml`, the bootstrap SQL, the shared fixture JSON and the shared-setup docs. Lipi only consumes them.
+Both Lipi and Infinitunes ship their own `docker-compose.yml` for the shared resources, so you can start the database from either checkout without the other. The two files are byte-identical and define one shared identity:
 
-| Asset                                                      | Where                                       | Lipi consumes it through |
-| :--------------------------------------------------------- | :------------------------------------------ | :----------------------- |
-| Compose file (PostgreSQL 18.6-alpine, Redis, REST adapter) | Infinitunes `docker-compose.yml`            | `LOCAL_DEV_COMPOSE`      |
-| Credentials and canonical user ID (single constant file)   | Infinitunes `config/local-dev-fixture.json` | `LOCAL_DEV_CONFIG`       |
+| Item                  | Value                                                                             |
+| :-------------------- | :-------------------------------------------------------------------------------- |
+| Compose project       | `local-platforms`                                                                 |
+| Containers            | `local-platforms-postgres`, `local-platforms-redis`, `local-platforms-redis-rest` |
+| Volumes               | `local_platforms_pgdata_18`, `local_platforms_redis_data`                         |
+| Network               | `local_platforms_net`                                                             |
+| Images                | `postgres:18.6-alpine`, `redis:7.4-alpine`, `hiett/serverless-redis-http:0.0.10`  |
+| Ports (loopback only) | 5432, 6379, 8079                                                                  |
+| Database              | `local_platforms` (user `postgres`)                                               |
 
-Lipi does not keep a copy of the compose file or the credentials. The seed script reads the user from the fixture; find the credentials in that file.
+Starting from either checkout reuses the same containers and data. The Postgres init SQL is inlined in the compose file (`configs.content`) instead of a bind mount, because a bind-mount path differs per checkout and would make Compose recreate the container whenever you switch. If you change one file, change the other the same way.
+
+Infinitunes owns the canonical fixture. It is the single constant file for the shared credentials, and Lipi reads it through `LOCAL_DEV_CONFIG` (this is a seed-time path, not needed to start the containers):
+
+| Asset                             | Where                                 | Lipi consumes it through |
+| :-------------------------------- | :------------------------------------ | :----------------------- |
+| Credentials and canonical user ID | Infinitunes `local-dev/fixtures.json` | `LOCAL_DEV_CONFIG`       |
+
+Lipi does not keep a copy of the credentials. Find them in that file (`user.email`, `user.password`).
 
 ## Prerequisites
 
@@ -23,11 +36,10 @@ Lipi does not keep a copy of the compose file or the credentials. The seed scrip
 
 ```bash
 cp .env.example .env.local        # local defaults are already filled in
-export LOCAL_DEV_COMPOSE=/path/to/infinitunes/docker-compose.yml
-export LOCAL_DEV_CONFIG=/path/to/infinitunes/config/local-dev-fixture.json
+export LOCAL_DEV_CONFIG=/path/to/infinitunes/local-dev/fixtures.json   # only for migrate/seed
 
 bun i
-bun run db:up                     # Postgres, Redis, REST adapter (waits for healthy)
+bun run db:up                     # Postgres, Redis, REST adapter (waits for healthy); safe if Infinitunes already started them
 ```
 
 Then, from the Infinitunes checkout, run its migrations first (it owns the shared `user` and `better_auth_*` tables):
@@ -50,7 +62,7 @@ Sign in with the email and password from the fixture file (`user.email`, `user.p
 
 | Command                              | Does                                                                                                              |
 | :----------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| `bun run db:up` / `db:down`          | Start / stop the shared containers (`docker compose -f $LOCAL_DEV_COMPOSE`). `down` keeps volumes.                |
+| `bun run db:up` / `db:down`          | `docker compose up -d --wait` / `docker compose down` for the shared containers. `down` keeps the named volumes.  |
 | `bun run db:migrate`                 | Apply Lipi migrations. With `LOCAL_DEV_CONFIG` set, history is stored in `drizzle.__lipi_migrations` (see below). |
 | `bun run db:seed`                    | Idempotent local seed: shared user, credential account, one workspace with three pages.                           |
 | `bun run dev`                        | Next.js dev server on the host.                                                                                   |
@@ -67,7 +79,7 @@ Sign in with the email and password from the fixture file (`user.email`, `user.p
 | Redis REST adapter | 8079 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`         |
 | Realtime           | 1234 | `NEXT_PUBLIC_LIPI_REALTIME_URL`, `LIPI_REALTIME_PORT`        |
 
-Keep the same local `AUTH_SECRET` / `BETTER_AUTH_SECRET` as Infinitunes (the `.env.example` default is identical in both). Lipi seeds no Redis data: it only uses Redis for rate limiting, which is off locally (`ENABLE_RATE_LIMITING=false`).
+Keep the same local `AUTH_SECRET` / `BETTER_AUTH_SECRET` as Infinitunes (the `.env.example` default, `local-development-secret-must-be-at-least-32-chars-long`, is identical in both). Lipi seeds no Redis data: it only uses Redis for rate limiting, which is off locally (`ENABLE_RATE_LIMITING=false`).
 
 ## Shared database, user and prefixes
 
@@ -94,6 +106,6 @@ Both projects use Drizzle. Their default history table is shared, and Infinitune
 
 ## Safe reset
 
-- `bun run db:down` stops containers and keeps the data volume.
-- Do not run `docker system prune` or delete the shared volume from here: other projects use it.
+- `bun run db:down` stops the shared containers (Infinitunes' too) and keeps the data volumes.
+- Do not run `docker system prune` or delete the shared volumes from here: other projects use them.
 - To start Lipi data over, drop only the `lipi_*` tables and `drizzle.__lipi_migrations` in the shared database, then rerun `db:migrate` and `db:seed`.
