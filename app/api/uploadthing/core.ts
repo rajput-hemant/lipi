@@ -5,7 +5,7 @@ import { z } from "zod";
 import type { FileRouter } from "uploadthing/next";
 
 import { getCurrentUser } from "@/lib/auth";
-import { requireWorkspacePermission } from "@/lib/db/queries/mutation-auth";
+import { requireWorkspacePermission } from "@/lib/db/data/mutation-auth";
 
 const f = createUploadthing();
 

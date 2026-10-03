@@ -9,20 +9,20 @@ import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 import { sendWorkspaceInviteEmail } from "@/lib/workspace/send-invite";
 import { publicPendingInvitesForRole } from "@/lib/workspace/workspace-invites";
 import { db } from "..";
-import { collaborators, users, workspaceInvites, workspaces } from "../schema";
 import {
   authorizeWorkspaceMemberManagement,
   getWorkspaceMembershipRole,
   MutationAuthError,
   requireAuthenticatedUser,
   requireWorkspacePermission,
-} from "./mutation-auth";
-import { runMutation } from "./mutation-failure";
+} from "../data/mutation-auth";
+import { runMutation } from "../data/mutation-failure";
 import {
   getWorkspaceOwnerId,
   revalidateWorkspaceLists,
-} from "./workspace-list-tags";
-import { ensureOwnerCollaboratorQuota } from "./workspace-member-quota";
+} from "../data/workspace-list-tags";
+import { ensureOwnerCollaboratorQuota } from "../data/workspace-member-quota";
+import { collaborators, users, workspaceInvites, workspaces } from "../schema";
 
 const inviteRoleSchema = z.enum(["editor", "viewer"]);
 

@@ -16,7 +16,7 @@ const { restoreDocument, deleteDocumentPermanently } = vi.hoisted(() => ({
   deleteDocumentPermanently: vi.fn(async () => ({ ok: true, data: 1 })),
 }));
 
-vi.mock("@/lib/db/queries", () => ({
+vi.mock("@/lib/db/actions/document", () => ({
   restoreDocument,
   deleteDocumentPermanently,
 }));

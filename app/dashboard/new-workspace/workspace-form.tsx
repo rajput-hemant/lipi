@@ -23,8 +23,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { createWorkspace } from "@/lib/db/actions/workspace";
 import { mutationErrorMessage, unwrapMutation } from "@/lib/db/mutation-result";
-import { createWorkspace } from "@/lib/db/queries";
 
 const workspaceSchema = z.object({
   name: z.string().min(3, "Workspace name must be at least 3 characters long"),

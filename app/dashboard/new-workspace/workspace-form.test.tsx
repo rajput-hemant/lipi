@@ -12,7 +12,7 @@ const { createWorkspace, replace } = vi.hoisted(() => ({
   replace: vi.fn(),
 }));
 
-vi.mock("@/lib/db/queries", () => ({ createWorkspace }));
+vi.mock("@/lib/db/actions/workspace", () => ({ createWorkspace }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }) }));
 vi.mock("@/components/emoji-picker", () => ({
   EmojiPicker: ({ children }: { children: React.ReactNode }) => children,

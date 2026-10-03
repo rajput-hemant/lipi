@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
-import { acceptWorkspaceInvite } from "@/lib/db/queries";
+import { acceptWorkspaceInvite } from "@/lib/db/actions/workspace-members";
 
 type InviteRouteContext = {
   params: Promise<{ token: string }>;

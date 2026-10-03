@@ -34,6 +34,12 @@ import {
   useCanEditPages,
   usePageAccess,
 } from "@/hooks/use-app-state";
+import {
+  createDocument,
+  duplicateDocument,
+  softDeleteDocumentTree,
+  updateDocument,
+} from "@/lib/db/actions/document";
 import { buildOptimisticDuplicateDocuments } from "@/lib/db/client-document-state";
 import {
   flattenVisibleTreeNodes,
@@ -41,12 +47,6 @@ import {
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
 import { isMutationDenied, unwrapMutation } from "@/lib/db/mutation-result";
-import {
-  createDocument,
-  duplicateDocument,
-  softDeleteDocumentTree,
-  updateDocument,
-} from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";

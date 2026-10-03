@@ -4,11 +4,14 @@ import type { Workspace } from "@/types/db";
 
 import { assertUserCanCreateWorkspace } from "@/lib/billing/enforce-quotas";
 import { db } from "..";
+import {
+  MutationAuthError,
+  requireAuthenticatedUser,
+} from "../data/mutation-auth";
+import { mutationFailure } from "../data/mutation-failure";
+import { revalidateWorkspaceLists } from "../data/workspace-list-tags";
+import { listWorkspacesForSwitcher } from "../data/workspace-lists";
 import { workspaces } from "../schema";
-import { MutationAuthError, requireAuthenticatedUser } from "./mutation-auth";
-import { mutationFailure } from "./mutation-failure";
-import { revalidateWorkspaceLists } from "./workspace-list-tags";
-import { listWorkspacesForSwitcher } from "./workspace-lists";
 
 export async function listWorkspacesForCurrentUser() {
   const user = await requireAuthenticatedUser();

@@ -13,7 +13,7 @@ import {
 import {
   requireAuthenticatedUser,
   requireWorkspacePermission,
-} from "./mutation-auth";
+} from "../data/mutation-auth";
 
 export type SearchDocumentResult = {
   id: string;

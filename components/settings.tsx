@@ -44,16 +44,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useAppActions } from "@/hooks/use-app-state";
-import { mutationErrorMessage, unwrapMutation } from "@/lib/db/mutation-result";
 import {
   createWorkspaceCollaboratorInvite,
-  deleteWorkspace,
   listWorkspaceMembers,
   removeWorkspaceMember,
-  transferWorkspaceOwnership,
   updateCollaboratorRole,
+} from "@/lib/db/actions/workspace-members";
+import {
+  deleteWorkspace,
+  transferWorkspaceOwnership,
   updateWorkspaceSettings,
-} from "@/lib/db/queries";
+} from "@/lib/db/actions/workspace-settings";
+import { mutationErrorMessage, unwrapMutation } from "@/lib/db/mutation-result";
 import { uploadFiles } from "@/lib/uploadthing";
 
 const settingsSchema = z.object({

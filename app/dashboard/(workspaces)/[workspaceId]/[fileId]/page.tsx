@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 import { DocumentPageView } from "@/components/document-editor/document-page-view";
 import { getCurrentUser } from "@/lib/auth";
-import { assertDocumentAccess } from "@/lib/db/queries/mutation-auth";
+import { assertDocumentAccess } from "@/lib/db/data/mutation-auth";
 
 type FilePageProps = {
   params: Promise<{ workspaceId: string; fileId: string }>;

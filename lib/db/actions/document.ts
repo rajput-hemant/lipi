@@ -25,15 +25,15 @@ import {
   updateDocumentSchema,
 } from "@/lib/validations/document";
 import { db } from "..";
-import { documents } from "../schema";
 import {
   assertWorkspaceAccess,
   authorizeDocumentMutation,
   authorizeWorkspaceMutation,
   MutationAuthError,
   requireAuthenticatedUser,
-} from "./mutation-auth";
-import { mutationFailure } from "./mutation-failure";
+} from "../data/mutation-auth";
+import { mutationFailure } from "../data/mutation-failure";
+import { documents } from "../schema";
 
 // `db` is a single-connection client: inside `db.transaction`, every query
 // must go through `tx` or it waits forever for the connection the transaction holds.

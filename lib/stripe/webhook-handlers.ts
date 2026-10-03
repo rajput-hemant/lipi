@@ -4,7 +4,7 @@ import {
   getCustomerByUserId,
   syncSubscriptionFromStripe,
   upsertCatalogFromStripePrice,
-} from "@/lib/db/queries/billing";
+} from "@/lib/db/data/billing";
 import { getStripe } from "@/lib/stripe/client";
 import { resolveUserIdFromStripeSubscription } from "@/lib/stripe/subscription-sync";
 

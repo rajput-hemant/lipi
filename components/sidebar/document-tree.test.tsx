@@ -30,7 +30,7 @@ vi.mock("@/components/realtime/workspace-realtime-provider", () => ({
 vi.mock("../subscription-modal-provider", () => ({
   useSubscriptionModal: () => ({ setOpen: vi.fn(), hasProEntitlement: true }),
 }));
-vi.mock("@/lib/db/queries", () => ({
+vi.mock("@/lib/db/actions/document", () => ({
   createDocument,
   softDeleteDocumentTree,
   duplicateDocument: vi.fn(),

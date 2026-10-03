@@ -11,7 +11,7 @@ const { mockRequireUser, mockRequirePermission, mockSelect } = vi.hoisted(
   })
 );
 
-vi.mock("./mutation-auth", () => ({
+vi.mock("../data/mutation-auth", () => ({
   requireAuthenticatedUser: mockRequireUser,
   requireWorkspacePermission: mockRequirePermission,
   MutationAuthError: class MutationAuthError extends Error {},

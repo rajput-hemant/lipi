@@ -4,7 +4,7 @@ import {
   claimStripeWebhookEvent,
   markStripeWebhookEventProcessed,
   releaseStripeWebhookEventClaim,
-} from "@/lib/db/queries/billing";
+} from "@/lib/db/data/billing";
 import { handleStripeWebhookEvent } from "./webhook-handlers";
 
 export type StripeWebhookDeliveryResult =

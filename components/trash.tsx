@@ -19,6 +19,10 @@ import {
   usePageAccess,
 } from "@/hooks/use-app-state";
 import {
+  deleteDocumentPermanently,
+  restoreDocument,
+} from "@/lib/db/actions/document";
+import {
   patchDocumentsForRestore,
   permanentDeleteTargetIds,
 } from "@/lib/db/client-document-state";
@@ -27,7 +31,6 @@ import {
   mutationErrorMessage,
   unwrapMutation,
 } from "@/lib/db/mutation-result";
-import { deleteDocumentPermanently, restoreDocument } from "@/lib/db/queries";
 import {
   AlertDialog,
   AlertDialogAction,

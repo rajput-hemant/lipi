@@ -12,7 +12,7 @@ import type { Workspace } from "@/types/db";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { listWorkspacesForCurrentUser } from "@/lib/db/queries";
+import { listWorkspacesForCurrentUser } from "@/lib/db/actions/workspace";
 import { cn } from "@/lib/utils";
 
 type WorkspaceGroups = {

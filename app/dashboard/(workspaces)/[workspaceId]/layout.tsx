@@ -7,11 +7,11 @@ import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realt
 import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
 import { getCurrentUser } from "@/lib/auth";
 import { isSidebarOpen, SIDEBAR_COOKIE } from "@/lib/dashboard/sidebar-cookie";
-import { getDocuments } from "@/lib/db/queries";
+import { getDocuments } from "@/lib/db/actions/document";
 import {
   getWorkspaceMembershipRole,
   MutationAuthError,
-} from "@/lib/db/queries/mutation-auth";
+} from "@/lib/db/data/mutation-auth";
 import { WorkspaceShell } from "../components/workspace-shell";
 
 export const instant = false;
