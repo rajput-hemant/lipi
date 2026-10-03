@@ -8,7 +8,7 @@ import type { DocumentRecord } from "@/lib/db/documents-tree";
 import type { MutationResult } from "@/lib/db/mutation-result";
 import type { Document } from "@/types/db";
 
-import { userHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
+import { workspaceOwnerHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
 import {
   assertPermanentDeleteAllowed,
   assertRootPageQuota,
@@ -88,9 +88,11 @@ export async function createDocument(input: unknown) {
   let workspaceIdForRevalidate: string | undefined;
 
   try {
-    const user = await authorizeWorkspaceMutation(parsed.workspaceId);
+    await authorizeWorkspaceMutation(parsed.workspaceId);
     const workspaceDocs = await loadWorkspaceDocuments(parsed.workspaceId);
-    const hasProEntitlement = await userHasProPlanEntitlement(user.id);
+    const hasProEntitlement = await workspaceOwnerHasProPlanEntitlement(
+      parsed.workspaceId
+    );
 
     assertRootPageQuota(
       workspaceDocs,
@@ -168,9 +170,7 @@ export async function updateDocument(input: unknown) {
       throw new MutationAuthError("Invalid document");
     }
 
-    const { user, document: existing } = await authorizeDocumentMutation(
-      parsed.id
-    );
+    const { document: existing } = await authorizeDocumentMutation(parsed.id);
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
 
@@ -178,7 +178,7 @@ export async function updateDocument(input: unknown) {
       assertRootPageQuota(
         workspaceDocs,
         existing.workspaceId,
-        await userHasProPlanEntitlement(user.id),
+        await workspaceOwnerHasProPlanEntitlement(existing.workspaceId),
         null
       );
     }
@@ -251,6 +251,16 @@ export async function restoreDocument(documentId: string) {
     workspaceIdForRevalidate = existing.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
     const ids = collectRestoreTargetIds(workspaceDocs, documentId);
+    const topmost = workspaceDocs.find((document) => document.id === ids[0]);
+
+    if (!topmost?.parentId) {
+      assertRootPageQuota(
+        workspaceDocs,
+        existing.workspaceId,
+        await workspaceOwnerHasProPlanEntitlement(existing.workspaceId),
+        null
+      );
+    }
 
     await db
       .update(documents)
@@ -259,6 +269,7 @@ export async function restoreDocument(documentId: string) {
 
     return ids.length;
   } catch (e) {
+    rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to restore document");
   } finally {
