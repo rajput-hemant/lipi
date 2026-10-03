@@ -27,7 +27,7 @@ import {
 } from "@/lib/block-editor/cover-presets";
 import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
 import { updateDocument } from "@/lib/db/actions/document";
-import { uploadFiles } from "@/lib/uploadthing";
+import { uploadImage } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
 type DocumentHeaderProps = {
@@ -107,13 +107,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
 
     try {
       setUploading(true);
-      const res = await uploadFiles("coverBanner", {
-        files: [file],
-        input: { workspaceId: document.workspaceId },
-      });
-      const uploaded = res?.[0];
-      const url = uploaded?.serverData?.url ?? uploaded?.url;
-      if (!url) throw new Error("Upload failed: No URL returned");
+      const url = await uploadImage("coverBanner", file, document.workspaceId);
       onBannerChange(url);
       toast.success("Cover banner updated");
     } catch (err) {

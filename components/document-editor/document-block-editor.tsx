@@ -34,7 +34,7 @@ import { fetchRealtimeAccess, getRealtimeUrl } from "@/lib/realtime/client";
 import { BLOCKNOTE_FRAGMENT } from "@/lib/realtime/constants";
 import { readCollaboratorPresence } from "@/lib/realtime/presence";
 import { documentRoomName } from "@/lib/realtime/rooms";
-import { uploadFiles } from "@/lib/uploadthing";
+import { uploadImage } from "@/lib/uploadthing";
 
 type DocumentBlockEditorProps = {
   document: Document;
@@ -196,16 +196,7 @@ function DocumentBlockEditorConnected({
       }
 
       try {
-        const response = await uploadFiles("documentImage", {
-          files: [file],
-          input: { workspaceId: document.workspaceId },
-        });
-
-        const uploaded = response?.[0];
-        const url = uploaded?.serverData?.url ?? uploaded?.url;
-
-        if (!url) throw new Error("No URL returned from upload");
-        return url;
+        return await uploadImage("documentImage", file, document.workspaceId);
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Image upload failed";

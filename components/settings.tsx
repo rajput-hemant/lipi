@@ -56,7 +56,7 @@ import {
   updateWorkspaceSettings,
 } from "@/lib/db/actions/workspace-settings";
 import { runMutationToast } from "@/lib/db/mutation-result";
-import { uploadFiles } from "@/lib/uploadthing";
+import { uploadImage } from "@/lib/uploadthing";
 
 const settingsSchema = z.object({
   title: z.string().min(1, "Name is required"),
@@ -103,13 +103,7 @@ export function Settings() {
 
     try {
       setUploadingLogo(true);
-      const res = await uploadFiles("workspaceLogo", {
-        files: [file],
-        input: { workspaceId },
-      });
-      const uploaded = res?.[0];
-      const url = uploaded?.serverData?.url ?? uploaded?.url;
-      if (!url) throw new Error("Upload failed: No URL returned");
+      const url = await uploadImage("workspaceLogo", file, workspaceId);
       settingsForm.setValue("logo", url, { shouldDirty: true });
       toast.success("Workspace logo uploaded");
     } catch (err) {
