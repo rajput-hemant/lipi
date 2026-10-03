@@ -13,6 +13,7 @@ import { realtimeBlockNoteEditor } from "@/lib/block-editor/realtime-schema";
 import { db } from "@/lib/db";
 import { documents, realtimeDocuments } from "@/lib/db/schema";
 import { DOCUMENT_CONTENT_MAX_LENGTH } from "@/lib/validations/document";
+import { serializedContentFromYjsState } from "./authoritative-content";
 import { BLOCKNOTE_FRAGMENT } from "./constants";
 import { parseRealtimeRoomName } from "./rooms";
 
@@ -73,16 +74,7 @@ export function createRealtimePersistence() {
       const room = parseRealtimeRoomName(documentName);
       if (!room || room.kind !== "document") return;
 
-      const ydoc = new Y.Doc();
-      Y.applyUpdate(ydoc, state);
-      const blocks = yDocToBlocks(
-        realtimeBlockNoteEditor,
-        ydoc,
-        BLOCKNOTE_FRAGMENT
-      );
-      ydoc.destroy();
-
-      const content = serializeDocumentContent(blocks);
+      const content = serializedContentFromYjsState(state);
       if (content.length > DOCUMENT_CONTENT_MAX_LENGTH) {
         throw new Error("Document content is too large");
       }

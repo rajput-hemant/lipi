@@ -29,7 +29,6 @@ type RealtimeServerOptions = {
   originIsAllowed?: (origin: string | null) => boolean;
   quotaGuard?: RealtimeQuotaGuard;
   secret: string;
-  verifyToken?: typeof verifyRealtimeToken;
 };
 
 function userColor(userId: string) {
@@ -61,12 +60,26 @@ export function createRealtimeServer({
   originIsAllowed = (origin) => Boolean(origin && allowedOrigins.has(origin)),
   quotaGuard,
   secret,
-  verifyToken = verifyRealtimeToken,
 }: RealtimeServerOptions) {
-  function makeContext(token: string, roomName: string) {
-    const payload = verifyToken(token, roomName, secret);
+  async function buildContext(
+    token: string,
+    roomName: string
+  ): Promise<RealtimeContext> {
+    const payload = verifyRealtimeToken(token, roomName, secret);
     if (!payload) throw new RealtimeAuthorizationError();
-    return payload;
+    const access = await authorizeRoom(payload.userId, roomName);
+    return {
+      ...access,
+      userId: payload.userId,
+      name: payload.name,
+      image: payload.image,
+    };
+  }
+
+  function logUnlessForbidden(message: string, error: unknown) {
+    if (!(error instanceof RealtimeAuthorizationError)) {
+      logger.error(message, error);
+    }
   }
 
   return new Server<RealtimeContext>({
@@ -92,29 +105,14 @@ export function createRealtimeServer({
         throw new RealtimeAuthorizationError();
       }
 
-      const payload = makeContext(token, documentName);
-      const access = await authorizeRoom(payload.userId, documentName);
-      connectionConfig.readOnly = access.readOnly;
+      const context = await buildContext(token, documentName);
+      connectionConfig.readOnly = context.readOnly;
 
-      return {
-        ...access,
-        userId: payload.userId,
-        name: payload.name,
-        image: payload.image,
-        readOnly: access.readOnly,
-      };
+      return context;
     },
     onTokenSync: async ({ token, documentName, connection }) => {
-      const payload = makeContext(token, documentName);
-      const access = await authorizeRoom(payload.userId, documentName);
-      connection.readOnly = access.readOnly;
-      connection.context = {
-        ...access,
-        userId: payload.userId,
-        name: payload.name,
-        image: payload.image,
-        readOnly: access.readOnly,
-      };
+      connection.context = await buildContext(token, documentName);
+      connection.readOnly = connection.context.readOnly;
 
       return connection.context;
     },
@@ -125,9 +123,10 @@ export function createRealtimeServer({
         await authorizeRoom(context.userId, documentName);
       } catch (error) {
         states.clear();
-        if (!(error instanceof RealtimeAuthorizationError)) {
-          logger.error("Lipi realtime awareness authorization failed", error);
-        }
+        logUnlessForbidden(
+          "Lipi realtime awareness authorization failed",
+          error
+        );
         return;
       }
 
@@ -172,10 +171,10 @@ export function createRealtimeServer({
           document.broadcastStateless(payload, (peer) => peer !== connection);
         }
       } catch (error) {
-        if (!(error instanceof RealtimeAuthorizationError)) {
-          logger.error("Lipi realtime workspace notification failed", error);
-        }
-        return;
+        logUnlessForbidden(
+          "Lipi realtime workspace notification failed",
+          error
+        );
       }
     },
     onListen: async ({ port: listeningPort }) => {
