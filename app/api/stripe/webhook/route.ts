@@ -23,10 +23,11 @@ export async function POST(request: Request) {
       getStripeWebhookSecret()
     );
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Invalid webhook signature";
-    console.error("Stripe webhook verification failed:", message);
-    return NextResponse.json({ error: message }, { status: 400 });
+    console.error("Stripe webhook verification failed:", error);
+    return NextResponse.json(
+      { error: "Invalid webhook signature" },
+      { status: 400 }
+    );
   }
 
   try {
