@@ -2,6 +2,7 @@ import { DocumentCollaborators } from "@/components/realtime/document-collaborat
 import { SearchCommand } from "@/components/search-command";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SidebarMobile } from "../sidebar/sidebar-mobile";
+import { SidebarToggle } from "../sidebar/sidebar-state";
 import { DocumentBreadcrumbs } from "./document-breadcrumbs";
 
 export function Navbar() {
@@ -10,6 +11,7 @@ export function Navbar() {
       <div className="flex h-14 items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-2 overflow-hidden">
           <SidebarMobile />
+          <SidebarToggle />
           <DocumentBreadcrumbs />
         </div>
 

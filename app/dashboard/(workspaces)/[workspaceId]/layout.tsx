@@ -5,13 +5,10 @@ import { redirect } from "next/navigation";
 import { AppStateProvider } from "@/components/app-state-provider";
 import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realtime-provider";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  RESIZABLE_COLLAPSED_COOKIE,
-  RESIZABLE_LAYOUT_COOKIE,
-} from "@/lib/dashboard/resizable-layout-cookies";
+import { SIDEBAR_COLLAPSED_COOKIE } from "@/lib/dashboard/sidebar-cookie";
 import { getDocuments } from "@/lib/db/queries";
 import { getWorkspaceMembershipRole } from "@/lib/db/queries/mutation-auth";
-import { ResizableLayout } from "../components/resizable-layout";
+import { WorkspaceShell } from "../components/workspace-shell";
 
 export const instant = false;
 
@@ -31,11 +28,8 @@ export const WorkspaceLayout: React.FCC<{
 
   const cookieStore = await cookies();
 
-  const layout = cookieStore.get(RESIZABLE_LAYOUT_COOKIE);
-  const collapsed = cookieStore.get(RESIZABLE_COLLAPSED_COOKIE);
-
-  const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
-  const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;
+  const defaultCollapsed =
+    cookieStore.get(SIDEBAR_COLLAPSED_COOKIE)?.value === "true";
 
   const documents = await getDocuments(workspaceId);
 
@@ -48,12 +42,9 @@ export const WorkspaceLayout: React.FCC<{
       documents={documents}
     >
       <WorkspaceRealtimeProvider workspaceId={workspaceId}>
-        <ResizableLayout
-          defaultLayout={defaultLayout as number[]}
-          defaultCollapsed={defaultCollapsed as boolean}
-        >
+        <WorkspaceShell defaultCollapsed={defaultCollapsed}>
           {children}
-        </ResizableLayout>
+        </WorkspaceShell>
       </WorkspaceRealtimeProvider>
     </AppStateProvider>
   );

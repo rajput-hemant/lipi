@@ -132,7 +132,10 @@ export function SidebarPanel({
       >
         {isCollapsed ?
           <Popover>
-            <PopoverTrigger className="mx-auto flex rounded-full border p-0.5 shadow hover:shadow-xl">
+            <PopoverTrigger
+              aria-label="Account menu"
+              className="mx-auto flex rounded-full border p-0.5 shadow hover:shadow-xl"
+            >
               <Avatar>
                 <AvatarImage
                   src={user?.image ?? undefined}

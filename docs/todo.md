@@ -27,6 +27,7 @@ Confirmed bugs live in the single ledger, [checks/verification-issues.md](./chec
 - [x] Free/Pro quotas and Stripe checkout/portal/webhook - `lib/billing/plan-quotas.ts`, `app/api/stripe/`, `tests/e2e/stripe-checkout.spec.ts`
 - [x] Product requirements and portfolio showcase scope - [requirements](./requirements.md)
 - [x] Trash controls and empty-state polish - `components/trash.tsx`, `components/trash.test.tsx`
+- [x] Collapsible sidebar (2026-10-03): two states only (full 16rem, icon rail 3.5rem), toggle in the navbar (`aria-expanded`, tooltip, keyboard), no resize handle or pixel width; state in the `lipi_sidebar_collapsed` cookie read server-side. Evidence: `components/sidebar/sidebar-state.tsx`, `app/dashboard/(workspaces)/components/workspace-shell.test.tsx`, live run in Chrome via `chrome-devtools-axi` (expand, collapse, tooltip, Enter/Space, reload persistence, light, dark, 390 px sheet unchanged, 1023/1024 px boundary); not exercised: width animation (none), long page titles, Safari/Firefox
 - [x] Docs link fixes (2026-10-03): the ledger's LIP-V016 pointed at `docs/shared-database-auth.md`, which does not exist (`git ls-files docs` lists no such file); the `workspaces-roles-invites` feature map cited `app/invite/[token]/page.tsx`, which is now `route.ts` (`app/invite/[token]/route.ts`)
 
 ## Open
@@ -96,6 +97,9 @@ Each line below was re-read against the current code on 2026-10-03 and is still 
 - [ ] Add unit tests for tree viewer gating and trash rollback (the keyboard test mocks `useCanEditPages: () => true`) [verification gap, P3]
 - [ ] `View only` badge is `text-[10px]`; raise it for readability [improvement, P3; still at `document-tree.tsx:593`]
 - [ ] Removed member with an open session hits the layout's `MutationAuthError`; show a friendly state (pre-existing); `pages:changed` stateless messages can be sent by any connected client (pre-existing) [fix, P2; one line, two pre-existing items; the second was not reproduced]
+- [ ] `components/ui/resizable.tsx` and the `react-resizable-panels` dependency are now unused after the sidebar rewrite; remove both in a dependency task (the file is protected shadcn source, so it was left untouched) [cleanup, P3; `grep -rn "ui/resizable"` finds no importer]
+- [ ] Collapsed rail: the `Open pages` trigger floats mid-height (`document-tree-collapsed.tsx` inside the `flex-1` tree container); anchor it under the nav separator [improvement, P3; seen in the live collapsed screenshot]
+- [ ] Sidebar width change is instant (no transition); add one that respects `prefers-reduced-motion` without clipping the expanded content [improvement, P3]
 
 ## shadcn source modification check (2026-10-03)
 

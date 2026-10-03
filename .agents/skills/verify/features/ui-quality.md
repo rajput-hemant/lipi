@@ -9,7 +9,7 @@ Checklist applied per feature screen once drivable; not a separate route.
 ## Sub-features
 
 - [x] Light and dark themes: contrast, borders, editor and dialogs. - live: editor page in light and dark (`Toggle theme` > `Dark`); contrast spot-checked by screenshot only.
-- [x] 390 px and 1280 px (and a tablet width): no horizontal overflow, resizable sidebar and mobile sheet usable. - live: no horizontal overflow at 390 px on the editor page; collaborator avatar overlaps the search button there (LIP-V021). Tablet width NOT exercised.
+- [x] 390 px and 1280 px (and a tablet width): no horizontal overflow, collapsible sidebar and mobile sheet usable. - live: no horizontal overflow at 390 px on the editor page; collaborator avatar overlaps the search button there (LIP-V021). Tablet width NOT exercised.
 - [ ] Empty, loading (`app/loading.tsx`, `app/dashboard/loading.tsx`), error (`app/error.tsx`, `app/global-error.tsx`) and long-content states (long page titles, many pages, many collaborators).
 - [ ] Keyboard: tab order through auth forms, sidebar tree, dialogs, ⌘K; visible focus; Escape closes dialogs.
 - [ ] Accessible names (aria labels listed in SKILL.md), toasts announced.
