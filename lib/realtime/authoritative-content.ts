@@ -22,7 +22,8 @@ export function serializedContentFromYjsState(state: Uint8Array): string {
 
 export async function loadAuthoritativeDocumentContentBySourceIds(
   sourceIds: readonly string[],
-  fallbackBySourceId: ReadonlyMap<string, string | null>
+  fallbackBySourceId: ReadonlyMap<string, string | null>,
+  executor: Pick<typeof db, "select"> = db
 ): Promise<Map<string, string | null>> {
   const uniqueIds = [...new Set(sourceIds)];
   const result = new Map<string, string | null>();
@@ -31,7 +32,7 @@ export async function loadAuthoritativeDocumentContentBySourceIds(
     return result;
   }
 
-  const rows = await db
+  const rows = await executor
     .select({
       documentId: realtimeDocuments.documentId,
       state: realtimeDocuments.state,
