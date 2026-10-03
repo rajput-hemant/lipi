@@ -5,15 +5,14 @@ export type DBResponse<T> =
 // avoid star export, causing warning
 // ```The requested module '...' contains conflicting star exports for the name '$$ACTION_0' with the previous requested module '...'```
 
+export { createWorkspace, listWorkspacesForCurrentUser } from "./workspace";
 export {
-  createWorkspace,
   getCollaboratingWorkspaces,
   getDefaultWorkspaceId,
   getPrivateWorkspaces,
   getSharedWorkspaces,
-  listWorkspacesForCurrentUser,
   listWorkspacesForSwitcher,
-} from "./workspace";
+} from "./workspace-lists";
 export {
   acceptWorkspaceInvite,
   createWorkspaceCollaboratorInvite,
@@ -38,7 +37,6 @@ export {
   updateDocument,
   updateDocumentInDb,
 } from "./document";
-export { getUserSubscription } from "./subscription";
 export {
   searchDocumentsInWorkspace,
   type SearchDocumentResult,
