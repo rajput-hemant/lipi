@@ -1,11 +1,15 @@
-import { and, count, eq, gt, not } from "drizzle-orm";
+import { and, count, eq, gt, ne, not } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { collaborators, workspaceInvites, workspaces } from "@/lib/db/schema";
 import { tryGetStripeProPriceId } from "@/lib/stripe/billing-env";
 import { hasProEntitlement } from "./entitlement";
 import { PlanQuotaError } from "./errors";
-import { canAddCollaborator, canCreateWorkspace } from "./plan-quotas";
+import {
+  canAddCollaborator,
+  canCreateWorkspace,
+  canHoldCollaborators,
+} from "./plan-quotas";
 import { getCurrentBillingSubscription } from "./subscription-access";
 
 export type PendingInviteRef = { workspaceId: string; email: string };
@@ -101,6 +105,39 @@ export async function assertUserCanAddCollaborator(
     throw new PlanQuotaError(
       "collaborator",
       "Free plan allows two collaborators. Upgrade to Pro for unlimited collaborators."
+    );
+  }
+}
+
+/**
+ * The new owner keeps the workspace's other collaborators and gains the old
+ * owner as an editor, on top of collaborators in workspaces they already own.
+ */
+export async function assertUserCanReceiveWorkspaceTransfer(
+  newOwnerId: string,
+  workspaceId: string
+): Promise<void> {
+  const subscription = await getCurrentBillingSubscription(newOwnerId);
+  if (isProSubscriber(subscription)) return;
+
+  const [row] = await db
+    .select({ value: count() })
+    .from(collaborators)
+    .where(
+      and(
+        eq(collaborators.workspaceId, workspaceId),
+        ne(collaborators.userId, newOwnerId)
+      )
+    );
+  const collaboratorCount =
+    (await countCollaboratorsForOwner(newOwnerId)) +
+    Number(row?.value ?? 0) +
+    1;
+
+  if (!canHoldCollaborators({ isPro: false, collaboratorCount })) {
+    throw new PlanQuotaError(
+      "collaborator",
+      "The new owner is on the Free plan, which allows two collaborators. Ask them to upgrade to Pro to receive this workspace."
     );
   }
 }

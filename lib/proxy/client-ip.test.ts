@@ -1,11 +1,15 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { getClientIp } from "./client-ip";
 
 function request(headers: Record<string, string>) {
   return new NextRequest("http://localhost:3000/dashboard", { headers });
 }
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("getClientIp", () => {
   it("prefers the platform-provided x-real-ip", () => {
@@ -46,5 +50,53 @@ describe("getClientIp", () => {
 
   it("returns an empty string when no header is present", () => {
     expect(getClientIp(request({}))).toBe("");
+  });
+
+  describe("TRUSTED_PROXY_COUNT", () => {
+    const forwarded = "6.6.6.6, 198.51.100.4, 203.0.113.9";
+
+    it("takes the hop N from the right", () => {
+      vi.stubEnv("TRUSTED_PROXY_COUNT", "1");
+      expect(getClientIp(request({ "x-forwarded-for": forwarded }))).toBe(
+        "203.0.113.9"
+      );
+      vi.stubEnv("TRUSTED_PROXY_COUNT", "2");
+      expect(getClientIp(request({ "x-forwarded-for": forwarded }))).toBe(
+        "198.51.100.4"
+      );
+    });
+
+    it("ignores a client-supplied x-real-ip", () => {
+      vi.stubEnv("TRUSTED_PROXY_COUNT", "1");
+      expect(
+        getClientIp(
+          request({ "x-real-ip": "1.2.3.4", "x-forwarded-for": forwarded })
+        )
+      ).toBe("203.0.113.9");
+    });
+
+    it("returns an empty string when fewer hops than proxies are present", () => {
+      vi.stubEnv("TRUSTED_PROXY_COUNT", "4");
+      expect(getClientIp(request({ "x-forwarded-for": forwarded }))).toBe("");
+    });
+
+    it("keeps the default behaviour when invalid", () => {
+      vi.stubEnv("TRUSTED_PROXY_COUNT", "abc");
+      expect(
+        getClientIp(
+          request({ "x-real-ip": "203.0.113.7", "x-forwarded-for": forwarded })
+        )
+      ).toBe("203.0.113.7");
+    });
+
+    it("keeps trusting platform headers on Vercel", () => {
+      vi.stubEnv("VERCEL", "1");
+      vi.stubEnv("TRUSTED_PROXY_COUNT", "2");
+      expect(
+        getClientIp(
+          request({ "x-real-ip": "203.0.113.7", "x-forwarded-for": forwarded })
+        )
+      ).toBe("203.0.113.7");
+    });
   });
 });
