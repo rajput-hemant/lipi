@@ -1,7 +1,6 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { revalidateTag } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
@@ -19,6 +18,10 @@ import {
   requireWorkspacePermission,
 } from "./mutation-auth";
 import { runMutation } from "./mutation-failure";
+import {
+  getWorkspaceOwnerId,
+  revalidateWorkspaceLists,
+} from "./workspace-list-tags";
 import { ensureOwnerCollaboratorQuota } from "./workspace-member-quota";
 
 const inviteRoleSchema = z.enum(["editor", "viewer"]);
@@ -42,12 +45,6 @@ const removeMemberSchema = z.object({
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
-}
-
-function revalidateWorkspaceLists() {
-  revalidateTag("get_private_workspaces", "max");
-  revalidateTag("get_collaborating_workspaces", "max");
-  revalidateTag("get_shared_workspaces", "max");
 }
 
 export async function listWorkspaceMembers(workspaceId: string) {
@@ -188,7 +185,7 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
       acceptUrl,
     });
 
-    revalidateWorkspaceLists();
+    revalidateWorkspaceLists([workspace.workspaceOwnerId]);
 
     return { token, acceptUrl };
   });
@@ -214,7 +211,10 @@ export async function updateCollaboratorRole(input: unknown) {
       throw new MutationAuthError("Collaborator not found");
     }
 
-    revalidateWorkspaceLists();
+    revalidateWorkspaceLists([
+      updated.userId,
+      await getWorkspaceOwnerId(parsed.workspaceId),
+    ]);
     return updated;
   });
 }
@@ -238,7 +238,10 @@ export async function removeWorkspaceMember(input: unknown) {
       throw new MutationAuthError("Collaborator not found");
     }
 
-    revalidateWorkspaceLists();
+    revalidateWorkspaceLists([
+      removed.userId,
+      await getWorkspaceOwnerId(parsed.workspaceId),
+    ]);
     return removed;
   });
 }
@@ -295,7 +298,7 @@ export async function acceptWorkspaceInvite(token: string) {
 
   await db.delete(workspaceInvites).where(eq(workspaceInvites.id, invite.id));
 
-  revalidateWorkspaceLists();
+  revalidateWorkspaceLists([user.id, workspace.workspaceOwnerId]);
 
   return { workspaceId: invite.workspaceId };
 }
