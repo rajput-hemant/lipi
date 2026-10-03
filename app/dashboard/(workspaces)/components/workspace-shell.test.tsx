@@ -12,24 +12,20 @@ import {
   vi,
 } from "vitest";
 
-import { SIDEBAR_COLLAPSED_COOKIE } from "@/lib/dashboard/sidebar-cookie";
+import { useSidebar } from "@/components/ui/sidebar";
+import { isSidebarOpen, SIDEBAR_COOKIE } from "@/lib/dashboard/sidebar-cookie";
 import { WorkspaceShell } from "./workspace-shell";
 
-const setCookie = vi.fn();
-
-vi.mock("cookies-next", () => ({
-  setCookie: (...args: unknown[]) => setCookie(...args),
-}));
-
-vi.mock("@/components/sidebar/sidebar", () => ({
-  Sidebar: ({ isCollapsed }: { isCollapsed: boolean }) => (
-    <aside data-testid="sidebar" data-collapsed={isCollapsed} />
-  ),
+vi.mock("@/components/sidebar/app-sidebar", () => ({
+  AppSidebar: function AppSidebar() {
+    const { state } = useSidebar();
+    return <aside data-testid="sidebar" data-state={state} />;
+  },
 }));
 
 vi.mock("@/components/site-header/navbar", async () => {
-  const { SidebarToggle } = await import("@/components/sidebar/sidebar-state");
-  return { Navbar: () => <SidebarToggle /> };
+  const { SidebarTrigger } = await import("@/components/ui/sidebar");
+  return { Navbar: () => <SidebarTrigger /> };
 });
 
 const roots: ReturnType<typeof createRoot>[] = [];
@@ -37,65 +33,106 @@ const roots: ReturnType<typeof createRoot>[] = [];
 beforeAll(() => vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true));
 afterAll(() => vi.unstubAllGlobals());
 afterEach(() => {
-  setCookie.mockClear();
   act(() => roots.splice(0).forEach((root) => root.unmount()));
   document.body.replaceChildren();
 });
 
-function renderShell(defaultCollapsed: boolean) {
+function renderShell(defaultOpen: boolean, content: React.ReactNode = "Main") {
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
   roots.push(root);
   act(() =>
     root.render(
-      <WorkspaceShell defaultCollapsed={defaultCollapsed}>
-        <div>Main</div>
-      </WorkspaceShell>
+      <WorkspaceShell defaultOpen={defaultOpen}>{content}</WorkspaceShell>
     )
   );
   return container;
 }
 
 describe("WorkspaceShell", () => {
-  it("toggles between exactly two states and persists the choice", () => {
-    const container = renderShell(false);
+  it("toggles between two states and persists the choice in the shadcn cookie", () => {
+    const container = renderShell(true);
     const sidebar = container.querySelector("[data-testid=sidebar]");
     const toggle = container.querySelector("button")!;
 
-    expect(sidebar?.getAttribute("data-collapsed")).toBe("false");
-    expect(toggle.getAttribute("aria-expanded")).toBe("true");
-    expect(toggle.getAttribute("aria-label")).toBe("Collapse sidebar");
+    expect(sidebar?.getAttribute("data-state")).toBe("expanded");
 
     act(() => toggle.click());
 
-    expect(sidebar?.getAttribute("data-collapsed")).toBe("true");
-    expect(toggle.getAttribute("aria-expanded")).toBe("false");
-    expect(toggle.getAttribute("aria-label")).toBe("Expand sidebar");
-    expect(setCookie).toHaveBeenLastCalledWith(
-      SIDEBAR_COLLAPSED_COOKIE,
-      true,
-      expect.objectContaining({ path: "/" })
-    );
+    expect(sidebar?.getAttribute("data-state")).toBe("collapsed");
+    expect(document.cookie).toContain(`${SIDEBAR_COOKIE}=false`);
 
     act(() => toggle.click());
 
-    expect(sidebar?.getAttribute("data-collapsed")).toBe("false");
-    expect(setCookie).toHaveBeenLastCalledWith(
-      SIDEBAR_COLLAPSED_COOKIE,
-      false,
-      expect.objectContaining({ path: "/" })
-    );
+    expect(sidebar?.getAttribute("data-state")).toBe("expanded");
+    expect(document.cookie).toContain(`${SIDEBAR_COOKIE}=true`);
   });
 
-  it("renders collapsed on first paint from the server default and has no resize handle", () => {
-    const container = renderShell(true);
+  it("renders collapsed on first paint from the server default", () => {
+    const container = renderShell(false);
 
     expect(
       container
         .querySelector("[data-testid=sidebar]")
-        ?.getAttribute("data-collapsed")
-    ).toBe("true");
+        ?.getAttribute("data-state")
+    ).toBe("collapsed");
     expect(container.querySelector('[role="separator"]')).toBeNull();
+  });
+
+  it("uses dvh for the shell height and keeps the 56px icon rail", () => {
+    const wrapper = renderShell(true).querySelector<HTMLElement>(
+      '[data-slot="sidebar-wrapper"]'
+    )!;
+
+    expect(wrapper.className).toContain("min-h-dvh");
+    expect(wrapper.className).not.toContain("min-h-svh");
+    expect(wrapper.style.getPropertyValue("--sidebar-width-icon")).toBe(
+      "3.5rem"
+    );
+  });
+
+  it("keeps Mod+B for the editor's bold instead of toggling the sidebar", () => {
+    const container = renderShell(
+      true,
+      <div
+        contentEditable
+        suppressContentEditableWarning
+        data-testid="editor"
+      />
+    );
+    const editor = container.querySelector("[data-testid=editor]")!;
+    const sidebar = container.querySelector("[data-testid=sidebar]");
+    // The editor handles bold at the target, before React and the window.
+    editor.addEventListener("keydown", (event) => event.preventDefault());
+
+    act(() => {
+      editor.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "b",
+          ctrlKey: true,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+
+    expect(sidebar?.getAttribute("data-state")).toBe("expanded");
+
+    act(() => {
+      window.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "b", ctrlKey: true })
+      );
+    });
+
+    expect(sidebar?.getAttribute("data-state")).toBe("collapsed");
+  });
+});
+
+describe("isSidebarOpen", () => {
+  it("is open unless the cookie says false", () => {
+    expect(isSidebarOpen(undefined)).toBe(true);
+    expect(isSidebarOpen("true")).toBe(true);
+    expect(isSidebarOpen("false")).toBe(false);
   });
 });

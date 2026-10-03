@@ -1,8 +1,7 @@
 import { DocumentCollaborators } from "@/components/realtime/document-collaborators";
 import { SearchCommand } from "@/components/search-command";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { SidebarMobile } from "../sidebar/sidebar-mobile";
-import { SidebarToggle } from "../sidebar/sidebar-state";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DocumentBreadcrumbs } from "./document-breadcrumbs";
 
 export function Navbar() {
@@ -10,8 +9,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b bg-background">
       <div className="flex h-14 items-center justify-between gap-4 px-4">
         <div className="flex items-center gap-2 overflow-hidden">
-          <SidebarMobile />
-          <SidebarToggle />
+          <SidebarTrigger />
           <DocumentBreadcrumbs />
         </div>
 
