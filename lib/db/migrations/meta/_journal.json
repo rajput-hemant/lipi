@@ -92,6 +92,13 @@
       "when": 1790483450940,
       "tag": "0012_loving_silverclaw",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791037871889,
+      "tag": "0013_documents_trigram_search",
+      "breakpoints": true
     }
   ]
 }
