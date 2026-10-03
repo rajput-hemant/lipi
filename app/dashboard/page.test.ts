@@ -8,7 +8,7 @@ const { getCurrentUser, getDefaultWorkspaceId } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/auth", () => ({ getCurrentUser }));
-vi.mock("@/lib/db/queries", () => ({ getDefaultWorkspaceId }));
+vi.mock("@/lib/db/queries/workspace-lists", () => ({ getDefaultWorkspaceId }));
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
     throw new Error(`REDIRECT ${url}`);
