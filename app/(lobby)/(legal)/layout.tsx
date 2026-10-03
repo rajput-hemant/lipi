@@ -2,7 +2,7 @@ import React from "react";
 
 export default function LegalLayout({ children }: React.PropsWithChildren) {
   return (
-    <main className="py-4">
+    <div className="py-4">
       {children}
 
       <p className="text-center text-sm text-muted-foreground">
@@ -13,6 +13,6 @@ export default function LegalLayout({ children }: React.PropsWithChildren) {
         and <span className="font-medium text-foreground">Privacy Policy</span>{" "}
         of our website.
       </p>
-    </main>
+    </div>
   );
 }

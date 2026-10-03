@@ -14,7 +14,7 @@ import { Kbd } from "@/components/ui/kbd";
 
 export function Features() {
   return (
-    <section id="features" className="container space-y-8">
+    <section id="features" className="space-y-8">
       <div className="mx-auto flex max-w-3xl flex-col items-center space-y-4 text-center">
         <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
           Everything your team needs in one workspace

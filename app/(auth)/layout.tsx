@@ -7,7 +7,7 @@ import { AuthModeToggle } from "./components/auth-mode-toggle";
 
 export default function AuthLayout({ children }: React.PropsWithChildren) {
   return (
-    <div className="container h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
+    <div className="container min-h-dvh flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col justify-between border-r p-10 lg:flex">
         <div className="absolute inset-0 bg-zinc-900" />
 
@@ -48,27 +48,27 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
 
       <AuthModeToggle />
 
-      <div className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0">
+      <main className="m-auto flex w-full flex-col justify-center space-y-6 p-8 sm:w-[350px] sm:p-0">
         <Logo className="mx-auto size-14 drop-shadow" />
         {children}
         <p className="mx-auto px-10 text-center text-sm text-muted-foreground">
           By clicking continue, you agree to our{" "}
           <Link
             href="/terms"
-            className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
+            className="underline underline-offset-4 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
           >
             Terms of Service
           </Link>{" "}
           and{" "}
           <Link
             href="/privacy"
-            className="underline underline-offset-4 outline-none hover:text-foreground hover:underline"
+            className="underline underline-offset-4 rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
           >
             Privacy Policy
           </Link>
           .
         </p>
-      </div>
+      </main>
     </div>
   );
 }
