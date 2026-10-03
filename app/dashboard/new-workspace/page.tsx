@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getCurrentUser } from "@/lib/auth";
+import { InviteNotice, isInvalidInvite } from "../invite-notice";
 import { WorkspaceForm } from "./workspace-form";
 
 export const metadata = {
@@ -18,7 +19,12 @@ export const metadata = {
 
 export const instant = false;
 
-export default async function WorkspaceSetupPage() {
+export default async function WorkspaceSetupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ invite?: string | string[] }>;
+}) {
+  const { invite } = await searchParams;
   const user = await getCurrentUser();
 
   return (
@@ -44,6 +50,10 @@ export default async function WorkspaceSetupPage() {
           <br />
           workspace
         </h1>
+
+        {isInvalidInvite(invite) && (
+          <InviteNotice className="-mt-8 w-full max-w-xl" />
+        )}
 
         <Card className="z-10 h-fit w-full max-w-xl shadow-lg">
           <CardHeader>
