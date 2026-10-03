@@ -43,7 +43,6 @@ export async function searchDocumentsInWorkspace(
         workspaceId: documents.workspaceId,
         title: documents.title,
         icon: documents.icon,
-        content: documents.content,
         updatedAt: documents.updatedAt,
       })
       .from(documents)
