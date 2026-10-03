@@ -1,6 +1,7 @@
 import { unstable_cache as cache } from "next/cache";
 import { and, eq, notExists } from "drizzle-orm";
 
+import { logger } from "@/lib/logger";
 import { db } from "..";
 import { collaborators, users, workspaces } from "../schema";
 import { workspaceListTag } from "./workspace-list-tags";
@@ -65,7 +66,7 @@ export async function getPrivateWorkspaces(userID: string) {
 
         return data;
       } catch (e) {
-        console.error((e as Error).message);
+        logger.error("Failed to fetch private workspaces!", e);
         throw new Error("Failed to fetch private workspaces!");
       }
     },
@@ -91,7 +92,7 @@ export async function getCollaboratingWorkspaces(userId: string) {
 
         return data.map(({ workspaces }) => workspaces);
       } catch (e) {
-        console.error((e as Error).message);
+        logger.error("Failed to fetch collaborating workspaces!", e);
         throw new Error("Failed to fetch collaborating workspaces!");
       }
     },
@@ -120,7 +121,7 @@ export async function getSharedWorkspaces(userId: string) {
 
         return data.map(({ workspaces }) => workspaces);
       } catch (e) {
-        console.error((e as Error).message);
+        logger.error("Failed to fetch shared workspaces!", e);
         throw new Error("Failed to fetch shared workspaces!");
       }
     },

@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 import { siteConfig } from "@/config/site";
+import { logger } from "@/lib/logger";
 import { env } from "./env";
 
 export { cn } from "cn";
@@ -73,7 +74,7 @@ export async function getGitHubStars(): Promise<string | null> {
 
     return parseInt(json.stargazers_count).toLocaleString();
   } catch (error) {
-    console.error(error);
+    logger.error("Failed to fetch GitHub stars", error);
     return null;
   }
 }

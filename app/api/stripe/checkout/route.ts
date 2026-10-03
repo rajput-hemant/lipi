@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
 import { BillingNotConfiguredError } from "@/lib/billing/errors";
+import { logger } from "@/lib/logger";
 import { createCheckoutSessionForUser } from "@/lib/stripe/checkout";
 
 export async function POST() {
@@ -20,7 +21,7 @@ export async function POST() {
     if (error instanceof BillingNotConfiguredError) {
       return NextResponse.json({ error: error.message }, { status: 503 });
     }
-    console.error(error);
+    logger.error("Failed to create checkout session", error);
     return NextResponse.json(
       { error: "Failed to create checkout session" },
       { status: 500 }
