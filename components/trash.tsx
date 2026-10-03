@@ -117,7 +117,7 @@ export function Trash() {
                 className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5"
               >
                 <span
-                  className="flex min-w-0 items-center gap-2 truncate text-sm"
+                  className="flex min-w-0 items-center gap-2 text-sm"
                   title={document.title}
                 >
                   {document.icon ?
@@ -128,7 +128,7 @@ export function Trash() {
                       className="size-4 shrink-0"
                     />
                   }
-                  {document.title}
+                  <span className="truncate">{document.title}</span>
                 </span>
 
                 {canEdit && (
@@ -211,8 +211,9 @@ export function Trash() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete permanently?</AlertDialogTitle>
             <AlertDialogDescription>
-              This cannot be undone. &quot;{pendingDocument?.title}&quot; will
-              be removed forever.
+              This cannot be undone. &quot;
+              <span className="break-words">{pendingDocument?.title}</span>
+              &quot; will be removed forever.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

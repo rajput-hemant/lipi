@@ -44,7 +44,11 @@ export function DocumentCollaborators() {
         </Avatar>
       ))}
       {collaborators.length > visibleCollaborators.length ?
-        <span className="pl-3 text-xs text-muted-foreground" role="listitem">
+        <span
+          className="pl-3 text-xs text-muted-foreground"
+          role="listitem"
+          aria-label={`${collaborators.length - visibleCollaborators.length} more collaborators`}
+        >
           +{collaborators.length - visibleCollaborators.length}
         </span>
       : null}

@@ -32,6 +32,7 @@ export function EmojiPicker(props: EmojiPickerProps) {
         nativeButton={false}
         render={
           <span
+            aria-label="Choose emoji"
             className={cn(
               "inline-flex cursor-pointer items-center justify-center",
               className
@@ -43,8 +44,16 @@ export function EmojiPicker(props: EmojiPickerProps) {
         {children}
       </PopoverTrigger>
 
-      <PopoverContent side={side} align={align} className="border-none p-0">
-        <Picker theme={resolvedTheme as Theme} onEmojiClick={onEmojiClick} />
+      <PopoverContent
+        side={side}
+        align={align}
+        className="w-[min(22rem,calc(100vw-2rem))] border-none p-0"
+      >
+        <Picker
+          width="100%"
+          theme={resolvedTheme as Theme}
+          onEmojiClick={onEmojiClick}
+        />
       </PopoverContent>
     </Popover>
   );

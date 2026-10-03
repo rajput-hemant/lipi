@@ -83,6 +83,12 @@ describe("Trash", () => {
     expect(document.body.textContent).toContain("Nothing in the trash");
   });
 
+  it("truncates long page titles with an ellipsis", () => {
+    render([doc("a", "A very long page title ".repeat(10))]);
+    const title = document.querySelector("li span.truncate");
+    expect(title?.textContent).toContain("A very long page title");
+  });
+
   it("labels row controls by page title", () => {
     render();
     expect(byLabel("Restore Alpha")).toBeTruthy();

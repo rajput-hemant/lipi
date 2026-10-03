@@ -134,7 +134,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
     <div className="w-full">
       {coverStyle ?
         <div
-          className="h-48 w-full bg-cover bg-center"
+          className="h-32 w-full bg-cover bg-center sm:h-48"
           style={{ backgroundImage: coverStyle }}
         />
       : null}
@@ -201,9 +201,10 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
                   <button
                     type="button"
                     className={cn(
-                      "h-14 rounded-md border text-xs text-muted-foreground",
+                      "h-14 rounded-md border text-xs text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                       !bannerUrl && "ring-2 ring-ring"
                     )}
+                    aria-pressed={!bannerUrl}
                     onClick={() => onBannerChange(null)}
                   >
                     None
@@ -213,8 +214,10 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
                       key={preset.id}
                       type="button"
                       title={preset.label}
+                      aria-label={preset.label}
+                      aria-pressed={bannerUrl === preset.id}
                       className={cn(
-                        "h-14 rounded-md border",
+                        "h-14 rounded-md border outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                         bannerUrl === preset.id && "ring-2 ring-ring"
                       )}
                       style={{ backgroundImage: preset.style }}
@@ -242,8 +245,9 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
             value={title}
             onChange={onTitleChange}
             rows={1}
+            aria-label="Page title"
             placeholder="Untitled"
-            className="min-h-14 resize-none border-none bg-transparent px-0 text-4xl font-bold shadow-none focus-visible:ring-0"
+            className="min-h-14 resize-none border-none bg-transparent px-0 text-3xl font-bold shadow-none sm:text-4xl focus-visible:ring-0"
           />
         </div>
       </div>

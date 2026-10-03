@@ -111,6 +111,7 @@ export function WorkspaceForm({ user }: WorkspaceFormProps) {
                 icon={Loading03Icon}
                 strokeWidth={2}
                 className="size-4 animate-spin"
+                aria-label="Creating workspace"
               />
             : "Create workspace"}
           </Button>

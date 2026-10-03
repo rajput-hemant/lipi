@@ -35,8 +35,9 @@ function WorkspaceRow({
   return (
     <Link
       href={`/dashboard/${workspace.id}`}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-lg border px-3 py-2 transition-colors hover:bg-muted/60",
+        "flex items-center gap-3 rounded-lg border px-3 py-2 outline-none transition-colors hover:bg-muted/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
         isActive && "border-primary bg-muted/40"
       )}
     >
@@ -114,7 +115,11 @@ export function Workspaces() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
+      <div
+        role="status"
+        aria-label="Loading workspaces"
+        className="flex items-center justify-center py-12 text-muted-foreground"
+      >
         <HugeiconsIcon
           icon={Loading03Icon}
           strokeWidth={2}

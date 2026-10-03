@@ -233,6 +233,7 @@ export function SearchCommand({
                 <HugeiconsIcon
                   icon={Loading03Icon}
                   strokeWidth={2}
+                  aria-label="Searching"
                   className="size-4 shrink-0 animate-spin text-muted-foreground"
                 />
               )}
@@ -277,7 +278,7 @@ export function SearchCommand({
                           className="size-4 text-muted-foreground"
                         />
                       }
-                      <span className="font-medium text-foreground">
+                      <span className="truncate font-medium text-foreground">
                         {doc.title}
                       </span>
                     </div>
