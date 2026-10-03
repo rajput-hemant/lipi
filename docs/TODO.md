@@ -45,6 +45,8 @@ Confirmed bugs live in the single ledger, [verification/verification-issues.md](
 - [ ] Collapsible sidebar (commit 4d2199c) not verified: long page titles, other browsers (Safari/Firefox). Decision needed for cloud agents: keep existing custom sidebar (resize wiring removed) vs adopt shadcn Sidebar. Evidence: `components/sidebar/sidebar-state.tsx`, `components/sidebar/sidebar-panel.tsx`, `components.json`. Priority: P2. Kind: decision needed. Status: open. Uncertainty: shadcn Sidebar is not installed.
 - [ ] Credential logging not verified against a production build. Evidence: `lib/dev-credentials-logger.ts`, `instrumentation.ts`. Priority: P2. Kind: verification gap. Status: open.
 
+- [ ] Design improvement pass over every page and component: visual quality, consistency with the design system (theme tokens, shadcn by composition), spacing, typography, motion (`prefers-reduced-motion`), accessibility, light and dark themes, clean at every breakpoint from 320 px phones to 1920 px+ desktops. Kind: improvement. Priority: P2. Evidence: ledger LIP-V013. Status: in progress (added 2026-10-03; split into public/auth, dashboard shell and editor). Dashboard and editor pages need a database, so they can only be reviewed by source and unit tests in the cloud; live checks are marked "needs local environment"
+
 ## Confirmed bugs (details in the ledger)
 
 - [ ] Footer newsletter form reports success without subscribing. Kind: confirmed bug. Priority: P3. Evidence: ledger [LIP-V006](./verification/verification-issues.md#lip-v006-newsletter-form-reports-success-without-subscribing); the `// TODO` is still in `components/site-footer/newsletter-subscription-form.tsx:32`. Status: open
