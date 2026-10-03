@@ -44,8 +44,7 @@ describe("stripe webhook route", () => {
     expect(res.status).toBe(400);
     expect(await res.json()).toEqual({ error: "Invalid webhook signature" });
     expect(log).toHaveBeenCalledWith(
-      "Stripe webhook verification failed:",
-      error
+      expect.stringContaining("Stripe webhook verification failed")
     );
   });
 

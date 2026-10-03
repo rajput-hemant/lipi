@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   createSearchSnippet,
+  escapeLikePattern,
   extractPlainTextFromDocumentContent,
 } from "./search-utils";
 
@@ -108,5 +109,15 @@ describe("createSearchSnippet", () => {
 
     expect(snippet?.startsWith("... ")).toBe(true);
     expect(snippet?.endsWith(" ...")).toBe(true);
+  });
+});
+
+describe("escapeLikePattern", () => {
+  it("escapes LIKE wildcards and the escape character", () => {
+    expect(escapeLikePattern("100%_done\\")).toBe("100\\%\\_done\\\\");
+  });
+
+  it("leaves ordinary text unchanged", () => {
+    expect(escapeLikePattern("roadmap 2026")).toBe("roadmap 2026");
   });
 });

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
-import { getDefaultWorkspaceId } from "@/lib/db/queries";
+import { getDefaultWorkspaceId } from "@/lib/db/data/workspace-lists";
 import { INVALID_INVITE_QUERY, isInvalidInvite } from "./invite-notice";
 
 export const metadata = {

@@ -8,7 +8,9 @@ const { getCurrentUser, acceptWorkspaceInvite } = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/auth", () => ({ getCurrentUser }));
-vi.mock("@/lib/db/queries", () => ({ acceptWorkspaceInvite }));
+vi.mock("@/lib/db/actions/workspace-members", () => ({
+  acceptWorkspaceInvite,
+}));
 
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {

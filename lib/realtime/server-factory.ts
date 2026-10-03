@@ -7,6 +7,7 @@ import type {
   Extension,
 } from "@hocuspocus/server";
 
+import { logger } from "@/lib/logger";
 import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 import { RealtimeAuthorizationError } from "./context";
 import { parseRealtimeRoomName } from "./rooms";
@@ -125,7 +126,7 @@ export function createRealtimeServer({
       } catch (error) {
         states.clear();
         if (!(error instanceof RealtimeAuthorizationError)) {
-          console.error("Lipi realtime awareness authorization failed", error);
+          logger.error("Lipi realtime awareness authorization failed", error);
         }
         return;
       }
@@ -172,13 +173,13 @@ export function createRealtimeServer({
         }
       } catch (error) {
         if (!(error instanceof RealtimeAuthorizationError)) {
-          console.error("Lipi realtime workspace notification failed", error);
+          logger.error("Lipi realtime workspace notification failed", error);
         }
         return;
       }
     },
     onListen: async ({ port: listeningPort }) => {
-      console.info(`Lipi realtime listening on ${listeningPort}`);
+      logger.info(`Lipi realtime listening on ${listeningPort}`);
     },
   });
 }

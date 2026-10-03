@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlanQuotaError } from "@/lib/billing/errors";
-import { MutationAuthError } from "./mutation-auth";
+import { MutationAuthError } from "../data/mutation-auth";
 
 const mocks = vi.hoisted(() => ({
   requireAuthenticatedUser: vi.fn(),
@@ -13,9 +13,11 @@ vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 vi.mock("@/lib/billing/enforce-quotas", () => ({
   assertUserCanCreateWorkspace: mocks.assertUserCanCreateWorkspace,
 }));
-vi.mock("./workspace-lists", () => ({ listWorkspacesForSwitcher: vi.fn() }));
-vi.mock("./mutation-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./mutation-auth")>()),
+vi.mock("../data/workspace-lists", () => ({
+  listWorkspacesForSwitcher: vi.fn(),
+}));
+vi.mock("../data/mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../data/mutation-auth")>()),
   requireAuthenticatedUser: mocks.requireAuthenticatedUser,
 }));
 vi.mock("..", () => ({

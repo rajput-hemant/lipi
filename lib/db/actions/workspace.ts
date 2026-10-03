@@ -1,15 +1,18 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
-
 import type { Workspace } from "@/types/db";
 
 import { assertUserCanCreateWorkspace } from "@/lib/billing/enforce-quotas";
+import { logger } from "@/lib/logger";
 import { db } from "..";
+import {
+  MutationAuthError,
+  requireAuthenticatedUser,
+} from "../data/mutation-auth";
+import { mutationFailure } from "../data/mutation-failure";
+import { revalidateWorkspaceLists } from "../data/workspace-list-tags";
+import { listWorkspacesForSwitcher } from "../data/workspace-lists";
 import { workspaces } from "../schema";
-import { MutationAuthError, requireAuthenticatedUser } from "./mutation-auth";
-import { mutationFailure } from "./mutation-failure";
-import { listWorkspacesForSwitcher } from "./workspace-lists";
 
 export async function listWorkspacesForCurrentUser() {
   const user = await requireAuthenticatedUser();
@@ -37,11 +40,9 @@ export async function createWorkspace(workspace: Workspace) {
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    console.error((e as Error).message);
+    logger.error("Failed to create Workspace.", e);
     throw new Error("Failed to create Workspace.");
   } finally {
-    revalidateTag("get_private_workspaces", "max");
-    revalidateTag("get_collaborating_workspaces", "max");
-    revalidateTag("get_shared_workspaces", "max");
+    revalidateWorkspaceLists([workspace.workspaceOwnerId]);
   }
 }

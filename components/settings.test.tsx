@@ -26,7 +26,8 @@ const mocks = vi.hoisted(() => ({
   updateWorkspaceSettings: vi.fn(),
 }));
 
-vi.mock("@/lib/db/queries", () => mocks);
+vi.mock("@/lib/db/actions/workspace-members", () => mocks);
+vi.mock("@/lib/db/actions/workspace-settings", () => mocks);
 vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard/ws-1",
   useRouter: () => ({ refresh: vi.fn(), replace: vi.fn() }),

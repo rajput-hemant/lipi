@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getCurrentUser } from "@/lib/auth";
 import { BillingNotConfiguredError } from "@/lib/billing/errors";
+import { logger } from "@/lib/logger";
 import { createBillingPortalSessionForUser } from "@/lib/stripe/checkout";
 
 export async function POST() {
@@ -23,7 +24,7 @@ export async function POST() {
     ) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    console.error(error);
+    logger.error("Failed to create billing portal session", error);
     return NextResponse.json(
       { error: "Failed to create billing portal session" },
       { status: 500 }

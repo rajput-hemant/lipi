@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   handleStripeWebhookEvent: vi.fn(),
 }));
 
-vi.mock("@/lib/db/queries/billing", () => ({
+vi.mock("@/lib/db/data/billing", () => ({
   claimStripeWebhookEvent: mocks.claimStripeWebhookEvent,
   markStripeWebhookEventProcessed: mocks.markStripeWebhookEventProcessed,
   releaseStripeWebhookEventClaim: mocks.releaseStripeWebhookEventClaim,

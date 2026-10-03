@@ -18,7 +18,8 @@ export default function ChangePasswordPage() {
   return (
     <main
       id="main-content"
-      className="flex min-h-dvh items-center justify-center px-4 py-10"
+      tabIndex={-1}
+      className="flex min-h-dvh items-center justify-center px-4 py-10 outline-none"
     >
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader>

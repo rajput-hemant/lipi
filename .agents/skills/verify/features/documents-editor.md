@@ -15,7 +15,7 @@ Nested pages in the sidebar tree and the BlockNote editor (`components/sidebar/`
 - [ ] Alert/callout, checklist, code and list blocks.
 - [ ] Block quota (Free: 500 blocks).
 - [x] Not-found document page (`Document not found`). - live: after permanent delete, the page URL shows `Document not found` with a `Dashboard` link.
-- [ ] Mobile sidebar (`Open navigation menu`).
+- [ ] Mobile sidebar (`Toggle Sidebar` button, which opens the sheet below 768 px; Ctrl/Cmd+B toggles on desktop).
 
 ## How to get to it (user POV)
 

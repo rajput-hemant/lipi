@@ -13,12 +13,12 @@ import {
   assertRootPageQuota,
   collectRestoreTargetIds,
   DocumentOperationError,
-  orderPermanentDeleteIds,
   planDeepDuplicate,
   validateParentAssignment,
 } from "@/lib/db/document-operations";
 import { documentSummaryColumns } from "@/lib/db/document-summary";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
+import { logger } from "@/lib/logger";
 import { loadAuthoritativeDocumentContentBySourceIds } from "@/lib/realtime/authoritative-content";
 import {
   createDocumentSchema,
@@ -26,15 +26,19 @@ import {
   updateDocumentSchema,
 } from "@/lib/validations/document";
 import { db } from "..";
-import { documents } from "../schema";
 import {
   assertWorkspaceAccess,
   authorizeDocumentMutation,
   authorizeWorkspaceMutation,
   MutationAuthError,
   requireAuthenticatedUser,
-} from "./mutation-auth";
-import { mutationFailure } from "./mutation-failure";
+} from "../data/mutation-auth";
+import { mutationFailure } from "../data/mutation-failure";
+import { documents } from "../schema";
+
+// `db` is a single-connection client: inside `db.transaction`, every query
+// must go through `tx` or it waits forever for the connection the transaction holds.
+type DbExecutor = Pick<typeof db, "select">;
 
 function documentsCacheTag(workspaceId: string) {
   return `documents_${workspaceId}`;
@@ -75,8 +79,11 @@ function forbiddenResult(error: unknown) {
   }
 }
 
-async function loadWorkspaceDocuments(workspaceId: string) {
-  const rows = await db
+async function loadWorkspaceDocuments(
+  workspaceId: string,
+  executor: DbExecutor = db
+) {
+  const rows = await executor
     .select(documentSummaryColumns)
     .from(documents)
     .where(eq(documents.workspaceId, workspaceId));
@@ -122,7 +129,7 @@ export async function createDocument(input: unknown) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
     rethrowKnownErrors(e);
-    console.error((e as Error).message);
+    logger.error("Failed to create document", e);
     throw new Error("Failed to create document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -150,7 +157,7 @@ export async function getDocuments(workspaceId: string) {
           .where(eq(documents.workspaceId, workspaceId))
           .orderBy(documents.createdAt);
       } catch (e) {
-        console.error((e as Error).message);
+        logger.error("Failed to fetch documents from the database", e);
         throw new Error("Failed to fetch documents from the database");
       }
     },
@@ -170,37 +177,48 @@ export async function updateDocument(input: unknown) {
 
     const { document: existing } = await authorizeDocumentMutation(parsed.id);
     workspaceIdForRevalidate = existing.workspaceId;
-    const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
-
-    if (parsed.parentId === null && existing.parentId) {
-      assertRootPageQuota(
-        workspaceDocs,
-        existing.workspaceId,
-        await workspaceOwnerHasProPlanEntitlement(existing.workspaceId),
-        null
-      );
-    }
-
-    if (parsed.parentId !== undefined) {
-      validateParentAssignment(workspaceDocs, {
-        workspaceId: existing.workspaceId,
-        parentId: parsed.parentId,
-        documentId: parsed.id,
-      });
-    }
+    const movesToRoot = parsed.parentId === null && !!existing.parentId;
+    const hasProEntitlement =
+      movesToRoot ?
+        await workspaceOwnerHasProPlanEntitlement(existing.workspaceId)
+      : false;
 
     const { id, ...patch } = parsed;
 
-    const [data] = await db
-      .update(documents)
-      .set({ ...patch, updatedAt: new Date().toISOString() })
-      .where(eq(documents.id, id))
-      .returning(documentSummaryColumns);
+    return await db.transaction(async (tx) => {
+      const workspaceDocs = await loadWorkspaceDocuments(
+        existing.workspaceId,
+        tx
+      );
 
-    return data;
+      if (movesToRoot) {
+        assertRootPageQuota(
+          workspaceDocs,
+          existing.workspaceId,
+          hasProEntitlement,
+          null
+        );
+      }
+
+      if (parsed.parentId !== undefined) {
+        validateParentAssignment(workspaceDocs, {
+          workspaceId: existing.workspaceId,
+          parentId: parsed.parentId,
+          documentId: parsed.id,
+        });
+      }
+
+      const [data] = await tx
+        .update(documents)
+        .set({ ...patch, updatedAt: new Date().toISOString() })
+        .where(eq(documents.id, id))
+        .returning(documentSummaryColumns);
+
+      return data;
+    });
   } catch (e) {
     rethrowKnownErrors(e);
-    console.error((e as Error).message);
+    logger.error("Failed to update document", e);
     throw new Error("Failed to update document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -216,21 +234,26 @@ export async function softDeleteDocumentTree(documentId: string) {
     const { document: root } = await authorizeDocumentMutation(documentId);
     workspaceIdForRevalidate = root.workspaceId;
 
-    const workspaceDocs = await loadWorkspaceDocuments(root.workspaceId);
+    const count = await db.transaction(async (tx) => {
+      const workspaceDocs = await loadWorkspaceDocuments(root.workspaceId, tx);
+      const ids = [
+        documentId,
+        ...collectDescendantIds(workspaceDocs, documentId),
+      ];
 
-    const descendantIds = collectDescendantIds(workspaceDocs, documentId);
-    const ids = [documentId, ...descendantIds];
+      await tx
+        .update(documents)
+        .set({ inTrash: true, updatedAt: new Date().toISOString() })
+        .where(inArray(documents.id, ids));
 
-    await db
-      .update(documents)
-      .set({ inTrash: true, updatedAt: new Date().toISOString() })
-      .where(inArray(documents.id, ids));
+      return ids.length;
+    });
 
-    return { ok: true, data: ids.length } as const;
+    return { ok: true, data: count } as const;
   } catch (e) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
-    console.error((e as Error).message);
+    logger.error("Failed to move document to trash", e);
     throw new Error("Failed to move document to trash");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -245,29 +268,40 @@ export async function restoreDocument(documentId: string) {
   try {
     const { document: existing } = await authorizeDocumentMutation(documentId);
     workspaceIdForRevalidate = existing.workspaceId;
-    const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
-    const ids = collectRestoreTargetIds(workspaceDocs, documentId);
-    const topmost = workspaceDocs.find((document) => document.id === ids[0]);
+    const hasProEntitlement = await workspaceOwnerHasProPlanEntitlement(
+      existing.workspaceId
+    );
 
-    if (!topmost?.parentId) {
-      assertRootPageQuota(
-        workspaceDocs,
+    const count = await db.transaction(async (tx) => {
+      const workspaceDocs = await loadWorkspaceDocuments(
         existing.workspaceId,
-        await workspaceOwnerHasProPlanEntitlement(existing.workspaceId),
-        null
+        tx
       );
-    }
+      const ids = collectRestoreTargetIds(workspaceDocs, documentId);
+      const topmost = workspaceDocs.find((document) => document.id === ids[0]);
 
-    await db
-      .update(documents)
-      .set({ inTrash: false, updatedAt: new Date().toISOString() })
-      .where(inArray(documents.id, ids));
+      if (!topmost?.parentId) {
+        assertRootPageQuota(
+          workspaceDocs,
+          existing.workspaceId,
+          hasProEntitlement,
+          null
+        );
+      }
 
-    return { ok: true, data: ids.length } as const;
+      await tx
+        .update(documents)
+        .set({ inTrash: false, updatedAt: new Date().toISOString() })
+        .where(inArray(documents.id, ids));
+
+      return ids.length;
+    });
+
+    return { ok: true, data: count } as const;
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    console.error((e as Error).message);
+    logger.error("Failed to restore document", e);
     throw new Error("Failed to restore document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -282,19 +316,27 @@ export async function deleteDocumentPermanently(documentId: string) {
   try {
     const { document: existing } = await authorizeDocumentMutation(documentId);
     workspaceIdForRevalidate = existing.workspaceId;
-    const workspaceDocs = await loadWorkspaceDocuments(existing.workspaceId);
-    const ids = assertPermanentDeleteAllowed(workspaceDocs, documentId);
-    const ordered = orderPermanentDeleteIds(workspaceDocs, ids);
 
-    for (const id of ordered) {
-      await db.delete(documents).where(eq(documents.id, id));
-    }
+    const count = await db.transaction(async (tx) => {
+      const workspaceDocs = await loadWorkspaceDocuments(
+        existing.workspaceId,
+        tx
+      );
+      const ids = assertPermanentDeleteAllowed(workspaceDocs, documentId);
 
-    return { ok: true, data: ids.length } as const;
+      // One statement: the parent FK is RESTRICT, which is checked after the
+      // statement, so parents and children can go together. Realtime state
+      // rows cascade from documents.
+      await tx.delete(documents).where(inArray(documents.id, ids));
+
+      return ids.length;
+    });
+
+    return { ok: true, data: count } as const;
   } catch (e) {
     const failure = mutationFailure(e);
     if (failure) return failure;
-    console.error((e as Error).message);
+    logger.error("Failed to delete document", e);
     throw new Error("Failed to delete document");
   } finally {
     if (workspaceIdForRevalidate) {
@@ -310,39 +352,46 @@ export async function duplicateDocument(input: unknown) {
   try {
     const { document: source } = await authorizeDocumentMutation(sourceId);
     workspaceIdForRevalidate = source.workspaceId;
-    const workspaceDocs = await loadWorkspaceDocuments(source.workspaceId);
-    const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);
-    const sourceIds = plan.map((node) => node.sourceId);
-    const sourceRows = await db
-      .select({ id: documents.id, content: documents.content })
-      .from(documents)
-      .where(inArray(documents.id, sourceIds));
-    const fallbackBySourceId = new Map(
-      sourceRows.map((row) => [row.id, row.content])
-    );
-    const authoritativeContent =
-      await loadAuthoritativeDocumentContentBySourceIds(
-        sourceIds,
-        fallbackBySourceId
+
+    const inserted = await db.transaction(async (tx) => {
+      const workspaceDocs = await loadWorkspaceDocuments(
+        source.workspaceId,
+        tx
       );
+      const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);
+      const sourceIds = plan.map((node) => node.sourceId);
+      const sourceRows = await tx
+        .select({ id: documents.id, content: documents.content })
+        .from(documents)
+        .where(inArray(documents.id, sourceIds));
+      const fallbackBySourceId = new Map(
+        sourceRows.map((row) => [row.id, row.content])
+      );
+      const authoritativeContent =
+        await loadAuthoritativeDocumentContentBySourceIds(
+          sourceIds,
+          fallbackBySourceId,
+          tx
+        );
 
-    const now = new Date().toISOString();
-    const rows = plan.map((node) => ({
-      id: node.id,
-      workspaceId: source.workspaceId,
-      parentId: node.parentId,
-      title: node.title,
-      icon: node.icon,
-      bannerUrl: node.bannerUrl,
-      content: authoritativeContent.get(node.sourceId) ?? null,
-      createdAt: now,
-      updatedAt: now,
-    }));
+      const now = new Date().toISOString();
+      const rows = plan.map((node) => ({
+        id: node.id,
+        workspaceId: source.workspaceId,
+        parentId: node.parentId,
+        title: node.title,
+        icon: node.icon,
+        bannerUrl: node.bannerUrl,
+        content: authoritativeContent.get(node.sourceId) ?? null,
+        createdAt: now,
+        updatedAt: now,
+      }));
 
-    const inserted = await db
-      .insert(documents)
-      .values(rows)
-      .returning(documentSummaryColumns);
+      return tx
+        .insert(documents)
+        .values(rows)
+        .returning(documentSummaryColumns);
+    });
 
     return {
       ok: true,
@@ -352,7 +401,7 @@ export async function duplicateDocument(input: unknown) {
     const denied = forbiddenResult(e);
     if (denied) return denied;
     rethrowKnownErrors(e);
-    console.error((e as Error).message);
+    logger.error("Failed to duplicate document", e);
     throw new Error("Failed to duplicate document");
   } finally {
     if (workspaceIdForRevalidate) {

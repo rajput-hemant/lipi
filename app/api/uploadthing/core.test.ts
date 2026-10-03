@@ -13,7 +13,7 @@ vi.mock("@/lib/auth", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.mock("@/lib/db/queries/mutation-auth", () => ({
+vi.mock("@/lib/db/data/mutation-auth", () => ({
   requireWorkspacePermission: mockRequireWorkspacePermission,
 }));
 

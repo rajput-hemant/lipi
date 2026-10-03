@@ -12,6 +12,7 @@ import {
   vi,
 } from "vitest";
 
+import { SidebarProvider } from "../ui/sidebar";
 import { DocumentTree } from "./document-tree";
 
 const mockDocuments = [
@@ -58,7 +59,7 @@ vi.mock("@/hooks/use-subscription-modal", () => ({
   }),
 }));
 
-vi.mock("@/lib/db/queries", () => ({
+vi.mock("@/lib/db/actions/document", () => ({
   createDocument: vi.fn(),
   updateDocument: vi.fn(),
   deleteDocument: vi.fn(),
@@ -86,7 +87,11 @@ describe("DocumentTree Keyboard Context Menu", () => {
     roots.push(root);
 
     act(() => {
-      root.render(<DocumentTree />);
+      root.render(
+        <SidebarProvider>
+          <DocumentTree />
+        </SidebarProvider>
+      );
     });
 
     const link = document.getElementById("document-tree-item-doc-1");

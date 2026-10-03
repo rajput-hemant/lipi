@@ -22,7 +22,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard/ws-123/doc-456",
 }));
 
-vi.mock("@/lib/db/queries", () => ({
+vi.mock("@/lib/db/actions/search", () => ({
   searchDocumentsInWorkspace: (...args: unknown[]) =>
     mockSearchDocuments(...args),
 }));

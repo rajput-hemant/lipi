@@ -8,6 +8,7 @@ import type { WorkspaceMembershipRole } from "@/lib/workspace/permissions";
 import type { DocumentSummary } from "@/types/db";
 
 import { AppStateContext, createAppStore } from "@/hooks/use-app-state";
+import { SidebarProvider } from "../ui/sidebar";
 import { TooltipProvider } from "../ui/tooltip";
 import { DocumentTree } from "./document-tree";
 
@@ -29,7 +30,7 @@ vi.mock("@/components/realtime/workspace-realtime-provider", () => ({
 vi.mock("../subscription-modal-provider", () => ({
   useSubscriptionModal: () => ({ setOpen: vi.fn(), hasProEntitlement: true }),
 }));
-vi.mock("@/lib/db/queries", () => ({
+vi.mock("@/lib/db/actions/document", () => ({
   createDocument,
   softDeleteDocumentTree,
   duplicateDocument: vi.fn(),
@@ -76,7 +77,9 @@ function render(
     root.render(
       <AppStateContext.Provider value={store}>
         <TooltipProvider>
-          <DocumentTree />
+          <SidebarProvider>
+            <DocumentTree />
+          </SidebarProvider>
         </TooltipProvider>
       </AppStateContext.Provider>
     );

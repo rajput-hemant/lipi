@@ -6,12 +6,12 @@ import { AppStateProvider } from "@/components/app-state-provider";
 import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realtime-provider";
 import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
 import { getCurrentUser } from "@/lib/auth";
-import { SIDEBAR_COLLAPSED_COOKIE } from "@/lib/dashboard/sidebar-cookie";
-import { getDocuments } from "@/lib/db/queries";
+import { isSidebarOpen, SIDEBAR_COOKIE } from "@/lib/dashboard/sidebar-cookie";
+import { getDocuments } from "@/lib/db/actions/document";
 import {
   getWorkspaceMembershipRole,
   MutationAuthError,
-} from "@/lib/db/queries/mutation-auth";
+} from "@/lib/db/data/mutation-auth";
 import { WorkspaceShell } from "../components/workspace-shell";
 
 export const instant = false;
@@ -40,8 +40,7 @@ export const WorkspaceLayout: React.FCC<{
 
   const cookieStore = await cookies();
 
-  const defaultCollapsed =
-    cookieStore.get(SIDEBAR_COLLAPSED_COOKIE)?.value === "true";
+  const defaultOpen = isSidebarOpen(cookieStore.get(SIDEBAR_COOKIE)?.value);
 
   const documents = await getDocuments(workspaceId);
 
@@ -54,9 +53,7 @@ export const WorkspaceLayout: React.FCC<{
       documents={documents}
     >
       <WorkspaceRealtimeProvider workspaceId={workspaceId}>
-        <WorkspaceShell defaultCollapsed={defaultCollapsed}>
-          {children}
-        </WorkspaceShell>
+        <WorkspaceShell defaultOpen={defaultOpen}>{children}</WorkspaceShell>
       </WorkspaceRealtimeProvider>
     </AppStateProvider>
   );

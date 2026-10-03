@@ -22,7 +22,7 @@ Research date: 2026-09-27. This checkout has no `data/lipi-discovery-plan/report
 
 - Phase 4 currently initializes BlockNote from `documents.content` and debounces writes back to that column in `components/document-editor/document-block-editor.tsx`.
 - `lib/workspace/permissions.ts` defines owner, editor, and viewer roles. Viewers have `document:read` but not `document:write`.
-- Existing page mutations live in `lib/db/queries/document.ts`; retain those authorization and quota-aware paths for page structure instead of mutating the sidebar tree through collaborative editor content.
+- Existing page mutations live in `lib/db/actions/document.ts`; retain those authorization and quota-aware paths for page structure instead of mutating the sidebar tree through collaborative editor content.
 - Lipi-only schema uses `createTable` from `lib/db/table-creator.ts`, and the migration filter is Lipi-prefixed. The Yjs persistence table belongs there and should receive the next migration after the current highest migration.
 - Current package versions include BlockNote `^0.55.0`, Better Auth `^1.6.23`, Drizzle ORM `^0.45.3`, and Node `>=22.11.0`. Yjs and Hocuspocus packages are not currently direct dependencies.
 

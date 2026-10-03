@@ -7,12 +7,13 @@ import { db } from "@/lib/db";
 import { documents } from "@/lib/db/schema";
 import {
   createSearchSnippet,
+  escapeLikePattern,
   extractPlainTextFromDocumentContent,
 } from "@/lib/search/search-utils";
 import {
   requireAuthenticatedUser,
   requireWorkspacePermission,
-} from "./mutation-auth";
+} from "../data/mutation-auth";
 
 export type SearchDocumentResult = {
   id: string;
@@ -64,6 +65,7 @@ export async function searchDocumentsInWorkspace(
     }));
   }
 
+  const pattern = `%${escapeLikePattern(trimmed)}%`;
   const rows = await db
     .select({
       id: documents.id,
@@ -78,10 +80,7 @@ export async function searchDocumentsInWorkspace(
       and(
         eq(documents.workspaceId, workspaceId),
         eq(documents.inTrash, false),
-        or(
-          ilike(documents.title, `%${trimmed}%`),
-          ilike(documents.content, `%${trimmed}%`)
-        )
+        or(ilike(documents.title, pattern), ilike(documents.content, pattern))
       )
     )
     .orderBy(desc(documents.updatedAt))

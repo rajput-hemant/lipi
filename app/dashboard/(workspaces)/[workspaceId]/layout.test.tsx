@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
-import { MutationAuthError } from "@/lib/db/queries/mutation-auth";
+import { MutationAuthError } from "@/lib/db/data/mutation-auth";
 import { WorkspaceLayout } from "./layout";
 
 const { getCurrentUser, getWorkspaceMembershipRole } = vi.hoisted(() => ({
@@ -14,9 +14,11 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("@/lib/auth", () => ({ getCurrentUser }));
-vi.mock("@/lib/db/queries", () => ({ getDocuments: vi.fn(async () => []) }));
-vi.mock("@/lib/db/queries/mutation-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@/lib/db/queries/mutation-auth")>()),
+vi.mock("@/lib/db/actions/document", () => ({
+  getDocuments: vi.fn(async () => []),
+}));
+vi.mock("@/lib/db/data/mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/db/data/mutation-auth")>()),
   getWorkspaceMembershipRole,
 }));
 vi.mock("@/components/app-state-provider", () => ({

@@ -3,34 +3,36 @@
 import { File01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "../ui/sidebar";
 import { DocumentTree } from "./document-tree";
 
 export function DocumentTreeCollapsed() {
   return (
-    <NavigationMenu className="max-w-full flex-none justify-center">
-      <NavigationMenuList>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger className="size-9 p-0" aria-label="Open pages">
-            <HugeiconsIcon
-              icon={File01Icon}
-              strokeWidth={2}
-              className="size-5"
-            />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent className="w-72 p-0">
-            <div className="max-h-96 overflow-hidden">
-              <DocumentTree />
-            </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+    <SidebarGroup>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <Popover>
+            <SidebarMenuButton
+              tooltip="Pages"
+              aria-label="Open pages"
+              render={<PopoverTrigger />}
+            >
+              <HugeiconsIcon icon={File01Icon} strokeWidth={2} />
+            </SidebarMenuButton>
+            <PopoverContent side="right" align="start" className="w-72 p-0">
+              <div className="max-h-[min(24rem,70dvh)] overflow-y-auto">
+                <DocumentTree />
+              </div>
+            </PopoverContent>
+          </Popover>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }

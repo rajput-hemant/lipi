@@ -140,7 +140,7 @@ Stable handles, confirmed live unless marked otherwise:
 - Settings dialog: button `Settings`, field `Invite by email`, role `<select>` (`editor`/`viewer`), button `Invite`, toast `Invite created`, section `Danger zone`, `Transfer ownership`, `Delete workspace`.
 - Pricing: button `Go Pro` on `/pricing`.
 - Theme: button `Toggle theme` opens menu items `Light` / `Dark` / `System` (`html` class becomes `dark`).
-- Mobile nav: `aria-label="Open navigation menu"` (appears at 390 px).
+- Mobile nav: `aria-label="Open navigation menu"` (appears at 390 px). In the dashboard the sidebar trigger is `Toggle Sidebar` (sheet below 768 px, icon rail on desktop, cookie `sidebar_state`).
 - Settings members: row role button (`Editor`) opens menu `Editor` / `Viewer` / `Remove`.
 
 Multi-user flows need **separate bridge sessions (one per user)** (one cookie jar per user), never one shared logged-in profile. Never drive the user's own authenticated browser session.
