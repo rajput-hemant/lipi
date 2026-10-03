@@ -134,19 +134,26 @@ export async function getDocuments(workspaceId: string) {
     throw new Error("Invalid workspace ID");
   }
 
+  // Authorize outside the cache: the cache key is the workspace alone, so a
+  // check inside the callback would be skipped on every hit for other callers.
+  try {
+    const user = await requireAuthenticatedUser();
+    await assertWorkspaceAccess(user.id, workspaceId);
+  } catch (e) {
+    if (e instanceof MutationAuthError) throw e;
+    console.error((e as Error).message);
+    throw new Error("Failed to fetch documents from the database");
+  }
+
   return cache(
     async () => {
       try {
-        const user = await requireAuthenticatedUser();
-        await assertWorkspaceAccess(user.id, workspaceId);
-
         return await db
           .select()
           .from(documents)
           .where(eq(documents.workspaceId, workspaceId))
           .orderBy(documents.createdAt);
       } catch (e) {
-        if (e instanceof MutationAuthError) throw e;
         console.error((e as Error).message);
         throw new Error("Failed to fetch documents from the database");
       }
@@ -339,9 +346,6 @@ export async function getDocumentBreadcrumbs(
   if (!validateUuid(workspaceId) || !validateUuid(documentId)) {
     return [];
   }
-
-  const user = await requireAuthenticatedUser();
-  await assertWorkspaceAccess(user.id, workspaceId);
 
   const rows = await getDocuments(workspaceId);
   const byId = new Map(rows.map((row) => [row.id, row]));
