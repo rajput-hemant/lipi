@@ -5,6 +5,12 @@
 export const publicRoutes = ["/", "/terms", "/privacy", "/pricing"];
 
 /**
+ * Signed-out password recovery. `/reset-password` is where Better Auth redirects
+ * with `?token=` after the emailed link is opened.
+ */
+export const passwordRecoveryRoutes = ["/forgot-password", "/reset-password"];
+
+/**
  * Route prefixes called by third-party servers without a session cookie.
  * Each handler authenticates the request itself (Stripe signature, UploadThing
  * signed callback and per-route middleware), so the proxy must not redirect them.

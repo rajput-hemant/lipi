@@ -48,6 +48,13 @@ describe("Better Auth configuration", () => {
     );
   });
 
+  it("enables the emailed reset flow with a 1 hour token and session revocation", () => {
+    const options = createAuth(makeFakeDb()).options.emailAndPassword;
+    expect(options?.sendResetPassword).toBeTypeOf("function");
+    expect(options?.resetPasswordTokenExpiresIn).toBe(3600);
+    expect(options?.revokeSessionsOnPasswordReset).toBe(true);
+  });
+
   it("uses uuid ids for shared user primary keys", () => {
     const auth = createAuth(makeFakeDb());
     expect(auth.options.advanced?.database?.generateId).toBe("uuid");

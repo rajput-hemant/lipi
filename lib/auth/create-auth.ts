@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { compare, hash } from "bcryptjs";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
@@ -12,10 +13,23 @@ import {
   betterAuthVerifications,
   users,
 } from "@/lib/db/schema";
+import { buildResetPasswordEmail } from "@/lib/email/reset-password-email";
+import { sendEmail } from "@/lib/email/send-email";
 import { env } from "@/lib/env";
 import { resolveAuthRateLimitEnabled } from "./auth-rate-limit";
 import { credentialAccountWhere } from "./credential-account";
 import { resolveAuthBaseURL } from "./resolve-auth-base-url";
+
+const RESET_PASSWORD_TOKEN_TTL_SECONDS = 60 * 60;
+
+/** Runs after the response when inside a request, so timing does not reveal accounts. */
+function runInBackground(task: Promise<unknown>) {
+  try {
+    after(task);
+  } catch {
+    void task;
+  }
+}
 
 export function createAuth(
   database: typeof db,
@@ -61,6 +75,16 @@ export function createAuth(
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false,
+      resetPasswordTokenExpiresIn: RESET_PASSWORD_TOKEN_TTL_SECONDS,
+      revokeSessionsOnPasswordReset: true,
+      sendResetPassword: ({ user, url }) =>
+        sendEmail({
+          to: user.email,
+          ...buildResetPasswordEmail(
+            url,
+            RESET_PASSWORD_TOKEN_TTL_SECONDS / 60
+          ),
+        }),
       password: {
         hash: async (password) => hash(password, 10),
         verify: async ({ password, hash: passwordHash }) =>
@@ -141,6 +165,7 @@ export function createAuth(
     },
 
     advanced: {
+      backgroundTasks: { handler: runInBackground },
       defaultCookieAttributes: {
         sameSite: "lax",
         secure: env.NODE_ENV === "production",

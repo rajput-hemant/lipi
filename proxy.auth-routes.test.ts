@@ -50,7 +50,19 @@ describe("proxy auth routes", () => {
     );
   });
 
-  it.each(["/dashboard/change-password", "/reset-password"])(
+  it.each(["/forgot-password", "/reset-password"])(
+    "lets signed-out visitors reach %s",
+    async (path) => {
+      const res = await proxy(
+        new NextRequest(`http://localhost:3000${path}?token=abc`)
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("location")).toBeNull();
+    }
+  );
+
+  it.each(["/dashboard/change-password"])(
     "requires a session for %s",
     async (path) => {
       const res = await proxy(new NextRequest(`http://localhost:3000${path}`));

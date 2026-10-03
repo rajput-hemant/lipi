@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -171,6 +172,15 @@ export function LoginForm() {
             </FormItem>
           )}
         />
+
+        <div className="text-right">
+          <Link
+            href="/forgot-password"
+            className="rounded-sm text-sm text-muted-foreground underline-offset-4 outline-none hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring/50"
+          >
+            Forgot password?
+          </Link>
+        </div>
 
         <Button
           type="submit"

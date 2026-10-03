@@ -58,3 +58,15 @@ describe("LoginForm OAuthAccountNotLinked toast", () => {
     expect(mocks.toastError).not.toHaveBeenCalled();
   });
 });
+
+describe("LoginForm forgot password link", () => {
+  it("links to /forgot-password", async () => {
+    mocks.search = "";
+    await render();
+
+    const link = Array.from(document.querySelectorAll("a")).find(
+      (a) => a.textContent === "Forgot password?"
+    );
+    expect(link?.getAttribute("href")).toBe("/forgot-password");
+  });
+});

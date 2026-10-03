@@ -6,6 +6,7 @@ import type { NextRequest } from "next/server";
 
 import {
   authRoutes,
+  passwordRecoveryRoutes,
   publicRoutes,
   selfAuthenticatedRoutePrefixes,
 } from "./config/routes";
@@ -64,7 +65,9 @@ export async function proxy(req: NextRequest) {
   const { nextUrl } = req;
 
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-  const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
+  const isPublicRoute =
+    publicRoutes.includes(nextUrl.pathname) ||
+    passwordRecoveryRoutes.includes(nextUrl.pathname);
 
   const isSelfAuthenticated = selfAuthenticatedRoutePrefixes.some(
     (prefix) =>
