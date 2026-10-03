@@ -278,25 +278,27 @@ Method: `bunx shadcn@latest add <name> --diff components/ui/<name>.tsx` (CLI 4.2
 
 ## Deslop and ponytail review (2026-10-03)
 
-Static review of every tracked file (463) with the `deslop` and `ponytail-review` skills on branch `fm/lipi-deslop-ponytail-review` (base `9472258`). Nothing was run, built or installed; no code, dependency or env value was changed. Existing sections above are unchanged. This section lists what to cut and why; each item is meant for a separate fixer.
+Scope (captain, 2026-10-03): test files, UI component source and `components/ui` (shadcn) are excluded and not reviewed; findings that rest solely on those files were removed (their IDs are not reused). Mixed files had only their separable non-UI logic reviewed. Business and server logic, handlers, scripts, config, dependencies and docs got both passes. Paths inside tests or UI files that still appear in an item are context only: do not act on them.
+
+Static review of the in-scope tracked files (463 tracked, the excluded ones are marked in the coverage ledger) with the `deslop` and `ponytail-review` skills on branch `fm/lipi-deslop-ponytail-review` (base `9472258`). Nothing was run, built or installed; no code, dependency or env value was changed. Existing sections above are unchanged. This section lists what to cut and why; each item is meant for a separate fixer.
 
 How to read an item: **ID**, priority (P2 do first, P3 polish, P4 optional), skill tag (`ponytail:delete|shrink|yagni`, `deslop`), and **CONFIRMED** (use sites checked with `git grep` or source) or **HYPOTHESIS** (needs a check or an owner decision first). Line numbers are for base `9472258`. Default acceptance for every item: `bun run type-check`, `bun run lint` and `bun run test` pass and no importer of a removed name remains.
 
-Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and subsume the sidebar parts of R-17, R-18, R-26 and R-36; do those only if D-3 is deferred. Protected `components/ui/*` was read but no edit is proposed (R-13 is a removal of an unused file and needs an owner OK).
+Caveat: D-3 (adopt the shadcn Sidebar) rewrites UI that is out of scope here.
 
 ### Net line-reduction estimate
 
-- Confirmed removals (dead code, redundant tests, deletable files): net **-1,111** lines across 13 items, plus 20 unreferenced binary files (about 330 KB, 0 lines).
-- Confirmed consolidation (dedupe, helpers, table-driven data, comment and default removal): net **-1,772** lines.
-- Total confirmed: net **-2,883** lines possible, of roughly 46,500 tracked lines (about 6.2 %). Uncertainty: plus or minus 30 % (about -2,018 to -3,747); the dedupe items (R-15 to R-27) are the least certain because shared helpers add lines back, and the e2e items could not be run here.
-- Hypotheses (H-1 to H-9 and the four HYPOTHESIS items R-13, R-14, R-40, R-43) are not counted; accepted in full they would add about -537 more lines (H-3 alone is about -200 and needs a migration).
+- Confirmed removals (dead code, redundant tests, deletable files): net **-569** lines across 11 items, plus 20 unreferenced binary files (about 330 KB, 0 lines).
+- Confirmed consolidation (dedupe, helpers, table-driven data, comment and default removal): net **-733** lines.
+- Total confirmed: net **-1,302** lines possible, of roughly 46,500 tracked lines (about 2.8 %). Mixed items (marked) may still count a few lines in excluded test/UI call sites. Uncertainty: plus or minus 30 % (about -911 to -1,692); the dedupe items (R-15 to R-27) are the least certain because shared helpers add lines back, and some items could not be executed here (static review only).
+- Hypotheses (H-1 to H-9 that remain and the HYPOTHESIS items R-14, R-40, R-43) are not counted; accepted in full they would add about -349 more lines (H-3 alone is about -200 and needs a migration).
 
 ### Findings
 
-- [ ] **R-1** Unused sidebar navigation menu and the shadcn call-site helper that only its tests use. Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -190 lines.
-  - Where: `components/sidebar/vertical-navigation-menu.tsx:1-29`, `components/sidebar/vertical-navigation-menu.test.tsx:1-88`, `components/sidebar/folder-accordion-trigger.test.tsx:1-66`, `lib/shadcn-call-site.ts:1-5`
+- [ ] **R-1** Unused shadcn call-site helper (its only users are excluded test/UI files). Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -5 lines. Mixed: only the non-UI, non-test part is in scope.
+  - Where: `lib/shadcn-call-site.ts:1-5`; companions `components/sidebar/vertical-navigation-menu.tsx`, `vertical-navigation-menu.test.tsx`, `folder-accordion-trigger.test.tsx` are excluded by captain scope (UI/tests) and listed for context only
   - Evidence: `git grep` finds `VerticalNavigationMenu`, `hideNavigationMenuTriggerIndicator` and `hideAccordionTriggerIndicator` only in these files and their tests. The folder test targets a `folders.tsx` call site that no longer exists and only exercises the protected shadcn accordion.
-  - Cut and replace: Delete the four files. No replacement.
+  - Cut and replace: Delete `lib/shadcn-call-site.ts` together with its dead UI/test companions when a fixer next touches them.
   - Behaviour preserved: Nothing user-visible: no production importer.
   - Check before cutting: `git grep -n "vertical-navigation-menu\|shadcn-call-site\|folder-accordion"` outside the four files; D-3 (shadcn Sidebar) does not need them.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
@@ -307,7 +309,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Nothing: unused.
   - Check before cutting: Re-run `git grep -n "use-event-listener\|use-is-mounted\|use-isomorphic-layout-effect"`.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-3** Legacy folder/file to document migration helper with no caller. Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -194 lines.
+- [ ] **R-3** Legacy folder/file to document migration helper with no caller. Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -96 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/db/legacy-document-migration.ts:1-96`, `lib/db/legacy-document-migration.test.ts:1-98`
   - Evidence: No importer outside its own test. The folders/files to documents conversion shipped as SQL in migration `0006_documents_unified_tree.sql`; the function is also a pure pass-through (`legacyDocumentMigrationRows`).
   - Cut and replace: Delete both files.
@@ -321,19 +323,12 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: `absoluteUrl` output on Vercel and locally.
   - Check before cutting: Check `lib/utils.test.ts` (if present) for removed names before deleting. `getStars` doc-comments and `stargazers_count: string` typing at `:72` are tracked in R-45.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer. `absoluteUrl` tests still pass.
-- [ ] **R-5** Unused exported server action `getDocumentBreadcrumbs`, `DBResponse` type and `isWorkspaceMember`. Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -55 lines.
+- [ ] **R-5** Unused exported server action `getDocumentBreadcrumbs`, `DBResponse` type and `isWorkspaceMember`. Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -45 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/db/queries/document.ts:364-387`, `lib/db/queries/index.ts:1-2` and `:32` (re-export), `lib/db/queries/mutation-auth.ts:27-36`, `lib/db/queries/mutation-auth.test.ts:1-25`
   - Evidence: Breadcrumbs are built client-side in `components/site-header/document-breadcrumbs.tsx`; nothing calls the action. `DBResponse` and `isWorkspaceMember` have no use sites other than the test. Removing the action also removes a publicly callable endpoint.
   - Cut and replace: Delete the action, the re-export, the type, the helper and its test.
   - Behaviour preserved: All live behaviour.
   - Check before cutting: Check `document.test.ts` / `document.forbidden.test.ts` for cases naming `getDocumentBreadcrumbs` first.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-11** Unused sidebar trigger variant in the search command. Priority: P2. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -45 lines.
-  - Where: `components/search-command.tsx:33-37` (props `triggerVariant`, `isCollapsed`, `className`), `:134-173` (sidebar trigger branches)
-  - Evidence: The only caller, `components/site-header/navbar.tsx`, renders `<SearchCommand />` with no props (`git grep "<SearchCommand"`).
-  - Cut and replace: Remove the props and the sidebar branches; keep the navbar trigger.
-  - Behaviour preserved: Navbar trigger and dialog.
-  - Check before cutting: `search-command.test.tsx` cases for the variant (if any) go with it.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
 - [ ] **R-15** Three identical UploadThing endpoints. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -60 lines.
   - Where: `app/api/uploadthing/core.ts:12-129`
@@ -342,21 +337,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Auth, permission checks and returned `ufsUrl ?? url` payload.
   - Check before cutting: Keep the per-route permission strings exactly (`document:write` vs `workspace:settings`); `core.test.ts` pins them. The 4 MB precheck constant is duplicated in the client uploaders (R-18).
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-16** Near-identical error boundaries and status panels. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -90 lines.
-  - Where: `app/error.tsx:10-64`, `app/(lobby)/error.tsx:10-57`, `app/dashboard/error.tsx:10-63`, `app/not-found.tsx`, `app/dashboard/(workspaces)/[workspaceId]/not-found.tsx`, `components/workspace-access-revoked.tsx:7-28`
-  - Evidence: Three boundaries repeat the same icon box, heading, text and two buttons (about 55 lines each); the not-found and access-revoked panels share the layout. `global-error.tsx` is intentionally standalone and stays. F-ERR-6 (lobby boundary omits `error.digest`) falls out of the dedupe.
-  - Cut and replace: One `StatusPanel`/`ErrorState({ title, message, homeHref, homeLabel })` client component; each boundary becomes an 8-line wrapper.
-  - Behaviour preserved: Copy and buttons per route; `lib/launch-polish.test.tsx` asserts the titles.
-  - Check before cutting: Keep `reset` and `useEffect` logging per boundary.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-17** Duplicated create-page flow and inline form in the document tree. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -70 lines.
-  - Where: `components/sidebar/document-tree.tsx:127-166` vs `:548-586` (child vs root create: same `DocumentSummary` build, same `toast.promise(createDocument)` and rollback), `:400-437` vs `:639-687` (EmojiPicker + Input + Escape form), `:477-496` (three Set-copy callbacks `toggleExpanded`/`expandNode`/`collapseNode`)
-  - Evidence: Two copies of both the create handler and the new-page form; three callbacks that each copy the expanded `Set`.
-  - Cut and replace: `createPage(parentId)` + `<NewPageForm>` + `setExpanded(id, open)`.
-  - Behaviour preserved: Optimistic insert, rollback, toasts, focus behaviour.
-  - Check before cutting: If D-3 (shadcn Sidebar) proceeds this file is rewritten; do R-17 only if D-3 is deferred. Tests: `document-tree.test.tsx`, `document-tree-keyboard.test.tsx`.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-18** One mutation toast helper and one image-upload helper. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -125 lines.
+- [ ] **R-18** One mutation toast helper and one image-upload helper. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -30 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `components/settings.tsx:176-297` (6 handlers), `components/sidebar/document-tree.tsx:116-124,153-165,184-201,221-239,573-585` (5), `components/trash.tsx` (2), `app/dashboard/new-workspace/workspace-form.tsx` (1); uploads: `components/document-editor/document-header.tsx:98-127`, `components/settings.tsx:92-121`, `components/document-editor/document-block-editor.tsx:191-217`
   - Evidence: Every site writes `toast.promise(unwrapMutation(x), { loading, success, error: isMutationDenied(e) ? "You do not have permission to ..." : mutationErrorMessage(e, fallback) })`, and the settings handlers add the same `if (!workspaceId) return` and `router.refresh(); notifyPageChanges(); refresh();` tail. The three upload flows each do a size precheck, `uploadFiles(endpoint, { files, input })`, `serverData?.url ?? url`, and an error toast; the editor one toasts then rethrows twice (`:193-196`, `:209-213`).
   - Cut and replace: `runMutationToast({ loading, success, denied, failed })` next to `unwrapMutation` in `lib/db/mutation-result.ts`, an `afterMutation()` in settings, and `uploadImage(endpoint, file, workspaceId, maxMb)` in `lib/uploadthing.ts`.
@@ -370,7 +351,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Returned `MutationResult` codes and messages; revalidation after the call.
   - Check before cutting: `document.test.ts` and `document.forbidden.test.ts` pin outcomes; F-ERR-5 (structured logging) stays separate.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-20** `createWorkspace` takes `workspaceOwnerId` from the client. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -20 lines.
+- [ ] **R-20** `createWorkspace` takes `workspaceOwnerId` from the client. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -10 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/db/queries/workspace.ts:24-34`, `app/dashboard/new-workspace/page.tsx:68`, `app/dashboard/new-workspace/workspace-form.tsx:35,55`, `lib/db/queries/workspace.test.ts:60-65`
   - Evidence: The action accepts a full `Workspace`, then rejects with FORBIDDEN when the owner id differs from the session user. The page passes `user!` and the form `user.id!`. The server can set `workspaceOwnerId = user.id` and accept only `{ title, iconId }`.
   - Cut and replace: Change the signature, drop the equality check and its test, stop threading `user` through `WorkspaceForm`, remove the two non-null assertions.
@@ -384,7 +365,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Permission strings per action; error messages.
   - Check before cutting: `mutation-auth` and `*.forbidden.test.ts` suites.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-22** Redundant `DocumentSummary` to `DocumentRecord` mapping with null guards on NOT NULL columns. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -35 lines.
+- [ ] **R-22** Redundant `DocumentSummary` to `DocumentRecord` mapping with null guards on NOT NULL columns. Priority: P2. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -30 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/db/queries/document.ts:51-63` (`toRecords`), `components/sidebar/document-tree-utils.ts:10-24,26-38` (`toDocumentRecord`)
   - Evidence: Both map field by field with `row.id!`, `?? null`, `?? ""` and `?? new Date(0)` although the columns are NOT NULL and `DocumentSummary` is structurally assignable to `DocumentRecord`. `if (!document.id) return null` is dead for the same reason.
   - Cut and replace: Pass the rows through; keep the dedupe-by-id and `inTrash` filter in `toDocumentRecords`.
@@ -398,21 +379,21 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Types only.
   - Check before cutting: Re-grep each name.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-7** Dead constants, exports and type aliases. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -70 lines.
+- [ ] **R-7** Dead constants, exports and type aliases. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -68 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/constants.ts:81-90` (`MAX_FOLDERS_FREE_PLAN`, `ACCEPTED_IMAGE_TYPES`), `lib/uploadthing.ts:3-4,9-10,12` (`UploadButton`, `UploadDropzone`, `useUploadThing`), `lib/auth.ts:71-74` (`checkAuth` and its `redirect` import), `lib/auth.ts:30` (`User` alias, verify), `lib/auth/auth-client.ts:5-11,17-18` (`useSession`, `getSession`, optional `baseURL` spread), `lib/auth/create-auth.ts:186` (`Auth` type), `config/site.ts:16,21` (`links.discord`, `SiteConfig`), `lib/db/index.ts:1,7,19-24` (duplicate `createTable`; `lib/db/table-creator.ts` is the one `schema/app.ts` imports), `lib/db/schema/auth.ts:120-132` (`NewUser`, `BetterAuthAccount`, `NewBetterAuth*`, `BetterAuthSession`, `BetterAuthVerification`), `types/db.ts:13-24` (`User`, `NewDocument`, `Account`, `Customer`, `Product`, `Collaborator`, `Price`), `lib/block-editor/alert-block.tsx:45` (`AlertType`; also drop `export` on `alertTypes`), `components/sidebar/document-tree-utils.ts:63` (`export type { DocumentTreeNode }`, verify)
   - Evidence: Each name has zero imports (`git grep`); in `types/db.ts` only `Document`, `DocumentSummary`, `Subscription` and `Workspace` are imported anywhere. `FREE_WORKSPACE_ROOT_PAGE_LIMIT` already exists for the 3-page limit that `MAX_FOLDERS_FREE_PLAN` duplicates (see R-37).
   - Cut and replace: Delete each declaration and any import left unused.
   - Behaviour preserved: Runtime unchanged (type-only or unreferenced exports).
   - Check before cutting: Verify one name at a time with `git grep -n "\bName\b"`; `PRICING_PLANS.freeplan` is used only by `lib/launch-polish.test.tsx`, keep.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-8** Credential-account helpers that only their tests and each other call. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -60 lines.
+- [ ] **R-8** Credential-account helpers that only their tests and each other call. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -35 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/auth/credential-account.ts:15-48` (`resolveStoredPasswordHash`, `findCredentialAccount`, `upsertCredentialPassword`) and their cases in `lib/auth/credential-account.test.ts`
   - Evidence: `create-auth.ts` imports only `CREDENTIAL_PROVIDER_ID` and `credentialAccountWhere`; `lib/db/seed.ts` re-builds the same `and(eq, eq)` filter by hand instead of calling `credentialAccountWhere` (see R-38). `docs/requirements/requirements.md` still cites the file as credential validation (R-52).
   - Cut and replace: Delete the three helpers and their test cases; keep the two used exports.
   - Behaviour preserved: Sign-in and backfill hooks use the kept exports.
   - Check before cutting: Check `lib/db/seed.ts` and `scripts` for importers first (none found).
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-9** Duplicate and dead billing entitlement code. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -45 lines.
+- [ ] **R-9** Duplicate and dead billing entitlement code. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -33 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/billing/plan-quotas.ts:40-49` (`evaluateWorkspaceQuota`, no non-test caller), `lib/billing/plan-quotas.test.ts:48-70`, `lib/billing/enforce-quotas.ts:67-73` (`isProSubscriber` equals `hasConfiguredProEntitlement` in `entitlement.ts:16-22`) and `:78-79,98-99,120-121`, `lib/billing/current-subscription.ts:3-6` vs `lib/billing/entitlement.ts:5` (same `active`/`trialing` set twice), `lib/billing/quota-entitlement.ts:8-13`
   - Evidence: `isProSubscriber` re-implements `tryGetStripeProPriceId()` + `hasProEntitlement`; the status set exists twice; `evaluateWorkspaceQuota` is exercised only by its own test.
   - Cut and replace: Delete `evaluateWorkspaceQuota` + test case, call `hasConfiguredProEntitlement` from `enforce-quotas.ts`, export one status set from `entitlement.ts`, and let `userHasProPlanEntitlement` serve the three inlined lookups.
@@ -426,19 +407,12 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Nothing: unreferenced.
   - Check before cutting: Re-run `git grep -n "avatar-[0-9]"`; also see H-4 for the `client-*` images.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-12** Pass-through wrappers and single-use indirection. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -60 lines.
+- [ ] **R-12** Pass-through wrappers and single-use indirection. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -60 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/workspace/permissions.ts:29-33,46` (`workspaceRoleFromCollaborator` returns its argument), `lib/workspace/access.ts:1-11` (barrel with no importer), `lib/db/client-document-state.ts:22-27` (`permanentDeleteTargetIds` = `assertPermanentDeleteAllowed`), `lib/realtime/client.ts:32-35` (`fetchRealtimeToken` wraps `fetchRealtimeAccess`; caller `components/realtime/workspace-realtime-provider.tsx:7,36`), `lib/block-editor/document-content.ts:61-76` (`parseStoredDocumentContent` has only test callers), `lib/realtime/server-factory.ts:31,63` (`verifyToken` seam never injected), `lib/realtime/authorize-room.ts:14` (re-export used by `app/api/realtime/token/route.ts:5-8` and `authorize-room.test.ts:3-6`; repoint them to `./context`), `lib/auth.ts:14-28` (`getAuth()` plus a Proxy `auth` expose one lazy instance; keep one)
   - Evidence: Each indirection has one or zero real callers (greps listed per item).
   - Cut and replace: Inline or delete each; for `lib/auth.ts` pick `getAuth()` and update `app/api/auth/[...all]/route.ts`.
   - Behaviour preserved: Same values returned.
   - Check before cutting: `lib/workspace/access.ts` needs `git grep "workspace/access"` = empty. The Proxy removal touches the Better Auth route handler: keep its tests green.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-13** Unused shadcn `hover-card` component (removal only, no edit). Priority: P3. Tag: `ponytail:delete`. Status: HYPOTHESIS. Net: about -50 lines.
-  - Where: `components/ui/hover-card.tsx:1-50`
-  - Evidence: `git grep` finds no importer. Same situation as `resizable.tsx`, removed in C-16.
-  - Cut and replace: Delete the file (a removal, not a modification of protected source). Needs the owner's OK because `components/ui` is protected.
-  - Behaviour preserved: Nothing.
-  - Check before cutting: Check `components.json` aliases and the shadcn diff note below; do not touch any other `components/ui` file.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
 - [ ] **R-14** `kirimase.config.json` scaffold leftover. Priority: P3. Tag: `ponytail:delete`. Status: HYPOTHESIS. Net: about -13 lines.
   - Where: `kirimase.config.json:1-13`
@@ -447,28 +421,14 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Nothing at runtime.
   - Check before cutting: Run `bunx drizzle-kit` once locally to confirm it does not read this file.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-23** Password toggle copied three times; OAuth buttons and page headings repeated. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -90 lines.
-  - Where: `app/(auth)/components/login-form.tsx:139-168`, `signup-form.tsx:139-168,191-224`, `app/(auth)/components/oauth-buttons.tsx:57-87`, h1 class string in `login:21`, `signup:21`, `forgot-password:11`, `reset-password:44`; `components/tooltip-delayed.tsx` (+ test) only serves these toggles
-  - Evidence: Show/hide password button with tooltip and icon (about 30 lines) is pasted into three places; the two provider buttons are identical; the long h1 `className` repeats on four pages. `signup-form.tsx:109,117` also wraps `Input` in a `relative` div with no absolute child, and `app/(auth)/layout.tsx:14` puts text styles on a div that only wraps a `Logo`.
-  - Cut and replace: `PasswordInput`, a provider map for OAuth, a shared `AuthHeading`; wrap the tooltip once.
-  - Behaviour preserved: Accessible names (C-31) and `login-form.test.tsx`, `signup-form.test.tsx` expectations.
-  - Check before cutting: Keep the keyboard-reachable toggle semantics.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-24** Privacy and terms pages are near-identical. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -40 lines.
-  - Where: `app/(lobby)/(legal)/privacy/page.tsx:1-46`, `app/(lobby)/(legal)/terms/page.tsx:1-46`
-  - Evidence: Same layout, differing only by title and the `LEGAL` key; list items use the index as key.
-  - Cut and replace: One `LegalPage({ title, sections })`.
-  - Behaviour preserved: Rendered copy and metadata.
-  - Check before cutting: `app/(lobby)/(legal)/*.test.tsx` if present.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-25** Static data written out as repeated JSX/objects. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -120 lines.
+- [ ] **R-25** Static data written out as repeated JSX/objects. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -20 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `app/sitemap.ts:5-44` (six copied entries), `components/icons.tsx:3-180` (ten `<svg>` shells; `size || height` / `size || width` make `height`/`width` props dead because `size` defaults to 24), `app/(lobby)/components/features.tsx:115-138,196-241` (5 sidebar rows and 4 checklist rows repeated), `app/(lobby)/components/testimonials.tsx` (duplicated rows)
   - Evidence: Hand-repeated structures that differ only in data.
   - Cut and replace: A `[path, changeFrequency, priority]` table for the sitemap, an `Icon` wrapper taking `viewBox` + children, data arrays plus `map` in the features mock.
   - Behaviour preserved: Same URLs, icons and DOM text (`launch-polish.test.tsx` checks `Q3 Product Roadmap`, `Acme Workspace`).
   - Check before cutting: `robots`/`sitemap` assertions in `lib/launch-polish.test.tsx:93-115`.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-26** Duplicated branches inside single components. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -140 lines.
+- [ ] **R-26** Duplicated branches inside single components. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -45 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `components/sidebar/sidebar-panel.tsx:107-124` (two identical `<NavDialog>` differing only in `isCollapsed`), `:148-221` (account block written twice), `components/subscription-modal-provider.tsx:65-109` (two near-identical `DialogContent` branches), `components/settings.tsx:141-174` (`refresh()` and the load effect duplicate the loader), `:454-527` (owner row vs member row), `app/api/realtime/token/route.ts:31-63` (origin and referer branches duplicate parse + protocol + host match), `app/api/stripe/checkout/route.ts` + `portal/route.ts` (same 503/500 mapping), `lib/db/queries/search.ts:40-65` vs `:67-101` (empty-query and query branches), `lib/db/documents-tree.ts:20-30` vs `:69-78` (same group-by-parent map)
   - Evidence: Each pair differs only in a prop, a string or one condition.
   - Cut and replace: Pass the prop, extract `AccountSummary`/`MemberRow`, config object for the modal, one loader in settings, `sameOriginUrl(str)` helper (keep loopback normalization), shared billing route handler, one search query with an optional `or(ilike)`, `groupByParent`.
@@ -482,75 +442,26 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Behaviour; for the schema helper the generated DDL must not change.
   - Check before cutting: Run `bunx drizzle-kit check` (locally) to prove no migration diff after the timestamp helper; verify `set: row` does not update the primary key; verify Better Auth 1.6 defaults before dropping the explicit values in R-40.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-28** Happy-dom test boilerplate repeated across about 30 files. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -150 lines.
-  - Where: `lib/block-editor/use-debounced-callback.test.tsx:17-52`, `lib/launch-polish.test.tsx:33-42,117-232`, `app/(auth)/components/login-form.test.tsx:22-39`, `app/(auth)/components/password-recovery-forms.test.tsx:26-61`, `app/dashboard/change-password/change-password-form.test.tsx:27-51`, `app/dashboard/new-workspace/workspace-form.test.tsx:29-46,65-69`, `app/dashboard/(workspaces)/components/workspace-shell.test.tsx:35-43`, `app/(lobby)/components/lobby-mobile-menu.test.tsx`, and others (`git grep -l IS_REACT_ACT_ENVIRONMENT`)
-  - Evidence: Every file re-declares the `IS_REACT_ACT_ENVIRONMENT` stub, the `roots` array, container creation, `createRoot` + `act` render and unmount cleanup. `launch-polish.test.tsx` repeats the five-line mount six times.
-  - Cut and replace: One `tests/helpers/render.tsx` (`render`, auto-cleanup) or a vitest setup file; `it.each` for the three error-boundary cases in `launch-polish.test.tsx`.
-  - Behaviour preserved: Test assertions.
-  - Check before cutting: Count files with `git grep -l IS_REACT_ACT_ENVIRONMENT` before and after.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-29** Document and record test factories repeated. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -80 lines.
-  - Where: `lib/db/documents-tree.test.ts:11-26`, `lib/db/document-operations.test.ts:14-29`, `lib/db/client-document-state.test.ts:12-42`, `components/sidebar/document-tree-utils.test.ts:8-25`, `components/sidebar/document-tree.test.tsx:53-65`, `components/trash.test.tsx:30-42`, `lib/smoke.test.ts`
-  - Evidence: `const ts = "2026-01-01T00:00:00.000Z"` plus `doc()`/`record()` factories copied per file.
-  - Cut and replace: One `tests/fixtures/documents.ts`.
-  - Behaviour preserved: Test data.
-  - Check before cutting: Keep per-test overrides.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-30** Redundant or self-referential tests. Priority: P3. Tag: `ponytail:delete`. Status: CONFIRMED. Net: about -165 lines.
-  - Where: `lib/db/queries/document.get-documents.test.ts:1-50` (only case is covered by `document.test.ts:90-99`), `lib/workspace/permissions.test.ts:34-50` (matrix repeated by `authorization-matrix.test.ts:28-37`) and `authorization-matrix.test.ts:39-42`, `lib/stripe/webhook-verify.test.ts:1-23` (tests the Stripe SDK; imports no project code), `lib/db/table-prefix.test.ts:5-9` (asserts a constant equals itself), `lib/auth/legacy-backfill-sign-in.test.ts:1-61` (hypothesis: asserts a row it builds itself; `makeFakeDb` duplicated with `create-auth.test.ts:12-24`), `lib/proxy/proxy-rate-limit.test.ts:1-28` (fold into `proxy-routing.test.ts`), `lib/proxy/rate-limiting.test.ts:10-35` (four near-identical cases to `it.each`)
-  - Evidence: Each case duplicates coverage elsewhere or asserts a library/constant.
-  - Cut and replace: Delete or fold as listed; if signature verification needs a test, target `app/api/stripe/webhook/route.ts`.
-  - Behaviour preserved: Coverage of project behaviour is unchanged.
-  - Check before cutting: The single `lib/smoke.test.ts` and `server-factory.test.ts` integration test are kept as the minimum.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-31** E2E harness duplication. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -105 lines.
-  - Where: `tests/e2e/apply-auth-database.ts:1-18` + `apply-lipi-database.ts:1-27` (same `drizzle-kit push --force --config X` with identical env), `tests/e2e/drizzle-auth.config.ts:7-15` + `drizzle-lipi.config.ts:6-15` (duplicated URL literal; the `?? literal` fallback is dead because `apply-*` always injects `DATABASE_URL`), `tests/e2e/helpers/workspace.ts:5-16,36-55` (shared tail of `createRootPage`/`createSubpage`), `:18-34` vs `:57-77` (repeated hidden-waits), `tests/e2e/collaboration.spec.ts:19-98` (owner/editor/viewer triple copy of context, issues array, page, tracker, teardown) and `:50-62` (join flow twice), `tests/e2e/fixtures.ts:45-48,62-65` (same expect message twice), `tests/e2e/stripe-checkout.spec.ts:15-35,49-53` (monkeypatches `window.fetch` and `location.assign`; `page.route` does it natively)
-  - Evidence: Copy-pasted setup and wait sequences.
-  - Cut and replace: One `applySchema(url, root, config)`, one shared DB URL, helper functions for the shared waits, a role loop and `joinViaInvite` in the collaboration spec, reuse `assertNoConsoleIssues` in the fixture.
-  - Behaviour preserved: The four specs' assertions.
-  - Check before cutting: These need a local Docker run to prove (F-TST-5); static review only here.
-  - Accept when: `bun run type-check` and `bun run lint` pass; specs unchanged in assertions.
-- [ ] **R-32** Narration comments and template leftovers. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -40 lines.
+- [ ] **R-32** Narration comments and template leftovers. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -20 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `lib/fonts.ts:4-6,18-20,32` (banner and trailing `// ...` placeholder), `lib/db/schema/app.ts:119` (template comment about `mode: bigint`), JSX section comments such as `{/* Workspace Header */}` in `app/dashboard/(workspaces)/[workspaceId]/page.tsx:82-83,121-125`, `features.tsx`, `loading.tsx`; JSDoc blocks restating the signature in `lib/utils.ts:8-12,44-47,81-86`, `lib/db/queries/workspace.ts:19-23`, `workspace-lists.ts:42-45,74-77,98-101`
   - Evidence: Comments that describe the next line rather than a non-obvious why (AGENTS.md rule).
   - Cut and replace: Delete the comments; leave genuine why-comments.
   - Behaviour preserved: Nothing.
   - Check before cutting: Do not touch comments in `components/ui`.
   - Accept when: No functional diff.
-- [ ] **R-33** Redundant props, defaults and wrappers in components. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -30 lines.
-  - Where: `components/alert-dialog-close-action.tsx:11-12,19` (`cn(className)` identity; `variant`/`size` defaults restate `Button`), `components/billing/stripe-checkout-button.tsx:25` (`variant="default"`), `components/subscription-modal-provider.tsx` (same), `components/emoji-picker.tsx:25-27,54` (`if (getValue) getValue(emoji)` -> `getValue?.(emoji)`; `resolvedTheme as Theme` cast), `components/site-footer/theme-toggle-group.tsx:23-25` (pass-through `handleThemeChange`), `app/(lobby)/components/hero.tsx:69-71` (`priority` + `fetchPriority="high"` + `loading="eager"`; the `animate-in` class string repeated at `:16,20,24,46,76`), `app/(lobby)/components/testimonials.tsx:39` (`cn({ "animate-[...]": true })`), `app/(lobby)/pricing/pricing-plans.tsx:1` (`"use client"` without hooks; verify), `components/providers.tsx:10-19` (`theme` prop with no caller; verify), `app/dashboard/(workspaces)/[workspaceId]/layout.tsx:19-65` (named and default export of the same component, named only for the test), `app/dashboard/invite-notice.tsx:5` (`string | string[]` widened for a value `string[]` never matches)
-  - Evidence: Each restates a framework or component default or exists only for one test.
-  - Cut and replace: Remove each.
-  - Behaviour preserved: Rendering.
-  - Check before cutting: Confirm defaults against the Base UI/shadcn Button and Next Image docs before cutting; `pricing-plans.tsx` and `providers.tsx` need a caller grep first.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-34** Type-bypassing casts and non-null assertions. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -5 lines.
+- [ ] **R-34** Type-bypassing casts and non-null assertions. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -3 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `components/sidebar/document-tree.tsx:172` (`allDocuments as DocumentSummary[]`), `components/site-header/document-breadcrumbs.test.tsx:19-24` (`as any` for mock state), `lib/db/queries/document.ts:125,153,203` (`(e as Error).message`), `app/(auth)/components/login-form.tsx:90-93`, `oauth-buttons.tsx:36-39`, `signup-form.tsx:90-94` (`const err = error as Error; console.error(err.message)`), `lib/utils.ts:72` (`stargazers_count: string` then `parseInt`), `app/dashboard/new-workspace/page.tsx:68` (`user!`; see R-20)
   - Evidence: Casts that hide real types (`unknown` catch values, API number typed as string).
   - Cut and replace: Use `error instanceof Error ? error.message : String(error)` or a shared `errorMessage(e)`, type the mock state, type `stargazers_count` as `number`.
   - Behaviour preserved: Same log text.
   - Check before cutting: Prefer one `errorMessage` helper over per-site guards.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-35** Abnormal defensive code, dead guards and inconsistent patterns. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -40 lines.
+- [ ] **R-35** Abnormal defensive code, dead guards and inconsistent patterns. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -25 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `components/sidebar/document-tree.tsx:317,338` (fragment around one `<Link>`), `:254` (`e.key === "F10" || e.code === "F10"`), `:462` (workspace id parsed from `pathname.split("/")[2]` while app state has it); `components/workspaces.tsx:97-114` (`.catch(() => null).then(...)` with a `cancelled` flag; async/await is simpler); `components/trash.tsx:82-116` (try/catch around synchronous `permanentDeleteTargetIds` and a catch toast that duplicates the `toast.promise` error path); `lib/db/document-operations.ts:117-119` (`byIdIn` linear find in loops vs `Map(byId)` elsewhere); `lib/realtime/server-factory.ts:120` (silent `if (!context) return`), `lib/security/csp.ts:38-51` (hypothesis: `new URL(url).origin.replace(/^http/, "ws")`); `hooks/use-app-state.ts:128,136` (messages name `StoreProvider`; the provider is `AppStateProvider`) and `:41,103` + `components/app-state-provider.tsx:13` (same `Pick<AppState, ...> & { workspace?, role? }` three times); `app/dashboard/(workspaces)/[workspaceId]/page.tsx:33-48` and `[fileId]/page.tsx:15-31` (hypothesis: `generateMetadata` repeats the user lookup and access try/catch the page body does)
   - Evidence: Defensive or duplicated constructs that the surrounding code does not use.
   - Cut and replace: Simplify each.
   - Behaviour preserved: Behaviour unchanged.
   - Check before cutting: Keep `csp.ts` tests; keep `generateMetadata` unless caching proves it redundant (Next `cacheComponents` dedupes only `fetch`/`cache()`).
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-36** Stale test mocks and assertions on implementation details. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -30 lines.
-  - Where: `components/sidebar/document-tree-keyboard.test.tsx:36-68` (mocks `@/hooks/use-subscription-modal`, which does not exist, plus `useAppActions`, `countChildren`, `hasWorkspaceProPlan` that `DocumentTree` no longer uses), `components/sidebar/sidebar.test.tsx:141-163` (hypothesis: asserts Tailwind class strings), `components/sidebar/document-tree.test.tsx:198-215` vs `:241-257` (same open-menu helper twice), `components/trash.test.tsx:207-217` (re-implements the `rejection()` helper)
-  - Evidence: Mocks of modules the component does not import; tests that pin classes instead of behaviour.
-  - Cut and replace: Remove stale mocks, share the helpers.
-  - Behaviour preserved: Test intent.
-  - Check before cutting: D-3 will rewrite the sidebar tests anyway.
-  - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-37** Hard-coded Free root-page limit duplicates a constant. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -2 lines.
-  - Where: `components/sidebar/document-tree.tsx:538` (literal `3`), `lib/db/document-operations.ts:12` (`FREE_WORKSPACE_ROOT_PAGE_LIMIT`), `lib/constants.ts` (`MAX_FOLDERS_FREE_PLAN = 3`, dead, see R-7)
-  - Evidence: The tree shows its own quota check with a hard-coded 3 and a generic "Something went wrong" title for a quota block.
-  - Cut and replace: Import `FREE_WORKSPACE_ROOT_PAGE_LIMIT` (it is plain data, safe for the client) and use the quota message.
-  - Behaviour preserved: Limit value 3.
-  - Check before cutting: Server enforcement (C-27) stays authoritative.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
 - [ ] **R-38** Duplicate local-dev credential loading and filter. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -20 lines.
   - Where: `lib/db/seed.ts:16-31,72-77`, `lib/dev-credentials-logger.ts:6-19`
@@ -559,7 +470,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Seed result.
   - Check before cutting: Never print fixture values; only the structure moves.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
-- [ ] **R-39** Defaults restated in root layout and validators. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -15 lines.
+- [ ] **R-39** Defaults restated in root layout and validators. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -5 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `app/layout.tsx:16-27,51-61` (viewport `width`/`initialScale`/`userScalable` and robots `index`/`follow`/`googleBot` restate Next defaults; keep `themeColor`, `viewportFit`), `lib/validations.ts:11` (`passwordSchema`: `.min(1)`, whitespace regex and `.min(8)` overlap)
   - Evidence: Values equal to framework defaults or implied by a stricter neighbour rule.
   - Cut and replace: Remove the redundant members.
@@ -574,13 +485,13 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Check before cutting: Check the 1.6 defaults in `node_modules/better-auth` before cutting.
   - Accept when: `bun run type-check`, `bun run lint` and `bun run test` pass; no remaining importer.
 - [ ] **R-41** Documentation drift: references to files and flows that no longer exist. Priority: P3. Tag: `deslop`. Status: CONFIRMED. Net: about -10 lines.
-  - Where: `docs/requirements/requirements.md` section 3.7 (cites `lib/stripe/webhook-verify.ts`, absent; cites `credential-account.ts` as credential validation; section 4 keeps realtime topology open though D-1 is decided), `docs/verification/verification-issues.md` and `.agents/skills/verify/features/auth-session.md:1-40` (cite `lib/actions.ts`, `lib/db/migrate.ts`, `docs/project.md`, all absent; the whole reset-password flow, sub-feature and step 7, was replaced by D-5 and the emailed flow in `b04d298`), `.agents/skills/verify/features/uploads.md:5,29` (LIP-V018 fixed; F-OPS-8 tracks it), `lobby-legal-public.md:15-17` (newsletter removed, D-2), `access-control-anonymous.md:6` (auth route list vs `config/routes.ts`)
+  - Where: `docs/requirements/requirements.md` section 3.7 (cites `lib/stripe/webhook-verify.ts`, absent; cites `credential-account.ts` as credential validation; section 4 keeps realtime topology open though D-1 is decided), `docs/verification/verification-issues.md` and `.agents/skills/verify/features/auth-session.md:1-40` (cite `lib/actions.ts`, `lib/db/migrate.ts`, `docs/project.md`, all absent; the whole reset-password flow, sub-feature and step 7, was replaced by D-5 and the emailed flow in `b04d298`), `lobby-legal-public.md:15-17` (newsletter removed, D-2), `access-control-anonymous.md:6` (auth route list vs `config/routes.ts`), `docs/guides/realtime.md` (links `./research/realtime-collaboration.md`, which resolves to `docs/guides/research/...` and is broken; the correct relative path is `../research/realtime-collaboration.md`; keep this link correct if R-43 deletes the note)
   - Evidence: `git ls-files` confirms the cited paths are gone. The ledger still shows V003 as open HYPOTHESIS and V018 as open.
-  - Cut and replace: Rewrite the cited sentences to the current flow; do not change decisions.
+  - Cut and replace: Rewrite the cited sentences to the current flow and fix the broken link; do not change decisions. The LIP-V018 sub-item is owned by F-OPS-8.
   - Behaviour preserved: Nothing in code.
   - Check before cutting: Extends F-OPS-8; do it as one docs pass.
   - Accept when: Every backticked path in these docs resolves with `git ls-files`.
-- [ ] **R-42** Resolved ledger entries and repeated feature-map headers. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -100 lines.
+- [ ] **R-42** Resolved ledger entries and repeated feature-map headers. Priority: P3. Tag: `ponytail:shrink`. Status: CONFIRMED. Net: about -100 lines. Mixed: only the non-UI, non-test part is in scope.
   - Where: `docs/verification/verification-issues.md:38-233` (about 12 of 27 entries already fixed or resolved: V001, V002, V019 to V025 and others), `.agents/skills/verify/features/*.md` (each of 10 files repeats a 3-line `Ledger:` header plus a `How to get to it` section; `features/README.md` already carries the same IDs)
   - Evidence: Full repro and evidence prose is kept for entries whose state is fixed.
   - Cut and replace: Collapse fixed entries to one line each with the fixing commit; drop the repeated header lines.
@@ -592,7 +503,7 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Evidence: Phase-5 research note; every decision is marked implemented and `docs/guides/realtime.md` is the living description. It references a nonexistent `data/lipi-discovery-plan/report.md`.
   - Cut and replace: Fold the one open caveat (host-only session cookie) into the guide and delete the note.
   - Behaviour preserved: Guide content.
-  - Check before cutting: Needs the owner's call on keeping research history in the repo.
+  - Check before cutting: Needs the owner's call on keeping research history in the repo. `docs/guides/realtime.md` links the note; update that link when deleting.
   - Accept when: No inbound link breaks (`git grep realtime-collaboration.md`).
 - [ ] **R-44** README template leftovers. Priority: P4. Tag: `deslop`. Status: CONFIRMED. Net: about -20 lines.
   - Where: `README.md:1-35,48-60,76-95`
@@ -601,15 +512,8 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Behaviour preserved: Instructions.
   - Check before cutting: Do not alter the deploy variable list until H-1 is decided.
   - Accept when: README renders without external badge hosts.
-- [ ] **R-45** Smaller deslop items in utilities. Priority: P4. Tag: `deslop`. Status: CONFIRMED. Net: about 0 lines.
-  - Where: `lib/utils.ts:8-12,44-47,81-86` (JSDoc restating signatures, see R-32), `components/sidebar/document-tree-utils.ts:49` (`toAllDocumentRecords` used only by trash; verify), `lib/auth/create-auth.ts:106-180` `runInBackground` try/catch (`void` task), `lib/db/queries/document.ts:122` (`as DocumentSummary[]`-style casts)
-  - Evidence: Minor consistency items.
-  - Cut and replace: Fold into the nearby larger change.
-  - Behaviour preserved: Nothing.
-  - Check before cutting: None.
-  - Accept when: Done with its parent finding.
 
-### Hypotheses and decisions (H-n are not counted in the estimate; so are R-13, R-14, R-40, R-43)
+### Hypotheses and decisions (H-n are not counted in the estimate; so are R-14, R-40, R-43)
 
 - [ ] **H-1** Two auth env name families (`AUTH_*` and `BETTER_AUTH_*`). Priority: P3. Tag: `ponytail:delete`. Status: HYPOTHESIS. Net if accepted: about -25 lines.
   - Where: `.env.example` (Auth block), `lib/env.ts:26-29`, `lib/auth/create-auth.ts:52`, `lib/auth/resolve-auth-base-url.ts:8-9`, `lib/realtime/token.ts:20`, `tests/e2e/env.ts:17-20`, `README.md` deploy URL, `.agents/skills/verify/SKILL.md` env block, `.github/workflows/ci.yml`
@@ -626,30 +530,10 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
   - Evidence: Nothing reads `lipi_products`/`lipi_prices`; they exist because `subscriptions.priceId` has an FK to `prices.id`, while entitlement compares `priceId` with `STRIPE_PRICE_ID_PRO`.
   - Needs: Dropping the FK, tables, the `price.*`/`product.*` webhook cases and the sync code is about -200 lines but needs a migration and a production-data decision.
   - Accept when: the owner decides, then the usual gate passes and no importer remains.
-- [ ] **H-4** "Our Valued Clients" placeholder marquee. Priority: P3. Tag: `ponytail:delete`. Status: HYPOTHESIS. Net if accepted: about -60 lines.
-  - Where: `lib/constants.ts:3-9`, `app/(lobby)/components/clients.tsx`, `public/placeholders/client-1..5.png`
-  - Evidence: Alt text `client1..5` and stock logos; the capabilities section was rewritten to avoid invented content, this one was not.
-  - Needs: Product call: remove the section or replace with real content.
-  - Accept when: the owner decides, then the usual gate passes and no importer remains.
 - [ ] **H-5** Quota wrapper that only remaps the error code. Priority: P3. Tag: `ponytail:yagni`. Status: HYPOTHESIS. Net if accepted: about -19 lines.
   - Where: `lib/db/queries/workspace-member-quota.ts:1-19`
   - Evidence: Converts `PlanQuotaError` to `MutationAuthError` with code `INVALID`, while `mutationFailure` already maps it to `QUOTA_EXCEEDED`. Settings tests pin `INVALID`.
   - Needs: Changing it alters the client-visible code; decide first.
-  - Accept when: the owner decides, then the usual gate passes and no importer remains.
-- [ ] **H-6** Client-side date component and hand-rolled realtime store. Priority: P3. Tag: `ponytail:yagni`. Status: HYPOTHESIS. Net if accepted: about -45 lines.
-  - Where: `app/dashboard/(workspaces)/[workspaceId]/updated-date.tsx`, `workspace-pages.ts:33-52`, `workspace-pages.test.ts:62-78`; `components/document-editor/document-block-editor.tsx:43-60,83-89`
-  - Evidence: `useSyncExternalStore` + a 20-line formatter + 3 tests for a date label; a custom external store holding one provider where `useState` set in the effect may do (check the `set-state-in-effect` lint rule and React Compiler first).
-  - Needs: Verify hydration safety (C-18 introduced it deliberately) before cutting.
-  - Accept when: the owner decides, then the usual gate passes and no importer remains.
-- [ ] **H-7** Dev-only breakpoint badge and unused CSS tokens. Priority: P3. Tag: `ponytail:delete`. Status: HYPOTHESIS. Net if accepted: about -15 lines.
-  - Where: `components/tailwind-indicator.tsx`, `app/layout.tsx:113`, `app/globals.css:9-38,109-113,115-122,149-156` (`--chart-*`, `--sidebar-*`)
-  - Evidence: Template leftovers. `--chart-*` are used by `lib/block-editor/alert-block.css` so those stay; `--sidebar-*` may be needed by D-3.
-  - Needs: Grep each token; keep what D-3 will use.
-  - Accept when: the owner decides, then the usual gate passes and no importer remains.
-- [ ] **H-8** Search command focus-restore code. Priority: P4. Tag: `ponytail:shrink`. Status: HYPOTHESIS. Net if accepted: about -18 lines.
-  - Where: `components/search-command.tsx:57-75`
-  - Evidence: Manual `lastFocusedElementRef`/`requestAnimationFrame` focus restore; Base UI dialogs restore focus to the trigger.
-  - Needs: Prove with `search-command.test.tsx` and a real browser before cutting.
   - Accept when: the owner decides, then the usual gate passes and no importer remains.
 - [ ] **H-9** `createAuthClient` options and other small seams. Priority: P4. Tag: `ponytail:yagni`. Status: HYPOTHESIS. Net if accepted: about 0 lines.
   - Where: `lib/realtime/server-factory.ts:15-32` (`quotaGuard` optional), `lib/realtime/authorize-room.ts:23-48` (three sequential queries, perf not LOC), `lib/block-editor/document-content.ts:11-18,38-59` (three-variant union for one caller), `y-prosemirror` pinned in `package.json:74` with no import
@@ -659,15 +543,13 @@ Caveat: D-3 (adopt the shadcn Sidebar) would rewrite `components/sidebar/*` and 
 
 ### Out-of-scope observations (correctness, security, content; not complexity)
 
-- **O-1** `app/(auth)/components/signup-form.tsx:60-64`: `toast.error` is called during render (F-COR-7 fixed only the login form). Correctness: move to an effect keyed on the error param.
 - **O-2** `app/layout.tsx:62-64`: `alternates.canonical = siteConfig.url` in the root metadata is inherited by every route, so every page declares the home page as canonical (SEO). Verify per route.
 - **O-3** `lib/constants.ts:135-171`: The privacy policy copy says no data is collected, no cookies are used and data stays local, while the app stores accounts, sets auth cookies and uses Stripe and UploadThing. Content accuracy, needs the owner.
 - **O-4** `lib/workspace/send-invite.ts:1-13`: The invite sender only logs in development; no email is sent (the project now has Resend for password recovery). Product gap, not complexity.
-- **O-5** `tests/e2e/fixtures.ts:56-59`: `trackConsole` calls `void stubUploadthing(page)` unawaited; the route may register after the first request. Can cause flakes.
 - **O-6** `docs/TODO.md` F-AUTH-1, D-5 consequence, section 4 reset-password line: States that signed-out recovery does not exist; `b04d298` added an emailed forgotten-password flow. Existing entries were preserved as-is; the owner should reconcile them.
 - **O-7** `lib/auth/credential-account.ts` consumers: R-8 removes helpers; confirm the legacy backfill (F-OPS-1) does not need `upsertCredentialPassword` as an ops script before deletion.
 - **O-8** `components/ui/form.tsx`: the only file with no `base-nova` upstream; it uses the 2023 `forwardRef` style and a `{}`-defaulted context, so its `!fieldContext` guard can never be true. Protected source, no edit proposed; noted for D-3 or a shadcn refresh.
 
 ### Coverage
 
-Private ledger `coverage.tsv` (path, blob hash, category, deslop status, ponytail status, disposition, finding IDs) covers all 463 tracked files plus 6 ignored local paths. Every tracked path has a disposition for both passes: 217 with at least one finding, 206 reviewed with no finding, and the rest are generated history, lockfile, binary assets or the secret fixture (structure and variable names only, no values read into notes). Migrations are append-only history and are not proposed for change.
+Private ledger `coverage.tsv` (path, blob hash, category, deslop status, ponytail status, disposition, finding IDs) covers all 463 tracked files plus 6 ignored local paths. Every tracked path has a disposition for both passes; excluded paths carry `excluded-by-captain-test` or `excluded-by-captain-ui` and are not claimed as reviewed (excluded count: 214): 124 with at least one finding, 80 reviewed with no finding, and the rest are generated history, lockfile, binary assets or the secret fixture (structure and variable names only, no values read into notes). Migrations are append-only history and are not proposed for change.
