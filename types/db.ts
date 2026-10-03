@@ -13,6 +13,8 @@ import type {
 export type User = typeof users.$inferInsert;
 export type Workspace = typeof workspaces.$inferInsert;
 export type Document = typeof documents.$inferSelect;
+/** Every document column except `content`; editor bodies come from Yjs. */
+export type DocumentSummary = Omit<Document, "content">;
 export type NewDocument = typeof documents.$inferInsert;
 export type Account = typeof billingAccounts.$inferInsert;
 export type Customer = typeof customers.$inferInsert;

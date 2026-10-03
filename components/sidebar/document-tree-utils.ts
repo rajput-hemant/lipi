@@ -1,13 +1,13 @@
 import type { DocumentRecord, DocumentTreeNode } from "@/lib/db/documents-tree";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import { buildDocumentTree } from "@/lib/db/documents-tree";
 
-export function getActiveDocuments(documents: readonly Document[]) {
+export function getActiveDocuments(documents: readonly DocumentSummary[]) {
   return documents.filter((document) => !document.inTrash);
 }
 
-function toDocumentRecord(document: Document): DocumentRecord | null {
+function toDocumentRecord(document: DocumentSummary): DocumentRecord | null {
   if (!document.id) return null;
 
   return {
@@ -17,7 +17,6 @@ function toDocumentRecord(document: Document): DocumentRecord | null {
     title: document.title,
     icon: document.icon ?? "",
     bannerUrl: document.bannerUrl ?? null,
-    content: document.content ?? null,
     inTrash: document.inTrash ?? false,
     createdAt: document.createdAt ?? new Date(0).toISOString(),
     updatedAt: document.updatedAt ?? new Date(0).toISOString(),
@@ -25,7 +24,7 @@ function toDocumentRecord(document: Document): DocumentRecord | null {
 }
 
 export function toDocumentRecords(
-  documents: readonly Document[]
+  documents: readonly DocumentSummary[]
 ): DocumentRecord[] {
   const seen = new Set<string>();
 
@@ -40,7 +39,7 @@ export function toDocumentRecords(
 
 /** Includes trashed rows; use for trash restore/delete helpers, not sidebar tree building. */
 export function toAllDocumentRecords(
-  documents: readonly Document[]
+  documents: readonly DocumentSummary[]
 ): DocumentRecord[] {
   return documents.flatMap((document) => {
     const record = toDocumentRecord(document);
@@ -48,12 +47,12 @@ export function toAllDocumentRecords(
   });
 }
 
-export function getDocumentForest(documents: readonly Document[]) {
+export function getDocumentForest(documents: readonly DocumentSummary[]) {
   return buildDocumentTree(toDocumentRecords(documents));
 }
 
 export function countChildren(
-  documents: readonly Document[],
+  documents: readonly DocumentSummary[],
   parentId: string | null
 ) {
   return getActiveDocuments(documents).filter(

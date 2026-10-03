@@ -5,7 +5,7 @@ import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
 import type { DocumentRecord } from "@/lib/db/documents-tree";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import { workspaceOwnerHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
 import {
@@ -17,6 +17,7 @@ import {
   planDeepDuplicate,
   validateParentAssignment,
 } from "@/lib/db/document-operations";
+import { documentSummaryColumns } from "@/lib/db/document-summary";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
 import { loadAuthoritativeDocumentContentBySourceIds } from "@/lib/realtime/authoritative-content";
 import {
@@ -47,7 +48,7 @@ function revalidateDocuments(workspaceId: string, documentId?: string) {
   }
 }
 
-function toRecords(rows: Document[]): DocumentRecord[] {
+function toRecords(rows: DocumentSummary[]): DocumentRecord[] {
   return rows.map((row) => ({
     id: row.id!,
     workspaceId: row.workspaceId,
@@ -55,7 +56,6 @@ function toRecords(rows: Document[]): DocumentRecord[] {
     title: row.title,
     icon: row.icon ?? "",
     bannerUrl: row.bannerUrl ?? null,
-    content: row.content ?? null,
     inTrash: row.inTrash ?? false,
     createdAt: row.createdAt ?? new Date(0).toISOString(),
     updatedAt: row.updatedAt ?? new Date(0).toISOString(),
@@ -77,7 +77,7 @@ function forbiddenResult(error: unknown) {
 
 async function loadWorkspaceDocuments(workspaceId: string) {
   const rows = await db
-    .select()
+    .select(documentSummaryColumns)
     .from(documents)
     .where(eq(documents.workspaceId, workspaceId));
   return toRecords(rows);
@@ -114,7 +114,7 @@ export async function createDocument(input: unknown) {
         title: parsed.title,
         icon: parsed.icon ?? "",
       })
-      .returning();
+      .returning(documentSummaryColumns);
 
     workspaceIdForRevalidate = parsed.workspaceId;
     return { ok: true, data } as const;
@@ -145,7 +145,7 @@ export async function getDocuments(workspaceId: string) {
     async () => {
       try {
         return await db
-          .select()
+          .select(documentSummaryColumns)
           .from(documents)
           .where(eq(documents.workspaceId, workspaceId))
           .orderBy(documents.createdAt);
@@ -195,7 +195,7 @@ export async function updateDocument(input: unknown) {
       .update(documents)
       .set({ ...patch, updatedAt: new Date().toISOString() })
       .where(eq(documents.id, id))
-      .returning();
+      .returning(documentSummaryColumns);
 
     return data;
   } catch (e) {
@@ -312,12 +312,17 @@ export async function duplicateDocument(input: unknown) {
     workspaceIdForRevalidate = source.workspaceId;
     const workspaceDocs = await loadWorkspaceDocuments(source.workspaceId);
     const plan = planDeepDuplicate(workspaceDocs, sourceId, newId, uuid);
+    const sourceIds = plan.map((node) => node.sourceId);
+    const sourceRows = await db
+      .select({ id: documents.id, content: documents.content })
+      .from(documents)
+      .where(inArray(documents.id, sourceIds));
     const fallbackBySourceId = new Map(
-      plan.map((node) => [node.sourceId, node.content])
+      sourceRows.map((row) => [row.id, row.content])
     );
     const authoritativeContent =
       await loadAuthoritativeDocumentContentBySourceIds(
-        plan.map((node) => node.sourceId),
+        sourceIds,
         fallbackBySourceId
       );
 
@@ -329,12 +334,15 @@ export async function duplicateDocument(input: unknown) {
       title: node.title,
       icon: node.icon,
       bannerUrl: node.bannerUrl,
-      content: authoritativeContent.get(node.sourceId) ?? node.content,
+      content: authoritativeContent.get(node.sourceId) ?? null,
       createdAt: now,
       updatedAt: now,
     }));
 
-    const inserted = await db.insert(documents).values(rows).returning();
+    const inserted = await db
+      .insert(documents)
+      .values(rows)
+      .returning(documentSummaryColumns);
 
     return {
       ok: true,
@@ -363,7 +371,7 @@ export async function getDocumentBreadcrumbs(
 
   const rows = await getDocuments(workspaceId);
   const byId = new Map(rows.map((row) => [row.id, row]));
-  const chain: Document[] = [];
+  const chain: DocumentSummary[] = [];
   let current = byId.get(documentId);
   const visited = new Set<string>();
 

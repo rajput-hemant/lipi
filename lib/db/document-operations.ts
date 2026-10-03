@@ -167,7 +167,6 @@ export type DuplicateNode = {
   title: string;
   icon: string;
   bannerUrl: string | null;
-  content: string | null;
 };
 
 export function planDeepDuplicate(
@@ -212,7 +211,6 @@ export function planDeepDuplicate(
         : document.title,
       icon: document.icon,
       bannerUrl: document.bannerUrl,
-      content: document.content,
     };
   });
 }

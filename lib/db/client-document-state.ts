@@ -1,5 +1,5 @@
 import type { DocumentRecord } from "./documents-tree";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import {
   assertPermanentDeleteAllowed,
@@ -8,10 +8,10 @@ import {
 } from "./document-operations";
 
 export function patchDocumentsForRestore(
-  documents: Document[],
+  documents: DocumentSummary[],
   records: DocumentRecord[],
   documentId: string
-): Document[] {
+): DocumentSummary[] {
   const restoreIds = new Set(collectRestoreTargetIds(records, documentId));
 
   return documents.map((document) =>
@@ -27,13 +27,13 @@ export function permanentDeleteTargetIds(
 }
 
 export function buildOptimisticDuplicateDocuments(
-  documents: Document[],
+  documents: DocumentSummary[],
   records: DocumentRecord[],
   sourceRootId: string,
   newRootId: string,
   createId: () => string,
   workspaceId: string
-): Document[] {
+): DocumentSummary[] {
   const plan = planDeepDuplicate(records, sourceRootId, newRootId, createId);
   const byId = new Map(documents.map((document) => [document.id, document]));
   const now = new Date().toISOString();
@@ -47,7 +47,6 @@ export function buildOptimisticDuplicateDocuments(
       title: node.title,
       icon: node.icon,
       bannerUrl: node.bannerUrl,
-      content: node.content,
       inTrash: source?.inTrash ?? false,
       createdAt: now,
       updatedAt: now,

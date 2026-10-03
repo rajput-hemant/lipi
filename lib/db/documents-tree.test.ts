@@ -18,7 +18,6 @@ function doc(
     parentId: null,
     icon: "",
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: ts,
     updatedAt: ts,

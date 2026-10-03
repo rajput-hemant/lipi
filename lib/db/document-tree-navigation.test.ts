@@ -19,7 +19,6 @@ function node(
     title: id,
     icon: "",
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: "",
     updatedAt: "",

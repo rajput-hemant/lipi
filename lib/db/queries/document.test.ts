@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDocuments, restoreDocument, updateDocument } from "./document";
+import {
+  duplicateDocument,
+  getDocuments,
+  restoreDocument,
+  softDeleteDocumentTree,
+  updateDocument,
+} from "./document";
 import { MutationAuthError } from "./mutation-auth";
 
 const WORKSPACE_ID = "11111111-1111-4111-8111-111111111111";
@@ -11,7 +17,10 @@ const mocks = vi.hoisted(() => ({
   authorizeDocumentMutation: vi.fn(),
   requireAuthenticatedUser: vi.fn(),
   workspaceOwnerHasProPlanEntitlement: vi.fn(),
+  loadAuthoritativeContent: vi.fn(),
+  select: vi.fn(),
   selectRows: vi.fn(),
+  insert: vi.fn(),
   update: vi.fn(),
 }));
 
@@ -27,7 +36,7 @@ vi.mock("@/lib/billing/quota-entitlement", () => ({
 }));
 
 vi.mock("@/lib/realtime/authoritative-content", () => ({
-  loadAuthoritativeDocumentContentBySourceIds: vi.fn(),
+  loadAuthoritativeDocumentContentBySourceIds: mocks.loadAuthoritativeContent,
 }));
 
 vi.mock("./mutation-auth", async (importOriginal) => ({
@@ -44,7 +53,16 @@ vi.mock("..", () => {
       where: () => Object.assign(rows(), { orderBy: rows }),
     });
   };
-  return { db: { select: () => ({ from: query }), update: mocks.update } };
+  return {
+    db: {
+      select: (columns: unknown) => {
+        mocks.select(columns);
+        return { from: query };
+      },
+      insert: mocks.insert,
+      update: mocks.update,
+    },
+  };
 });
 
 function row(id: string, parentId: string | null) {
@@ -55,7 +73,6 @@ function row(id: string, parentId: string | null) {
     title: "Page",
     icon: "",
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
@@ -78,6 +95,62 @@ describe("getDocuments", () => {
 
     await expect(getDocuments(WORKSPACE_ID)).rejects.toThrow("Forbidden");
     expect(mocks.selectRows).not.toHaveBeenCalled();
+  });
+});
+
+describe("document summary selects", () => {
+  it("getDocuments selects every column except content", async () => {
+    await getDocuments(WORKSPACE_ID);
+
+    const [columns] = mocks.select.mock.calls[0];
+    expect(columns).toHaveProperty("title");
+    expect(columns).toHaveProperty("updatedAt");
+    expect(columns).not.toHaveProperty("content");
+  });
+
+  it("loadWorkspaceDocuments (used by mutations) omits content", async () => {
+    mocks.authorizeDocumentMutation.mockResolvedValue({
+      user: { id: "user-1" },
+      document: row("t", null),
+    });
+    mocks.selectRows.mockResolvedValue([row("t", null)]);
+    mocks.update.mockReturnValue({ set: () => ({ where: () => undefined }) });
+
+    await softDeleteDocumentTree("t");
+
+    expect(mocks.select).toHaveBeenCalledOnce();
+    expect(mocks.select.mock.calls[0][0]).not.toHaveProperty("content");
+  });
+});
+
+describe("duplicateDocument", () => {
+  const NEW_ID = "33333333-3333-4333-8333-333333333333";
+
+  it("fetches source content itself and copies it into the new row", async () => {
+    mocks.authorizeDocumentMutation.mockResolvedValue({
+      user: { id: "user-1" },
+      document: row(DOCUMENT_ID, null),
+    });
+    mocks.selectRows.mockImplementation(async () =>
+      "content" in (mocks.select.mock.lastCall?.[0] ?? {}) ?
+        [{ id: DOCUMENT_ID, content: "stored body" }]
+      : [row(DOCUMENT_ID, null)]
+    );
+    mocks.loadAuthoritativeContent.mockImplementation(
+      async (_ids: string[], fallback: Map<string, string | null>) => fallback
+    );
+    const values = vi.fn(() => ({
+      returning: () => Promise.resolve([row(NEW_ID, null)]),
+    }));
+    mocks.insert.mockReturnValue({ values });
+
+    await duplicateDocument({ sourceId: DOCUMENT_ID, newId: NEW_ID });
+
+    expect(mocks.select.mock.calls[0][0]).not.toHaveProperty("content");
+    expect(mocks.select.mock.calls[1][0]).toHaveProperty("content");
+    expect(values).toHaveBeenCalledWith([
+      expect.objectContaining({ id: NEW_ID, content: "stored body" }),
+    ]);
   });
 });
 

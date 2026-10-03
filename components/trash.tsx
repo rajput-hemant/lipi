@@ -10,7 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { toast } from "sonner";
 
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import { toAllDocumentRecords } from "@/components/sidebar/document-tree-utils";
 import {
@@ -43,7 +43,9 @@ import { DialogClose, DialogFooter } from "./ui/dialog";
 import { ScrollArea, ScrollBar } from "./ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
-function cloneDocuments(documents: readonly Document[]): Document[] {
+function cloneDocuments(
+  documents: readonly DocumentSummary[]
+): DocumentSummary[] {
   return documents.map((document) => ({ ...document }));
 }
 

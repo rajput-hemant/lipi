@@ -5,7 +5,6 @@ export type DocumentRecord = {
   title: string;
   icon: string;
   bannerUrl: string | null;
-  content: string | null;
   inTrash: boolean;
   createdAt: string;
   updatedAt: string;

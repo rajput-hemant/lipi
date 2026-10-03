@@ -5,7 +5,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceMembershipRole } from "@/lib/workspace/permissions";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import { AppStateContext, createAppStore } from "@/hooks/use-app-state";
 import { TooltipProvider } from "../ui/tooltip";
@@ -50,7 +50,7 @@ vi.mock("sonner", () => ({
   },
 }));
 
-function doc(id: string, parentId: string | null = null): Document {
+function doc(id: string, parentId: string | null = null): DocumentSummary {
   return {
     id,
     workspaceId: "ws-1",
@@ -58,7 +58,6 @@ function doc(id: string, parentId: string | null = null): Document {
     title: `Page ${id}`,
     icon: "",
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",

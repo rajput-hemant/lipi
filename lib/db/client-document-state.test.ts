@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { DocumentRecord } from "./documents-tree";
-import type { Document } from "@/types/db";
+import type { DocumentSummary } from "@/types/db";
 
 import {
   buildOptimisticDuplicateDocuments,
@@ -19,7 +19,6 @@ function record(
     parentId: null,
     icon: "",
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: ts,
     updatedAt: ts,
@@ -28,14 +27,13 @@ function record(
 }
 
 function doc(
-  partial: Partial<Document> & Pick<Document, "id" | "title">
-): Document {
+  partial: Partial<DocumentSummary> & Pick<DocumentSummary, "id" | "title">
+): DocumentSummary {
   return {
     workspaceId: "ws-1",
     parentId: null,
     icon: "",
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: ts,
     updatedAt: ts,

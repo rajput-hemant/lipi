@@ -22,7 +22,6 @@ const mockDocuments = [
     title: "Getting Started",
     icon: null,
     bannerUrl: null,
-    content: null,
     inTrash: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
