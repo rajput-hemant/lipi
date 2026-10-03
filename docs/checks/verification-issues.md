@@ -72,11 +72,12 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V005 `?invite=invalid` is never displayed
 
-- Class: HYPOTHESIS. Severity: low. State: open.
+- Class: CONFIRMED (deterministic source; upgraded from HYPOTHESIS 2026-10-03). Severity: low. State: open.
 - Surface: `/invite/<bad-token>`.
 - Evidence: `app/invite/[token]/page.tsx` redirects to `/dashboard?invite=invalid`; `app/dashboard/page.tsx` ignores search params and redirects again; `grep -rn "invite=invalid" app components lib` finds only the redirect.
 - Expected: a visible "invalid or expired invite" message. Actual (source): silent landing in the default workspace or new-workspace page.
 - Browser pass: the banner is still not shown, and the same redirect is hit after a successful accept, see LIP-V019.
+- Re-check 2026-10-03 (read only): the redirect now lives in `app/invite/[token]/route.ts`, and `git grep "invite=invalid"` and `app/dashboard/page.tsx` show nothing that reads the parameter, so no banner can render. The old `page.tsx` path in Evidence above no longer exists.
 - Follow-up: browser check, then a small UX ship.
 
 ### LIP-V006 Newsletter form reports success without subscribing
@@ -146,7 +147,7 @@ Not re-run here and not counted as new verification:
 ### LIP-V016 Shared-database backfill and production realtime topology undecided
 
 - Class: GAP (operational/decision). Severity: medium. State: open.
-- Scope: the credential backfill on the production database for legacy users, and the same-host vs separate-host realtime arrangement. Tracked in [todo](../todo.md), [shared-database-auth](../shared-database-auth.md), [requirements](../requirements.md) §4. Local runs cannot answer either.
+- Scope: the credential backfill on the production database for legacy users, and the same-host vs separate-host realtime arrangement. Tracked in [todo](../todo.md) and [requirements](../requirements.md) §4. Local runs cannot answer either.
 
 ### LIP-V017 Free-plan single-workspace limit constrains verification scenarios
 
@@ -222,6 +223,14 @@ Not re-run here and not counted as new verification:
 - Fix: Settings save, role change and ownership transfer update the store, call `router.refresh()` and send the existing `pages:changed` realtime notice, so collaborators' layouts re-render.
 - Verified live without reloading: owner renamed `Alpha Space` to `Alpha Renamed`; owner, editor and viewer breadcrumb, heading and document title all updated. Owner promoted a viewer to editor and that open session gained `New page`; after a realtime reconnect an editor demoted to viewer showed `View only`.
 - Gap: member removal only notifies; the removed user's open session was not driven.
+
+### LIP-V027 Failed root page creation is not rolled back
+
+- Class: CONFIRMED (deterministic source). Severity: low. State: open (added 2026-10-03 from the UI follow-ups in [todo](../todo.md)).
+- Surface: sidebar `New page` (`createRootPage` in `components/sidebar/document-tree.tsx`).
+- Evidence: `createRootPage` calls `addDocument(newDocument)` before the server call, then `toast.promise(createDocument(newDocument), { ..., error: "Could not create page." })`; the error branch only returns text and never removes the optimistic document. `New subpage` creation and `moveToTrash` do roll back (LIP-V025). Re-run: `sed -n 523,557p components/sidebar/document-tree.tsx`.
+- Reproduction (not run): as an editor in an open session, have the owner demote the editor to viewer, then create a root page; the server rejects it.
+- Expected: the optimistic page disappears and the error toast shows. Actual (from source): the page stays in the tree until a reload. Not reproduced live; the rejecting server path is the one LIP-V025 drove for trash.
 
 ### Automatic verification triggers
 

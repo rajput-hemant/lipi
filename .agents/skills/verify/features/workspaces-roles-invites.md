@@ -4,7 +4,7 @@ Status: PARTIAL live proof (create, invite, accept, viewer role). Invite accepta
 Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V005, LIP-V008, LIP-V011
 
-Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts`), email-token invites (`lib/workspace/workspace-invites.ts`, `app/invite/[token]/page.tsx`), settings dialog (`components/settings.tsx`), ownership transfer and workspace deletion.
+Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts`), email-token invites (`lib/workspace/workspace-invites.ts`, `app/invite/[token]/route.ts`), settings dialog (`components/settings.tsx`), ownership transfer and workspace deletion.
 
 ## Sub-features
 
