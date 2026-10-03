@@ -60,7 +60,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 - [x] **Role Hierarchy & Permissions:** Enforces three discrete roles (`owner`, `editor`, `viewer`) across seven granular permissions (`workspace:read`, `document:read`, `document:write`, `member:manage`, `workspace:settings`, `workspace:transfer`, `workspace:delete`) (`lib/workspace/permissions.ts`, `lib/workspace/permissions.test.ts`, `lib/workspace/authorization-matrix.test.ts`).
 - [x] **Email Invites:** Generates unique invite tokens, prevents duplicate active invites, and restricts invite visibility to managers (`lib/workspace/workspace-invites.ts`, `lib/workspace/workspace-invites.test.ts`, migration `0009_workspace_roles_invites.sql`, `0010_workspace_invite_email_unique.sql`).
 - [x] **End-to-End Invite & Role Assignment:** Verified inviting editor and viewer members via email and token acceptance in multi-context browser tests (`tests/e2e/collaboration.spec.ts`).
-- [x] **Collaborator Quotas:** Enforces collaborator limits based on active workspace tier (`lib/db/queries/workspace-member-quota.ts`, `lib/db/queries/workspace-members.quota.test.ts`).
+- [x] **Collaborator Quotas:** Enforces collaborator limits based on active workspace tier (`lib/db/data/workspace-member-quota.ts`, `lib/db/actions/workspace-members.quota.test.ts`).
 
 ### 3.3 Nested Block Documents
 
@@ -78,7 +78,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 ### 3.5 Search & File Uploads
 
 - [x] **Workspace Search Command:** Command palette dialog (⌘K / Ctrl+K) with debounced input, keyboard selection, and error handling (`components/search-command.tsx`, `components/search-command.test.tsx`, `lib/search/search-utils.test.ts`).
-- [x] **Search Authorization:** Database queries enforce user authentication, workspace `document:read` permission, and filter out trashed documents (`lib/db/queries/search.ts`, `lib/db/queries/search.test.ts`).
+- [x] **Search Authorization:** Database queries enforce user authentication, workspace `document:read` permission, and filter out trashed documents (`lib/db/actions/search.ts`, `lib/db/actions/search.test.ts`).
 - [x] **Upload Router & RBAC Middleware:** UploadThing router endpoints (`documentImage`, `coverBanner`, `workspaceLogo`) validating authentication and required permissions (`document:write` or `workspace:settings`) (`app/api/uploadthing/core.ts`, `app/api/uploadthing/core.test.ts`).
 - [ ] **Live Binary Upload Delivery:** Verified via unit mocks; live end-to-end binary transfer to external UploadThing storage in a running browser environment requires external service credentials (`UPLOADTHING_TOKEN`).
 

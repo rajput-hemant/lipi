@@ -15,12 +15,12 @@ const mocks = vi.hoisted(() => ({
   findCollaborator: vi.fn(),
 }));
 
-vi.mock("./workspace-member-quota", () => ({
+vi.mock("../data/workspace-member-quota", () => ({
   ensureOwnerCollaboratorQuota: mocks.ensureOwnerCollaboratorQuota,
 }));
 
-vi.mock("./mutation-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./mutation-auth")>()),
+vi.mock("../data/mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../data/mutation-auth")>()),
   authorizeWorkspaceMemberManagement: mocks.authorizeWorkspaceMemberManagement,
   requireAuthenticatedUser: mocks.requireAuthenticatedUser,
   requireWorkspacePermission: vi.fn(),
@@ -122,7 +122,7 @@ describe("workspace member invite quota enforcement", () => {
   });
 
   it("returns quota errors when creating an invite", async () => {
-    const { MutationAuthError } = await import("./mutation-auth");
+    const { MutationAuthError } = await import("../data/mutation-auth");
     mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
       new MutationAuthError("Free plan allows two collaborators.")
     );
@@ -141,7 +141,7 @@ describe("workspace member invite quota enforcement", () => {
   });
 
   it("surfaces quota errors when accepting an invite", async () => {
-    const { MutationAuthError } = await import("./mutation-auth");
+    const { MutationAuthError } = await import("../data/mutation-auth");
     mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
       new MutationAuthError("Free plan allows two collaborators.")
     );

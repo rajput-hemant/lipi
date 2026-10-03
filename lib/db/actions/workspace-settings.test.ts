@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlanQuotaError } from "@/lib/billing/errors";
-import { MutationAuthError } from "./mutation-auth";
+import { MutationAuthError } from "../data/mutation-auth";
 
 const mocks = vi.hoisted(() => ({
   authorizeWorkspaceOwnerAction: vi.fn(),
@@ -18,7 +18,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
-vi.mock("./workspace-list-tags", () => ({
+vi.mock("../data/workspace-list-tags", () => ({
   revalidateWorkspaceLists: mocks.revalidateWorkspaceLists,
   getWorkspaceListAudience: mocks.getWorkspaceListAudience,
   getWorkspaceOwnerId: mocks.getWorkspaceOwnerId,
@@ -26,8 +26,8 @@ vi.mock("./workspace-list-tags", () => ({
 vi.mock("@/lib/billing/enforce-quotas", () => ({
   assertUserCanReceiveWorkspaceTransfer: mocks.assertReceive,
 }));
-vi.mock("./mutation-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./mutation-auth")>()),
+vi.mock("../data/mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../data/mutation-auth")>()),
   authorizeWorkspaceOwnerAction: mocks.authorizeWorkspaceOwnerAction,
   authorizeWorkspaceTransfer: mocks.authorizeWorkspaceTransfer,
   authorizeWorkspaceDelete: mocks.authorizeWorkspaceDelete,

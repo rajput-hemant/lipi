@@ -5,18 +5,18 @@ import { z } from "zod";
 
 import { assertUserCanReceiveWorkspaceTransfer } from "@/lib/billing/enforce-quotas";
 import { db } from "..";
-import { collaborators, workspaces } from "../schema";
 import {
   authorizeWorkspaceDelete,
   authorizeWorkspaceOwnerAction,
   authorizeWorkspaceTransfer,
   MutationAuthError,
-} from "./mutation-auth";
-import { runMutation } from "./mutation-failure";
+} from "../data/mutation-auth";
+import { runMutation } from "../data/mutation-failure";
 import {
   getWorkspaceListAudience,
   revalidateWorkspaceLists,
-} from "./workspace-list-tags";
+} from "../data/workspace-list-tags";
+import { collaborators, workspaces } from "../schema";
 
 const updateWorkspaceSchema = z.object({
   workspaceId: z.uuid(),

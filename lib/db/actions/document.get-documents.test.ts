@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { MutationAuthError } from "./mutation-auth";
+import { MutationAuthError } from "../data/mutation-auth";
 
 const { cache, requireAuthenticatedUser, assertWorkspaceAccess } = vi.hoisted(
   () => ({
@@ -22,8 +22,8 @@ vi.mock("@/lib/billing/quota-entitlement", () => ({
 vi.mock("@/lib/realtime/authoritative-content", () => ({
   loadAuthoritativeDocumentContentBySourceIds: vi.fn(),
 }));
-vi.mock("./mutation-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./mutation-auth")>()),
+vi.mock("../data/mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../data/mutation-auth")>()),
   requireAuthenticatedUser,
   assertWorkspaceAccess,
 }));

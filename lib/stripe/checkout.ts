@@ -2,7 +2,7 @@ import { resolveAuthBaseURL } from "@/lib/auth/resolve-auth-base-url";
 import {
   getCustomerByUserId,
   upsertStripeCustomer,
-} from "@/lib/db/queries/billing";
+} from "@/lib/db/data/billing";
 import { getStripeProPriceId } from "./billing-env";
 import { getStripe } from "./client";
 

@@ -10,7 +10,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import type { SearchDocumentResult } from "@/lib/db/queries";
+import type { SearchDocumentResult } from "@/lib/db/actions/search";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +27,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Kbd } from "@/components/ui/kbd";
-import { searchDocumentsInWorkspace } from "@/lib/db/queries";
+import { searchDocumentsInWorkspace } from "@/lib/db/actions/search";
 import { cn } from "@/lib/utils";
 
 type SearchCommandProps = {

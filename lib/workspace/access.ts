@@ -1,7 +1,7 @@
 export {
   getWorkspaceMembershipRole,
   requireWorkspacePermission,
-} from "@/lib/db/queries/mutation-auth";
+} from "@/lib/db/data/mutation-auth";
 
 export {
   hasWorkspacePermission,

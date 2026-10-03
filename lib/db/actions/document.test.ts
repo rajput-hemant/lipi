@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { MutationAuthError } from "../data/mutation-auth";
 import {
   deleteDocumentPermanently,
   duplicateDocument,
@@ -8,7 +9,6 @@ import {
   softDeleteDocumentTree,
   updateDocument,
 } from "./document";
-import { MutationAuthError } from "./mutation-auth";
 
 const WORKSPACE_ID = "11111111-1111-4111-8111-111111111111";
 const DOCUMENT_ID = "22222222-2222-4222-8222-222222222222";
@@ -42,8 +42,8 @@ vi.mock("@/lib/realtime/authoritative-content", () => ({
   loadAuthoritativeDocumentContentBySourceIds: mocks.loadAuthoritativeContent,
 }));
 
-vi.mock("./mutation-auth", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./mutation-auth")>()),
+vi.mock("../data/mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../data/mutation-auth")>()),
   assertWorkspaceAccess: mocks.assertWorkspaceAccess,
   authorizeDocumentMutation: mocks.authorizeDocumentMutation,
   requireAuthenticatedUser: mocks.requireAuthenticatedUser,

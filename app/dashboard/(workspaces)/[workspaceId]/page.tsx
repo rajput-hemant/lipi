@@ -13,11 +13,11 @@ import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth";
-import { getDocuments } from "@/lib/db/queries";
+import { getDocuments } from "@/lib/db/actions/document";
 import {
   assertWorkspaceAccess,
   getWorkspaceMembershipRole,
-} from "@/lib/db/queries/mutation-auth";
+} from "@/lib/db/data/mutation-auth";
 import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 import { InviteNotice, isInvalidInvite } from "../../invite-notice";
 import { UpdatedDate } from "./updated-date";

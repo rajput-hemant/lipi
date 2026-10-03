@@ -15,7 +15,7 @@ const stripeMocks = vi.hoisted(() => ({
   pricesRetrieve: vi.fn(),
 }));
 
-vi.mock("@/lib/db/queries/billing", () => billingMocks);
+vi.mock("@/lib/db/data/billing", () => billingMocks);
 vi.mock("@/lib/stripe/client", () => ({
   getStripe: () => ({
     subscriptions: { retrieve: stripeMocks.retrieve },

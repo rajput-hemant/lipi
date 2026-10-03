@@ -59,7 +59,7 @@ vi.mock("@/hooks/use-subscription-modal", () => ({
   }),
 }));
 
-vi.mock("@/lib/db/queries", () => ({
+vi.mock("@/lib/db/actions/document", () => ({
   createDocument: vi.fn(),
   updateDocument: vi.fn(),
   deleteDocument: vi.fn(),

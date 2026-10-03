@@ -26,7 +26,7 @@ import {
   documentCoverPresets,
 } from "@/lib/block-editor/cover-presets";
 import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
-import { updateDocument } from "@/lib/db/queries";
+import { updateDocument } from "@/lib/db/actions/document";
 import { uploadFiles } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 

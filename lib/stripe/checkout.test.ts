@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   checkoutCreate: vi.fn(),
 }));
 
-vi.mock("@/lib/db/queries/billing", () => ({
+vi.mock("@/lib/db/data/billing", () => ({
   getCustomerByUserId: mocks.getCustomerByUserId,
   upsertStripeCustomer: mocks.upsertStripeCustomer,
 }));
