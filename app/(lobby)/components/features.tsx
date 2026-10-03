@@ -163,9 +163,9 @@ export function Features() {
                 </div>
               </div>
 
-              <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <p className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Q3 Product Roadmap & Launch Plan
-              </h1>
+              </p>
 
               {/* Editor Blocks */}
               <div className="mt-4 space-y-3.5 text-sm">

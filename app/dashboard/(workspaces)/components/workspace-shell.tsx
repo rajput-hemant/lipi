@@ -23,7 +23,9 @@ function WorkspaceShellContent({ children }: React.PropsWithChildren) {
       />
       <div className="min-w-0 flex-1">
         <Navbar />
-        <main className="overflow-auto">{children}</main>
+        <main id="main-content" className="overflow-auto">
+          {children}
+        </main>
       </div>
     </div>
   );

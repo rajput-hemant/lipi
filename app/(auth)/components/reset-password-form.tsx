@@ -127,7 +127,6 @@ export function ResetPasswordForm() {
                       aria-label={
                         isPassVisible ? "Hide Password" : "Show Password"
                       }
-                      tabIndex={-1}
                       type="button"
                       disabled={!field.value}
                       onClick={() => setIsPassVisible(!isPassVisible)}
@@ -180,7 +179,6 @@ export function ResetPasswordForm() {
                       aria-label={
                         isNewPassVisible ? "Hide Password" : "Show Password"
                       }
-                      tabIndex={-1}
                       type="button"
                       disabled={!field.value}
                       onClick={() => setIsNewPassVisible(!isNewPassVisible)}

@@ -273,7 +273,8 @@ function DocumentTreeItem({
         <button
           type="button"
           aria-label={isExpanded ? "Collapse" : "Expand"}
-          className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+          aria-expanded={isExpanded}
+          className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50"
           onClick={() => toggleExpanded(node.id)}
         >
           <HugeiconsIcon
@@ -297,9 +298,16 @@ function DocumentTreeItem({
                 setIsRenaming(false);
               }
             }}
+            aria-label="Page title"
             className="h-8"
           />
-          <Button type="submit" size="icon" variant="ghost" className="size-8">
+          <Button
+            type="submit"
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label="Save title"
+          >
             <HugeiconsIcon
               icon={Tick02Icon}
               strokeWidth={2}
@@ -423,6 +431,7 @@ function DocumentTreeItem({
                 setChildIcon("");
               }
             }}
+            aria-label="New page title"
             className="h-9 pl-9"
           />
         </form>
@@ -659,6 +668,7 @@ export function DocumentTree() {
                           setRootIcon("");
                         }
                       }}
+                      aria-label="New page title"
                       className="h-9 px-9"
                     />
                     <Button
@@ -666,6 +676,7 @@ export function DocumentTree() {
                       size="icon"
                       variant="ghost"
                       className="absolute inset-y-0 right-1 my-auto size-7"
+                      aria-label="Create page"
                     >
                       <HugeiconsIcon
                         icon={Tick02Icon}

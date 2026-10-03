@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 import type { Metadata, Viewport } from "next";
 
 import { Providers } from "@/components/providers";
+import { SkipLink } from "@/components/skip-link";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
@@ -100,6 +101,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           "min-h-screen scroll-smooth font-sans antialiased selection:bg-foreground selection:text-background"
         )}
       >
+        <SkipLink />
         <Providers>
           {children}
           <Toaster />
