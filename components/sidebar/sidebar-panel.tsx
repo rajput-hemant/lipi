@@ -12,7 +12,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import type { IconSvgElement } from "@hugeicons/react";
 
 import { siteConfig } from "@/config/site";
-import { useAppState } from "@/hooks/use-app-state";
+import { useAppState, usePageAccess } from "@/hooks/use-app-state";
 import { cn } from "@/lib/utils";
 import { Logo } from "../icons";
 import { Settings } from "../settings";
@@ -29,6 +29,7 @@ import { NavDialog } from "./nav-dialog";
 export type SidebarNavItem = {
   title: string;
   description: string;
+  viewerDescription?: string;
   icon: IconSvgElement;
   content: React.FC;
 };
@@ -49,6 +50,7 @@ export const sidebarNavItems: SidebarNavItem[] = [
   {
     title: "Trash",
     description: "Restore or delete trashed pages",
+    viewerDescription: "Browse pages in the trash",
     icon: Delete02Icon,
     content: Trash,
   },
@@ -66,6 +68,7 @@ export function SidebarPanel({
   className,
 }: SidebarPanelProps) {
   const { user } = useAppState();
+  const isViewer = usePageAccess() === "view";
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col gap-2", className)}>
@@ -89,25 +92,36 @@ export function SidebarPanel({
 
       <nav className="flex flex-col items-center justify-center gap-1 px-4">
         {sidebarNavItems.map(
-          ({ title, description, icon, content: Content }) =>
-            isCollapsed ?
-              <NavDialog
-                key={title}
-                title={title}
-                icon={icon}
-                description={description}
-                isCollapsed
-              >
-                <Content />
-              </NavDialog>
-            : <NavDialog
-                key={title}
-                title={title}
-                icon={icon}
-                description={description}
-              >
-                <Content />
-              </NavDialog>
+          ({
+            title,
+            description: fullDescription,
+            viewerDescription,
+            icon,
+            content: Content,
+          }) => {
+            const description =
+              isViewer && viewerDescription ? viewerDescription : (
+                fullDescription
+              );
+            return isCollapsed ?
+                <NavDialog
+                  key={title}
+                  title={title}
+                  icon={icon}
+                  description={description}
+                  isCollapsed
+                >
+                  <Content />
+                </NavDialog>
+              : <NavDialog
+                  key={title}
+                  title={title}
+                  icon={icon}
+                  description={description}
+                >
+                  <Content />
+                </NavDialog>;
+          }
         )}
       </nav>
 

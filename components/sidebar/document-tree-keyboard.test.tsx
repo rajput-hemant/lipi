@@ -45,6 +45,7 @@ vi.mock("@/hooks/use-app-state", () => ({
     deleteDocument: vi.fn(),
   }),
   useCanEditPages: () => true,
+  usePageAccess: () => "edit",
   useAppActions: () => ({
     addDocument: vi.fn(),
     updateDocument: vi.fn(),

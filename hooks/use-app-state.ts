@@ -125,7 +125,16 @@ export function useAppActions() {
   return store;
 }
 
-export function useCanEditPages() {
+export type PageAccess = "unknown" | "edit" | "view";
+
+/** UI gating only; the server enforces permissions on every mutation. */
+export function usePageAccess(): PageAccess {
   const { role } = useAppState();
-  return !role || hasWorkspacePermission(role, "document:write");
+  if (!role) return "unknown";
+  return hasWorkspacePermission(role, "document:write") ? "edit" : "view";
+}
+
+/** False while the role is unknown, so edit controls never show unverified. */
+export function useCanEditPages() {
+  return usePageAccess() === "edit";
 }

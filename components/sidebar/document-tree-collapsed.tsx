@@ -14,7 +14,7 @@ import { DocumentTree } from "./document-tree";
 
 export function DocumentTreeCollapsed() {
   return (
-    <NavigationMenu className="max-w-full justify-center">
+    <NavigationMenu className="max-w-full flex-none justify-center">
       <NavigationMenuList>
         <NavigationMenuItem>
           <NavigationMenuTrigger className="size-9 p-0" aria-label="Open pages">

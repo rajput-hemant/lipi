@@ -13,7 +13,11 @@ import { toast } from "sonner";
 import type { Document } from "@/types/db";
 
 import { toAllDocumentRecords } from "@/components/sidebar/document-tree-utils";
-import { useAppState, useCanEditPages } from "@/hooks/use-app-state";
+import {
+  useAppState,
+  useCanEditPages,
+  usePageAccess,
+} from "@/hooks/use-app-state";
 import {
   patchDocumentsForRestore,
   permanentDeleteTargetIds,
@@ -41,6 +45,7 @@ function cloneDocuments(documents: readonly Document[]): Document[] {
 export function Trash() {
   const { documents, replaceDocuments } = useAppState();
   const canEdit = useCanEditPages();
+  const isViewer = usePageAccess() === "view";
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const trashed = documents.filter((document) => document.inTrash);
@@ -96,7 +101,7 @@ export function Trash() {
   return (
     <div className="flex h-full flex-col gap-2">
       <p className="px-4 text-sm font-medium text-muted-foreground">Trash</p>
-      {!canEdit && trashed.length > 0 && (
+      {isViewer && trashed.length > 0 && (
         <p className="px-4 text-xs text-muted-foreground">
           You have view-only access. Ask an editor or the owner to restore or
           delete pages.
