@@ -33,7 +33,7 @@ vi.mock("@/lib/db/queries", () => ({
   createDocument,
   softDeleteDocumentTree,
   duplicateDocument: vi.fn(),
-  updateDocumentInDb: vi.fn(),
+  updateDocument: vi.fn(),
 }));
 // Run the rejection callback the way sonner does.
 vi.mock("sonner", () => ({

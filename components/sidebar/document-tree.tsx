@@ -45,7 +45,7 @@ import {
   createDocument,
   duplicateDocument,
   softDeleteDocumentTree,
-  updateDocumentInDb,
+  updateDocument,
 } from "@/lib/db/queries";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
@@ -113,7 +113,7 @@ function DocumentTreeItem({
 
     setIsRenaming(false);
 
-    toast.promise(updateDocumentInDb({ id: node.id, title }), {
+    toast.promise(updateDocument({ id: node.id, title }), {
       loading: "Renaming...",
       success: (updated) => {
         updateDocumentState(updated);
