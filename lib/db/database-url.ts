@@ -1,3 +1,5 @@
+import { isEnvValidationSkipped } from "@/lib/env-flags";
+
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
 
 export const MISSING_DATABASE_URL_MESSAGE =
@@ -28,8 +30,6 @@ export function requireLocalDatabaseUrl(databaseUrl: string | undefined) {
 }
 
 export function assertDatabaseUrlConfigured(databaseUrl: string | undefined) {
-  const skipped =
-    process.env.SKIP_ENV_VALIDATION === "true" ||
-    process.env.NODE_ENV === "test";
+  const skipped = isEnvValidationSkipped() || process.env.NODE_ENV === "test";
   if (!skipped && !databaseUrl) throw new Error(MISSING_DATABASE_URL_MESSAGE);
 }

@@ -7,6 +7,7 @@ import type { SessionUser } from "./auth/types";
 
 import { db } from "@/lib/db";
 import { createAuth } from "./auth/create-auth";
+import { isEnvValidationSkipped } from "./env-flags";
 
 let authInstance: ReturnType<typeof createAuth> | undefined;
 
@@ -38,10 +39,7 @@ function isMissingSecretError(error: unknown): boolean {
 }
 
 function isValidatedProduction(): boolean {
-  return (
-    process.env.NODE_ENV === "production" &&
-    process.env.SKIP_ENV_VALIDATION !== "true"
-  );
+  return process.env.NODE_ENV === "production" && !isEnvValidationSkipped();
 }
 
 export const getSession = cache(async () => {
