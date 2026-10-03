@@ -12,6 +12,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 
+const treeRows = [
+  { icon: "🏠", label: "Team Overview" },
+  { icon: Folder01Icon, label: "Product Specs" },
+  { icon: "📋", label: "Q3 Product Roadmap", active: true },
+  { icon: File01Icon, label: "Design System" },
+  { icon: File01Icon, label: "Weekly Notes" },
+  { icon: "💡", label: "Brainstorming" },
+];
+
+const doneItems = [
+  "Integrate BlockNote rich text document editor",
+  "Shared document editing in workspaces",
+  "Command+K workspace full-text document search",
+];
+
 export function Features() {
   return (
     <section id="features" className="space-y-8">
@@ -112,30 +127,23 @@ export function Features() {
               <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Workspace
               </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <span>🏠</span>
-                <span>Team Overview</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <HugeiconsIcon icon={Folder01Icon} className="size-3.5" />
-                <span>Product Specs</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md bg-accent px-2 py-1.5 font-medium text-accent-foreground">
-                <span>📋</span>
-                <span className="truncate">Q3 Product Roadmap</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <HugeiconsIcon icon={File01Icon} className="size-3.5" />
-                <span>Design System</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <HugeiconsIcon icon={File01Icon} className="size-3.5" />
-                <span>Weekly Notes</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <span>💡</span>
-                <span>Brainstorming</span>
-              </div>
+              {treeRows.map(({ icon, label, active }) => (
+                <div
+                  key={label}
+                  className={
+                    active ?
+                      "flex items-center gap-2 rounded-md bg-accent px-2 py-1.5 font-medium text-accent-foreground"
+                    : "flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted"
+                  }
+                >
+                  {typeof icon === "string" ?
+                    <span>{icon}</span>
+                  : <HugeiconsIcon icon={icon} className="size-3.5" />}
+                  <span className={active ? "truncate" : undefined}>
+                    {label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -193,39 +201,19 @@ export function Features() {
 
                 {/* Checklist */}
                 <div className="space-y-1.5 text-xs sm:text-sm">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      readOnly
-                      className="size-4 rounded border-input accent-primary"
-                    />
-                    <span className="text-muted-foreground line-through">
-                      Integrate BlockNote rich text document editor
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      readOnly
-                      className="size-4 rounded border-input accent-primary"
-                    />
-                    <span className="text-muted-foreground line-through">
-                      Shared document editing in workspaces
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      readOnly
-                      className="size-4 rounded border-input accent-primary"
-                    />
-                    <span className="text-muted-foreground line-through">
-                      Command+K workspace full-text document search
-                    </span>
-                  </div>
+                  {doneItems.map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        readOnly
+                        className="size-4 rounded border-input accent-primary"
+                      />
+                      <span className="text-muted-foreground line-through">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
