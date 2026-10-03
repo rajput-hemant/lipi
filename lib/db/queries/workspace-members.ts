@@ -147,7 +147,10 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
     throw new MutationAuthError("This user is already a collaborator");
   }
 
-  await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId);
+  await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId, {
+    workspaceId: parsed.workspaceId,
+    email,
+  });
 
   const token = randomUUID();
   const expiresAt = new Date(
