@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Terms of Service",
   description:
     "Read the Terms of Service for using the Lipi collaborative workspace application.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

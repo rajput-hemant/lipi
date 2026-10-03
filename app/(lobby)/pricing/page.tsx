@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Pricing",
   description:
     "Simple, transparent pricing for individuals and collaborative teams.",
+  alternates: { canonical: "/pricing" },
 };
 
 export const instant = false;

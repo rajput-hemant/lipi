@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Lipi - All-In-One Collaborative Workspace",
   description:
     "Open-source workspace for nested documents, block editing, Command+K search, shared editing, and team workspaces.",
+  alternates: { canonical: "/" },
 };
 
 export default function HomePage() {

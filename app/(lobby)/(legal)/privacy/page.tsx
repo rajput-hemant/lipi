@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Read the Lipi Privacy Policy and learn about data protection and privacy.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
