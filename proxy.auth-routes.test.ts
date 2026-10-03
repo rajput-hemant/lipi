@@ -49,4 +49,26 @@ describe("proxy auth routes", () => {
       "http://localhost:3000/login?from=%2Fdashboard"
     );
   });
+
+  it.each(["/api/stripe/webhook", "/api/uploadthing"])(
+    "lets third-party callbacks reach %s without a session",
+    async (path) => {
+      const res = await proxy(
+        new NextRequest(`http://localhost:3000${path}`, { method: "POST" })
+      );
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get("location")).toBeNull();
+    }
+  );
+
+  it("still protects other API routes without a session", async () => {
+    const res = await proxy(
+      new NextRequest("http://localhost:3000/api/stripe/checkout", {
+        method: "POST",
+      })
+    );
+
+    expect(res.status).toBe(307);
+  });
 });
