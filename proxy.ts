@@ -82,10 +82,7 @@ export async function proxy(req: NextRequest) {
     const isAuthenticated = await hasValidProxySession(req);
 
     if (!isAuthenticated) {
-      let from = nextUrl.pathname;
-      if (nextUrl.search) {
-        from += nextUrl.search;
-      }
+      const from = nextUrl.pathname + nextUrl.search;
 
       return NextResponse.redirect(
         new URL(`/login?from=${encodeURIComponent(from)}`, nextUrl)

@@ -48,6 +48,21 @@ export function createAuth(
     }
   }
 
+  async function syncUserName(user: { id: unknown; name?: unknown }) {
+    if (user.name === undefined) return;
+    await database
+      .update(users)
+      .set({ name: user.name as string })
+      .where(eq(users.id, user.id as string));
+  }
+
+  async function mirrorIfPassword(account: {
+    userId: unknown;
+    password?: unknown;
+  }) {
+    if (account.password) await mirrorAccountPassword(account.userId as string);
+  }
+
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET || env.AUTH_SECRET,
     baseURL: resolveAuthBaseURL(),
@@ -122,45 +137,15 @@ export function createAuth(
       user: {
         create: {
           after: async (user) => {
-            const patch: Record<string, unknown> = {};
-            if (user.name !== undefined) patch.name = user.name;
-            if (Object.keys(patch).length > 0) {
-              await database
-                .update(users)
-                .set(patch)
-                .where(eq(users.id, user.id as string));
-            }
+            await syncUserName(user);
             await mirrorAccountPassword(user.id as string);
           },
         },
-        update: {
-          after: async (user) => {
-            const patch: Record<string, unknown> = {};
-            if (user.name !== undefined) patch.name = user.name;
-            if (Object.keys(patch).length > 0) {
-              await database
-                .update(users)
-                .set(patch)
-                .where(eq(users.id, user.id as string));
-            }
-          },
-        },
+        update: { after: syncUserName },
       },
       account: {
-        create: {
-          after: async (account) => {
-            if (account.password) {
-              await mirrorAccountPassword(account.userId as string);
-            }
-          },
-        },
-        update: {
-          after: async (account) => {
-            if (account.password) {
-              await mirrorAccountPassword(account.userId as string);
-            }
-          },
-        },
+        create: { after: mirrorIfPassword },
+        update: { after: mirrorIfPassword },
       },
     },
 

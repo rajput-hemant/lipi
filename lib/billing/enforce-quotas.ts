@@ -2,15 +2,13 @@ import { and, count, eq, gt, ne, not } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { collaborators, workspaceInvites, workspaces } from "@/lib/db/schema";
-import { tryGetStripeProPriceId } from "@/lib/stripe/billing-env";
-import { hasProEntitlement } from "./entitlement";
 import { PlanQuotaError } from "./errors";
 import {
   canAddCollaborator,
   canCreateWorkspace,
   canHoldCollaborators,
 } from "./plan-quotas";
-import { getCurrentBillingSubscription } from "./subscription-access";
+import { userHasProPlanEntitlement } from "./quota-entitlement";
 
 export type PendingInviteRef = { workspaceId: string; email: string };
 
@@ -64,19 +62,10 @@ async function countPendingInvitesForOwner(
   return Number(row?.value ?? 0);
 }
 
-function isProSubscriber(
-  subscription: Awaited<ReturnType<typeof getCurrentBillingSubscription>>
-): boolean {
-  const proPriceId = tryGetStripeProPriceId();
-  if (!proPriceId) return false;
-  return hasProEntitlement(subscription, proPriceId);
-}
-
 export async function assertUserCanCreateWorkspace(
   userId: string
 ): Promise<void> {
-  const subscription = await getCurrentBillingSubscription(userId);
-  const isPro = isProSubscriber(subscription);
+  const isPro = await userHasProPlanEntitlement(userId);
   const ownedWorkspaceCount = await countOwnedWorkspaces(userId);
 
   if (!canCreateWorkspace({ isPro, ownedWorkspaceCount })) {
@@ -95,8 +84,7 @@ export async function assertUserCanAddCollaborator(
   userId: string,
   invite?: PendingInviteRef
 ): Promise<void> {
-  const subscription = await getCurrentBillingSubscription(userId);
-  const isPro = isProSubscriber(subscription);
+  const isPro = await userHasProPlanEntitlement(userId);
   const collaboratorCount =
     (await countCollaboratorsForOwner(userId)) +
     (invite ? await countPendingInvitesForOwner(userId, invite) : 0);
@@ -117,8 +105,7 @@ export async function assertUserCanReceiveWorkspaceTransfer(
   newOwnerId: string,
   workspaceId: string
 ): Promise<void> {
-  const subscription = await getCurrentBillingSubscription(newOwnerId);
-  if (isProSubscriber(subscription)) return;
+  if (await userHasProPlanEntitlement(newOwnerId)) return;
 
   const [row] = await db
     .select({ value: count() })

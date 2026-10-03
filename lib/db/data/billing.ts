@@ -41,43 +41,22 @@ export async function upsertProductRow(
   row: typeof products.$inferInsert,
   client: DbClient = db
 ) {
-  await client
-    .insert(products)
-    .values(row)
-    .onConflictDoUpdate({
-      target: products.id,
-      set: {
-        active: row.active,
-        name: row.name,
-        description: row.description,
-        image: row.image,
-        metadata: row.metadata,
-      },
-    });
+  const { id: _id, ...rest } = row;
+  await client.insert(products).values(row).onConflictDoUpdate({
+    target: products.id,
+    set: rest,
+  });
 }
 
 export async function upsertPriceRow(
   row: typeof prices.$inferInsert,
   client: DbClient = db
 ) {
-  await client
-    .insert(prices)
-    .values(row)
-    .onConflictDoUpdate({
-      target: prices.id,
-      set: {
-        productId: row.productId,
-        active: row.active,
-        description: row.description,
-        unitAmount: row.unitAmount,
-        currency: row.currency,
-        type: row.type,
-        interval: row.interval,
-        intervalCount: row.intervalCount,
-        trialPeriodDays: row.trialPeriodDays,
-        metadata: row.metadata,
-      },
-    });
+  const { id: _id, ...rest } = row;
+  await client.insert(prices).values(row).onConflictDoUpdate({
+    target: prices.id,
+    set: rest,
+  });
 }
 
 export async function upsertCatalogFromStripePrice(
@@ -97,28 +76,11 @@ export async function upsertSubscriptionRow(
   row: Subscription,
   client: DbClient = db
 ) {
-  await client
-    .insert(subscriptions)
-    .values(row)
-    .onConflictDoUpdate({
-      target: subscriptions.id,
-      set: {
-        userId: row.userId,
-        status: row.status,
-        metadata: row.metadata,
-        priceId: row.priceId,
-        quantity: row.quantity,
-        cancelAtPeriodEnd: row.cancelAtPeriodEnd,
-        created: row.created,
-        currentPeriodStart: row.currentPeriodStart,
-        currentPeriodEnd: row.currentPeriodEnd,
-        endedAt: row.endedAt,
-        cancelAt: row.cancelAt,
-        canceledAt: row.canceledAt,
-        trialStart: row.trialStart,
-        trialEnd: row.trialEnd,
-      },
-    });
+  const { id: _id, ...rest } = row;
+  await client.insert(subscriptions).values(row).onConflictDoUpdate({
+    target: subscriptions.id,
+    set: rest,
+  });
 }
 
 export async function syncSubscriptionFromStripe(

@@ -1,51 +1,22 @@
-import { readFileSync } from "fs";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 import { hash } from "bcryptjs";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from ".";
-import { CREDENTIAL_PROVIDER_ID } from "../auth/credential-account";
+import {
+  CREDENTIAL_PROVIDER_ID,
+  credentialAccountWhere,
+} from "../auth/credential-account";
 import { requireLocalDatabaseUrl } from "./database-url";
+import { loadLocalDevCredentials } from "./local-dev-credentials";
 import { betterAuthAccounts, documents, users, workspaces } from "./schema";
 import { LOCAL_DOCUMENTS, LOCAL_WORKSPACE } from "./seed-data";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-interface LocalDevUser {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-}
-
-interface LocalDevCredentials {
-  user: LocalDevUser;
-  database: {
-    host: string;
-    port: number;
-    name: string;
-    user: string;
-  };
-}
-
-function loadLocalDevCredentials(): LocalDevUser {
-  const fixturePath = join(
-    __dirname,
-    "../../fixtures/local-dev-credentials.json"
-  );
-  const content = readFileSync(fixturePath, "utf-8");
-  const credentials = JSON.parse(content) as LocalDevCredentials;
-  return credentials.user;
-}
 
 async function seed() {
   if (process.env.NODE_ENV === "production") {
     throw new Error("Refusing to seed with NODE_ENV=production");
   }
   requireLocalDatabaseUrl(process.env.DATABASE_URL);
-  const user = loadLocalDevCredentials();
+  const { user } = loadLocalDevCredentials();
 
   await db.transaction(async (tx) => {
     const byEmail = await tx.query.users.findFirst({
@@ -70,10 +41,7 @@ async function seed() {
       .onConflictDoNothing();
 
     const credential = await tx.query.betterAuthAccounts.findFirst({
-      where: and(
-        eq(betterAuthAccounts.userId, user.id),
-        eq(betterAuthAccounts.providerId, CREDENTIAL_PROVIDER_ID)
-      ),
+      where: credentialAccountWhere(user.id),
     });
     if (!credential) {
       const password = await hash(user.password, 10);

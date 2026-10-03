@@ -1,5 +1,3 @@
-import { hasProEntitlement } from "./entitlement";
-
 export const FREE_PLAN_MAX_WORKSPACES = 1;
 export const FREE_PLAN_MAX_COLLABORATORS = 2;
 export const FREE_PLAN_MAX_BLOCKS = 500;
@@ -35,15 +33,4 @@ export function canCreateBlock(params: {
 }): boolean {
   if (params.isPro) return true;
   return params.blockCount < FREE_PLAN_MAX_BLOCKS;
-}
-
-export function evaluateWorkspaceQuota(
-  subscription: Parameters<typeof hasProEntitlement>[0],
-  proPriceId: string,
-  ownedWorkspaceCount: number
-): boolean {
-  return canCreateWorkspace({
-    isPro: hasProEntitlement(subscription, proPriceId),
-    ownedWorkspaceCount,
-  });
 }

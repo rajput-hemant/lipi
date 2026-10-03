@@ -22,6 +22,9 @@ import {
   workspaceCollaboratorRole,
 } from "./enums";
 
+const timestampTz = (name: string) =>
+  timestamp(name, { withTimezone: true, mode: "string" });
+
 const bytea = customType<{ data: Uint8Array; driverData: Uint8Array }>({
   dataType: () => "bytea",
 });
@@ -35,12 +38,7 @@ export const workspaces = createTable("workspaces", {
   bannerUrl: text("banner_url"),
   workspaceOwnerId: uuid("workspace_owner_id").notNull(),
   inTrash: boolean("in_trash").notNull().default(false),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
+  createdAt: timestampTz("created_at").defaultNow().notNull(),
 });
 
 export const documents = createTable(
@@ -56,18 +54,8 @@ export const documents = createTable(
     bannerUrl: text("banner_url"),
     content: text("content"),
     inTrash: boolean("in_trash").notNull().default(false),
-    createdAt: timestamp("created_at", {
-      withTimezone: true,
-      mode: "string",
-    })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-      mode: "string",
-    })
-      .defaultNow()
-      .notNull(),
+    createdAt: timestampTz("created_at").defaultNow().notNull(),
+    updatedAt: timestampTz("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     documentsWorkspaceIdIdx: index("lipi_documents_workspace_id_idx").on(
@@ -101,9 +89,7 @@ export const realtimeDocuments = createTable("realtime_documents", {
     .primaryKey()
     .references(() => documents.id, { onDelete: "cascade" }),
   state: bytea("state").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
-    .defaultNow()
-    .notNull(),
+  updatedAt: timestampTz("updated_at").defaultNow().notNull(),
 });
 
 export const billingAccounts = createTable("accounts", {
@@ -111,7 +97,7 @@ export const billingAccounts = createTable("accounts", {
     .notNull()
     .references(() => users.id),
   billingAddress: jsonb("billing_address"),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
+  updatedAt: timestampTz("updated_at"),
   paymentMethod: jsonb("payment_method"),
 });
 
@@ -152,60 +138,24 @@ export const subscriptions = createTable("subscriptions", {
   priceId: text("price_id").references(() => prices.id),
   quantity: integer("quantity"),
   cancelAtPeriodEnd: boolean("cancel_at_period_end"),
-  created: timestamp("created", { withTimezone: true, mode: "string" })
+  created: timestampTz("created").defaultNow().notNull(),
+  currentPeriodStart: timestampTz("current_period_start")
     .defaultNow()
     .notNull(),
-  currentPeriodStart: timestamp("current_period_start", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
-  currentPeriodEnd: timestamp("current_period_end", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
-  endedAt: timestamp("ended_at", {
-    withTimezone: true,
-    mode: "string",
-  }).defaultNow(),
-  cancelAt: timestamp("cancel_at", {
-    withTimezone: true,
-    mode: "string",
-  }).defaultNow(),
-  canceledAt: timestamp("canceled_at", {
-    withTimezone: true,
-    mode: "string",
-  }).defaultNow(),
-  trialStart: timestamp("trial_start", {
-    withTimezone: true,
-    mode: "string",
-  }).defaultNow(),
-  trialEnd: timestamp("trial_end", {
-    withTimezone: true,
-    mode: "string",
-  }).defaultNow(),
+  currentPeriodEnd: timestampTz("current_period_end").defaultNow().notNull(),
+  endedAt: timestampTz("ended_at").defaultNow(),
+  cancelAt: timestampTz("cancel_at").defaultNow(),
+  canceledAt: timestampTz("canceled_at").defaultNow(),
+  trialStart: timestampTz("trial_start").defaultNow(),
+  trialEnd: timestampTz("trial_end").defaultNow(),
 });
 
 export const stripeWebhookEvents = createTable("stripe_webhook_events", {
   id: text("id").primaryKey().notNull(),
   type: text("type").notNull(),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
-  processedAt: timestamp("processed_at", {
-    withTimezone: true,
-    mode: "string",
-  }),
-  claimExpiresAt: timestamp("claim_expires_at", {
-    withTimezone: true,
-    mode: "string",
-  })
+  createdAt: timestampTz("created_at").defaultNow().notNull(),
+  processedAt: timestampTz("processed_at"),
+  claimExpiresAt: timestampTz("claim_expires_at")
     .default(sql`now() + interval '5 minutes'`)
     .notNull(),
 });
@@ -216,12 +166,7 @@ export const collaborators = createTable("collaborators", {
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
   role: workspaceCollaboratorRole("role").notNull().default("editor"),
-  createdAt: timestamp("created_at", {
-    withTimezone: true,
-    mode: "string",
-  })
-    .defaultNow()
-    .notNull(),
+  createdAt: timestampTz("created_at").defaultNow().notNull(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -240,16 +185,8 @@ export const workspaceInvites = createTable(
     invitedByUserId: uuid("invited_by_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    expiresAt: timestamp("expires_at", {
-      withTimezone: true,
-      mode: "string",
-    }).notNull(),
-    createdAt: timestamp("created_at", {
-      withTimezone: true,
-      mode: "string",
-    })
-      .defaultNow()
-      .notNull(),
+    expiresAt: timestampTz("expires_at").notNull(),
+    createdAt: timestampTz("created_at").defaultNow().notNull(),
   },
   (table) => ({
     workspaceEmailUnique: uniqueIndex(
