@@ -37,6 +37,12 @@ export default function LobbyError({
           We encountered an issue loading this section. Please try again.
         </p>
 
+        {error.digest && (
+          <p className="font-mono text-xs text-muted-foreground/80">
+            Error digest: {error.digest}
+          </p>
+        )}
+
         <div className="flex items-center gap-3 pt-2">
           <Button onClick={reset} className="gap-2">
             <HugeiconsIcon
