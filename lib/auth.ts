@@ -18,15 +18,6 @@ export function getAuth(): ReturnType<typeof createAuth> {
   return authInstance;
 }
 
-export const auth = new Proxy({} as ReturnType<typeof createAuth>, {
-  get(_target, prop) {
-    const instance = getAuth() as unknown as Record<string | symbol, unknown>;
-    const value = instance[prop];
-    return typeof value === "function" ? value.bind(instance) : value;
-  },
-  has: (_target, prop) => prop in (getAuth() as object),
-});
-
 export type { SessionUser as User } from "./auth/types";
 
 function isMissingSecretError(error: unknown): boolean {
@@ -44,7 +35,7 @@ function isValidatedProduction(): boolean {
 
 export const getSession = cache(async () => {
   try {
-    const session = await auth.api.getSession({
+    const session = await getAuth().api.getSession({
       headers: await headers(),
     });
     return session ?? null;

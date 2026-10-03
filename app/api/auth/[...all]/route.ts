@@ -1,5 +1,8 @@
 import { toNextJsHandler } from "better-auth/next-js";
 
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 
-export const { GET, POST } = toNextJsHandler(auth);
+// Resolve lazily so importing the route at build time does not construct auth.
+export const { GET, POST } = toNextJsHandler((request) =>
+  getAuth().handler(request)
+);
