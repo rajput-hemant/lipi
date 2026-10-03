@@ -58,7 +58,7 @@ export async function createWorkspace(workspace: Workspace) {
     const user = await requireAuthenticatedUser();
 
     if (workspace.workspaceOwnerId !== user.id) {
-      throw new MutationAuthError("Forbidden");
+      throw new MutationAuthError("Forbidden", "FORBIDDEN");
     }
 
     await assertUserCanCreateWorkspace(user.id);

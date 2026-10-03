@@ -40,6 +40,7 @@ import {
   resolveTreeKeyAction,
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
+import { isMutationDenied, unwrapMutation } from "@/lib/db/mutation-result";
 import {
   createDocument,
   duplicateDocument,
@@ -150,15 +151,17 @@ function DocumentTreeItem({
     setChildTitle("Untitled");
     setChildIcon("");
 
-    toast.promise(createDocument(newDocument), {
+    toast.promise(unwrapMutation(createDocument(newDocument)), {
       loading: "Creating page...",
       success: () => {
         notifyPageChanges();
         return "Page created.";
       },
-      error: () => {
+      error: (error) => {
         deleteDocument(newDocument.id);
-        return "Could not create page.";
+        return isMutationDenied(error) ?
+            "You do not have permission to create pages."
+          : "Could not create page.";
       },
     });
   }
@@ -179,19 +182,24 @@ function DocumentTreeItem({
       addDocument(copy);
     }
 
-    toast.promise(duplicateDocument({ sourceId: node.id, newId }), {
-      loading: "Duplicating...",
-      success: () => {
-        notifyPageChanges();
-        return "Page duplicated.";
-      },
-      error: () => {
-        for (const copy of copies) {
-          deleteDocument(copy.id);
-        }
-        return "Could not duplicate page.";
-      },
-    });
+    toast.promise(
+      unwrapMutation(duplicateDocument({ sourceId: node.id, newId })),
+      {
+        loading: "Duplicating...",
+        success: () => {
+          notifyPageChanges();
+          return "Page duplicated.";
+        },
+        error: (error) => {
+          for (const copy of copies) {
+            deleteDocument(copy.id);
+          }
+          return isMutationDenied(error) ?
+              "You do not have permission to duplicate this page."
+            : "Could not duplicate page.";
+        },
+      }
+    );
   }
 
   async function moveToTrash() {
@@ -211,7 +219,7 @@ function DocumentTreeItem({
       updateDocumentState({ ...document, inTrash: true });
     }
 
-    toast.promise(softDeleteDocumentTree(node.id), {
+    toast.promise(unwrapMutation(softDeleteDocumentTree(node.id)), {
       loading: "Moving to trash...",
       success: () => {
         const openDocumentId = pathname.split("/")[3];
@@ -225,7 +233,7 @@ function DocumentTreeItem({
         for (const document of previous) {
           updateDocumentState({ ...document });
         }
-        return error instanceof Error && error.message === "Forbidden" ?
+        return isMutationDenied(error) ?
             "You do not have permission to move this page to trash."
           : "Could not move to trash.";
       },
@@ -555,15 +563,17 @@ export function DocumentTree() {
     setRootTitle("Untitled");
     setRootIcon("");
 
-    toast.promise(createDocument(newDocument), {
+    toast.promise(unwrapMutation(createDocument(newDocument)), {
       loading: "Creating page...",
       success: () => {
         notifyPageChanges();
         return "Page created.";
       },
-      error: () => {
+      error: (error) => {
         deleteDocument(newDocument.id);
-        return "Could not create page.";
+        return isMutationDenied(error) ?
+            "You do not have permission to create pages."
+          : "Could not create page.";
       },
     });
   }

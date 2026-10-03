@@ -43,6 +43,6 @@ describe("requireWorkspacePermission workspace id enforcement", () => {
 
     await expect(
       requireWorkspacePermission("attacker-id", "ws-real", "workspace:read")
-    ).rejects.toMatchObject({ message: "Forbidden" });
+    ).rejects.toMatchObject({ message: "Forbidden", code: "FORBIDDEN" });
   });
 });
