@@ -1,6 +1,5 @@
 import { cache } from "react";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { nextCookies } from "better-auth/next-js";
 
 import type { SessionUser } from "./auth/types";
@@ -26,8 +25,6 @@ export const auth = new Proxy({} as ReturnType<typeof createAuth>, {
   },
   has: (_target, prop) => prop in (getAuth() as object),
 });
-
-export type { SessionUser as User } from "./auth/types";
 
 function isMissingSecretError(error: unknown): boolean {
   return (
@@ -67,8 +64,3 @@ export const getCurrentUser = cache(
     };
   }
 );
-
-export const checkAuth = async () => {
-  const session = await getSession();
-  if (!session) redirect("/login");
-};
