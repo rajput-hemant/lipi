@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { GitHub, Google } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { signIn } from "@/lib/auth/auth-client";
+import { errorMessage } from "@/lib/error-message";
 
 type OAuthButtonProps = {
   isFormDisabled: boolean;
@@ -34,8 +35,7 @@ export function OAuthButtons(props: OAuthButtonProps) {
         toast.error(result.error.message ?? "Something went wrong.");
       }
     } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
+      console.error(errorMessage(error));
       toast.error("Something went wrong.");
     } finally {
       setIsSubmitting(false);
