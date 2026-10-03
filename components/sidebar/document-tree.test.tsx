@@ -11,10 +11,13 @@ import { AppStateContext, createAppStore } from "@/hooks/use-app-state";
 import { TooltipProvider } from "../ui/tooltip";
 import { DocumentTree } from "./document-tree";
 
-const { createDocument, softDeleteDocumentTree } = vi.hoisted(() => ({
-  createDocument: vi.fn(),
-  softDeleteDocumentTree: vi.fn(),
-}));
+const { createDocument, softDeleteDocumentTree, errorMessages } = vi.hoisted(
+  () => ({
+    createDocument: vi.fn(),
+    softDeleteDocumentTree: vi.fn(),
+    errorMessages: [] as unknown[],
+  })
+);
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -40,7 +43,10 @@ vi.mock("sonner", () => ({
     promise: (
       promise: Promise<unknown>,
       opts: { error: (e: unknown) => unknown }
-    ) => promise.catch((e) => opts.error(e)),
+    ) =>
+      promise.catch((e) => {
+        errorMessages.push(opts.error(e));
+      }),
   },
 }));
 
@@ -104,6 +110,7 @@ beforeAll(() => {
 });
 
 afterEach(() => {
+  errorMessages.length = 0;
   document.body.replaceChildren();
   vi.clearAllMocks();
 });
@@ -148,8 +155,29 @@ describe("DocumentTree optimistic rollback", () => {
     expect(store.documents.map((d) => d.id)).toEqual(["a", "b"]);
   });
 
+  it("rolls back and shows a permission message when creation is denied", async () => {
+    createDocument.mockResolvedValue({ ok: false, code: "FORBIDDEN" });
+    const { store } = render("editor");
+
+    await submitNewRootPage();
+
+    expect(store.documents.map((d) => d.id)).toEqual(["a", "b"]);
+    expect(errorMessages).toEqual([
+      "You do not have permission to create pages.",
+    ]);
+  });
+
+  it("keeps the generic message for non-permission failures", async () => {
+    createDocument.mockRejectedValue(new Error("Failed to create document"));
+    render("editor");
+
+    await submitNewRootPage();
+
+    expect(errorMessages).toEqual(["Could not create page."]);
+  });
+
   it("keeps the optimistic root page when creation succeeds", async () => {
-    createDocument.mockResolvedValue(undefined);
+    createDocument.mockResolvedValue({ ok: true, data: undefined });
     const { store } = render("editor");
 
     await submitNewRootPage();
@@ -198,10 +226,41 @@ describe("DocumentTree optimistic rollback", () => {
     await act(async () => reject(new Error("fail")));
     await flush();
 
+    expect(errorMessages).toEqual(["Could not move to trash."]);
+
     expect(inTrash("a")).toBe(false);
     expect(inTrash("a1")).toBe(false);
     expect(store.documents.find((d) => d.id === "b")?.title).toBe(
       "Renamed remotely"
     );
+  });
+
+  it("rolls back and shows a permission message when trashing is denied", async () => {
+    softDeleteDocumentTree.mockResolvedValue({ ok: false, code: "FORBIDDEN" });
+    const { store } = render("editor", [doc("a"), doc("a1", "a"), doc("b")]);
+
+    const trigger = document
+      .getElementById("document-tree-item-a")!
+      .closest('[data-slot="context-menu-trigger"]')!;
+    act(() => {
+      trigger.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          clientX: 5,
+          clientY: 5,
+        })
+      );
+    });
+    const item = [
+      ...document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    ].find((el) => el.textContent?.includes("Move to trash"));
+    await act(async () => item?.click());
+    await flush();
+
+    expect(store.documents.every((d) => !d.inTrash)).toBe(true);
+    expect(errorMessages).toEqual([
+      "You do not have permission to move this page to trash.",
+    ]);
   });
 });

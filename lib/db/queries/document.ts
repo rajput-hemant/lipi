@@ -5,6 +5,7 @@ import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
 
 import type { DocumentRecord } from "@/lib/db/documents-tree";
+import type { MutationResult } from "@/lib/db/mutation-result";
 import type { Document } from "@/types/db";
 
 import { userHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
@@ -68,6 +69,12 @@ function rethrowKnownErrors(error: unknown) {
   }
 }
 
+function forbiddenResult(error: unknown) {
+  if (error instanceof MutationAuthError && error.code === "FORBIDDEN") {
+    return { ok: false, code: "FORBIDDEN" } satisfies MutationResult<never>;
+  }
+}
+
 async function loadWorkspaceDocuments(workspaceId: string) {
   const rows = await db
     .select()
@@ -108,8 +115,10 @@ export async function createDocument(input: unknown) {
       .returning();
 
     workspaceIdForRevalidate = parsed.workspaceId;
-    return data;
+    return { ok: true, data } as const;
   } catch (e) {
+    const denied = forbiddenResult(e);
+    if (denied) return denied;
     rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to create document");
@@ -209,8 +218,10 @@ export async function softDeleteDocumentTree(documentId: string) {
       .set({ inTrash: true, updatedAt: new Date().toISOString() })
       .where(inArray(documents.id, ids));
 
-    return ids.length;
+    return { ok: true, data: ids.length } as const;
   } catch (e) {
+    const denied = forbiddenResult(e);
+    if (denied) return denied;
     console.error((e as Error).message);
     throw new Error("Failed to move document to trash");
   } finally {
@@ -304,8 +315,13 @@ export async function duplicateDocument(input: unknown) {
 
     const inserted = await db.insert(documents).values(rows).returning();
 
-    return inserted.find((row) => row.id === newId) ?? inserted[0];
+    return {
+      ok: true,
+      data: inserted.find((row) => row.id === newId) ?? inserted[0],
+    } as const;
   } catch (e) {
+    const denied = forbiddenResult(e);
+    if (denied) return denied;
     rethrowKnownErrors(e);
     console.error((e as Error).message);
     throw new Error("Failed to duplicate document");

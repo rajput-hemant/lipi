@@ -1,5 +1,6 @@
 import { and, eq } from "drizzle-orm";
 
+import type { MutationErrorCode } from "@/lib/db/mutation-result";
 import type {
   WorkspaceMembershipRole,
   WorkspacePermission,
@@ -14,7 +15,10 @@ import { db } from "..";
 import { collaborators, documents, workspaces } from "../schema";
 
 export class MutationAuthError extends Error {
-  constructor(message = "Unauthorized") {
+  constructor(
+    message: string,
+    readonly code: MutationErrorCode = "INVALID"
+  ) {
     super(message);
     this.name = "MutationAuthError";
   }
@@ -64,7 +68,7 @@ export async function getWorkspaceMembershipRole(
   );
 
   if (!role) {
-    throw new MutationAuthError("Forbidden");
+    throw new MutationAuthError("Forbidden", "FORBIDDEN");
   }
 
   return { workspace, role };
@@ -81,7 +85,7 @@ export async function requireWorkspacePermission(
   );
 
   if (!hasWorkspacePermission(role, permission)) {
-    throw new MutationAuthError("Forbidden");
+    throw new MutationAuthError("Forbidden", "FORBIDDEN");
   }
 
   return { workspace, role };
@@ -89,7 +93,7 @@ export async function requireWorkspacePermission(
 
 export async function requireAuthenticatedUser() {
   const user = await getCurrentUser();
-  if (!user) throw new MutationAuthError("Unauthorized");
+  if (!user) throw new MutationAuthError("Unauthorized", "UNAUTHORIZED");
   return user;
 }
 

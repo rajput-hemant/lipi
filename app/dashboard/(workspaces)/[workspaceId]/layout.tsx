@@ -4,10 +4,14 @@ import { redirect } from "next/navigation";
 
 import { AppStateProvider } from "@/components/app-state-provider";
 import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realtime-provider";
+import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
 import { getCurrentUser } from "@/lib/auth";
 import { SIDEBAR_COLLAPSED_COOKIE } from "@/lib/dashboard/sidebar-cookie";
 import { getDocuments } from "@/lib/db/queries";
-import { getWorkspaceMembershipRole } from "@/lib/db/queries/mutation-auth";
+import {
+  getWorkspaceMembershipRole,
+  MutationAuthError,
+} from "@/lib/db/queries/mutation-auth";
 import { WorkspaceShell } from "../components/workspace-shell";
 
 export const instant = false;
@@ -21,10 +25,18 @@ export const WorkspaceLayout: React.FCC<{
 
   if (!user) redirect("/login");
 
-  const { workspace, role } = await getWorkspaceMembershipRole(
-    user.id,
-    workspaceId
-  );
+  let membership;
+  try {
+    membership = await getWorkspaceMembershipRole(user.id, workspaceId);
+  } catch (error) {
+    // A removed member's open session lands here; production strips thrown
+    // messages, so render the state instead of letting the boundary show it.
+    if (error instanceof MutationAuthError && error.code === "FORBIDDEN") {
+      return <WorkspaceAccessRevoked />;
+    }
+    throw error;
+  }
+  const { workspace, role } = membership;
 
   const cookieStore = await cookies();
 
