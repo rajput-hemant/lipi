@@ -15,7 +15,7 @@ export function Navbar() {
 
         <div className="flex shrink-0 items-center gap-2">
           <DocumentCollaborators />
-          <SearchCommand />
+          <SearchCommand className="md:w-56 lg:w-80" />
           <ThemeToggle />
         </div>
       </div>

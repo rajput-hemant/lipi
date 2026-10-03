@@ -270,7 +270,8 @@ function DocumentTreeItem({
       <span className="shrink-0">
         {node.icon ?
           node.icon
-        : <HugeiconsIcon icon={File01Icon} strokeWidth={2} />}
+        : <HugeiconsIcon icon={File01Icon} strokeWidth={2} className="size-4" />
+        }
       </span>
       <span>{node.title}</span>
     </>
