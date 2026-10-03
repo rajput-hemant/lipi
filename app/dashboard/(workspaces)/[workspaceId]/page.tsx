@@ -78,7 +78,6 @@ export default async function WorkspacePage({
       <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-8">
         {isInvalidInvite(invite) && <InviteNotice className="mb-6" />}
 
-        {/* Workspace Header */}
         <div className="flex flex-col gap-3 pb-8 border-b">
           <div className="flex items-center gap-3">
             {workspace.iconId ?
@@ -116,7 +115,6 @@ export default async function WorkspacePage({
           </div>
         </div>
 
-        {/* Workspace Content */}
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold tracking-tight text-foreground">
