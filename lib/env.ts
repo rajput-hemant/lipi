@@ -67,6 +67,7 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
     ENABLE_RATE_LIMITING: z.enum(["true", "false"]).default("false"),
     RATE_LIMITING_REQUESTS_PER_SECOND: z.coerce.number().default(50),
+    TRUSTED_PROXY_COUNT: z.coerce.number().int().min(0).default(0),
     DISABLE_AUTH_RATE_LIMIT: z
       .enum(["true", "false"])
       .optional()
