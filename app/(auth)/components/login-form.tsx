@@ -106,6 +106,7 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   type="email"
+                  autoComplete="email"
                   disabled={isSubmitting}
                   placeholder="you@domain.com"
                   className="shadow-sm"
@@ -127,6 +128,7 @@ export function LoginForm() {
                 <div className="relative">
                   <Input
                     type={isPassVisible ? "text" : "password"}
+                    autoComplete="current-password"
                     disabled={isSubmitting}
                     placeholder="••••••••••"
                     className="pr-8 shadow-sm"
