@@ -90,11 +90,35 @@ export const env = createEnv({
     UPLOADTHING_TOKEN: z.string().optional(),
     UPLOADTHING_SECRET: z.string().optional(),
     UPLOADTHING_APP_ID: z.string().optional(),
+
+    // Hosting platform variables
+    VERCEL: z.string().optional(),
+    VERCEL_URL: z.string().optional(),
+    NETLIFY: z.string().optional(),
+    CONTEXT: z.string().optional(),
+    DEPLOY_PRIME_URL: z.string().optional(),
+    PORT: z.coerce.number().int().positive().optional(),
+
+    // Read directly from process.env by the standalone realtime process
+    // (realtime/server.ts), which cannot load t3-env; declared here so the
+    // values are still validated and documented on the Next side.
+    LIPI_REALTIME_ALLOWED_ORIGINS: z.string().optional(),
+    LIPI_REALTIME_PORT: z.coerce.number().int().min(1).max(65535).optional(),
+    LIPI_REALTIME_ADDRESS: z.string().optional(),
   },
 
-  client: {},
+  client: {
+    NEXT_PUBLIC_LIPI_REALTIME_URL: z.string().optional(),
+    NEXT_PUBLIC_VERCEL_ENV: z.string().optional(),
+    NEXT_PUBLIC_VERCEL_BRANCH_URL: z.string().optional(),
+  },
 
-  experimental__runtimeEnv: {},
+  // Client variables must be referenced literally so Next inlines them.
+  experimental__runtimeEnv: {
+    NEXT_PUBLIC_LIPI_REALTIME_URL: process.env.NEXT_PUBLIC_LIPI_REALTIME_URL,
+    NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
+    NEXT_PUBLIC_VERCEL_BRANCH_URL: process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL,
+  },
 
   emptyStringAsUndefined: true,
 });

@@ -6,6 +6,8 @@ import { createRealtimePersistence } from "@/lib/realtime/persistence";
 import { createRealtimeServer } from "@/lib/realtime/server-factory";
 import { getRealtimeTokenSecret } from "@/lib/realtime/token";
 
+// Standalone Node process (realtime/bootstrap.mjs): it reads process.env directly
+// because it cannot load t3-env; the same variables are declared in lib/env.ts.
 function getAllowedOrigins() {
   const configured = process.env.LIPI_REALTIME_ALLOWED_ORIGINS;
   const origins = configured

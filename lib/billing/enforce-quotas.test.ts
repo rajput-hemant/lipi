@@ -8,9 +8,12 @@ import {
 import { PlanQuotaError } from "./errors";
 
 const mocks = vi.hoisted(() => ({
+  env: {} as { STRIPE_PRICE_ID_PRO?: string },
   getCurrentBillingSubscription: vi.fn(),
   rows: [] as { value: number }[][],
 }));
+
+vi.mock("@/lib/env", () => ({ env: mocks.env }));
 
 vi.mock("./subscription-access", () => ({
   getCurrentBillingSubscription: mocks.getCurrentBillingSubscription,
@@ -37,11 +40,11 @@ describe("plan quota enforcement", () => {
   beforeEach(() => {
     mocks.rows = [];
     mocks.getCurrentBillingSubscription.mockReset();
-    vi.stubEnv("STRIPE_PRICE_ID_PRO", "price_pro");
+    mocks.env.STRIPE_PRICE_ID_PRO = "price_pro";
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
+    mocks.env.STRIPE_PRICE_ID_PRO = undefined;
   });
 
   it("blocks a second workspace on the free plan", async () => {
@@ -105,7 +108,7 @@ describe("plan quota enforcement", () => {
   });
 
   it("treats a pro subscription as free when the pro price is unconfigured", async () => {
-    vi.stubEnv("STRIPE_PRICE_ID_PRO", undefined);
+    mocks.env.STRIPE_PRICE_ID_PRO = undefined;
     mocks.getCurrentBillingSubscription.mockResolvedValue(proSubscription);
     mocks.rows = [[{ value: 2 }]];
 

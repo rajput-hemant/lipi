@@ -1,3 +1,6 @@
+// Reads process.env directly: proxy code is kept free of t3-env so it loads
+// without the full schema (the proxy may run outside the app runtime).
+
 export type ProxyRateLimitMode = "disabled" | "active" | "misconfigured";
 
 export function getProxyRateLimitMode(): ProxyRateLimitMode {

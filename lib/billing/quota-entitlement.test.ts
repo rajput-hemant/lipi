@@ -6,9 +6,12 @@ import {
 } from "./quota-entitlement";
 
 const mocks = vi.hoisted(() => ({
+  env: {} as { STRIPE_PRICE_ID_PRO?: string },
   getCurrentBillingSubscription: vi.fn(),
   findWorkspace: vi.fn(),
 }));
+
+vi.mock("@/lib/env", () => ({ env: mocks.env }));
 
 vi.mock("./subscription-access", () => ({
   getCurrentBillingSubscription: mocks.getCurrentBillingSubscription,
@@ -20,11 +23,11 @@ vi.mock("@/lib/db", () => ({
 
 describe("userHasProPlanEntitlement", () => {
   afterEach(() => {
-    vi.unstubAllEnvs();
+    mocks.env.STRIPE_PRICE_ID_PRO = undefined;
   });
 
   it("requires the configured pro price and trialing status", async () => {
-    vi.stubEnv("STRIPE_PRICE_ID_PRO", "price_pro");
+    mocks.env.STRIPE_PRICE_ID_PRO = "price_pro";
 
     mocks.getCurrentBillingSubscription.mockResolvedValueOnce({
       status: "trialing",
@@ -45,12 +48,12 @@ describe("workspaceOwnerHasProPlanEntitlement", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.stubEnv("STRIPE_PRICE_ID_PRO", "price_pro");
+    mocks.env.STRIPE_PRICE_ID_PRO = "price_pro";
     mocks.findWorkspace.mockResolvedValue({ workspaceOwnerId: "owner" });
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
+    mocks.env.STRIPE_PRICE_ID_PRO = undefined;
   });
 
   it("uses the owner's subscription, so a Free editor gets Pro limits", async () => {

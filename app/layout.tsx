@@ -11,6 +11,7 @@ import { SkipLink } from "@/components/skip-link";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
+import { env } from "@/lib/env";
 import { fontHandwriting, fontHeading, fontMono, fontSans } from "@/lib/fonts";
 import { absoluteUrl, cn } from "@/lib/utils";
 
@@ -109,7 +110,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           <Toaster />
         </Providers>
 
-        {process.env.NEXT_PUBLIC_VERCEL_ENV ?
+        {env.NEXT_PUBLIC_VERCEL_ENV ?
           <Analytics />
         : null}
         <TailwindIndicator />

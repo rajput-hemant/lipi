@@ -1,12 +1,14 @@
 import * as z from "zod";
 
+import { env } from "@/lib/env";
+
 const tokenResponseSchema = z.object({
   token: z.string().min(1),
   readOnly: z.boolean(),
 });
 
 export function getRealtimeUrl() {
-  const configured = process.env.NEXT_PUBLIC_LIPI_REALTIME_URL;
+  const configured = env.NEXT_PUBLIC_LIPI_REALTIME_URL;
   if (configured) return configured;
   if (process.env.NODE_ENV === "development") return "ws://localhost:1234";
   return null;
