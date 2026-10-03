@@ -138,9 +138,11 @@ describe("restoreDocument root page quota", () => {
   });
 
   it("rejects restoring a root page past the owner's free limit", async () => {
-    await expect(restoreDocument("t")).rejects.toThrow(
-      "Root page limit reached"
-    );
+    await expect(restoreDocument("t")).resolves.toMatchObject({
+      ok: false,
+      code: "INVALID",
+      message: expect.stringContaining("Root page limit reached"),
+    });
     expect(mocks.update).not.toHaveBeenCalled();
   });
 
@@ -148,6 +150,6 @@ describe("restoreDocument root page quota", () => {
     mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(true);
     mocks.update.mockReturnValue({ set: () => ({ where: () => undefined }) });
 
-    await expect(restoreDocument("t")).resolves.toBe(1);
+    await expect(restoreDocument("t")).resolves.toEqual({ ok: true, data: 1 });
   });
 });

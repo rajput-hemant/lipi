@@ -2,16 +2,18 @@
 
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
+import { toast } from "sonner";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { AppStateContext, createAppStore } from "@/hooks/use-app-state";
+import { MutationFailureError } from "@/lib/db/mutation-result";
 import { Trash } from "./trash";
 import { Dialog } from "./ui/dialog";
 import { TooltipProvider } from "./ui/tooltip";
 
 const { restoreDocument, deleteDocumentPermanently } = vi.hoisted(() => ({
-  restoreDocument: vi.fn(async () => undefined),
-  deleteDocumentPermanently: vi.fn(async () => undefined),
+  restoreDocument: vi.fn(async () => ({ ok: true, data: 1 })),
+  deleteDocumentPermanently: vi.fn(async () => ({ ok: true, data: 1 })),
 }));
 
 vi.mock("@/lib/db/queries", () => ({
@@ -19,7 +21,10 @@ vi.mock("@/lib/db/queries", () => ({
   deleteDocumentPermanently,
 }));
 vi.mock("sonner", () => ({
-  toast: { promise: vi.fn(), error: vi.fn() },
+  toast: {
+    promise: vi.fn((pending: Promise<unknown>) => void pending.catch(() => {})),
+    error: vi.fn(),
+  },
 }));
 
 function doc(id: string, title: string) {
@@ -131,5 +136,86 @@ describe("Trash", () => {
   it("keeps restore and delete controls for editors", () => {
     render(undefined, "editor");
     expect(byLabel("Restore Alpha")).toBeTruthy();
+  });
+
+  describe("failed results", () => {
+    const failure = (
+      code: "FORBIDDEN" | "INVALID",
+      message: string
+    ): { ok: false; code: typeof code; message: string } => ({
+      ok: false,
+      code,
+      message,
+    });
+
+    // Runs the toast.promise error handler with what the promise rejected with.
+    async function rejection() {
+      const [promise, options] = vi.mocked(toast.promise).mock.calls[0] as [
+        Promise<unknown>,
+        { error: (error: unknown) => string },
+      ];
+      const error = await promise.catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(MutationFailureError);
+      return options.error(error);
+    }
+
+    it("explains a denied restore and restores the trash state", async () => {
+      restoreDocument.mockResolvedValueOnce(
+        failure("FORBIDDEN", "No.") as never
+      );
+      const { store } = render();
+      await act(async () => byLabel("Restore Alpha").click());
+
+      let message = "";
+      await act(async () => {
+        message = await rejection();
+      });
+      expect(message).toBe("You do not have permission to restore pages.");
+      expect(store.documents.find((d) => d.id === "a")?.inTrash).toBe(true);
+    });
+
+    it("shows the server message for a failed restore", async () => {
+      restoreDocument.mockResolvedValueOnce(
+        failure("INVALID", "Root page limit reached.") as never
+      );
+      render();
+      await act(async () => byLabel("Restore Alpha").click());
+
+      let message = "";
+      await act(async () => {
+        message = await rejection();
+      });
+      expect(message).toBe("Root page limit reached.");
+    });
+
+    it("explains a denied permanent delete and brings the page back", async () => {
+      deleteDocumentPermanently.mockResolvedValueOnce(
+        failure("FORBIDDEN", "No.") as never
+      );
+      const { store } = render();
+      await act(async () => byLabel("Delete Alpha permanently").click());
+      await act(async () => byText("Delete permanently")!.click());
+      expect(store.documents.map((d) => d.id)).toEqual(["b"]);
+
+      let message = "";
+      await act(async () => {
+        message = await rejection();
+      });
+      expect(message).toBe("You do not have permission to delete pages.");
+      expect(store.documents.map((d) => d.id)).toEqual(["a", "b"]);
+    });
+
+    it("falls back to a generic message for unexpected errors", async () => {
+      restoreDocument.mockRejectedValueOnce(new Error("stripped") as never);
+      render();
+      await act(async () => byLabel("Restore Alpha").click());
+
+      const [promise, options] = vi.mocked(toast.promise).mock.calls[0] as [
+        Promise<unknown>,
+        { error: (error: unknown) => string },
+      ];
+      const error = await promise.catch((e: unknown) => e);
+      expect(options.error(error)).toBe("Failed to restore page");
+    });
   });
 });

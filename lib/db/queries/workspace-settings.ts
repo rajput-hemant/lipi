@@ -12,6 +12,7 @@ import {
   authorizeWorkspaceTransfer,
   MutationAuthError,
 } from "./mutation-auth";
+import { runMutation } from "./mutation-failure";
 
 const updateWorkspaceSchema = z.object({
   workspaceId: z.uuid(),
@@ -37,103 +38,109 @@ function revalidateWorkspaceLists() {
 
 export async function updateWorkspaceSettings(input: unknown) {
   const parsed = updateWorkspaceSchema.parse(input);
-  await authorizeWorkspaceOwnerAction(parsed.workspaceId);
+  return runMutation(async () => {
+    await authorizeWorkspaceOwnerAction(parsed.workspaceId);
 
-  const patch: Partial<typeof workspaces.$inferInsert> = {};
-  if (parsed.title !== undefined) patch.title = parsed.title;
-  if (parsed.iconId !== undefined) patch.iconId = parsed.iconId;
-  if (parsed.logo !== undefined) {
-    patch.logo = parsed.logo === "" ? null : parsed.logo;
-  }
+    const patch: Partial<typeof workspaces.$inferInsert> = {};
+    if (parsed.title !== undefined) patch.title = parsed.title;
+    if (parsed.iconId !== undefined) patch.iconId = parsed.iconId;
+    if (parsed.logo !== undefined) {
+      patch.logo = parsed.logo === "" ? null : parsed.logo;
+    }
 
-  if (Object.keys(patch).length === 0) {
-    throw new MutationAuthError("No changes provided");
-  }
+    if (Object.keys(patch).length === 0) {
+      throw new MutationAuthError("No changes provided");
+    }
 
-  const [updated] = await db
-    .update(workspaces)
-    .set(patch)
-    .where(eq(workspaces.id, parsed.workspaceId))
-    .returning();
+    const [updated] = await db
+      .update(workspaces)
+      .set(patch)
+      .where(eq(workspaces.id, parsed.workspaceId))
+      .returning();
 
-  if (!updated) {
-    throw new MutationAuthError("Workspace not found");
-  }
+    if (!updated) {
+      throw new MutationAuthError("Workspace not found");
+    }
 
-  revalidateWorkspaceLists();
-  return updated;
+    revalidateWorkspaceLists();
+    return updated;
+  });
 }
 
 export async function transferWorkspaceOwnership(input: unknown) {
   const parsed = transferOwnershipSchema.parse(input);
-  const user = await authorizeWorkspaceTransfer(parsed.workspaceId);
+  return runMutation(async () => {
+    const user = await authorizeWorkspaceTransfer(parsed.workspaceId);
 
-  if (parsed.newOwnerUserId === user.id) {
-    throw new MutationAuthError("Choose a different member");
-  }
+    if (parsed.newOwnerUserId === user.id) {
+      throw new MutationAuthError("Choose a different member");
+    }
 
-  const [targetCollaborator] = await db
-    .select()
-    .from(collaborators)
-    .where(
-      and(
-        eq(collaborators.userId, parsed.newOwnerUserId),
-        eq(collaborators.workspaceId, parsed.workspaceId)
+    const [targetCollaborator] = await db
+      .select()
+      .from(collaborators)
+      .where(
+        and(
+          eq(collaborators.userId, parsed.newOwnerUserId),
+          eq(collaborators.workspaceId, parsed.workspaceId)
+        )
       )
-    )
-    .limit(1);
+      .limit(1);
 
-  if (!targetCollaborator) {
-    throw new MutationAuthError("New owner must be an existing collaborator");
-  }
+    if (!targetCollaborator) {
+      throw new MutationAuthError("New owner must be an existing collaborator");
+    }
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(workspaces)
-      .set({ workspaceOwnerId: parsed.newOwnerUserId })
-      .where(eq(workspaces.id, parsed.workspaceId));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(workspaces)
+        .set({ workspaceOwnerId: parsed.newOwnerUserId })
+        .where(eq(workspaces.id, parsed.workspaceId));
 
-    await tx
-      .delete(collaborators)
-      .where(eq(collaborators.id, targetCollaborator.id));
+      await tx
+        .delete(collaborators)
+        .where(eq(collaborators.id, targetCollaborator.id));
 
-    const previousOwnerMembership = await tx.query.collaborators.findFirst({
-      where: and(
-        eq(collaborators.userId, user.id),
-        eq(collaborators.workspaceId, parsed.workspaceId)
-      ),
+      const previousOwnerMembership = await tx.query.collaborators.findFirst({
+        where: and(
+          eq(collaborators.userId, user.id),
+          eq(collaborators.workspaceId, parsed.workspaceId)
+        ),
+      });
+
+      if (previousOwnerMembership) {
+        await tx
+          .update(collaborators)
+          .set({ role: "editor" })
+          .where(eq(collaborators.id, previousOwnerMembership.id));
+      } else {
+        await tx.insert(collaborators).values({
+          workspaceId: parsed.workspaceId,
+          userId: user.id,
+          role: "editor",
+        });
+      }
     });
 
-    if (previousOwnerMembership) {
-      await tx
-        .update(collaborators)
-        .set({ role: "editor" })
-        .where(eq(collaborators.id, previousOwnerMembership.id));
-    } else {
-      await tx.insert(collaborators).values({
-        workspaceId: parsed.workspaceId,
-        userId: user.id,
-        role: "editor",
-      });
-    }
+    revalidateWorkspaceLists();
   });
-
-  revalidateWorkspaceLists();
 }
 
 export async function deleteWorkspace(input: unknown) {
   const parsed = deleteWorkspaceSchema.parse(input);
-  await authorizeWorkspaceDelete(parsed.workspaceId);
+  return runMutation(async () => {
+    await authorizeWorkspaceDelete(parsed.workspaceId);
 
-  const [deleted] = await db
-    .delete(workspaces)
-    .where(eq(workspaces.id, parsed.workspaceId))
-    .returning({ id: workspaces.id });
+    const [deleted] = await db
+      .delete(workspaces)
+      .where(eq(workspaces.id, parsed.workspaceId))
+      .returning({ id: workspaces.id });
 
-  if (!deleted) {
-    throw new MutationAuthError("Workspace not found");
-  }
+    if (!deleted) {
+      throw new MutationAuthError("Workspace not found");
+    }
 
-  revalidateWorkspaceLists();
-  return deleted;
+    revalidateWorkspaceLists();
+    return deleted;
+  });
 }

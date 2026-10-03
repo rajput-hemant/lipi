@@ -27,11 +27,20 @@ vi.mock("./mutation-auth", async (importOriginal) => ({
   authorizeWorkspaceMutation,
 }));
 
-const { createDocument, duplicateDocument, softDeleteDocumentTree } =
-  await import("./document");
+const {
+  createDocument,
+  deleteDocumentPermanently,
+  duplicateDocument,
+  restoreDocument,
+  softDeleteDocumentTree,
+} = await import("./document");
 
 const forbidden = () => new MutationAuthError("Forbidden", "FORBIDDEN");
-const denied = { ok: false, code: "FORBIDDEN" };
+const denied = {
+  ok: false,
+  code: "FORBIDDEN",
+  message: "You do not have permission to do that.",
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -68,11 +77,29 @@ describe("document mutations for a forbidden caller", () => {
     await expect(softDeleteDocumentTree("doc-1")).resolves.toEqual(denied);
   });
 
+  it("returns a FORBIDDEN result from restoreDocument", async () => {
+    authorizeDocumentMutation.mockRejectedValue(forbidden());
+
+    await expect(restoreDocument("doc-1")).resolves.toEqual(denied);
+  });
+
+  it("returns a FORBIDDEN result from deleteDocumentPermanently", async () => {
+    authorizeDocumentMutation.mockRejectedValue(forbidden());
+
+    await expect(deleteDocumentPermanently("doc-1")).resolves.toEqual(denied);
+  });
+
   it("still throws for non-permission failures", async () => {
     authorizeDocumentMutation.mockRejectedValue(new Error("db down"));
 
     await expect(softDeleteDocumentTree("doc-1")).rejects.toThrow(
       "Failed to move document to trash"
+    );
+    await expect(restoreDocument("doc-1")).rejects.toThrow(
+      "Failed to restore document"
+    );
+    await expect(deleteDocumentPermanently("doc-1")).rejects.toThrow(
+      "Failed to delete document"
     );
   });
 });

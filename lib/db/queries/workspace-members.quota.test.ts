@@ -19,12 +19,10 @@ vi.mock("./workspace-member-quota", () => ({
   ensureOwnerCollaboratorQuota: mocks.ensureOwnerCollaboratorQuota,
 }));
 
-vi.mock("./mutation-auth", () => ({
+vi.mock("./mutation-auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("./mutation-auth")>()),
   authorizeWorkspaceMemberManagement: mocks.authorizeWorkspaceMemberManagement,
   requireAuthenticatedUser: mocks.requireAuthenticatedUser,
-  MutationAuthError: class MutationAuthError extends Error {
-    name = "MutationAuthError";
-  },
   requireWorkspacePermission: vi.fn(),
   getWorkspaceMembershipRole: vi.fn(),
 }));
@@ -103,11 +101,13 @@ describe("workspace member invite quota enforcement", () => {
   });
 
   it("checks owner quota before creating an invite", async () => {
-    await createWorkspaceCollaboratorInvite({
-      workspaceId,
-      email: "new@example.com",
-      role: "editor",
-    });
+    await expect(
+      createWorkspaceCollaboratorInvite({
+        workspaceId,
+        email: "new@example.com",
+        role: "editor",
+      })
+    ).resolves.toMatchObject({ ok: true });
 
     expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1");
   });
@@ -118,7 +118,7 @@ describe("workspace member invite quota enforcement", () => {
     expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1");
   });
 
-  it("surfaces quota errors when creating an invite", async () => {
+  it("returns quota errors when creating an invite", async () => {
     const { MutationAuthError } = await import("./mutation-auth");
     mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
       new MutationAuthError("Free plan allows two collaborators.")
@@ -130,7 +130,11 @@ describe("workspace member invite quota enforcement", () => {
         email: "new@example.com",
         role: "editor",
       })
-    ).rejects.toThrow("Free plan allows two collaborators.");
+    ).resolves.toEqual({
+      ok: false,
+      code: "INVALID",
+      message: "Free plan allows two collaborators.",
+    });
   });
 
   it("surfaces quota errors when accepting an invite", async () => {

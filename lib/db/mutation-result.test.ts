@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   isMutationDenied,
-  MutationDeniedError,
+  mutationErrorMessage,
+  MutationFailureError,
   unwrapMutation,
 } from "./mutation-result";
 
@@ -13,12 +14,32 @@ describe("unwrapMutation", () => {
     ).resolves.toBe(3);
   });
 
-  it("rejects with a denial error for a FORBIDDEN result", async () => {
+  it("rejects with a typed error carrying the failure message", async () => {
     const error = await unwrapMutation(
-      Promise.resolve({ ok: false, code: "FORBIDDEN" } as const)
+      Promise.resolve({
+        ok: false,
+        code: "QUOTA_EXCEEDED",
+        message: "Upgrade to Pro.",
+      } as const)
     ).catch((e: unknown) => e);
 
-    expect(error).toBeInstanceOf(MutationDeniedError);
+    expect(error).toBeInstanceOf(MutationFailureError);
+    expect(error).toMatchObject({
+      code: "QUOTA_EXCEEDED",
+      message: "Upgrade to Pro.",
+    });
+    expect(isMutationDenied(error)).toBe(false);
+  });
+
+  it("marks a FORBIDDEN result as a denial", async () => {
+    const error = await unwrapMutation(
+      Promise.resolve({
+        ok: false,
+        code: "FORBIDDEN",
+        message: "No.",
+      } as const)
+    ).catch((e: unknown) => e);
+
     expect(isMutationDenied(error)).toBe(true);
   });
 
@@ -30,5 +51,14 @@ describe("unwrapMutation", () => {
 
     expect(error).toBe(failure);
     expect(isMutationDenied(error)).toBe(false);
+  });
+});
+
+describe("mutationErrorMessage", () => {
+  it("uses the failure message, else the fallback", () => {
+    expect(
+      mutationErrorMessage(new MutationFailureError("INVALID", "Bad"), "Oops")
+    ).toBe("Bad");
+    expect(mutationErrorMessage(new Error("stripped"), "Oops")).toBe("Oops");
   });
 });

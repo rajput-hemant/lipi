@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { mutationErrorMessage, unwrapMutation } from "@/lib/db/mutation-result";
 import { createWorkspace } from "@/lib/db/queries";
 
 const workspaceSchema = z.object({
@@ -47,18 +48,20 @@ export function WorkspaceForm({ user }: WorkspaceFormProps) {
 
   async function submitHandler({ name }: FormData) {
     toast.promise(
-      createWorkspace({
-        title: name,
-        iconId: selectedEmoji,
-        workspaceOwnerId: user.id!,
-      }),
+      unwrapMutation(
+        createWorkspace({
+          title: name,
+          iconId: selectedEmoji,
+          workspaceOwnerId: user.id!,
+        })
+      ),
       {
         loading: `Creating your workspace "${name}"`,
         success: (data) => {
           router.replace(`/dashboard/${data.id}`);
           return `Your workspace "${name}" was created successfully.`;
         },
-        error: (e) => e.message,
+        error: (e) => mutationErrorMessage(e, "Failed to create workspace."),
       }
     );
   }
