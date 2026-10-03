@@ -1,6 +1,6 @@
 import type { Subscription } from "@/types/db";
 
-const CURRENT_STATUSES = new Set<Subscription["status"]>([
+export const CURRENT_STATUSES = new Set<Subscription["status"]>([
   "active",
   "trialing",
 ]);

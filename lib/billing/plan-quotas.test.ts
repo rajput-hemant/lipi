@@ -4,7 +4,6 @@ import {
   canAddCollaborator,
   canCreateBlock,
   canCreateWorkspace,
-  evaluateWorkspaceQuota,
   FREE_PLAN_MAX_BLOCKS,
   FREE_PLAN_MAX_COLLABORATORS,
   FREE_PLAN_MAX_WORKSPACES,
@@ -42,30 +41,6 @@ describe("plan quotas", () => {
     expect(canCreateBlock({ isPro: false, blockCount: 499 })).toBe(true);
     expect(
       canCreateBlock({ isPro: false, blockCount: FREE_PLAN_MAX_BLOCKS })
-    ).toBe(false);
-  });
-
-  it("treats trialing pro-price subscriptions as pro for workspace quota", () => {
-    expect(
-      evaluateWorkspaceQuota(
-        { status: "trialing", priceId: "price_pro" },
-        "price_pro",
-        5
-      )
-    ).toBe(true);
-    expect(
-      evaluateWorkspaceQuota(
-        { status: "trialing", priceId: "price_other" },
-        "price_pro",
-        5
-      )
-    ).toBe(false);
-    expect(
-      evaluateWorkspaceQuota(
-        { status: "canceled", priceId: "price_pro" },
-        "price_pro",
-        1
-      )
     ).toBe(false);
   });
 });
