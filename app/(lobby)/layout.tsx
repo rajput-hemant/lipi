@@ -7,7 +7,11 @@ export default function LobbyLayout({ children }: React.PropsWithChildren) {
   return (
     <>
       <LobbyNavbar />
-      <main id="main-content" className="container space-y-10">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="container space-y-10 outline-none"
+      >
         {children}
       </main>
       <SiteFooter />
