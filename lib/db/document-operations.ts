@@ -106,23 +106,21 @@ export function collectRestoreTargetIds(
   documents: DocumentRecord[],
   documentId: string
 ): string[] {
+  const byId = new Map(documents.map((document) => [document.id, document]));
   const trashedAncestors = collectTrashedAncestorIds(documents, documentId);
   const trashedDescendants = collectDescendantIds(documents, documentId).filter(
-    (id) => byIdIn(documents, id)?.inTrash
+    (id) => byId.get(id)?.inTrash
   );
 
   return [...new Set([...trashedAncestors, documentId, ...trashedDescendants])];
-}
-
-function byIdIn(documents: DocumentRecord[], id: string) {
-  return documents.find((document) => document.id === id);
 }
 
 export function assertPermanentDeleteAllowed(
   documents: DocumentRecord[],
   documentId: string
 ) {
-  const root = byIdIn(documents, documentId);
+  const byId = new Map(documents.map((document) => [document.id, document]));
+  const root = byId.get(documentId);
   if (!root) {
     throw new DocumentOperationError("Document not found");
   }
@@ -138,7 +136,7 @@ export function assertPermanentDeleteAllowed(
     ...collectDescendantIds(documents, documentId),
   ];
   for (const id of subtreeIds) {
-    const row = byIdIn(documents, id);
+    const row = byId.get(id);
     if (row && !row.inTrash) {
       throw new DocumentOperationError(
         "Cannot permanently delete a document with active descendants"
@@ -146,7 +144,7 @@ export function assertPermanentDeleteAllowed(
     }
   }
 
-  return subtreeIds.filter((id) => byIdIn(documents, id)?.inTrash);
+  return subtreeIds.filter((id) => byId.get(id)?.inTrash);
 }
 
 export type DuplicateNode = {

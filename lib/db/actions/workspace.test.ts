@@ -59,13 +59,6 @@ describe("createWorkspace", () => {
     });
   });
 
-  it("returns a FORBIDDEN result when creating for another owner", async () => {
-    await expect(
-      createWorkspace({ ...workspace, workspaceOwnerId: "someone-else" })
-    ).resolves.toMatchObject({ ok: false, code: "FORBIDDEN" });
-    expect(mocks.assertUserCanCreateWorkspace).not.toHaveBeenCalled();
-  });
-
   it("returns an UNAUTHORIZED result without a session", async () => {
     mocks.requireAuthenticatedUser.mockRejectedValue(
       new MutationAuthError("Unauthorized", "UNAUTHORIZED")

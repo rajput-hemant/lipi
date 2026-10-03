@@ -12,6 +12,7 @@ import { db } from "..";
 import {
   authorizeWorkspaceMemberManagement,
   getWorkspaceMembershipRole,
+  getWorkspaceOrThrow,
   MutationAuthError,
   requireAuthenticatedUser,
   requireWorkspacePermission,
@@ -51,13 +52,7 @@ export async function listWorkspaceMembers(workspaceId: string) {
   const user = await requireAuthenticatedUser();
   await requireWorkspacePermission(user.id, workspaceId, "workspace:read");
 
-  const workspace = await db.query.workspaces.findFirst({
-    where: eq(workspaces.id, workspaceId),
-  });
-
-  if (!workspace) {
-    throw new MutationAuthError("Workspace not found");
-  }
+  const workspace = await getWorkspaceOrThrow(workspaceId);
 
   const owner = await db.query.users.findFirst({
     where: eq(users.id, workspace.workspaceOwnerId),
@@ -113,13 +108,7 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
     const user = await authorizeWorkspaceMemberManagement(parsed.workspaceId);
     const email = normalizeEmail(parsed.email);
 
-    const workspace = await db.query.workspaces.findFirst({
-      where: eq(workspaces.id, parsed.workspaceId),
-    });
-
-    if (!workspace) {
-      throw new MutationAuthError("Workspace not found");
-    }
+    const workspace = await getWorkspaceOrThrow(parsed.workspaceId);
 
     const owner = await db.query.users.findFirst({
       where: eq(users.id, workspace.workspaceOwnerId),
@@ -271,13 +260,7 @@ export async function acceptWorkspaceInvite(token: string) {
     );
   }
 
-  const workspace = await db.query.workspaces.findFirst({
-    where: eq(workspaces.id, invite.workspaceId),
-  });
-
-  if (!workspace) {
-    throw new MutationAuthError("Workspace not found");
-  }
+  const workspace = await getWorkspaceOrThrow(invite.workspaceId);
 
   const existing = await db.query.collaborators.findFirst({
     where: and(

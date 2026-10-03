@@ -14,9 +14,7 @@ export type DocumentTreeNode = DocumentRecord & {
   children: DocumentTreeNode[];
 };
 
-export function buildDocumentTree(
-  documents: DocumentRecord[]
-): DocumentTreeNode[] {
+function groupByParent(documents: DocumentRecord[]) {
   const byParent = new Map<string | null, DocumentRecord[]>();
 
   for (const document of documents) {
@@ -28,6 +26,14 @@ export function buildDocumentTree(
       byParent.set(parentKey, [document]);
     }
   }
+
+  return byParent;
+}
+
+export function buildDocumentTree(
+  documents: DocumentRecord[]
+): DocumentTreeNode[] {
+  const byParent = groupByParent(documents);
 
   const build = (parentId: string | null): DocumentTreeNode[] =>
     (byParent.get(parentId) ?? []).map((document) => ({
@@ -66,16 +72,7 @@ export function collectDescendantIds(
   documents: DocumentRecord[],
   rootId: string
 ): string[] {
-  const byParent = new Map<string | null, DocumentRecord[]>();
-  for (const document of documents) {
-    const parentKey = document.parentId ?? null;
-    const siblings = byParent.get(parentKey);
-    if (siblings) {
-      siblings.push(document);
-    } else {
-      byParent.set(parentKey, [document]);
-    }
-  }
+  const byParent = groupByParent(documents);
 
   const ids: string[] = [];
   const visited = new Set<string>([rootId]);

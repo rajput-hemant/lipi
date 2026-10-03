@@ -1,9 +1,11 @@
 import { unstable_cache as cache } from "next/cache";
 import { and, eq, notExists } from "drizzle-orm";
 
+import type { WorkspaceListKind } from "./workspace-list-tags";
+
 import { logger } from "@/lib/logger";
 import { db } from "..";
-import { collaborators, users, workspaces } from "../schema";
+import { collaborators, workspaces } from "../schema";
 import { workspaceListTag } from "./workspace-list-tags";
 
 // Not a "use server" module: these take a caller-supplied userId, so they must
@@ -41,38 +43,47 @@ export async function listWorkspacesForSwitcher(userId: string) {
   };
 }
 
+/** Caches one user's list under its tag; failures are logged and surfaced generically. */
+function cachedWorkspaceList<T>(
+  kind: WorkspaceListKind,
+  userId: string,
+  load: () => Promise<T>
+) {
+  return cache(
+    async () => {
+      try {
+        return await load();
+      } catch (e) {
+        logger.error(`Failed to fetch ${kind} workspaces!`, e);
+        throw new Error(`Failed to fetch ${kind} workspaces!`);
+      }
+    },
+    [`get_${kind}_workspaces`, userId],
+    { tags: [workspaceListTag(kind, userId)] }
+  )();
+}
+
 /**
  * @param userID User ID
  * @returns Private workspaces
  */
 export async function getPrivateWorkspaces(userID: string) {
-  return cache(
-    async () => {
-      try {
-        const data = await db
-          .select()
-          .from(workspaces)
-          .where(
-            and(
-              eq(workspaces.workspaceOwnerId, userID),
-              notExists(
-                db
-                  .select()
-                  .from(collaborators)
-                  .where(eq(collaborators.workspaceId, workspaces.id))
-              )
-            )
-          );
-
-        return data;
-      } catch (e) {
-        logger.error("Failed to fetch private workspaces!", e);
-        throw new Error("Failed to fetch private workspaces!");
-      }
-    },
-    ["get_private_workspaces", userID],
-    { tags: [workspaceListTag("private", userID)] }
-  )();
+  return cachedWorkspaceList("private", userID, () =>
+    db
+      .select()
+      .from(workspaces)
+      .where(
+        and(
+          eq(workspaces.workspaceOwnerId, userID),
+          notExists(
+            db
+              .select()
+              .from(collaborators)
+              .where(eq(collaborators.workspaceId, workspaces.id))
+          )
+        )
+      )
+  );
 }
 
 /**
@@ -80,25 +91,15 @@ export async function getPrivateWorkspaces(userID: string) {
  * @returns Collaborating workspaces
  */
 export async function getCollaboratingWorkspaces(userId: string) {
-  return cache(
-    async () => {
-      try {
-        const data = await db
-          .select()
-          .from(users)
-          .innerJoin(collaborators, eq(users.id, collaborators.userId))
-          .innerJoin(workspaces, eq(collaborators.workspaceId, workspaces.id))
-          .where(eq(users.id, userId));
+  return cachedWorkspaceList("collaborating", userId, async () => {
+    const data = await db
+      .select()
+      .from(collaborators)
+      .innerJoin(workspaces, eq(collaborators.workspaceId, workspaces.id))
+      .where(eq(collaborators.userId, userId));
 
-        return data.map(({ workspaces }) => workspaces);
-      } catch (e) {
-        logger.error("Failed to fetch collaborating workspaces!", e);
-        throw new Error("Failed to fetch collaborating workspaces!");
-      }
-    },
-    ["get_collaborating_workspaces", userId],
-    { tags: [workspaceListTag("collaborating", userId)] }
-  )();
+    return data.map(({ workspaces }) => workspaces);
+  });
 }
 
 /**
@@ -106,26 +107,14 @@ export async function getCollaboratingWorkspaces(userId: string) {
  * @returns Shared workspaces
  */
 export async function getSharedWorkspaces(userId: string) {
-  return cache(
-    async () => {
-      try {
-        const data = await db
-          .selectDistinct()
-          .from(workspaces)
-          .orderBy(workspaces.createdAt)
-          .innerJoin(
-            collaborators,
-            eq(workspaces.id, collaborators.workspaceId)
-          )
-          .where(eq(workspaces.workspaceOwnerId, userId));
+  return cachedWorkspaceList("shared", userId, async () => {
+    const data = await db
+      .selectDistinct()
+      .from(workspaces)
+      .orderBy(workspaces.createdAt)
+      .innerJoin(collaborators, eq(workspaces.id, collaborators.workspaceId))
+      .where(eq(workspaces.workspaceOwnerId, userId));
 
-        return data.map(({ workspaces }) => workspaces);
-      } catch (e) {
-        logger.error("Failed to fetch shared workspaces!", e);
-        throw new Error("Failed to fetch shared workspaces!");
-      }
-    },
-    ["get_shared_workspaces", userId],
-    { tags: [workspaceListTag("shared", userId)] }
-  )();
+    return data.map(({ workspaces }) => workspaces);
+  });
 }

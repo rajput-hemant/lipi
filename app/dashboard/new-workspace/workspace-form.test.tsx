@@ -31,7 +31,7 @@ async function submit(name: string) {
   document.body.append(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(<WorkspaceForm user={{ id: "u1" } as never} />);
+    root.render(<WorkspaceForm />);
   });
 
   const input = container.querySelector<HTMLInputElement>("input")!;
@@ -85,7 +85,6 @@ describe("WorkspaceForm", () => {
     expect(createWorkspace).toHaveBeenCalledWith({
       title: "Team",
       iconId: "💼",
-      workspaceOwnerId: "u1",
     });
     const { result, options } = await handlers();
     expect(options.error(result)).toBe("Free plan allows one workspace.");

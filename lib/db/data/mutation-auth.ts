@@ -24,15 +24,16 @@ export class MutationAuthError extends Error {
   }
 }
 
-export function isWorkspaceMember(
-  userId: string,
-  workspace: { workspaceOwnerId: string },
-  collaboratorUserIds: string[]
-) {
-  return (
-    workspace.workspaceOwnerId === userId ||
-    collaboratorUserIds.includes(userId)
-  );
+export async function getWorkspaceOrThrow(workspaceId: string) {
+  const workspace = await db.query.workspaces.findFirst({
+    where: eq(workspaces.id, workspaceId),
+  });
+
+  if (!workspace) {
+    throw new MutationAuthError("Workspace not found");
+  }
+
+  return workspace;
 }
 
 export async function getWorkspaceMembershipRole(
@@ -42,13 +43,7 @@ export async function getWorkspaceMembershipRole(
   workspace: typeof workspaces.$inferSelect;
   role: WorkspaceMembershipRole;
 }> {
-  const workspace = await db.query.workspaces.findFirst({
-    where: eq(workspaces.id, workspaceId),
-  });
-
-  if (!workspace) {
-    throw new MutationAuthError("Workspace not found");
-  }
+  const workspace = await getWorkspaceOrThrow(workspaceId);
 
   if (workspace.workspaceOwnerId === userId) {
     return { workspace, role: "owner" };
@@ -146,57 +141,22 @@ export async function authorizeDocumentMutation(documentId: string) {
   return { user, document };
 }
 
-export async function authorizeWorkspaceMutation(
-  workspaceId: string | null | undefined
-) {
-  const user = await requireAuthenticatedUser();
-  if (!workspaceId) {
-    throw new MutationAuthError("Invalid workspace");
-  }
-  await requireWorkspacePermission(user.id, workspaceId, "document:write");
-  return user;
+function authorizeWorkspace(permission: WorkspacePermission) {
+  return async (workspaceId: string | null | undefined) => {
+    const user = await requireAuthenticatedUser();
+    if (!workspaceId) {
+      throw new MutationAuthError("Invalid workspace");
+    }
+    await requireWorkspacePermission(user.id, workspaceId, permission);
+    return user;
+  };
 }
 
-export async function authorizeWorkspaceOwnerAction(
-  workspaceId: string | null | undefined
-) {
-  const user = await requireAuthenticatedUser();
-  if (!workspaceId) {
-    throw new MutationAuthError("Invalid workspace");
-  }
-  await requireWorkspacePermission(user.id, workspaceId, "workspace:settings");
-  return user;
-}
-
-export async function authorizeWorkspaceMemberManagement(
-  workspaceId: string | null | undefined
-) {
-  const user = await requireAuthenticatedUser();
-  if (!workspaceId) {
-    throw new MutationAuthError("Invalid workspace");
-  }
-  await requireWorkspacePermission(user.id, workspaceId, "member:manage");
-  return user;
-}
-
-export async function authorizeWorkspaceTransfer(
-  workspaceId: string | null | undefined
-) {
-  const user = await requireAuthenticatedUser();
-  if (!workspaceId) {
-    throw new MutationAuthError("Invalid workspace");
-  }
-  await requireWorkspacePermission(user.id, workspaceId, "workspace:transfer");
-  return user;
-}
-
-export async function authorizeWorkspaceDelete(
-  workspaceId: string | null | undefined
-) {
-  const user = await requireAuthenticatedUser();
-  if (!workspaceId) {
-    throw new MutationAuthError("Invalid workspace");
-  }
-  await requireWorkspacePermission(user.id, workspaceId, "workspace:delete");
-  return user;
-}
+export const authorizeWorkspaceMutation = authorizeWorkspace("document:write");
+export const authorizeWorkspaceOwnerAction =
+  authorizeWorkspace("workspace:settings");
+export const authorizeWorkspaceMemberManagement =
+  authorizeWorkspace("member:manage");
+export const authorizeWorkspaceTransfer =
+  authorizeWorkspace("workspace:transfer");
+export const authorizeWorkspaceDelete = authorizeWorkspace("workspace:delete");

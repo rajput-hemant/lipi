@@ -9,8 +9,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import type { SessionUser } from "@/lib/auth/types";
-
 import { EmojiPicker } from "@/components/emoji-picker";
 import { useSubscriptionModal } from "@/components/subscription-modal-provider";
 import { Button } from "@/components/ui/button";
@@ -32,9 +30,7 @@ const workspaceSchema = z.object({
 
 type FormData = z.infer<typeof workspaceSchema>;
 
-type WorkspaceFormProps = { user: SessionUser };
-
-export function WorkspaceForm({ user }: WorkspaceFormProps) {
+export function WorkspaceForm() {
   const router = useRouter();
   const { hasProEntitlement } = useSubscriptionModal();
 
@@ -48,13 +44,7 @@ export function WorkspaceForm({ user }: WorkspaceFormProps) {
 
   async function submitHandler({ name }: FormData) {
     toast.promise(
-      unwrapMutation(
-        createWorkspace({
-          title: name,
-          iconId: selectedEmoji,
-          workspaceOwnerId: user.id!,
-        })
-      ),
+      unwrapMutation(createWorkspace({ title: name, iconId: selectedEmoji })),
       {
         loading: `Creating your workspace "${name}"`,
         success: (data) => {
