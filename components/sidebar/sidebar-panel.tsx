@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   Delete02Icon,
   GridIcon,
@@ -172,6 +173,12 @@ export function SidebarPanel({
                 <p className="line-clamp-1 text-xs text-muted-foreground">
                   Free plan
                 </p>
+                <Link
+                  href="/dashboard/change-password"
+                  className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:underline focus-visible:outline-none"
+                >
+                  Change password
+                </Link>
               </div>
               <SignOut
                 size="icon"
@@ -198,6 +205,12 @@ export function SidebarPanel({
               <p className="line-clamp-1 text-xs text-muted-foreground">
                 Free plan
               </p>
+              <Link
+                href="/dashboard/change-password"
+                className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:underline focus-visible:outline-none"
+              >
+                Change password
+              </Link>
             </div>
             <SignOut
               size="icon"
