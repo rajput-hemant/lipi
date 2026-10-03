@@ -1,8 +1,6 @@
 # Workspaces, roles and invites
 
 Status: PARTIAL live proof (create, invite, accept, viewer role). Invite acceptance has a confirmed bug, LIP-V019. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/workspaces-roles-invites/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
-Related ledger IDs: LIP-V005, LIP-V008, LIP-V011
 
 Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts`), email-token invites (`lib/workspace/workspace-invites.ts`, `app/invite/[token]/route.ts`), settings dialog (`components/settings.tsx`), ownership transfer and workspace deletion.
 

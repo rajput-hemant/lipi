@@ -1,8 +1,6 @@
 # Realtime collaboration and presence
 
 Status: PARTIAL live proof (two-user live edit, presence label, viewer read-only). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/realtime-collaboration/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
-Related ledger IDs: LIP-V009, LIP-V016
 
 Hocuspocus 4.7 + Yjs server (`realtime/server.ts`, `realtime/bootstrap.mjs`, `lib/realtime/*`) with signed 60 s room tokens from `/api/realtime/token`, presence (`Page collaborators`), viewer read-only enforcement. See [docs/guides/realtime.md](../../../../docs/guides/realtime.md).
 
