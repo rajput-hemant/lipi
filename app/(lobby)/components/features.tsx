@@ -12,6 +12,21 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 
+const treeRows = [
+  { icon: "🏠", label: "Team Overview" },
+  { icon: Folder01Icon, label: "Product Specs" },
+  { icon: "📋", label: "Q3 Product Roadmap", active: true },
+  { icon: File01Icon, label: "Design System" },
+  { icon: File01Icon, label: "Weekly Notes" },
+  { icon: "💡", label: "Brainstorming" },
+];
+
+const doneItems = [
+  "Integrate BlockNote rich text document editor",
+  "Shared document editing in workspaces",
+  "Command+K workspace full-text document search",
+];
+
 export function Features() {
   return (
     <section id="features" className="space-y-8">
@@ -26,9 +41,7 @@ export function Features() {
         </p>
       </div>
 
-      {/* Composed Editor Product Mock */}
       <div className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl">
-        {/* Window Chrome Header */}
         <div className="flex h-11 items-center justify-between border-b border-border bg-muted/50 px-4">
           <div className="flex items-center gap-2">
             <span className="size-3 rounded-full bg-[#ef4444]" />
@@ -90,11 +103,8 @@ export function Features() {
           </div>
         </div>
 
-        {/* Workspace Body: Sidebar + Editor Canvas */}
         <div className="flex min-h-[460px]">
-          {/* Mock Sidebar */}
           <div className="hidden w-56 flex-col border-r border-border bg-muted/20 p-3 md:flex">
-            {/* Search Mock */}
             <div className="mb-3 flex items-center justify-between rounded-md border border-input bg-background px-2.5 py-1.5 text-xs text-muted-foreground shadow-xs">
               <span className="flex items-center gap-1.5">
                 <HugeiconsIcon
@@ -107,45 +117,34 @@ export function Features() {
               <Kbd className="text-[10px]">⌘K</Kbd>
             </div>
 
-            {/* Tree Navigation */}
             <div className="space-y-1 text-xs">
               <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Workspace
               </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <span>🏠</span>
-                <span>Team Overview</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <HugeiconsIcon icon={Folder01Icon} className="size-3.5" />
-                <span>Product Specs</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md bg-accent px-2 py-1.5 font-medium text-accent-foreground">
-                <span>📋</span>
-                <span className="truncate">Q3 Product Roadmap</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <HugeiconsIcon icon={File01Icon} className="size-3.5" />
-                <span>Design System</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <HugeiconsIcon icon={File01Icon} className="size-3.5" />
-                <span>Weekly Notes</span>
-              </div>
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted">
-                <span>💡</span>
-                <span>Brainstorming</span>
-              </div>
+              {treeRows.map(({ icon, label, active }) => (
+                <div
+                  key={label}
+                  className={
+                    active ?
+                      "flex items-center gap-2 rounded-md bg-accent px-2 py-1.5 font-medium text-accent-foreground"
+                    : "flex items-center gap-2 rounded-md px-2 py-1.5 text-muted-foreground hover:bg-muted"
+                  }
+                >
+                  {typeof icon === "string" ?
+                    <span>{icon}</span>
+                  : <HugeiconsIcon icon={icon} className="size-3.5" />}
+                  <span className={active ? "truncate" : undefined}>
+                    {label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Main Editor Canvas */}
           <div className="flex-1 overflow-hidden bg-background">
-            {/* Cover Banner */}
             <div className="h-28 w-full bg-gradient-to-r from-violet-600 via-indigo-600 to-pink-500 sm:h-36" />
 
             <div className="relative mx-auto max-w-2xl px-6 pb-8 pt-4">
-              {/* Document Icon & Title */}
               <div className="-mt-12 mb-3 flex items-center gap-3 sm:-mt-14">
                 <span className="flex size-14 items-center justify-center rounded-xl bg-background text-3xl shadow-md ring-1 ring-border sm:size-16 sm:text-4xl">
                   📋
@@ -167,7 +166,6 @@ export function Features() {
                 Q3 Product Roadmap & Launch Plan
               </p>
 
-              {/* Editor Blocks */}
               <div className="mt-4 space-y-3.5 text-sm">
                 <p className="leading-relaxed text-muted-foreground">
                   Lipi combines block-based editing with nested pages per
@@ -175,7 +173,6 @@ export function Features() {
                   editing and live updates.
                 </p>
 
-                {/* Callout Block */}
                 <div className="flex items-start gap-2.5 rounded-lg border border-border bg-muted/40 p-3 text-xs sm:text-sm">
                   <span className="text-base leading-none">💡</span>
                   <div className="text-muted-foreground">
@@ -186,46 +183,24 @@ export function Features() {
                   </div>
                 </div>
 
-                {/* Section Heading */}
                 <h3 className="pt-2 font-heading text-base font-semibold text-foreground sm:text-lg">
                   🎯 Target Deliverables
                 </h3>
 
-                {/* Checklist */}
                 <div className="space-y-1.5 text-xs sm:text-sm">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      readOnly
-                      className="size-4 rounded border-input accent-primary"
-                    />
-                    <span className="text-muted-foreground line-through">
-                      Integrate BlockNote rich text document editor
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      readOnly
-                      className="size-4 rounded border-input accent-primary"
-                    />
-                    <span className="text-muted-foreground line-through">
-                      Shared document editing in workspaces
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      readOnly
-                      className="size-4 rounded border-input accent-primary"
-                    />
-                    <span className="text-muted-foreground line-through">
-                      Command+K workspace full-text document search
-                    </span>
-                  </div>
+                  {doneItems.map((item) => (
+                    <div key={item} className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        defaultChecked
+                        readOnly
+                        className="size-4 rounded border-input accent-primary"
+                      />
+                      <span className="text-muted-foreground line-through">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -241,7 +216,6 @@ export function Features() {
                   </div>
                 </div>
 
-                {/* Floating Slash Menu Mock */}
                 <div className="relative mt-3 inline-block rounded-lg border border-border bg-popover p-1 text-xs shadow-lg">
                   <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
                     Insert Block

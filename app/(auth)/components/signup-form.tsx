@@ -32,6 +32,7 @@ import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signUp } from "@/lib/auth/auth-client";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
+import { errorMessage } from "@/lib/error-message";
 import { signUpSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -88,9 +89,8 @@ export function SignUpForm() {
       router.push(callbackURL as Route);
       router.refresh();
     } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
-      toast.error(err.message);
+      console.error(errorMessage(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }

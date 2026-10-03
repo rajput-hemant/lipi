@@ -35,6 +35,23 @@ export const useSubscriptionModal = () => {
   return React.useContext(SubscriptionModalContext);
 };
 
+const proPlanDialog = {
+  title: "Pro plan active",
+  description:
+    "Manage payment method, invoices, or cancel in the Stripe billing portal.",
+  dismiss: "Close",
+  mode: "portal",
+  action: "Manage billing",
+} as const;
+
+const upgradeDialog = {
+  title: "Upgrade to a Pro Plan",
+  description: "To access Pro features you need to have a paid plan.",
+  dismiss: "Cancel",
+  mode: "checkout",
+  action: "Upgrade",
+} as const;
+
 type Props = React.PropsWithChildren<{
   subscription: Subscription | null;
   hasProEntitlement: boolean;
@@ -55,6 +72,8 @@ export const SubscriptionModalProvider = (props: Props) => {
     }
   }, [hasErrored]);
 
+  const plan = hasProEntitlement ? proPlanDialog : upgradeDialog;
+
   return (
     <SubscriptionModalContext.Provider
       value={{ open, setOpen, subscription, hasProEntitlement }}
@@ -62,51 +81,24 @@ export const SubscriptionModalProvider = (props: Props) => {
       {children}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        {hasProEntitlement ?
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Pro plan active</DialogTitle>
-            </DialogHeader>
-            <DialogDescription>
-              Manage payment method, invoices, or cancel in the Stripe billing
-              portal.
-            </DialogDescription>
-            <DialogFooter>
-              <DialogClose
-                render={
-                  <Button size="sm" variant="secondary">
-                    Close
-                  </Button>
-                }
-              />
-              <StripeCheckoutButton mode="portal" variant="default">
-                Manage billing
-              </StripeCheckoutButton>
-            </DialogFooter>
-          </DialogContent>
-        : <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Upgrade to a Pro Plan</DialogTitle>
-            </DialogHeader>
-            <DialogDescription>
-              To access Pro features you need to have a paid plan.
-            </DialogDescription>
-
-            <DialogFooter>
-              <DialogClose
-                render={
-                  <Button size="sm" variant="secondary">
-                    Cancel
-                  </Button>
-                }
-              />
-
-              <StripeCheckoutButton mode="checkout" variant="default">
-                Upgrade
-              </StripeCheckoutButton>
-            </DialogFooter>
-          </DialogContent>
-        }
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{plan.title}</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>{plan.description}</DialogDescription>
+          <DialogFooter>
+            <DialogClose
+              render={
+                <Button size="sm" variant="secondary">
+                  {plan.dismiss}
+                </Button>
+              }
+            />
+            <StripeCheckoutButton mode={plan.mode} variant="default">
+              {plan.action}
+            </StripeCheckoutButton>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </SubscriptionModalContext.Provider>
   );

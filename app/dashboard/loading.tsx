@@ -3,7 +3,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function DashboardLoading() {
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-background [&_[data-slot=skeleton]]:motion-reduce:animate-none">
-      {/* Sidebar Skeleton */}
       <div className="hidden w-64 flex-col border-r border-border p-4 md:flex space-y-4">
         <div className="flex items-center gap-2">
           <Skeleton className="size-8 rounded-lg" />
@@ -19,9 +18,7 @@ export default function DashboardLoading() {
         </div>
       </div>
 
-      {/* Main Content Area Skeleton */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Navbar */}
         <div className="flex h-14 items-center justify-between border-b border-border px-6">
           <div className="flex items-center gap-2">
             <Skeleton className="h-4 w-24" />
@@ -34,7 +31,6 @@ export default function DashboardLoading() {
           </div>
         </div>
 
-        {/* Document Canvas Skeleton */}
         <div className="flex-1 overflow-y-auto p-6 md:p-12">
           <div className="mx-auto max-w-3xl space-y-6">
             <Skeleton className="h-10 w-2/3" />

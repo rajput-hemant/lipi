@@ -96,17 +96,16 @@ export function Workspaces() {
 
   React.useEffect(() => {
     let cancelled = false;
-    listWorkspacesForCurrentUser()
-      .catch(() => {
+    async function load() {
+      try {
+        const data = await listWorkspacesForCurrentUser();
+        if (!cancelled) setGroups(data);
+      } catch {
         if (!cancelled) toast.error("Failed to load workspaces");
-        return null;
-      })
-      .then((data) => {
-        if (!cancelled) {
-          if (data) setGroups(data);
-          setLoading(false);
-        }
-      });
+      }
+      if (!cancelled) setLoading(false);
+    }
+    void load();
 
     return () => {
       cancelled = true;

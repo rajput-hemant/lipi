@@ -33,6 +33,7 @@ import { DEFAULT_LOGIN_REDIRECT } from "@/config/routes";
 import { signIn } from "@/lib/auth/auth-client";
 import { getSafeRedirectPath } from "@/lib/auth/redirect";
 import { getRedirectBaseURL } from "@/lib/auth/redirect-base-url";
+import { errorMessage } from "@/lib/error-message";
 import { loginSchema } from "@/lib/validations";
 import { OAuthButtons } from "./oauth-buttons";
 
@@ -88,8 +89,7 @@ export function LoginForm() {
       router.push(callbackURL as Route);
       router.refresh();
     } catch (error) {
-      const err = error as Error;
-      console.error(err.message);
+      console.error(errorMessage(error));
       toast.error("Something went wrong.");
     } finally {
       setIsSubmitting(false);

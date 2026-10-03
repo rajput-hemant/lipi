@@ -28,38 +28,33 @@ function hostsMatch(leftHost: string, rightHost: string) {
   );
 }
 
+/** Whether `value` is on the request's protocol and host; null when unparsable. */
+function matchesRequestHost(value: string, requestUrl: URL) {
+  try {
+    const parsed = new URL(value);
+    return (
+      parsed.protocol === requestUrl.protocol &&
+      hostsMatch(parsed.host, requestUrl.host)
+    );
+  } catch {
+    return null;
+  }
+}
+
 function isSameOrigin(request: Request) {
   const requestUrl = new URL(request.url);
   const origin = request.headers.get("origin");
   if (origin) {
-    try {
-      const parsed = new URL(origin);
-      if (
-        parsed.protocol === requestUrl.protocol &&
-        hostsMatch(parsed.host, requestUrl.host)
-      ) {
-        return true;
-      }
-    } catch {
-      return false;
-    }
+    const matches = matchesRequestHost(origin, requestUrl);
+    if (matches === null) return false;
+    if (matches) return true;
   }
 
   const fetchSite = request.headers.get("sec-fetch-site");
   if (fetchSite === "same-origin") return true;
 
   const referer = request.headers.get("referer");
-  if (!referer) return false;
-
-  try {
-    const parsed = new URL(referer);
-    return (
-      parsed.protocol === requestUrl.protocol &&
-      hostsMatch(parsed.host, requestUrl.host)
-    );
-  } catch {
-    return false;
-  }
+  return !!referer && matchesRequestHost(referer, requestUrl) === true;
 }
 
 export async function POST(request: Request) {
