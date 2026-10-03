@@ -115,6 +115,17 @@
       "@commitlint/config-conventional"
     ]
   },
+  "overrides": {
+    "@babel/core": "7.29.7",
+    "@babel/helpers": "7.29.7",
+    "@humanfs/node": "0.16.8",
+    "browserslist": "4.29.3",
+    "cross-spawn": "7.0.6",
+    "effect": "3.22.2",
+    "flatted": "3.4.4",
+    "js-yaml": "4.3.2",
+    "micromatch": "4.0.8"
+  },
   "engines": {
     "node": ">=22.11.0"
   },
