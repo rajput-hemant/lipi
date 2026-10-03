@@ -1,8 +1,6 @@
 # Pricing and Stripe billing
 
 Status: DRAFT, not live-verified. Last live proof: none.
-Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
-Related ledger IDs: LIP-V011
 
 Public `/pricing` (`app/(lobby)/pricing/`), `Go Pro` checkout (`/api/stripe/checkout`), billing portal (`/api/stripe/portal`), webhook (`/api/stripe/webhook`), Free vs Pro quotas (`lib/billing/`). Showcase only: no live payments (see [requirements](../../../../docs/requirements/requirements.md)).
 

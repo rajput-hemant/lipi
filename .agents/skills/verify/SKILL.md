@@ -131,7 +131,7 @@ Tool behaviors learned live: element refs (`@g1:1_20`) go stale after every acti
 
 Stable handles, confirmed live unless marked otherwise:
 
-- Auth forms: placeholder `you@domain.com` (email), `••••••••••` (password; two on `/signup`, the second is confirm), buttons `Sign Up`, `Login with Email`. Routes `/login`, `/signup`, `/reset-password`.
+- Auth forms: placeholder `you@domain.com` (email), `••••••••••` (password; two on `/signup`, the second is confirm), buttons `Sign Up`, `Login with Email`. Routes `/login`, `/signup`, `/forgot-password`, `/reset-password`.
 - Dashboard: `/dashboard` redirects to `/dashboard/<workspaceId>` or `/dashboard/new-workspace`; workspace form placeholder `Workspace name`, button `Create workspace`.
 - Sidebar: `aria-label="Workspace pages"`, tree role `tree`, button `New page` / `Cancel new page`, link by page title, context menu item `New subpage`, toast `Page created.`.
 - Editor: `.bn-editor`, text `Syncing page...`, `Reconnecting to collaborators...`, `View only` (viewer), `aria-label="Page collaborators"`, `aria-label="Breadcrumb"`, `aria-label="Choose page icon"`.

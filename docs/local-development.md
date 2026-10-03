@@ -38,6 +38,8 @@ bun run dev
 
 `db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user documented in `fixtures/local-dev-credentials.json` (`local@example.test`, `LocalDev123!`). On dev server startup these credentials are logged to the terminal (only when `DATABASE_URL` points to loopback).
 
+Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password?" on the login form logs the email, reset link included, to the dev server terminal outside production (`lib/email/send-email.ts`); open that link at `/reset-password?token=...`. With the key, set `EMAIL_FROM` too. Signed-in users change their password at `/dashboard/change-password` (sidebar account popover).
+
 `DATABASE_URL` must be set (the `.env.example` value is `postgresql://postgres:postgrespassword@127.0.0.1:5432/local_platforms`). If it is missing, the app, `drizzle-kit` and the seed stop with `DATABASE_URL is not set` instead of connecting as your OS user.
 
 ## Commands
@@ -52,6 +54,23 @@ bun run dev
 | `bun run dev`                        | Next.js dev server on the host.                                                                                                                          |
 | `bun run realtime:dev`               | Hocuspocus server on Node (optional, only for live collaboration).                                                                                       |
 | `bun run test`, `type-check`, `lint` | Unit tests (Vitest), TypeScript, ESLint. `bun run test:e2e` starts its own throwaway database.                                                           |
+
+## Environment
+
+`.env.example` is grouped under hash headings, and every variable is read through `lib/env.ts`:
+
+| Group         | Variables                                                                                                       | Local default                                             |
+| :------------ | :-------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
+| App           | `NEXT_PUBLIC_APP_URL`, `SKIP_ENV_VALIDATION`                                                                    | `http://localhost:3000`, `false`                          |
+| Auth          | `AUTH_URL`, `AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                                              | local URL and a 32+ character dev secret                  |
+| OAuth         | `GOOGLE_CLIENT_ID/SECRET`, `GITHUB_CLIENT_ID/SECRET`                                                            | empty (buttons render, round trip fails)                  |
+| Database      | `DATABASE_URL`                                                                                                  | loopback Postgres                                         |
+| Redis         | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                            | REST adapter on 8079                                      |
+| Rate limiting | `ENABLE_RATE_LIMITING`, `RATE_LIMITING_REQUESTS_PER_SECOND`, `TRUSTED_PROXY_COUNT`                              | `false`, `20`, `0`                                        |
+| Stripe        | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`                                             | empty (billing disabled)                                  |
+| Email         | `RESEND_API_KEY`, `EMAIL_FROM`                                                                                  | empty (reset links are logged)                            |
+| UploadThing   | `UPLOADTHING_TOKEN`, `UPLOADTHING_SECRET`, `UPLOADTHING_APP_ID`                                                 | empty (URL-based images only)                             |
+| Realtime      | `NEXT_PUBLIC_LIPI_REALTIME_URL`, `LIPI_REALTIME_ALLOWED_ORIGINS`, `LIPI_REALTIME_PORT`, `LIPI_REALTIME_ADDRESS` | `ws://localhost:1234`, local origins, `1234`, `127.0.0.1` |
 
 ## Ports and env
 
@@ -70,6 +89,16 @@ Redis is only used for rate limiting, which is off locally (`ENABLE_RATE_LIMITIN
 - Auth tables are unprefixed: `user`, `account`, `verificationToken`, `better_auth_account`, `better_auth_session`, `better_auth_verification`. Sign-in is email and password only.
 - Application tables are prefixed `lipi_`; `drizzle.config.ts` filters on `lipi_*`, so `db:generate` never emits auth tables. The auth baseline is generated separately with `drizzle.auth.config.ts`.
 - Production keeps the auth tables it already has: `db:auth` refuses non-loopback URLs and `db:migrate` keeps the default history table there.
+
+## Code layout
+
+- `lib/db/schema/` holds the Drizzle schema (`auth.ts` unprefixed auth tables, `app.ts` the `lipi_*` tables); `lib/db/migrations/` are the `lipi_*` migrations.
+- `lib/db/actions/` are the `"use server"` actions called from the client (documents, search, workspaces, members, settings).
+- `lib/db/data/` is server-only data access (cached lists, mutation authorization, billing, quota helpers). Client components must not import it or `@/lib/db`; `lib/db/server-boundary.test.ts` enforces this.
+
+## Browser state
+
+The dashboard sidebar (shadcn `SidebarProvider`) stores its open state in the `sidebar_state` cookie (`"false"` means collapsed; absent means expanded). The workspace layout reads it on the server (`lib/dashboard/sidebar-cookie.ts`), so clear that cookie to reset the sidebar.
 
 ## Seed safety
 

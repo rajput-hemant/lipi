@@ -1,8 +1,6 @@
 # Image and logo uploads
 
 Status: DRAFT, not live-verified. Last live proof: none.
-Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
-Related ledger IDs: LIP-V010, LIP-V018
 
 UploadThing endpoints `documentImage`, `coverBanner`, `workspaceLogo` (`app/api/uploadthing/core.ts`) used by page cover/icon and the workspace logo field (`placeholder="https://... or upload an image"`).
 
@@ -26,4 +24,4 @@ Page header cover control; Settings, General, Logo.
 ## Gotchas
 
 - No real credentials: live upload remains a GAP.
-- `.env.example` omits `UPLOADTHING_*` (LIP-V018).
+- `.env.example` lists `UPLOADTHING_*` empty (LIP-V018 fixed).

@@ -1,8 +1,6 @@
 # Trash and search
 
 Status: PARTIAL live proof (trash, restore, permanent delete with cancel, empty state). Search returned no results or empty-state copy in the browser, LIP-V020. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/trash-search/` (private task data dir, not in the repo).
-Ledger: [verification-issues.md](../../../../docs/verification/verification-issues.md) (this file lists IDs only).
-Related ledger IDs: LIP-V010
 
 Soft-delete and restore (`components/trash.tsx`, `lib/db/document-operations.ts`) and the ⌘K workspace search (`components/search-command.tsx`, `lib/db/actions/search.ts`).
 
