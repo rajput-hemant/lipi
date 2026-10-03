@@ -52,12 +52,3 @@ export function hasWorkspacePermission(
 ): boolean {
   return ROLE_PERMISSIONS[role].includes(permission);
 }
-
-export function assertWorkspacePermission(
-  role: WorkspaceMembershipRole | null,
-  permission: WorkspacePermission
-): void {
-  if (!role || !hasWorkspacePermission(role, permission)) {
-    throw new Error("Forbidden");
-  }
-}
