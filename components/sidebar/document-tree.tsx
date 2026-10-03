@@ -230,6 +230,26 @@ function DocumentTreeItem({
               isActive && "bg-secondary"
             )}
             style={{ paddingLeft: `${depth * 12 + 4}px` }}
+            onKeyDown={(e) => {
+              if (isRenaming) return;
+              if (
+                e.key === "ContextMenu" ||
+                (e.shiftKey && (e.key === "F10" || e.code === "F10"))
+              ) {
+                e.preventDefault();
+                e.stopPropagation();
+                const target = e.currentTarget;
+                const rect = target.getBoundingClientRect();
+                target.dispatchEvent(
+                  new MouseEvent("contextmenu", {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: rect.left + rect.width / 2,
+                    clientY: rect.top + rect.height / 2,
+                  })
+                );
+              }
+            }}
           >
             {hasChildren ?
               <button

@@ -51,11 +51,41 @@ export function SearchCommand({
   const [isPending, startTransition] = React.useTransition();
   const [error, setError] = React.useState<string | null>(null);
 
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const lastFocusedElementRef = React.useRef<HTMLElement | null>(null);
+
+  const handleOpen = React.useCallback(() => {
+    lastFocusedElementRef.current =
+      (document.activeElement as HTMLElement) || triggerRef.current;
+    setOpen(true);
+  }, []);
+
+  const prevOpenRef = React.useRef(open);
+  React.useEffect(() => {
+    if (prevOpenRef.current && !open) {
+      const elementToFocus =
+        lastFocusedElementRef.current || triggerRef.current;
+      if (elementToFocus && typeof elementToFocus.focus === "function") {
+        requestAnimationFrame(() => {
+          elementToFocus.focus();
+        });
+      }
+    }
+    prevOpenRef.current = open;
+  }, [open]);
+
   React.useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        setOpen((prev) => {
+          if (!prev) {
+            lastFocusedElementRef.current =
+              (document.activeElement as HTMLElement) || triggerRef.current;
+            return true;
+          }
+          return false;
+        });
       }
     };
 
@@ -110,6 +140,7 @@ export function SearchCommand({
       {triggerVariant === "sidebar" ?
         isCollapsed ?
           <Button
+            ref={triggerRef}
             variant="ghost"
             size="icon-sm"
             className={cn(
@@ -118,7 +149,7 @@ export function SearchCommand({
             )}
             title="Search (⌘K)"
             aria-label="Search documents"
-            onClick={() => setOpen(true)}
+            onClick={handleOpen}
           >
             <HugeiconsIcon
               icon={Search01Icon}
@@ -127,13 +158,14 @@ export function SearchCommand({
             />
           </Button>
         : <Button
+            ref={triggerRef}
             variant="ghost"
             size="sm"
             className={cn(
               "w-full justify-between gap-2 px-3 text-muted-foreground hover:text-foreground",
               className
             )}
-            onClick={() => setOpen(true)}
+            onClick={handleOpen}
           >
             <span className="flex items-center gap-2 text-xs">
               <HugeiconsIcon
@@ -147,6 +179,7 @@ export function SearchCommand({
           </Button>
 
       : <Button
+          ref={triggerRef}
           variant="outline"
           size="sm"
           className={cn(
@@ -155,7 +188,7 @@ export function SearchCommand({
           )}
           title="Search (⌘K)"
           aria-label="Search documents"
-          onClick={() => setOpen(true)}
+          onClick={handleOpen}
         >
           <span className="inline-flex items-center gap-2">
             <HugeiconsIcon

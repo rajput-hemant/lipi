@@ -24,7 +24,7 @@ export const WorkspaceLayout: React.FCC<{
 
   if (!user) redirect("/login");
 
-  await assertWorkspaceAccess(user.id, workspaceId);
+  const workspace = await assertWorkspaceAccess(user.id, workspaceId);
 
   const cookieStore = await cookies();
 
@@ -37,7 +37,12 @@ export const WorkspaceLayout: React.FCC<{
   const documents = await getDocuments(workspaceId);
 
   return (
-    <AppStateProvider key={workspaceId} user={user} documents={documents}>
+    <AppStateProvider
+      key={workspaceId}
+      user={user}
+      workspace={workspace}
+      documents={documents}
+    >
       <WorkspaceRealtimeProvider workspaceId={workspaceId}>
         <ResizableLayout
           defaultLayout={defaultLayout as number[]}

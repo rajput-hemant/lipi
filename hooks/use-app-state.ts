@@ -2,10 +2,14 @@ import React from "react";
 import { proxy, useSnapshot } from "valtio";
 
 import type { SessionUser } from "@/lib/auth/types";
+import type { workspaces } from "@/lib/db/schema";
 import type { Document } from "@/types/db";
+
+export type WorkspaceRecord = typeof workspaces.$inferSelect;
 
 export type AppState = {
   user: SessionUser | null;
+  workspace?: WorkspaceRecord | null;
   documents: Document[];
   collaborators: CollaboratorPresence[];
 };
@@ -23,18 +27,25 @@ export type AppAction = {
   deleteDocument: (documentId: string) => void;
   replaceDocuments: (documents: Document[]) => void;
   setCollaborators: (collaborators: CollaboratorPresence[]) => void;
+  setWorkspace: (workspace: WorkspaceRecord | null) => void;
 };
 
 export type Store = AppState & AppAction;
 
 export function createAppStore(
-  initial: Pick<AppState, "user" | "documents">
+  initial: Pick<AppState, "user" | "documents"> & {
+    workspace?: WorkspaceRecord | null;
+  }
 ): Store {
   const store = proxy<Store>({
     user: initial.user,
+    workspace: initial.workspace ?? null,
     documents: initial.documents,
     collaborators: [],
 
+    setWorkspace(workspace) {
+      store.workspace = workspace;
+    },
     addDocument(document) {
       const index = store.documents.findIndex(
         (entry) => entry.id === document.id
@@ -66,9 +77,14 @@ export function createAppStore(
 
 export function syncAppStore(
   store: Store,
-  state: Pick<AppState, "user" | "documents">
+  state: Pick<AppState, "user" | "documents"> & {
+    workspace?: WorkspaceRecord | null;
+  }
 ) {
   store.user = state.user;
+  if (state.workspace !== undefined) {
+    store.workspace = state.workspace;
+  }
   const seen = new Set<string>();
   store.documents = state.documents.filter((document) => {
     if (seen.has(document.id)) return false;

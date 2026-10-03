@@ -11,19 +11,24 @@ import {
 } from "@/hooks/use-app-state";
 
 type AppStateProviderProps = React.PropsWithChildren<
-  Pick<AppState, "user" | "documents">
+  Pick<AppState, "user" | "documents"> & {
+    workspace?: AppState["workspace"];
+  }
 >;
 
 export function AppStateProvider({
   children,
   user,
+  workspace,
   documents,
 }: AppStateProviderProps) {
-  const [store] = React.useState(() => createAppStore({ user, documents }));
+  const [store] = React.useState(() =>
+    createAppStore({ user, workspace, documents })
+  );
 
   React.useEffect(() => {
-    syncAppStore(store, { user, documents });
-  }, [store, user, documents]);
+    syncAppStore(store, { user, workspace, documents });
+  }, [store, user, workspace, documents]);
 
   return (
     <AppStateContext.Provider value={store}>

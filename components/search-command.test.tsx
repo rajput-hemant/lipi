@@ -113,4 +113,48 @@ describe("SearchCommand", () => {
     const empty = document.querySelector('[data-slot="combobox-empty"]');
     expect(empty?.classList.contains("flex")).toBe(true);
   });
+
+  it("restores focus to trigger button when closed", async () => {
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(<SearchCommand />);
+    });
+
+    const trigger = container.querySelector("button");
+    expect(trigger).toBeTruthy();
+
+    act(() => {
+      trigger?.focus();
+      trigger?.click();
+    });
+
+    // Verify dialog opened
+    expect(document.querySelector('[data-slot="dialog-content"]')).toBeTruthy();
+
+    // Close via escape on the active input
+    const input = document.querySelector('input[role="combobox"]');
+    expect(input).toBeTruthy();
+
+    act(() => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Escape",
+        code: "Escape",
+        keyCode: 27,
+        bubbles: true,
+        cancelable: true,
+      });
+      input?.dispatchEvent(event);
+    });
+
+    // Wait for rAF
+    await act(async () => {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    });
+
+    expect(document.activeElement).toBe(trigger);
+  });
 });

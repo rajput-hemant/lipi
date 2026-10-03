@@ -197,14 +197,20 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V023 Tree context menu not opened by keyboard
 
-- Class: HYPOTHESIS. Severity: low. State: open.
-- Evidence: focusing a tree link and pressing `Shift+F10` through the browser tool did not open the menu; a synthetic `contextmenu` event did. The tool's key emulation may differ from a real keyboard.
-- Follow-up: check with a real keyboard; if confirmed, the actions are mouse-only.
+- Class: CONFIRMED. Severity: low. State: fixed (2026-10-03, fix branch).
+- Evidence: Base UI's ContextMenuTrigger listens exclusively to the `contextmenu` event and ignores keyboard interactions; on macOS / Chrome (and standard browser accessibility flows), `Shift+F10` or the `ContextMenu` key on focused tree item links does not synthesize a `contextmenu` event natively, leaving tree actions (New subpage, Rename, Duplicate, Move to trash) inaccessible via keyboard.
+- Fix: `components/sidebar/document-tree.tsx` TreeNodeItem now listens for `ContextMenu` key or `Shift+F10` on the item row, calculates the element bounds, and dispatches a synthetic `contextmenu` MouseEvent directly to the trigger wrapper. Verified live in Chrome: focusing tree link and pressing `Shift+F10` opens the context menu with keyboard focus on the menu items; pressing Escape closes it and restores focus to the tree item link. Unit test `components/sidebar/document-tree-keyboard.test.tsx` passes.
 
 ### LIP-V024 Workspace name not shown in breadcrumb or page heading
 
-- Class: HYPOTHESIS. Severity: low. State: open.
-- Evidence: workspace named `Alpha Space`; the empty-workspace view shows breadcrumb root `Workspace` and heading `workspace page`. May be intended placeholder copy.
+- Class: CONFIRMED. Severity: low. State: fixed (2026-10-03, fix branch).
+- Evidence: Empty-workspace view rendered an unstyled stub (`<div><h1>workspace page</h1></div>`) and breadcrumbs hardcoded `Workspace` without displaying the actual workspace title.
+- Fix:
+  1. `hooks/use-app-state.ts`, `components/app-state-provider.tsx`, and `app/dashboard/(workspaces)/[workspaceId]/layout.tsx` now provide the current workspace record in `AppState`.
+  2. `components/site-header/document-breadcrumbs.tsx` displays the active workspace title in the root breadcrumb link and current page heading.
+  3. `app/dashboard/(workspaces)/[workspaceId]/page.tsx` now renders a polished workspace home view with workspace icon, title, document counts, page link cards with timestamps, and empty state.
+  4. `components/search-command.tsx` tracks the trigger element and restores focus to the search button upon dialog dismissal (Escape/overlay click).
+- Verified live in Chrome: workspace `Alpha Space` shows `Alpha Space` in breadcrumb and heading; pages grid displays recent documents; search Escape restores focus to the search button; light/dark and 390px/768px/1280px responsive viewports verified with zero console errors. Unit tests `components/site-header/document-breadcrumbs.test.tsx` and `components/search-command.test.tsx` pass.
 
 ### Automatic verification triggers
 

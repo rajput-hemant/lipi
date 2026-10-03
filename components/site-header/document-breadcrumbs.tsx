@@ -14,15 +14,16 @@ export function DocumentBreadcrumbs() {
   const segments = pathname.split("/").filter(Boolean);
   const workspaceId = segments[1];
   const documentId = segments[2];
-  const { documents } = useAppState();
+  const { documents, workspace } = useAppState();
+  const workspaceTitle = workspace?.title || "Workspace";
 
   if (!workspaceId || !documentId) {
     return (
       <nav
         aria-label="Breadcrumb"
-        className="ml-4 text-sm text-muted-foreground"
+        className="ml-4 truncate text-sm font-medium text-muted-foreground"
       >
-        Workspace
+        {workspaceTitle}
       </nav>
     );
   }
@@ -51,7 +52,7 @@ export function DocumentBreadcrumbs() {
         href={`/dashboard/${workspaceId}`}
         className="truncate text-muted-foreground hover:text-foreground"
       >
-        Workspace
+        {workspaceTitle}
       </Link>
       {chain.map((document) => (
         <span key={document.id} className="flex min-w-0 items-center gap-1">
