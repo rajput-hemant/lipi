@@ -212,6 +212,21 @@ Not re-run here and not counted as new verification:
   4. `components/search-command.tsx` tracks the trigger element and restores focus to the search button upon dialog dismissal (Escape/overlay click).
 - Verified live in Chrome: workspace `Alpha Space` shows `Alpha Space` in breadcrumb and heading; pages grid displays recent documents; search Escape restores focus to the search button; light/dark and 390px/768px/1280px responsive viewports verified with zero console errors. Unit tests `components/site-header/document-breadcrumbs.test.tsx` and `components/search-command.test.tsx` pass.
 
+### LIP-V025 Viewer sees edit actions; failed trash leaves pages removed
+
+- Class: CONFIRMED (reproduced on base `cc338f4`, live). Severity: medium. State: fixed (2026-10-03, branch `fm/lipi-ui-polish-round-two`).
+- Evidence: as a viewer (invited by the owner, accepted through the real invite link) the sidebar showed `New page` and a four-item context menu. `Move to trash` removed the page from the tree immediately, then the server rejected it (`Could not move to trash.`); the tree stayed empty ("No pages yet. Create your first page.") until a reload. Screenshots `before-viewer-*.png`. The same optimistic path was keyboard-reachable (LIP-V023).
+- Fix: client state now carries the member `role` (`hooks/use-app-state.ts`, layout via `getWorkspaceMembershipRole`). Viewers get no `New page` button and no tree context menu, a `View only` badge in the sidebar and workspace home, read-only Trash (no restore or delete buttons, explanatory text) and role-specific empty states. `moveToTrash` now restores the previous tree on failure and only navigates away after success; failed `New subpage` creation also rolls back.
+- Verified live (production build, owner/editor/viewer in separate sessions): viewer path above; an editor whose role was revoked while realtime was down saw `Could not move to trash.` and the page stayed in the tree. Not re-verified: other roles at 768 px (only 390/768/1280 for viewer home), reduced motion. Unit: `components/trash.test.tsx` covers viewer and editor.
+- Gap: production builds sanitize server-action error messages, so the client cannot tell "forbidden" from other failures; the toast text is generic. See the TODO handoff.
+
+### LIP-V026 Workspace title and member role could go stale in open sessions
+
+- Class: HYPOTHESIS about base (not reproduced on base; code inspection only: Settings saved but only reloaded the member list), CONFIRMED working after the change. Severity: low. State: fixed (2026-10-03, same branch).
+- Fix: Settings save, role change and ownership transfer update the store, call `router.refresh()` and send the existing `pages:changed` realtime notice, so collaborators' layouts re-render.
+- Verified live without reloading: owner renamed `Alpha Space` to `Alpha Renamed`; owner, editor and viewer breadcrumb, heading and document title all updated. Owner promoted a viewer to editor and that open session gained `New page`; after a realtime reconnect an editor demoted to viewer showed `View only`.
+- Gap: member removal only notifies; the removed user's open session was not driven.
+
 ### Automatic verification triggers
 
 Checked 2026-10-02: no Git hook, package lifecycle script or CI job starts browser verification. `.husky/pre-commit` runs `bunx lint-staged` (prettier and eslint on staged files), `.husky/commit-msg` runs commitlint, `package.json` `prepare` runs `husky`, and `.github/workflows/ci.yml` runs type-check, lint, unit tests, build and a commit-message check. `test:e2e` (Playwright) is a manual script, not referenced by those. These are unrelated lint/unit checks, not verification.

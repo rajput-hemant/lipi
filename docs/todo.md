@@ -25,3 +25,13 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [ ] Run the skill live (launch, doctor, drive, evidence, cleanup) once the user-selected browser skill is available; update each feature's `Last live proof`
 - [ ] Re-prove sign-up/login/reset, role and anonymous access, workspaces and invites, editor, trash, search, realtime with two sessions, and UI quality in a browser (LIP-V007 to V013)
 - [ ] Triage the confirmed items for later ships: `db:migrate` on an empty database (LIP-V001), newsletter stub (LIP-V006), `.env.example` gaps (LIP-V018)
+
+## UI follow-ups (found during UI polish round two)
+
+- [ ] Handoff (non-design): return a typed code from `MutationAuthError` (for example `FORBIDDEN`) in server-action results so the client can show "You do not have permission" instead of a generic failure; production strips thrown messages. Files: `lib/db/queries/mutation-auth.ts`, `lib/db/queries/document.ts`, `components/sidebar/document-tree.tsx`. Desired: viewer-triggered mutations show a permission toast and the optimistic state rolls back (already done client-side).
+- [ ] Workspace home lists subpages flat, oldest first, and formats dates on the server locale; add parent context, recency order and client-side date formatting (`app/dashboard/(workspaces)/[workspaceId]/page.tsx`)
+- [ ] Sidebar nav dialog descriptions ("Restore or delete trashed pages") are not role-aware for viewers (`components/sidebar/sidebar-panel.tsx`)
+- [ ] Context menu "Move to trash" uses raw `!text-red-500` instead of a semantic destructive token or `variant="destructive"` item (`components/sidebar/document-tree.tsx`); inherited, left as is
+- [ ] Prove `Shift+F10` and the `ContextMenu` key on real hardware keyboards (LIP-V023 is tool-dispatched only)
+- [ ] Search: add tests for Cmd+K open and select-to-navigate focus restoration; `lastFocusedElementRef` is written inside a state updater (`components/search-command.tsx`)
+- [ ] Trash dialog and tree are not covered by a browser-driven viewer test in `tests/e2e`; add owner/editor/viewer role cases
