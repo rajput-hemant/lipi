@@ -4,7 +4,11 @@ import { Redis } from "@upstash/redis";
 
 import type { NextRequest } from "next/server";
 
-import { authRoutes, publicRoutes } from "./config/routes";
+import {
+  authRoutes,
+  publicRoutes,
+  selfAuthenticatedRoutePrefixes,
+} from "./config/routes";
 import { hasValidProxySession } from "./lib/auth/proxy-session";
 import { env } from "./lib/env";
 import { getProxyRateLimitMode } from "./lib/proxy/rate-limiting";
@@ -61,7 +65,12 @@ export async function proxy(req: NextRequest) {
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
 
-  if (isAuthRoute) {
+  const isSelfAuthenticated = selfAuthenticatedRoutePrefixes.some(
+    (prefix) =>
+      nextUrl.pathname === prefix || nextUrl.pathname.startsWith(`${prefix}/`)
+  );
+
+  if (isAuthRoute || isSelfAuthenticated) {
     return NextResponse.next();
   }
 
