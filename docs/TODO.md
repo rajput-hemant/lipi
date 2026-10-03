@@ -563,4 +563,6 @@ Private ledger `coverage.tsv` (path, blob hash, category, deslop status, ponytai
 
 ## Env example grouping outcome (2026-10-03)
 
-The grouped `.env.example` (hash headings, blank line between groups, one `KEY=` per line) is ready on `fm/lipi-env-example-groups` (`9472258`). It is NOT landed on `feat/complete-lipi` and not pushed. End of day: no further work planned here today.
+The grouped `.env.example` (hash headings, blank line between groups, one `KEY=` per line, from `9472258`) and the deslop/ponytail review section above are integrated into `feat/complete-lipi`. Merge commit `d910f2c` joins `origin/feat/complete-lipi` (`675aafd`, which includes `864b4b2`..`ae16208`) with review head `c6f88f8`; ordinary non-force push, `origin/feat/complete-lipi` verified equal to `d910f2c` after fetch. No conflicts; the review diff touched only `.env.example` and `docs/TODO.md`.
+
+Limitations: the review's `path:line` references are for base `9472258`. The merged feature branch has since moved files (for example `lib/db/queries/*` to `lib/db/data/*`, new `lib/logger.ts`, shadcn Sidebar, `lib/env` consolidation), so a fixer must re-locate each item with `git grep` and re-check that the finding still holds before editing. No new review, code change, build, test or browser run was done for this integration; validation evidence is the existing review notes only.
