@@ -1,3 +1,5 @@
+import { toast } from "sonner";
+
 export type MutationErrorCode =
   "FORBIDDEN" | "UNAUTHORIZED" | "INVALID" | "QUOTA_EXCEEDED";
 
@@ -41,4 +43,31 @@ export function isMutationDenied(error: unknown) {
 /** The server's user-facing message for a failed result, else `fallback`. */
 export function mutationErrorMessage(error: unknown, fallback: string) {
   return error instanceof MutationFailureError ? error.message : fallback;
+}
+
+/**
+ * Shows a loading/success/error toast for a server action result. `denied`
+ * replaces the message of a permission failure; `onError` runs first so
+ * callers can roll back optimistic state.
+ */
+export function runMutationToast<T>(
+  pending: Promise<MutationResult<T>>,
+  options: {
+    loading: string;
+    success: string | ((data: T) => string);
+    failed: string;
+    denied?: string;
+    onError?: () => void;
+  }
+) {
+  return toast.promise(unwrapMutation(pending), {
+    loading: options.loading,
+    success: options.success,
+    error: (error) => {
+      options.onError?.();
+      return options.denied && isMutationDenied(error) ?
+          options.denied
+        : mutationErrorMessage(error, options.failed);
+    },
+  });
 }

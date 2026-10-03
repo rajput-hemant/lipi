@@ -55,7 +55,7 @@ import {
   transferWorkspaceOwnership,
   updateWorkspaceSettings,
 } from "@/lib/db/actions/workspace-settings";
-import { mutationErrorMessage, unwrapMutation } from "@/lib/db/mutation-result";
+import { runMutationToast } from "@/lib/db/mutation-result";
 import { uploadFiles } from "@/lib/uploadthing";
 
 const settingsSchema = z.object({
@@ -175,17 +175,21 @@ export function Settings() {
     };
   }, [workspaceId, applyMembersPayload]);
 
+  function afterMutation() {
+    router.refresh();
+    notifyPageChanges();
+    refresh();
+  }
+
   async function saveSettings(values: SettingsForm) {
     if (!workspaceId) return;
-    toast.promise(
-      unwrapMutation(
-        updateWorkspaceSettings({
-          workspaceId,
-          title: values.title,
-          iconId: selectedEmoji,
-          logo: values.logo,
-        })
-      ),
+    runMutationToast(
+      updateWorkspaceSettings({
+        workspaceId,
+        title: values.title,
+        iconId: selectedEmoji,
+        logo: values.logo,
+      }),
       {
         loading: "Saving workspace settings...",
         success: () => {
@@ -197,23 +201,18 @@ export function Settings() {
               logo: values.logo || null,
             });
           }
-          router.refresh();
-          notifyPageChanges();
-          refresh();
+          afterMutation();
           return "Workspace updated";
         },
-        error: (error) =>
-          mutationErrorMessage(error, "Failed to update workspace"),
+        failed: "Failed to update workspace",
       }
     );
   }
 
   async function sendInvite(values: InviteForm) {
     if (!workspaceId) return;
-    toast.promise(
-      unwrapMutation(
-        createWorkspaceCollaboratorInvite({ workspaceId, ...values })
-      ),
+    runMutationToast(
+      createWorkspaceCollaboratorInvite({ workspaceId, ...values }),
       {
         loading: "Sending invite...",
         success: () => {
@@ -221,80 +220,66 @@ export function Settings() {
           refresh();
           return "Invite created";
         },
-        error: (error) =>
-          mutationErrorMessage(error, "Failed to invite member"),
+        failed: "Failed to invite member",
       }
     );
   }
 
   async function changeRole(collaboratorId: string, role: "editor" | "viewer") {
     if (!workspaceId) return;
-    toast.promise(
-      unwrapMutation(
-        updateCollaboratorRole({ workspaceId, collaboratorId, role })
-      ),
+    runMutationToast(
+      updateCollaboratorRole({ workspaceId, collaboratorId, role }),
       {
         loading: "Updating role...",
         success: () => {
-          router.refresh();
-          notifyPageChanges();
-          refresh();
+          afterMutation();
           return "Role updated";
         },
-        error: (error) => mutationErrorMessage(error, "Failed to update role"),
+        failed: "Failed to update role",
       }
     );
   }
 
   async function removeMember(collaboratorId: string) {
     if (!workspaceId) return;
-    toast.promise(
-      unwrapMutation(removeWorkspaceMember({ workspaceId, collaboratorId })),
-      {
-        loading: "Removing member...",
-        success: () => {
-          notifyPageChanges();
-          refresh();
-          return "Member removed";
-        },
-        error: (error) =>
-          mutationErrorMessage(error, "Failed to remove member"),
-      }
-    );
+    runMutationToast(removeWorkspaceMember({ workspaceId, collaboratorId }), {
+      loading: "Removing member...",
+      success: () => {
+        notifyPageChanges();
+        refresh();
+        return "Member removed";
+      },
+      failed: "Failed to remove member",
+    });
   }
 
   async function confirmTransfer() {
     if (!workspaceId || !transferTarget) return;
-    toast.promise(
-      unwrapMutation(
-        transferWorkspaceOwnership({
-          workspaceId,
-          newOwnerUserId: transferTarget,
-        })
-      ),
+    runMutationToast(
+      transferWorkspaceOwnership({
+        workspaceId,
+        newOwnerUserId: transferTarget,
+      }),
       {
         loading: "Transferring ownership...",
         success: () => {
-          router.refresh();
-          notifyPageChanges();
-          refresh();
+          afterMutation();
           return "Ownership transferred";
         },
-        error: (error) => mutationErrorMessage(error, "Transfer failed"),
+        failed: "Transfer failed",
       }
     );
   }
 
   async function confirmDelete() {
     if (!workspaceId) return;
-    toast.promise(unwrapMutation(deleteWorkspace({ workspaceId })), {
+    runMutationToast(deleteWorkspace({ workspaceId }), {
       loading: "Deleting workspace...",
       success: () => {
         router.replace("/dashboard");
         return "Workspace deleted";
       },
-      error: (error) =>
-        mutationErrorMessage(error, "Failed to delete workspace"),
+      failed: "Failed to delete workspace",
     });
   }
 

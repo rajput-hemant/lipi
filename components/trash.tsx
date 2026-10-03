@@ -26,11 +26,7 @@ import {
   patchDocumentsForRestore,
   permanentDeleteTargetIds,
 } from "@/lib/db/client-document-state";
-import {
-  isMutationDenied,
-  mutationErrorMessage,
-  unwrapMutation,
-} from "@/lib/db/mutation-result";
+import { runMutationToast } from "@/lib/db/mutation-result";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,15 +66,12 @@ export function Trash() {
 
     replaceDocuments(next);
 
-    toast.promise(unwrapMutation(restoreDocument(documentId)), {
+    runMutationToast(restoreDocument(documentId), {
       loading: "Restoring page...",
       success: "Page restored",
-      error: (error) => {
-        replaceDocuments(previous);
-        return isMutationDenied(error) ?
-            "You do not have permission to restore pages."
-          : mutationErrorMessage(error, "Failed to restore page");
-      },
+      failed: "Failed to restore page",
+      denied: "You do not have permission to restore pages.",
+      onError: () => replaceDocuments(previous),
     });
   }
 
@@ -95,18 +88,12 @@ export function Trash() {
         previous.filter((document) => !deleteIds.has(document.id))
       );
 
-      toast.promise(unwrapMutation(deleteDocumentPermanently(documentId)), {
+      runMutationToast(deleteDocumentPermanently(documentId), {
         loading: "Deleting page...",
         success: "Page deleted permanently.",
-        error: (error) => {
-          replaceDocuments(previous);
-          return isMutationDenied(error) ?
-              "You do not have permission to delete pages."
-            : mutationErrorMessage(
-                error,
-                "Something went wrong! Unable to delete page."
-              );
-        },
+        failed: "Something went wrong! Unable to delete page.",
+        denied: "You do not have permission to delete pages.",
+        onError: () => replaceDocuments(previous),
       });
     } catch {
       toast.error("Something went wrong", {
