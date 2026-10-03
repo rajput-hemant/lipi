@@ -294,9 +294,21 @@ export function Settings() {
     );
   }
 
+  if (!loading && !data) {
+    return (
+      <p role="alert" className="text-sm text-muted-foreground">
+        Unable to load workspace settings.
+      </p>
+    );
+  }
+
   if (loading || !data) {
     return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground">
+      <div
+        role="status"
+        aria-label="Loading settings"
+        className="flex items-center justify-center py-12 text-muted-foreground"
+      >
         <HugeiconsIcon
           icon={Loading03Icon}
           strokeWidth={2}
@@ -349,7 +361,7 @@ export function Settings() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Logo</FormLabel>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3">
                     <Avatar className="size-10 rounded-md border">
                       <AvatarImage
                         src={field.value || undefined}
@@ -362,6 +374,7 @@ export function Settings() {
                     </Avatar>
                     <FormControl>
                       <Input
+                        className="min-w-0 flex-1 basis-40"
                         placeholder="https://... or upload an image"
                         disabled={!isOwner}
                         {...field}
@@ -472,6 +485,7 @@ export function Settings() {
                         size="sm"
                         variant="outline"
                         className="capitalize"
+                        aria-label={`Change role for ${member.name ?? member.email}`}
                       >
                         {member.role}
                       </Button>
@@ -511,9 +525,9 @@ export function Settings() {
               {data.pendingInvites.map((invite) => (
                 <div
                   key={invite.id}
-                  className="flex items-center justify-between text-sm"
+                  className="flex items-center justify-between gap-2 text-sm"
                 >
-                  <span className="truncate">{invite.email}</span>
+                  <span className="min-w-0 truncate">{invite.email}</span>
                   <Badge variant="outline" className="capitalize">
                     {invite.role}
                   </Badge>
@@ -550,7 +564,7 @@ export function Settings() {
                     <FormLabel>Role</FormLabel>
                     <FormControl>
                       <select
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
+                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                         value={field.value}
                         onChange={field.onChange}
                       >
@@ -590,7 +604,7 @@ export function Settings() {
                 <Label htmlFor="transfer-member">Transfer ownership</Label>
                 <select
                   id="transfer-member"
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                   value={transferTarget}
                   onChange={(event) => setTransferTarget(event.target.value)}
                 >

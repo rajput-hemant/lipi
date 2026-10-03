@@ -12,7 +12,10 @@ type SidebarProps = React.ComponentProps<"aside"> & {
 export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
   return (
     <aside
-      className={cn("relative z-40 hidden lg:block", className)}
+      className={cn(
+        "relative z-40 hidden transition-[width] duration-200 ease-in-out motion-reduce:transition-none lg:block",
+        className
+      )}
       {...props}
     >
       <div
@@ -21,7 +24,10 @@ export function Sidebar({ isCollapsed, className, ...props }: SidebarProps) {
           !isCollapsed && "overflow-hidden"
         )}
       >
-        <SidebarPanel isCollapsed={isCollapsed} />
+        <SidebarPanel
+          isCollapsed={isCollapsed}
+          className={cn(!isCollapsed && "w-64 shrink-0")}
+        />
       </div>
     </aside>
   );

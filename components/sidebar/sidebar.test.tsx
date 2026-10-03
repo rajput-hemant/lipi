@@ -137,4 +137,28 @@ describe("sidebar navigation", () => {
       document.querySelector('[data-slot="dialog-description"]')?.textContent
     ).toBe(description);
   });
+
+  it("animates width without clipping expanded content and honours reduced motion", () => {
+    const expanded = renderSidebar(false).querySelector("aside")!;
+    expect(expanded.className).toContain("transition-[width]");
+    expect(expanded.className).toContain("motion-reduce:transition-none");
+    expect(
+      expanded.querySelector('[data-testid="document-tree"]')
+    ).toBeTruthy();
+    expect(expanded.firstElementChild?.firstElementChild?.className).toContain(
+      "w-64"
+    );
+  });
+
+  it("keeps dialogs within the viewport on small screens", () => {
+    const container = renderSidebar(false);
+    const settings = [...container.querySelectorAll("nav button")].find(
+      (button) => button.textContent?.trim() === "Settings"
+    );
+    act(() => (settings as HTMLElement).click());
+
+    const content = document.querySelector('[data-slot="dialog-content"]');
+    expect(content?.className).toContain("max-h-[calc(100dvh-2rem)]");
+    expect(content?.className).toContain("sm:max-w-4xl");
+  });
 });

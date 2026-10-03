@@ -49,15 +49,17 @@ export function StripeCheckoutButton({
       variant={variant}
       className={className}
       disabled={loading}
+      aria-busy={loading}
       onClick={onClick}
     >
-      {loading ?
+      {loading && (
         <HugeiconsIcon
           icon={Loading03Icon}
           strokeWidth={2}
-          className="size-4 animate-spin"
+          className="animate-spin"
         />
-      : children}
+      )}
+      {children}
     </Button>
   );
 }
