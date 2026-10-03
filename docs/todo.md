@@ -45,3 +45,12 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [ ] Add unit tests for tree viewer gating and trash rollback (the keyboard test mocks `useCanEditPages: () => true`)
 - [ ] `View only` badge is `text-[10px]`; raise it for readability
 - [ ] Removed member with an open session hits the layout's `MutationAuthError`; show a friendly state (pre-existing); `pages:changed` stateless messages can be sent by any connected client (pre-existing)
+
+## shadcn source modification check (2026-10-03)
+
+Method: `bunx shadcn@latest add <name> --diff components/ui/<name>.tsx` (CLI 4.21.1, style `base-nova`) for each of the 30 files in `components/ui/`, plus `git log -- components/ui`. Nothing was reverted or updated.
+
+- [x] No behavioral modification found. 17 files match upstream or differ in formatting only (CLI reports "no diff" or "formatting-only"): alert-dialog, avatar, card, hover-card, input, kbd, label, popover, resizable, scroll-area, separator, skeleton, textarea, toggle-group, tooltip, and the import-order-only ones below
+- [x] Formatting-only differences in accordion, badge, button, combobox, context-menu, dialog, dropdown-menu, input-group, navigation-menu, select, sheet, sonner, tabs, toggle: import order (`@hugeicons/*` before `@/` imports), `cva`/`VariantProps` type-import split, multi-line `cn(...)` arguments, wrapped icon imports. Pre-existing: introduced by the repo-wide Prettier/import-sort pass in `91f5f4b` (2026-10-02) on top of the CLI reset in `0321a94` and the combobox add in `c2b075b`; not part of the shadcn-sync task
+- [ ] `components/ui/form.tsx` has no `base-nova` registry counterpart ("No file matching"), so it cannot be diffed upstream. Pre-existing: added in `579490b` (2023-12-10), not touched by the 2026-09-26 reinstall. Verify whether it is still used and whether it is a legacy (react-hook-form era) file before relying on it. Priority: low. Status: open, unverified
+- [ ] Optional: align the formatter config with shadcn output (or ignore `components/ui` in Prettier) so future `--diff` runs show real drift instead of formatting noise. Priority: low. Evidence: 14 formatting-only diffs above. Status: open
