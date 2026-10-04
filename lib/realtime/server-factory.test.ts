@@ -13,6 +13,9 @@ import { createRealtimeToken } from "./token";
 const workspaceId = "11111111-1111-4111-8111-111111111111";
 const documentId = "22222222-2222-4222-8222-222222222222";
 const documentRoom = `document:${documentId}`;
+const otherWorkspaceId = "77777777-7777-4777-8777-777777777777";
+const workspaceRoom = `workspace:${workspaceId}`;
+const otherWorkspaceRoom = `workspace:${otherWorkspaceId}`;
 const ownerId = "33333333-3333-4333-8333-333333333333";
 const editorId = "44444444-4444-4444-8444-444444444444";
 const viewerId = "55555555-5555-4555-8555-555555555555";
@@ -52,7 +55,8 @@ function createPeer(
   userId: string,
   name: string,
   roomName = documentRoom,
-  onAuthenticationFailed: (reason: string) => void = () => {}
+  onAuthenticationFailed: (reason: string) => void = () => {},
+  onStateless: (payload: string) => void = () => {}
 ): Peer {
   const document = new Y.Doc();
   let markSynced = () => {};
@@ -65,6 +69,7 @@ function createPeer(
     document,
     token: tokenFor(userId, name, roomName),
     onAuthenticationFailed: ({ reason }) => onAuthenticationFailed(reason),
+    onStateless: ({ payload }) => onStateless(payload),
     onSynced: ({ state }) => {
       if (state) markSynced();
     },
@@ -85,9 +90,20 @@ function createTestServer(states: Map<string, Uint8Array>) {
   ): Promise<RealtimeRoomAccess> => {
     const room = parseRealtimeRoomName(roomName);
     const role = roles.get(userId);
-    if (room?.kind !== "document" || room.id !== documentId || !role) {
-      throw new RealtimeAuthorizationError();
+    if (!room || !role) throw new RealtimeAuthorizationError();
+    if (room.kind === "workspace") {
+      if (room.id !== workspaceId && room.id !== otherWorkspaceId) {
+        throw new RealtimeAuthorizationError();
+      }
+      return {
+        roomName,
+        workspaceId: room.id,
+        role,
+        readOnly: true,
+        documentId: null,
+      };
     }
+    if (room.id !== documentId) throw new RealtimeAuthorizationError();
 
     return {
       roomName,
@@ -217,6 +233,63 @@ describe("Hocuspocus realtime server", () => {
     } finally {
       for (const peer of peers) peer.provider.destroy();
       for (const server of servers.reverse()) await server.destroy();
+    }
+  }, 15000);
+
+  it("relays pages:changed only from editing roles within the sender's workspace", async () => {
+    const server = createTestServer(new Map());
+    const peers: Peer[] = [];
+    const received: Record<string, string[]> = {
+      owner: [],
+      editor: [],
+      viewer: [],
+      other: [],
+      document: [],
+    };
+    const join = (key: string, userId: string, room: string): Peer => {
+      const peer = createPeer(
+        `ws://127.0.0.1:${server.address.port}`,
+        userId,
+        key,
+        room,
+        () => {},
+        (payload) => received[key].push(payload)
+      );
+      peers.push(peer);
+      return peer;
+    };
+
+    try {
+      await server.listen();
+      const owner = join("owner", ownerId, workspaceRoom);
+      const editor = join("editor", editorId, workspaceRoom);
+      const viewer = join("viewer", viewerId, workspaceRoom);
+      const other = join("other", ownerId, otherWorkspaceRoom);
+      const document = join("document", ownerId, documentRoom);
+      await Promise.all(
+        [owner, editor, viewer, other, document].map((peer) => peer.synced)
+      );
+
+      // Messages from a connection arrive in order, so the rejected sends
+      // below are all processed before the final accepted one is relayed.
+      viewer.provider.sendStateless("pages:changed");
+      editor.provider.sendStateless("something:else");
+      editor.provider.sendStateless(JSON.stringify({ type: "pages:changed" }));
+      document.provider.sendStateless("pages:changed");
+      editor.provider.sendStateless("pages:changed");
+
+      await waitUntil(
+        () => received.owner.length > 0 && received.viewer.length > 0,
+        "accepted workspace notification"
+      );
+      expect(received.owner).toEqual(["pages:changed"]);
+      expect(received.viewer).toEqual(["pages:changed"]);
+      expect(received.editor).toEqual([]);
+      expect(received.other).toEqual([]);
+      expect(received.document).toEqual([]);
+    } finally {
+      for (const peer of peers) peer.provider.destroy();
+      await server.destroy();
     }
   }, 15000);
 });
