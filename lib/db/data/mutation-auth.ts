@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, eq } from "drizzle-orm";
 
 import type { MutationErrorCode } from "@/lib/db/mutation-result";
@@ -36,38 +37,40 @@ export async function getWorkspaceOrThrow(workspaceId: string) {
   return workspace;
 }
 
-export async function getWorkspaceMembershipRole(
-  userId: string,
-  workspaceId: string
-): Promise<{
-  workspace: typeof workspaces.$inferSelect;
-  role: WorkspaceMembershipRole;
-}> {
-  const workspace = await getWorkspaceOrThrow(workspaceId);
+export const getWorkspaceMembershipRole = cache(
+  async (
+    userId: string,
+    workspaceId: string
+  ): Promise<{
+    workspace: typeof workspaces.$inferSelect;
+    role: WorkspaceMembershipRole;
+  }> => {
+    const workspace = await getWorkspaceOrThrow(workspaceId);
 
-  if (workspace.workspaceOwnerId === userId) {
-    return { workspace, role: "owner" };
+    if (workspace.workspaceOwnerId === userId) {
+      return { workspace, role: "owner" };
+    }
+
+    const collaborator = await db.query.collaborators.findFirst({
+      where: and(
+        eq(collaborators.workspaceId, workspaceId),
+        eq(collaborators.userId, userId)
+      ),
+    });
+
+    const role = resolveWorkspaceMembershipRole(
+      userId,
+      workspace,
+      collaborator?.role ?? null
+    );
+
+    if (!role) {
+      throw new MutationAuthError("Forbidden", "FORBIDDEN");
+    }
+
+    return { workspace, role };
   }
-
-  const collaborator = await db.query.collaborators.findFirst({
-    where: and(
-      eq(collaborators.workspaceId, workspaceId),
-      eq(collaborators.userId, userId)
-    ),
-  });
-
-  const role = resolveWorkspaceMembershipRole(
-    userId,
-    workspace,
-    collaborator?.role ?? null
-  );
-
-  if (!role) {
-    throw new MutationAuthError("Forbidden", "FORBIDDEN");
-  }
-
-  return { workspace, role };
-}
+);
 
 export async function requireWorkspacePermission(
   userId: string,
