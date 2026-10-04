@@ -4,6 +4,7 @@ import {
   canAddCollaborator,
   canCreateBlock,
   canCreateWorkspace,
+  canHoldCollaborators,
   FREE_PLAN_MAX_BLOCKS,
   FREE_PLAN_MAX_COLLABORATORS,
   FREE_PLAN_MAX_WORKSPACES,
@@ -42,5 +43,22 @@ describe("plan quotas", () => {
     expect(
       canCreateBlock({ isPro: false, blockCount: FREE_PLAN_MAX_BLOCKS })
     ).toBe(false);
+  });
+
+  it("allows a free owner to hold up to the collaborator cap inclusively", () => {
+    const hold = (collaboratorCount: number) =>
+      canHoldCollaborators({ isPro: false, collaboratorCount });
+    expect(hold(FREE_PLAN_MAX_COLLABORATORS)).toBe(true);
+    expect(hold(FREE_PLAN_MAX_COLLABORATORS + 1)).toBe(false);
+  });
+
+  it("never limits pro plans", () => {
+    expect(canAddCollaborator({ isPro: true, collaboratorCount: 999 })).toBe(
+      true
+    );
+    expect(canHoldCollaborators({ isPro: true, collaboratorCount: 999 })).toBe(
+      true
+    );
+    expect(canCreateBlock({ isPro: true, blockCount: 100000 })).toBe(true);
   });
 });

@@ -46,4 +46,25 @@ describe("getSafeRedirectPath", () => {
       "/dashboard"
     );
   });
+
+  it("rejects encoded protocol-relative and scheme paths", () => {
+    expect(getSafeRedirectPath("%2F%2Fevil.test", "/dashboard", BASE)).toBe(
+      "/dashboard"
+    );
+    expect(getSafeRedirectPath("javascript:alert(1)", "/dashboard", BASE)).toBe(
+      "/dashboard"
+    );
+  });
+
+  it("falls back on malformed percent-encoding", () => {
+    expect(getSafeRedirectPath("/dashboard/%E0%A4%A", "/dashboard", BASE)).toBe(
+      "/dashboard"
+    );
+  });
+
+  it("keeps the query string and hash of a safe path", () => {
+    expect(getSafeRedirectPath("/dashboard/ws?a=1#top", "/x", BASE)).toBe(
+      "/dashboard/ws?a=1#top"
+    );
+  });
 });
