@@ -1,13 +1,15 @@
 import { NextRequest } from "next/server";
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { proxy } from "@/proxy";
 
 describe("proxy rate limiting gate", () => {
-  beforeAll(() => {
-    process.env.BETTER_AUTH_SECRET =
-      "test-secret-key-that-is-at-least-32-chars";
-    process.env.BETTER_AUTH_URL = "http://localhost:3000";
+  beforeEach(() => {
+    vi.stubEnv(
+      "BETTER_AUTH_SECRET",
+      "test-secret-key-that-is-at-least-32-chars"
+    );
+    vi.stubEnv("BETTER_AUTH_URL", "http://localhost:3000");
   });
 
   afterEach(() => {

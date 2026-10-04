@@ -1,5 +1,5 @@
 import { compare, hash } from "bcryptjs";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   betterAuthAccounts,
@@ -8,6 +8,14 @@ import {
   users,
 } from "@/lib/db/schema";
 import { createAuth } from "./create-auth";
+
+const TEST_SECRET = vi.hoisted(
+  () => "test-secret-key-that-is-at-least-32-chars"
+);
+
+vi.mock("@/lib/env", () => ({
+  env: { BETTER_AUTH_SECRET: TEST_SECRET, DISABLE_AUTH_RATE_LIMIT: "true" },
+}));
 
 function makeFakeDb() {
   const query: Record<string, unknown> = {
@@ -24,12 +32,8 @@ function makeFakeDb() {
 }
 
 describe("Better Auth configuration", () => {
-  beforeAll(() => {
-    process.env.BETTER_AUTH_SECRET =
-      "test-secret-key-that-is-at-least-32-chars";
-    process.env.BETTER_AUTH_URL = "http://localhost:3000";
-    process.env.SKIP_ENV_VALIDATION = "true";
-    process.env.DISABLE_AUTH_RATE_LIMIT = "true";
+  it("signs with the validated env secret", () => {
+    expect(createAuth(makeFakeDb()).options.secret).toBe(TEST_SECRET);
   });
 
   it("disables implicit account linking", () => {

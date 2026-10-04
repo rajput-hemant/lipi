@@ -46,11 +46,6 @@ vi.mock("@/hooks/use-app-state", () => ({
   }),
   useCanEditPages: () => true,
   usePageAccess: () => "edit",
-  useAppActions: () => ({
-    addDocument: vi.fn(),
-    updateDocument: vi.fn(),
-    deleteDocument: vi.fn(),
-  }),
 }));
 
 vi.mock("@/hooks/use-subscription-modal", () => ({
@@ -62,10 +57,8 @@ vi.mock("@/hooks/use-subscription-modal", () => ({
 vi.mock("@/lib/db/actions/document", () => ({
   createDocument: vi.fn(),
   updateDocument: vi.fn(),
-  deleteDocument: vi.fn(),
+  softDeleteDocumentTree: vi.fn(),
   duplicateDocument: vi.fn(),
-  countChildren: vi.fn(() => 1),
-  hasWorkspaceProPlan: vi.fn().mockResolvedValue(true),
 }));
 
 const roots: ReturnType<typeof createRoot>[] = [];
@@ -95,10 +88,10 @@ describe("DocumentTree Keyboard Context Menu", () => {
     });
 
     const link = document.getElementById("document-tree-item-doc-1");
-    expect(link).toBeTruthy();
+    expect(link?.textContent).toContain("Getting Started");
 
     const row = link?.closest('[role="treeitem"]');
-    expect(row).toBeTruthy();
+    expect(row).not.toBeNull();
 
     let contextMenuFired = false;
     row?.addEventListener("contextmenu", () => {
