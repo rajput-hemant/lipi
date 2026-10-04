@@ -186,7 +186,7 @@ function DocumentTreeItem({
     const newId = uuid();
     const records = toDocumentRecords(allDocuments);
     const copies = buildOptimisticDuplicateDocuments(
-      allDocuments as DocumentSummary[],
+      allDocuments,
       records,
       node.id,
       newId,
@@ -477,11 +477,10 @@ function DocumentTreeItem({
 }
 
 export function DocumentTree() {
-  const pathname = usePathname();
-  const workspaceId = pathname.split("/")[2] ?? "";
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
-  const { documents, addDocument, deleteDocument } = useAppState();
+  const { workspace, documents, addDocument, deleteDocument } = useAppState();
+  const workspaceId = workspace?.id ?? "";
   const access = usePageAccess();
   const canEdit = access === "edit";
 

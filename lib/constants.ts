@@ -82,7 +82,7 @@ export const PRICING_PLANS = { proplan: "Pro Plan", freeplan: "Free Plan" };
 
 export const LEGAL = {
   termsOfService: {
-    lastUpdated: "December 15, 2023",
+    lastUpdated: "October 4, 2026",
     sections: [
       {
         title: "Acceptance of Terms",
@@ -152,7 +152,7 @@ export const LEGAL = {
       },
       {
         title: "Changes to Privacy Policy",
-        description: `- **Updates:** This Privacy Policy may be updated from time to time. It is your responsibility to review this policy periodically. Your continued use of ${siteConfig.name} after changes to this policy signifies your acceptance of the updated terms.`,
+        description: `This Privacy Policy may be updated from time to time. It is your responsibility to review this policy periodically. Your continued use of ${siteConfig.name} after changes to this policy signifies your acceptance of the updated terms.`,
       },
       {
         title: "Contact Information",

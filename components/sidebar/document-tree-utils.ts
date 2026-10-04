@@ -7,33 +7,15 @@ export function getActiveDocuments(documents: readonly DocumentSummary[]) {
   return documents.filter((document) => !document.inTrash);
 }
 
-function toDocumentRecord(document: DocumentSummary): DocumentRecord | null {
-  if (!document.id) return null;
-
-  return {
-    id: document.id,
-    workspaceId: document.workspaceId,
-    parentId: document.parentId ?? null,
-    title: document.title,
-    icon: document.icon ?? "",
-    bannerUrl: document.bannerUrl ?? null,
-    inTrash: document.inTrash ?? false,
-    createdAt: document.createdAt ?? new Date(0).toISOString(),
-    updatedAt: document.updatedAt ?? new Date(0).toISOString(),
-  };
-}
-
 export function toDocumentRecords(
   documents: readonly DocumentSummary[]
 ): DocumentRecord[] {
   const seen = new Set<string>();
 
-  return getActiveDocuments(documents).flatMap((document) => {
-    if (seen.has(document.id)) return [];
+  return getActiveDocuments(documents).filter((document) => {
+    if (seen.has(document.id)) return false;
     seen.add(document.id);
-
-    const record = toDocumentRecord(document);
-    return record ? [record] : [];
+    return true;
   });
 }
 
@@ -41,10 +23,7 @@ export function toDocumentRecords(
 export function toAllDocumentRecords(
   documents: readonly DocumentSummary[]
 ): DocumentRecord[] {
-  return documents.flatMap((document) => {
-    const record = toDocumentRecord(document);
-    return record ? [record] : [];
-  });
+  return [...documents];
 }
 
 export function getDocumentForest(documents: readonly DocumentSummary[]) {
