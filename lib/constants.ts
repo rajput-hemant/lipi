@@ -93,8 +93,8 @@ export const LEGAL = {
         description: `${siteConfig.name} is an open-source project distributed under the MIT License. You are free to use, modify, and distribute ${siteConfig.name}'s source code in accordance with the terms specified in the MIT License. A copy of the MIT License is included in the ${siteConfig.name} repository.`,
       },
       {
-        title: "Code of Conduct",
-        description: `When using ${siteConfig.name}, you agree to abide by our Code of Conduct, available in the project repository. The Code of Conduct outlines the expected behavior within the ${siteConfig.name} community and helps create a positive and inclusive environment for all contributors.`,
+        title: "Acceptable Use",
+        description: `When using ${siteConfig.name}, you agree to use it lawfully and respectfully toward other users and collaborators, and not to interfere with the service or access content you are not authorized to see.`,
       },
       {
         title: "No Warranty",
@@ -124,31 +124,31 @@ export const LEGAL = {
   },
 
   privacyPolicy: {
-    lastUpdated: "December 15, 2023",
+    lastUpdated: "October 4, 2026",
     sections: [
       {
         title: "Introduction",
-        description: `Thank you for choosing ${siteConfig.name}, an open-source web application developed under the MIT License. This Privacy Policy outlines how we collect, use, disclose, and protect your information when you use ${siteConfig.name}. By using ${siteConfig.name}, you consent to the practices described in this Privacy Policy.`,
+        description: `${siteConfig.name} is an open-source web application developed under the MIT License. This Privacy Policy describes what information ${siteConfig.name} collects and how it is used. It is a general description for a showcase project, not legal advice.`,
       },
       {
         title: "Information We Collect",
-        description: `- **Personal Information:** We do not collect any personal information from ${siteConfig.name} users. ${siteConfig.name} is designed to respect your privacy, and any data you enter or generate while using the application remains on your local device.`,
+        description: `Account data: your name, email address and a hashed password, or the profile details returned by Google or GitHub if you choose to sign in with them. Content: the workspaces, pages and files you create or upload, stored in our database and with our file upload provider. Billing: paid plans are processed by Stripe. We do not store card numbers; Stripe handles payment details. Usage: anonymous page-view analytics from Vercel Analytics.`,
       },
       {
         title: "How We Use Your Information",
-        description: `- **Usage Data:** ${siteConfig.name} does not collect any usage data. All data generated or processed within the application stays locally on your device.`,
+        description: `We use your information to run ${siteConfig.name}: to sign you in, store and display your content, let collaborators edit pages together in real time, process subscriptions, and send transactional email such as password reset links through Resend. We do not sell your information.`,
       },
       {
         title: "Cookies and Tracking Technologies",
-        description: `- **Cookies:** ${siteConfig.name} does not use cookies or any tracking technologies.`,
+        description: `${siteConfig.name} sets cookies to keep you signed in and to remember interface preferences such as whether the sidebar is open. Vercel Analytics is used for page-view statistics.`,
       },
       {
-        title: "Data Security",
-        description: `- **Data Storage:** As an open-source project, ${siteConfig.name} does not store any user data on external servers. All data remains on the user's local device.`,
+        title: "Third-Party Services",
+        description: `${siteConfig.name} relies on Stripe (billing), UploadThing (file uploads), Resend (email), Google and GitHub (optional sign-in) and Vercel (hosting and analytics). Each processes the data needed for its function under its own privacy policy. ${siteConfig.name} may also link to external websites, which this policy does not cover.`,
       },
       {
-        title: "Third-Party Links",
-        description: `- **External Links:** ${siteConfig.name} may contain links to external websites or resources. This Privacy Policy applies only to ${siteConfig.name} and does not cover the privacy practices of third-party websites.`,
+        title: "Data Retention and Deletion",
+        description: `We keep your account and content while your account is active. To have your data deleted, contact us at the address below. Some records, such as billing history, may be retained where required by Stripe or by law.`,
       },
       {
         title: "Changes to Privacy Policy",
