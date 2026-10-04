@@ -120,12 +120,15 @@
     "@babel/core": "7.29.7",
     "@babel/helpers": "7.29.7",
     "@humanfs/node": "0.16.8",
+    "babel-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "browserslist": "4.29.3",
     "cross-spawn": "7.0.6",
     "effect": "3.22.2",
+    "eslint-plugin-react-compiler": "19.0.0-beta-df7b47d-20241124",
     "flatted": "3.4.4",
     "js-yaml": "4.3.2",
-    "micromatch": "4.0.8"
+    "micromatch": "4.0.8",
+    "zod-validation-error": "4.0.2"
   },
   "engines": {
     "node": ">=22.11.0"
