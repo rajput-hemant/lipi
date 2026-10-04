@@ -20,7 +20,7 @@ The Postgres init SQL is inlined in the compose file (`configs.content`) so the 
 
 ## Prerequisites
 
-- Bun 1.4.2 (pinned in `package.json` `packageManager`)
+- Bun 1.4.2 (the version the repo targets; `package.json` no longer pins it with `packageManager` or `engines`)
 - Docker with Compose
 - Node 22 only for the realtime process (see [Realtime](#realtime))
 
