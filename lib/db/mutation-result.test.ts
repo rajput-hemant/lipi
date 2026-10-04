@@ -80,10 +80,11 @@ describe("runMutationToast", () => {
       denied,
       onError,
     });
-    const { error } = vi.mocked(toast.promise).mock.lastCall![1] as {
-      error: (e: unknown) => string;
-    };
-    const rejection = await unwrapMutation(result).catch((e: unknown) => e);
+    const [pending, { error }] = vi.mocked(toast.promise).mock.lastCall as [
+      Promise<unknown>,
+      { error: (e: unknown) => string },
+    ];
+    const rejection = await pending.catch((e: unknown) => e);
     return { message: error(rejection), onError };
   }
 
