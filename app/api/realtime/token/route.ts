@@ -1,10 +1,8 @@
 import * as z from "zod";
 
 import { getAuth } from "@/lib/auth";
-import {
-  authorizeRealtimeRoom,
-  RealtimeAuthorizationError,
-} from "@/lib/realtime/authorize-room";
+import { authorizeRealtimeRoom } from "@/lib/realtime/authorize-room";
+import { RealtimeAuthorizationError } from "@/lib/realtime/context";
 import {
   createRealtimeToken,
   getRealtimeTokenSecret,

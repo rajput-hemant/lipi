@@ -22,7 +22,9 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/realtime/client", () => ({
-  fetchRealtimeToken: vi.fn().mockResolvedValue("token"),
+  fetchRealtimeAccess: vi
+    .fn()
+    .mockResolvedValue({ token: "token", readOnly: false }),
   getRealtimeUrl: () => "ws://127.0.0.1:1235",
 }));
 

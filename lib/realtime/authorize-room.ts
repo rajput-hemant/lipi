@@ -11,8 +11,6 @@ import {
 import { RealtimeAuthorizationError } from "./context";
 import { parseRealtimeRoomName } from "./rooms";
 
-export { RealtimeAuthorizationError } from "./context";
-
 export async function authorizeRealtimeRoom(
   userId: string,
   roomName: string
