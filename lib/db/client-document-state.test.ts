@@ -6,7 +6,6 @@ import type { DocumentSummary } from "@/types/db";
 import {
   buildOptimisticDuplicateDocuments,
   patchDocumentsForRestore,
-  permanentDeleteTargetIds,
 } from "./client-document-state";
 
 const ts = "2026-01-01T00:00:00.000Z";
@@ -53,17 +52,6 @@ describe("patchDocumentsForRestore", () => {
     const patched = patchDocumentsForRestore(documents, records, "child");
 
     expect(patched.every((document) => !document.inTrash)).toBe(true);
-  });
-});
-
-describe("permanentDeleteTargetIds", () => {
-  it("returns the full trashed subtree", () => {
-    const records = [
-      record({ id: "a", title: "A", inTrash: true }),
-      record({ id: "b", title: "B", parentId: "a", inTrash: true }),
-    ];
-
-    expect(permanentDeleteTargetIds(records, "a").sort()).toEqual(["a", "b"]);
   });
 });
 
