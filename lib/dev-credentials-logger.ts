@@ -6,11 +6,10 @@ export function logLocalDevCredentials() {
 
   const { user, database } = loadLocalDevCredentials();
 
-  console.log("\n=== Local development credentials ===");
+  console.log("\n=== Local development account ===");
   console.log(
     `Database: postgresql://${database.user}:********@${database.host}:${database.port}/${database.name}`
   );
   console.log(`User:     ${user.email}`);
-  console.log(`Password: ${user.password}`);
-  console.log("=====================================\n");
+  console.log("=================================\n");
 }
