@@ -90,7 +90,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 - [x] **Room Authorization & Viewer Enforcement:** Validates session and workspace membership on connection and synchronization; enforces read-only access for viewers (`lib/realtime/authorize-room.ts`, `lib/realtime/authorize-room.test.ts`).
 - [x] **Authoritative State Snapshots:** Yjs document state in `lipi_realtime_documents.state` serves as editing truth, with debounced snapshots written to `documents.content` (`lib/realtime/authoritative-content.ts`, `lib/realtime/authoritative-content.test.ts`).
 - [x] **End-to-End Multi-Client Synchronization:** Verified simultaneous multi-user editing, cursor presence, and viewer write rejection in a 3-context browser session (`tests/e2e/collaboration.spec.ts`).
-- [ ] **Production Realtime Endpoint:** Decided (D-1): a separate always-on Node host with its own `wss://` URL and signed room tokens ([realtime guide](../guides/realtime.md), [research note](../research/realtime-collaboration.md)). Deployment of that host is still open.
+- [ ] **Production Realtime Endpoint:** Decided (D-1): a separate always-on Node host with its own `wss://` URL and signed room tokens ([realtime guide](../guides/realtime.md)). Deployment of that host is still open.
 
 ### 3.7 Plan Quotas & Stripe Billing Demonstration
 
@@ -109,4 +109,4 @@ The following items are tracked as open and require operational execution or inf
 1. **Legacy Credential Backfill:**
    - Insert a `better_auth_account` credential row (`accountId = user.id`, `providerId = 'credential'`, `password` copied from `user.password`) for every legacy user without one, on the production database, before those users can sign in.
 2. **Production Realtime Server Host Deployment:**
-   - Decided (D-1 in [todo](../TODO.md)): a separate always-on Node 22 host with its own `wss://` URL, using short-lived signed room tokens ([realtime guide](../guides/realtime.md), [research note](../research/realtime-collaboration.md)). Remaining work is deployment: the host, `LIPI_REALTIME_ALLOWED_ORIGINS`, `NEXT_PUBLIC_LIPI_REALTIME_URL` and TLS.
+   - Decided (D-1 in [todo](../TODO.md)): a separate always-on Node 22 host with its own `wss://` URL, using short-lived signed room tokens ([realtime guide](../guides/realtime.md)). Remaining work is deployment: the host, `LIPI_REALTIME_ALLOWED_ORIGINS`, `NEXT_PUBLIC_LIPI_REALTIME_URL` and TLS.
