@@ -53,7 +53,7 @@ export function OAuthButtons(props: OAuthButtonProps) {
         </span>
       </div>
 
-      <div className="mt-6 flex w-full flex-col space-y-2 text-white">
+      <div className="mt-6 flex w-full flex-col space-y-2">
         <Button
           size="sm"
           onClick={() => oauthSignIn("google")}
