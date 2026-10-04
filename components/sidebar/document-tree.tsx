@@ -183,7 +183,7 @@ function DocumentTreeItem({
     const newId = uuid();
     const records = toDocumentRecords(allDocuments);
     const copies = buildOptimisticDuplicateDocuments(
-      allDocuments as DocumentSummary[],
+      allDocuments,
       records,
       node.id,
       newId,
