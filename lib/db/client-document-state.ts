@@ -27,7 +27,7 @@ export function permanentDeleteTargetIds(
 }
 
 export function buildOptimisticDuplicateDocuments(
-  documents: DocumentSummary[],
+  documents: readonly DocumentSummary[],
   records: DocumentRecord[],
   sourceRootId: string,
   newRootId: string,

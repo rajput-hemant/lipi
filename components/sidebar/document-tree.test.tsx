@@ -4,6 +4,7 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
+import type { WorkspaceRecord } from "@/hooks/use-app-state";
 import type { WorkspaceMembershipRole } from "@/lib/workspace/permissions";
 import type { DocumentSummary } from "@/types/db";
 
@@ -69,7 +70,12 @@ function render(
   role: WorkspaceMembershipRole | null,
   documents = [doc("a"), doc("b")]
 ) {
-  const store = createAppStore({ user: null, documents, role });
+  const store = createAppStore({
+    user: null,
+    workspace: { id: "ws-1" } as WorkspaceRecord,
+    documents,
+    role,
+  });
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
