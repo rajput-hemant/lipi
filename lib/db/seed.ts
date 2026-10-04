@@ -75,7 +75,7 @@ async function seed() {
 }
 
 seed().catch(async (error) => {
-  console.error("Seed failed:", error instanceof Error ? error.message : error);
+  console.error("Seed failed:", error);
   await db.$client.end({ timeout: 5 }).catch(() => undefined);
   process.exit(1);
 });
