@@ -55,11 +55,11 @@ describe("smoke", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    delete process.env.GITHUB_ACCESS_TOKEN;
+    vi.unstubAllEnvs();
   });
 
   it("omits github authorization without a token", async () => {
-    delete process.env.GITHUB_ACCESS_TOKEN;
+    vi.stubEnv("GITHUB_ACCESS_TOKEN", "");
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

@@ -46,11 +46,6 @@ vi.mock("@/hooks/use-app-state", () => ({
   }),
   useCanEditPages: () => true,
   usePageAccess: () => "edit",
-  useAppActions: () => ({
-    addDocument: vi.fn(),
-    updateDocument: vi.fn(),
-    deleteDocument: vi.fn(),
-  }),
 }));
 
 vi.mock("@/hooks/use-subscription-modal", () => ({
@@ -62,10 +57,8 @@ vi.mock("@/hooks/use-subscription-modal", () => ({
 vi.mock("@/lib/db/actions/document", () => ({
   createDocument: vi.fn(),
   updateDocument: vi.fn(),
-  deleteDocument: vi.fn(),
+  softDeleteDocumentTree: vi.fn(),
   duplicateDocument: vi.fn(),
-  countChildren: vi.fn(() => 1),
-  hasWorkspaceProPlan: vi.fn().mockResolvedValue(true),
 }));
 
 const roots: ReturnType<typeof createRoot>[] = [];

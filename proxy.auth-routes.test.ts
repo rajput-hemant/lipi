@@ -1,14 +1,20 @@
 import { NextRequest } from "next/server";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { proxy } from "./proxy";
 
 describe("proxy auth routes", () => {
   beforeAll(() => {
-    process.env.BETTER_AUTH_SECRET =
-      "test-secret-key-that-is-at-least-32-chars";
-    process.env.BETTER_AUTH_URL = "http://localhost:3000";
-    process.env.SKIP_ENV_VALIDATION = "true";
+    vi.stubEnv(
+      "BETTER_AUTH_SECRET",
+      "test-secret-key-that-is-at-least-32-chars"
+    );
+    vi.stubEnv("BETTER_AUTH_URL", "http://localhost:3000");
+    vi.stubEnv("SKIP_ENV_VALIDATION", "true");
+  });
+
+  afterAll(() => {
+    vi.unstubAllEnvs();
   });
 
   it("does not redirect /login when only a session cookie is present", async () => {
