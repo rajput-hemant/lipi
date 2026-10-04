@@ -63,10 +63,6 @@ function cachedWorkspaceList<T>(
   )();
 }
 
-/**
- * @param userID User ID
- * @returns Private workspaces
- */
 export async function getPrivateWorkspaces(userID: string) {
   return cachedWorkspaceList("private", userID, () =>
     db
@@ -86,10 +82,6 @@ export async function getPrivateWorkspaces(userID: string) {
   );
 }
 
-/**
- * @param userId User ID
- * @returns Collaborating workspaces
- */
 export async function getCollaboratingWorkspaces(userId: string) {
   return cachedWorkspaceList("collaborating", userId, async () => {
     const data = await db
@@ -102,10 +94,6 @@ export async function getCollaboratingWorkspaces(userId: string) {
   });
 }
 
-/**
- * @param userId User ID
- * @returns Shared workspaces
- */
 export async function getSharedWorkspaces(userId: string) {
   return cachedWorkspaceList("shared", userId, async () => {
     const data = await db

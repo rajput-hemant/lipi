@@ -14,11 +14,6 @@ export async function listWorkspacesForCurrentUser() {
   return listWorkspacesForSwitcher(user.id);
 }
 
-/**
- * Create workspace
- * @param workspace Title and icon; the owner is always the signed-in user
- * @returns Created workspace
- */
 export async function createWorkspace(
   workspace: Pick<typeof workspaces.$inferInsert, "title" | "iconId">
 ) {
