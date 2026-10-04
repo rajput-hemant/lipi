@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun --bun next dev --turbopack",
-    "build": "bun --bun next build",
-    "start": "bun --bun next start",
-    "preview": "bun --bun next build && bun --bun next start",
+    "dev": "bun next dev --turbopack",
+    "build": "bun next build",
+    "start": "bun next start",
+    "preview": "bun next build && bun next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "test": "vitest run --maxWorkers=2",
@@ -129,9 +129,5 @@
     "js-yaml": "4.3.2",
     "micromatch": "4.0.8",
     "zod-validation-error": "4.0.2"
-  },
-  "engines": {
-    "node": ">=22.11.0"
-  },
-  "packageManager": "bun@1.4.2"
+  }
 }

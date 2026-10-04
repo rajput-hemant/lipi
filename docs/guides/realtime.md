@@ -8,6 +8,11 @@ realtime process also needs `LIPI_REALTIME_ALLOWED_ORIGINS`, a comma-separated
 list of exact browser origins. `LIPI_REALTIME_PORT` defaults to `1234` and
 `LIPI_REALTIME_ADDRESS` defaults to `127.0.0.1`.
 
+Next.js loads `.env.local`, but the standalone Node process does not load it
+automatically. Export the variables into that process's environment, or start
+it from the repository root with `node --env-file=.env.local realtime/bootstrap.mjs`.
+Both processes must receive the same database URL and auth secret.
+
 This implementation pins Hocuspocus server, provider, and database extension
 to `4.7.0`, with Yjs `13.6.33`, `y-protocols` `1.0.7`, and `y-prosemirror`
 `1.3.7`.
