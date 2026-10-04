@@ -10,15 +10,6 @@ export const subscriptionStatus = pgEnum("subscription_status", [
   "trialing",
 ]);
 
-export const pricingType = pgEnum("pricing_type", ["recurring", "one_time"]);
-
-export const pricingPlanInterval = pgEnum("pricing_plan_interval", [
-  "year",
-  "month",
-  "week",
-  "day",
-]);
-
 export const workspaceCollaboratorRole = pgEnum("workspace_collaborator_role", [
   "editor",
   "viewer",
