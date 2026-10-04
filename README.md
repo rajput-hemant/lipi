@@ -35,7 +35,7 @@ The button below clones the repository into Vercel and prompts for the core vari
 - Real-time collaboration needs the standalone Hocuspocus process (`bun run realtime:start`) on an always-on Node.js host. It is not a Vercel function. Set `NEXT_PUBLIC_LIPI_REALTIME_URL` and `LIPI_REALTIME_ALLOWED_ORIGINS` as described in [docs/guides/realtime.md](docs/guides/realtime.md). Without them the editor has no realtime endpoint in production.
 - Password recovery email needs `RESEND_API_KEY` and `EMAIL_FROM` in production; locally the reset link is logged to the terminal instead.
 - Billing (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PRO`) and uploads (`UPLOADTHING_TOKEN`, `UPLOADTHING_SECRET`, `UPLOADTHING_APP_ID`) are optional and not prompted for. Those features stay disabled until you add them.
-- The database schema is not migrated by the deploy; run `bun run db:auth` and `bun run db:migrate` against your database. See [.env.example](.env.example) for every variable.
+- The database schema is not migrated by the deploy; run `bun run db:migrate` against your database. `bun run db:auth` is for local databases only (it refuses non-loopback URLs); an existing deployment keeps the auth tables it already has, see [docs/local-development.md](docs/local-development.md). See [.env.example](.env.example) for every variable.
 
 [![Deploy with Vercel](https://vercel.com/button)][deploy]
 

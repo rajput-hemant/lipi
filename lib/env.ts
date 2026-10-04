@@ -87,9 +87,6 @@ export const env = createEnv({
     // Hosting platform variables
     VERCEL: z.string().optional(),
     VERCEL_URL: z.string().optional(),
-    NETLIFY: z.string().optional(),
-    CONTEXT: z.string().optional(),
-    DEPLOY_PRIME_URL: z.string().optional(),
     PORT: z.coerce.number().int().positive().optional(),
 
     // Read directly from process.env by the standalone realtime process

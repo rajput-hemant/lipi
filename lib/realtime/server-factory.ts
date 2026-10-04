@@ -34,11 +34,11 @@ type RealtimeServerOptions = {
 function userColor(userId: string) {
   const colors = [
     "#db2777",
-    "#ea580c",
-    "#16a34a",
-    "#0891b2",
-    "#8b5cf6",
-    "#ca8a04",
+    "#c2410c",
+    "#15803d",
+    "#0e7490",
+    "#7c3aed",
+    "#a16207",
     "#dc2626",
   ];
   const hash = Array.from(userId).reduce(

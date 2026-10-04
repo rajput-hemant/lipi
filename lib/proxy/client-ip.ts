@@ -3,8 +3,8 @@ import type { NextRequest } from "next/server";
 const INTERNAL_HOP =
   /^(10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|::1$|f[cd][0-9a-f]{2}:|fe80:)/i;
 
-// Reads process.env directly: proxy code is kept free of t3-env so it loads
-// without the full schema (the proxy may run outside the app runtime).
+// Reads process.env on each call instead of the validated `env`: t3-env snapshots
+// values at import time, which would freeze the per-test overrides in the proxy tests.
 function trustedProxyCount(): number {
   if (process.env.VERCEL) return 0;
   const count = Number(process.env.TRUSTED_PROXY_COUNT);

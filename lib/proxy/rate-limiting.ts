@@ -1,5 +1,5 @@
-// Reads process.env directly: proxy code is kept free of t3-env so it loads
-// without the full schema (the proxy may run outside the app runtime).
+// Reads process.env on each call instead of the validated `env`: t3-env snapshots
+// values at import time, which would freeze the per-test overrides in the proxy tests.
 
 export type ProxyRateLimitMode = "disabled" | "active" | "misconfigured";
 
