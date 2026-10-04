@@ -63,7 +63,7 @@ describe("smoke", () => {
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ stargazers_count: "42" }),
+      json: async () => ({ stargazers_count: 42 }),
     });
     vi.stubGlobal("fetch", fetchMock);
 
