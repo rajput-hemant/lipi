@@ -24,4 +24,4 @@ Page header cover control; Settings, General, Logo.
 ## Gotchas
 
 - No real credentials: live upload remains a GAP.
-- `.env.example` lists `UPLOADTHING_*` empty (LIP-V018 fixed).
+- `.env.example` lists `UPLOADTHING_TOKEN` and optional legacy variables (LIP-V018 fixed). Binary delivery remains unverified.
