@@ -5,7 +5,6 @@ import { POST } from "./route";
 vi.mock("@/lib/auth", () => ({ getAuth: vi.fn() }));
 vi.mock("@/lib/realtime/authorize-room", () => ({
   authorizeRealtimeRoom: vi.fn(),
-  RealtimeAuthorizationError: class extends Error {},
 }));
 vi.mock("@/lib/realtime/token", () => ({
   createRealtimeToken: vi.fn(),

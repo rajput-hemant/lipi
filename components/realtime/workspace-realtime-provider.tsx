@@ -4,7 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 
-import { fetchRealtimeToken, getRealtimeUrl } from "@/lib/realtime/client";
+import { fetchRealtimeAccess, getRealtimeUrl } from "@/lib/realtime/client";
 import { workspaceRoomName } from "@/lib/realtime/rooms";
 import { getSharedHocuspocusWebsocket } from "@/lib/realtime/shared-websocket";
 
@@ -33,7 +33,7 @@ export function WorkspaceRealtimeProvider({
     const connection = new HocuspocusProvider({
       websocketProvider,
       name: roomName,
-      token: () => fetchRealtimeToken(roomName),
+      token: async () => (await fetchRealtimeAccess(roomName)).token,
     });
     connection.attach();
     const refreshPages = ({ payload }: { payload: string }) => {

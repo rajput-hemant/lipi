@@ -2,7 +2,6 @@ import type { DocumentRecord } from "./documents-tree";
 import type { DocumentSummary } from "@/types/db";
 
 import {
-  assertPermanentDeleteAllowed,
   collectRestoreTargetIds,
   planDeepDuplicate,
 } from "./document-operations";
@@ -17,13 +16,6 @@ export function patchDocumentsForRestore(
   return documents.map((document) =>
     restoreIds.has(document.id) ? { ...document, inTrash: false } : document
   );
-}
-
-export function permanentDeleteTargetIds(
-  records: DocumentRecord[],
-  documentId: string
-): string[] {
-  return assertPermanentDeleteAllowed(records, documentId);
 }
 
 export function buildOptimisticDuplicateDocuments(

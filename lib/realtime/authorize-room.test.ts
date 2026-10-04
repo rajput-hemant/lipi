@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  authorizeRealtimeRoom,
-  RealtimeAuthorizationError,
-} from "./authorize-room";
+import { authorizeRealtimeRoom } from "./authorize-room";
+import { RealtimeAuthorizationError } from "./context";
 
 const { findDocument, findWorkspace, findCollaborator } = vi.hoisted(() => ({
   findDocument: vi.fn(),

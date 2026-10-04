@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { DocumentSummary } from "@/types/db";
 
-import { permanentDeleteTargetIds } from "@/lib/db/client-document-state";
+import { assertPermanentDeleteAllowed } from "@/lib/db/document-operations";
 import { toAllDocumentRecords, toDocumentRecords } from "./document-tree-utils";
 
 const ts = "2026-01-01T00:00:00.000Z";
@@ -33,11 +33,11 @@ describe("trash record helpers", () => {
     const documents = [trashedDoc("a"), trashedDoc("b", "a")];
 
     expect(() =>
-      permanentDeleteTargetIds(toDocumentRecords(documents), "a")
+      assertPermanentDeleteAllowed(toDocumentRecords(documents), "a")
     ).toThrow(/not found/i);
 
     expect(
-      permanentDeleteTargetIds(toAllDocumentRecords(documents), "a").sort()
+      assertPermanentDeleteAllowed(toAllDocumentRecords(documents), "a").sort()
     ).toEqual(["a", "b"]);
   });
 });

@@ -30,8 +30,3 @@ export async function fetchRealtimeAccess(roomName: string) {
 
   return parsed.data;
 }
-
-export async function fetchRealtimeToken(roomName: string) {
-  const access = await fetchRealtimeAccess(roomName);
-  return access.token;
-}

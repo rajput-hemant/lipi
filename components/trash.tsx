@@ -22,10 +22,8 @@ import {
   deleteDocumentPermanently,
   restoreDocument,
 } from "@/lib/db/actions/document";
-import {
-  patchDocumentsForRestore,
-  permanentDeleteTargetIds,
-} from "@/lib/db/client-document-state";
+import { patchDocumentsForRestore } from "@/lib/db/client-document-state";
+import { assertPermanentDeleteAllowed } from "@/lib/db/document-operations";
 import { runMutationToast } from "@/lib/db/mutation-result";
 import {
   AlertDialog,
@@ -82,7 +80,9 @@ export function Trash() {
 
     try {
       const records = toAllDocumentRecords(documents);
-      const deleteIds = new Set(permanentDeleteTargetIds(records, documentId));
+      const deleteIds = new Set(
+        assertPermanentDeleteAllowed(records, documentId)
+      );
       const previous = cloneDocuments(documents);
       replaceDocuments(
         previous.filter((document) => !deleteIds.has(document.id))
