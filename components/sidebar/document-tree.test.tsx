@@ -146,6 +146,28 @@ describe("DocumentTree viewer gating", () => {
   });
 });
 
+describe("DocumentTree empty state copy", () => {
+  const permissionCopy = "Only editors and the owner can add pages";
+
+  it("explains the permission only for confirmed read-only roles", () => {
+    render("viewer", []);
+    expect(document.body.textContent).toContain(permissionCopy);
+  });
+
+  it("does not claim a permission restriction while the role is unknown", () => {
+    render(null, []);
+    expect(document.body.textContent).toContain("No pages yet.");
+    expect(document.body.textContent).not.toContain(permissionCopy);
+  });
+
+  it("invites editors to create the first page", () => {
+    render("editor", []);
+    expect(document.body.textContent).toContain(
+      "No pages yet. Create your first page."
+    );
+  });
+});
+
 describe("DocumentTree optimistic rollback", () => {
   it("removes the optimistic root page when creation fails", async () => {
     createDocument.mockRejectedValue(new Error("Forbidden"));

@@ -2,45 +2,94 @@ name: CI
 
 on: [push, pull_request, workflow_dispatch]
 
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BETTER_AUTH_SECRET: ci-dummy-auth-secret-min-32-characters-long
+  BETTER_AUTH_URL: http://localhost:3000
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+  GOOGLE_CLIENT_ID: ci-google-client-id
+  GOOGLE_CLIENT_SECRET: ci-google-client-secret
+  GITHUB_CLIENT_ID: ci-github-client-id
+  GITHUB_CLIENT_SECRET: ci-github-client-secret
+
 jobs:
-  build:
-    name: Run Type Check, Linters & Tests
+  type-check:
+    name: Type check
     runs-on: ubuntu-latest
-
-    env:
-      BETTER_AUTH_SECRET: ci-dummy-auth-secret-min-32-characters-long
-      BETTER_AUTH_URL: http://localhost:3000
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
-      GOOGLE_CLIENT_ID: ci-google-client-id
-      GOOGLE_CLIENT_SECRET: ci-google-client-secret
-      GITHUB_CLIENT_ID: ci-github-client-id
-      GITHUB_CLIENT_SECRET: ci-github-client-secret
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - run: bun run type-check
 
-      - name: Install dependencies
-        run: bun i
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
 
-      - name: Check types
-        run: bun run type-check
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lockb') }}
+          restore-keys: bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - run: bun run test
 
-      - name: Check linting
-        run: bun run lint
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            .next/cache
+          key: next-${{ runner.os }}-${{ hashFiles('bun.lockb') }}-${{ hashFiles('**/*.ts', '**/*.tsx') }}
+          restore-keys: next-${{ runner.os }}-${{ hashFiles('bun.lockb') }}-
+      - run: bun install --frozen-lockfile
+      - run: bun run build
 
-      - name: Run tests
-        run: bun run test
-
-      - name: Build application
-        run: bun run build
-
-      - name: Check commits messages
-        uses: wagoid/commitlint-github-action@v6
+  commitlint:
+    name: Commit messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
