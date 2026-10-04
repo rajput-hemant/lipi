@@ -53,9 +53,16 @@ describe("smoke", () => {
     expect(b.documents).toHaveLength(0);
   });
 
+  const originalGithubToken = process.env.GITHUB_ACCESS_TOKEN;
+
   afterEach(() => {
     vi.unstubAllGlobals();
-    delete process.env.GITHUB_ACCESS_TOKEN;
+    vi.unstubAllEnvs();
+    if (originalGithubToken === undefined) {
+      delete process.env.GITHUB_ACCESS_TOKEN;
+    } else {
+      process.env.GITHUB_ACCESS_TOKEN = originalGithubToken;
+    }
   });
 
   it("omits github authorization without a token", async () => {
@@ -63,7 +70,7 @@ describe("smoke", () => {
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({ stargazers_count: "42" }),
+      json: async () => ({ stargazers_count: 42 }),
     });
     vi.stubGlobal("fetch", fetchMock);
 

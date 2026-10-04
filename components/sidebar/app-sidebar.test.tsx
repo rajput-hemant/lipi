@@ -112,13 +112,19 @@ describe("app sidebar", () => {
     expect(
       buttons.every((b) => b.hasAttribute("data-base-ui-tooltip-trigger"))
     ).toBe(true);
-    expect(
-      container.querySelector('[data-testid="document-tree-collapsed"]')
-    ).toBeTruthy();
+    const collapsedTree = container.querySelector(
+      '[data-testid="document-tree-collapsed"]'
+    );
+    expect(collapsedTree).not.toBeNull();
+    expect(collapsedTree?.getAttribute("data-testid")).toBe(
+      "document-tree-collapsed"
+    );
     expect(container.querySelector('[data-testid="document-tree"]')).toBeNull();
-    expect(
-      container.querySelector('[data-testid="account-trigger"]')
-    ).toBeTruthy();
+    const accountTrigger = container.querySelector(
+      '[data-testid="account-trigger"]'
+    );
+    expect(accountTrigger).not.toBeNull();
+    expect(accountTrigger?.getAttribute("data-testid")).toBe("account-trigger");
   });
 
   it("shows the full tree and user card when expanded", () => {
@@ -129,9 +135,9 @@ describe("app sidebar", () => {
         .querySelector('[data-slot="sidebar"]')
         ?.getAttribute("data-state")
     ).toBe("expanded");
-    expect(
-      container.querySelector('[data-testid="document-tree"]')
-    ).toBeTruthy();
+    const fullTree = container.querySelector('[data-testid="document-tree"]');
+    expect(fullTree).not.toBeNull();
+    expect(fullTree?.getAttribute("data-testid")).toBe("document-tree");
     expect(
       container.querySelector('[data-testid="account-trigger"]')
     ).toBeNull();
@@ -191,8 +197,11 @@ describe("app sidebar", () => {
     );
 
     const sheet = document.querySelector('[data-mobile="true"]');
-    expect(sheet).toBeTruthy();
-    expect(sheet?.querySelector('[data-testid="document-tree"]')).toBeTruthy();
+    expect(sheet).not.toBeNull();
+    expect(sheet?.getAttribute("data-mobile")).toBe("true");
+    const sheetTree = sheet?.querySelector('[data-testid="document-tree"]');
+    expect(sheetTree).not.toBeNull();
+    expect(sheetTree?.getAttribute("data-testid")).toBe("document-tree");
     expect(
       sheet?.querySelector('[data-testid="document-tree-collapsed"]')
     ).toBeNull();

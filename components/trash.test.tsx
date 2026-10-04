@@ -95,8 +95,15 @@ describe("Trash", () => {
 
   it("labels row controls by page title", () => {
     render();
-    expect(byLabel("Restore Alpha")).toBeTruthy();
-    expect(byLabel("Delete Beta permanently")).toBeTruthy();
+    const restoreAlpha = byLabel("Restore Alpha");
+    expect(restoreAlpha).not.toBeNull();
+    expect(restoreAlpha?.getAttribute("aria-label")).toBe("Restore Alpha");
+
+    const deleteBeta = byLabel("Delete Beta permanently");
+    expect(deleteBeta).not.toBeNull();
+    expect(deleteBeta?.getAttribute("aria-label")).toBe(
+      "Delete Beta permanently"
+    );
   });
 
   it("dispatches restore and updates the store", async () => {
@@ -134,7 +141,14 @@ describe("Trash", () => {
 
   it("keeps restore and delete controls for editors", () => {
     render(undefined, "editor");
-    expect(byLabel("Restore Alpha")).toBeTruthy();
+    const restoreAlpha = byLabel("Restore Alpha");
+    expect(restoreAlpha).not.toBeNull();
+    expect(restoreAlpha?.getAttribute("aria-label")).toBe("Restore Alpha");
+    const deleteAlpha = byLabel("Delete Alpha permanently");
+    expect(deleteAlpha).not.toBeNull();
+    expect(deleteAlpha?.getAttribute("aria-label")).toBe(
+      "Delete Alpha permanently"
+    );
   });
 
   describe("failed results", () => {

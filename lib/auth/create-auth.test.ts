@@ -1,5 +1,5 @@
 import { compare, hash } from "bcryptjs";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   betterAuthAccounts,
@@ -24,12 +24,29 @@ function makeFakeDb() {
 }
 
 describe("Better Auth configuration", () => {
+  const originalEnv = {
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
+    DISABLE_AUTH_RATE_LIMIT: process.env.DISABLE_AUTH_RATE_LIMIT,
+  };
+
   beforeAll(() => {
     process.env.BETTER_AUTH_SECRET =
       "test-secret-key-that-is-at-least-32-chars";
     process.env.BETTER_AUTH_URL = "http://localhost:3000";
     process.env.SKIP_ENV_VALIDATION = "true";
     process.env.DISABLE_AUTH_RATE_LIMIT = "true";
+  });
+
+  afterAll(() => {
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   it("disables implicit account linking", () => {

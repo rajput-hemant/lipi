@@ -55,7 +55,10 @@ describe("AlertDialogCloseAction", () => {
     act(() => root.render(<Harness />));
 
     const action = document.querySelector('[data-slot="alert-dialog-action"]');
-    expect(action).toBeTruthy();
+    expect(action).not.toBeNull();
+    expect(action?.getAttribute("data-slot")).toBe("alert-dialog-action");
+    expect(action?.textContent).toBe("Delete");
+    expect(action?.className).toContain("destructive");
 
     await act(async () => {
       action?.dispatchEvent(

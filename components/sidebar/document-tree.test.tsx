@@ -12,13 +12,17 @@ import { SidebarProvider } from "../ui/sidebar";
 import { TooltipProvider } from "../ui/tooltip";
 import { DocumentTree } from "./document-tree";
 
-const { createDocument, softDeleteDocumentTree, errorMessages } = vi.hoisted(
-  () => ({
-    createDocument: vi.fn(),
-    softDeleteDocumentTree: vi.fn(),
-    errorMessages: [] as unknown[],
-  })
-);
+const {
+  createDocument,
+  softDeleteDocumentTree,
+  errorMessages,
+  pendingPromises,
+} = vi.hoisted(() => ({
+  createDocument: vi.fn(),
+  softDeleteDocumentTree: vi.fn(),
+  errorMessages: [] as unknown[],
+  pendingPromises: [] as Promise<unknown>[],
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -44,10 +48,15 @@ vi.mock("sonner", () => ({
     promise: (
       promise: Promise<unknown>,
       opts: { error: (e: unknown) => unknown }
-    ) =>
-      promise.catch((e) => {
-        errorMessages.push(opts.error(e));
-      }),
+    ) => {
+      const p = Promise.resolve(promise)
+        .then((res) => res)
+        .catch((e) => {
+          errorMessages.push(opts.error(e));
+        });
+      pendingPromises.push(p);
+      return p;
+    },
   },
 }));
 
@@ -87,10 +96,13 @@ function render(
   return { store };
 }
 
-const flush = () =>
-  act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 0));
+const flush = async () => {
+  await act(async () => {
+    while (pendingPromises.length > 0) {
+      await pendingPromises.shift();
+    }
   });
+};
 
 const newPageButton = () =>
   document.querySelector<HTMLButtonElement>('button[aria-label="New page"]');
@@ -113,6 +125,7 @@ beforeAll(() => {
 
 afterEach(() => {
   errorMessages.length = 0;
+  pendingPromises.length = 0;
   document.body.replaceChildren();
   vi.clearAllMocks();
 });
@@ -120,11 +133,15 @@ afterEach(() => {
 describe("DocumentTree viewer gating", () => {
   it("shows New page and no badge for editors", () => {
     render("editor");
-    expect(newPageButton()).toBeTruthy();
+    const button = newPageButton();
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute("aria-label")).toBe("New page");
     expect(document.body.textContent).not.toContain("View only");
-    expect(
-      document.querySelector('[data-slot="context-menu-trigger"]')
-    ).toBeTruthy();
+    const trigger = document.querySelector(
+      '[data-slot="context-menu-trigger"]'
+    );
+    expect(trigger).not.toBeNull();
+    expect(trigger?.getAttribute("data-slot")).toBe("context-menu-trigger");
   });
 
   it("hides New page and context menus and shows the badge for viewers", () => {
