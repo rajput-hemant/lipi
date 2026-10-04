@@ -160,5 +160,3 @@ export function createAuth(
     plugins: [...(options.plugins ?? [])],
   });
 }
-
-export type Auth = ReturnType<typeof createAuth>;

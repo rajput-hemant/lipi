@@ -80,15 +80,3 @@ export const betterAuthVerifications = pgTable("better_auth_verification", {
 });
 
 export type User = typeof users.$inferSelect;
-export type NewUser = typeof users.$inferInsert;
-
-export type BetterAuthAccount = typeof betterAuthAccounts.$inferSelect;
-export type NewBetterAuthAccount = typeof betterAuthAccounts.$inferInsert;
-
-export type BetterAuthSession = typeof betterAuthSessions.$inferSelect;
-export type NewBetterAuthSession = typeof betterAuthSessions.$inferInsert;
-
-export type BetterAuthVerification =
-  typeof betterAuthVerifications.$inferSelect;
-export type NewBetterAuthVerification =
-  typeof betterAuthVerifications.$inferInsert;
