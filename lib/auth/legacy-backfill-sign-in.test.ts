@@ -1,5 +1,7 @@
 import { hash } from "bcryptjs";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+import type { createAuth } from "./create-auth";
 
 import {
   betterAuthAccounts,
@@ -7,7 +9,6 @@ import {
   betterAuthVerifications,
   users,
 } from "@/lib/db/schema";
-import { createAuth } from "./create-auth";
 import { CREDENTIAL_PROVIDER_ID } from "./credential-account";
 
 function makeFakeDb() {
@@ -59,7 +60,13 @@ describe("legacy credential backfill sign-in", () => {
   });
 
   it("accepts bcrypt passwords on backfilled credential accounts", async () => {
-    const auth = createAuth(makeFakeDb());
+    vi.resetModules();
+    const { createAuth: isolatedCreateAuth } = await import("./create-auth");
+    const auth = isolatedCreateAuth(makeFakeDb());
+    expect(auth.options.secret).toBe(
+      "test-secret-key-that-is-at-least-32-chars"
+    );
+
     const password = "LegacyPass1!";
     const passwordHash = await hash(password, 10);
     const row = backfilledCredentialRow(

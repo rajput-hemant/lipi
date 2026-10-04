@@ -33,6 +33,7 @@ const {
   duplicateDocument,
   restoreDocument,
   softDeleteDocumentTree,
+  updateDocument,
 } = await import("./document");
 
 const forbidden = () => new MutationAuthError("Forbidden", "FORBIDDEN");
@@ -87,6 +88,26 @@ describe("document mutations for a forbidden caller", () => {
     authorizeDocumentMutation.mockRejectedValue(forbidden());
 
     await expect(deleteDocumentPermanently("doc-1")).resolves.toEqual(denied);
+  });
+
+  it("returns typed results for non-forbidden auth errors from softDeleteDocumentTree", async () => {
+    authorizeDocumentMutation.mockRejectedValue(
+      new MutationAuthError("Unauthorized", "UNAUTHORIZED")
+    );
+
+    await expect(softDeleteDocumentTree("doc-1")).resolves.toEqual({
+      ok: false,
+      code: "UNAUTHORIZED",
+      message: "Sign in again to continue.",
+    });
+  });
+
+  it("returns a FORBIDDEN result from updateDocument", async () => {
+    authorizeDocumentMutation.mockRejectedValue(forbidden());
+
+    await expect(
+      updateDocument({ id: crypto.randomUUID(), title: "New" })
+    ).resolves.toEqual(denied);
   });
 
   it("still throws for non-permission failures", async () => {

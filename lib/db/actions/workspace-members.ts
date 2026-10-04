@@ -48,7 +48,7 @@ function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
 }
 
-export async function listWorkspaceMembers(workspaceId: string) {
+async function loadWorkspaceMembers(workspaceId: string) {
   const user = await requireAuthenticatedUser();
   await requireWorkspacePermission(user.id, workspaceId, "workspace:read");
 
@@ -100,6 +100,10 @@ export async function listWorkspaceMembers(workspaceId: string) {
     members: memberRows,
     pendingInvites,
   };
+}
+
+export async function listWorkspaceMembers(workspaceId: string) {
+  return runMutation(() => loadWorkspaceMembers(workspaceId));
 }
 
 export async function createWorkspaceCollaboratorInvite(input: unknown) {

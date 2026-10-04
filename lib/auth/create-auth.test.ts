@@ -1,5 +1,5 @@
 import { compare, hash } from "bcryptjs";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
   betterAuthAccounts,
@@ -96,5 +96,24 @@ describe("Better Auth configuration", () => {
       await passwordConfig!.verify!({ password: "wrong", hash: hashed })
     ).toBe(false);
     expect(await compare("hunter2", hashed)).toBe(true);
+  });
+
+  it("proves import-time BETTER_AUTH_SECRET wiring using isolated modules", async () => {
+    const customSecret = "isolated-test-secret-key-32-chars-long";
+    const priorSecret = process.env.BETTER_AUTH_SECRET;
+    try {
+      process.env.BETTER_AUTH_SECRET = customSecret;
+      vi.resetModules();
+      const { createAuth: isolatedCreateAuth } = await import("./create-auth");
+      const auth = isolatedCreateAuth(makeFakeDb());
+      expect(auth.options.secret).toBe(customSecret);
+    } finally {
+      if (priorSecret === undefined) {
+        delete process.env.BETTER_AUTH_SECRET;
+      } else {
+        process.env.BETTER_AUTH_SECRET = priorSecret;
+      }
+      vi.resetModules();
+    }
   });
 });

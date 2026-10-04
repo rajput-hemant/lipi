@@ -55,7 +55,11 @@ import {
   transferWorkspaceOwnership,
   updateWorkspaceSettings,
 } from "@/lib/db/actions/workspace-settings";
-import { runMutationToast } from "@/lib/db/mutation-result";
+import {
+  mutationErrorMessage,
+  runMutationToast,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import { uploadImage } from "@/lib/uploadthing";
 
 const settingsSchema = z.object({
@@ -71,7 +75,10 @@ const inviteSchema = z.object({
 type SettingsForm = z.infer<typeof settingsSchema>;
 type InviteForm = z.infer<typeof inviteSchema>;
 
-type MembersPayload = Awaited<ReturnType<typeof listWorkspaceMembers>>;
+type MembersPayload = Extract<
+  Awaited<ReturnType<typeof listWorkspaceMembers>>,
+  { ok: true }
+>["data"];
 
 export function Settings() {
   const pathname = usePathname();
@@ -137,12 +144,10 @@ export function Settings() {
   const refresh = React.useCallback(async () => {
     if (!workspaceId) return;
     try {
-      const payload = await listWorkspaceMembers(workspaceId);
+      const payload = await unwrapMutation(listWorkspaceMembers(workspaceId));
       applyMembersPayload(payload);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load settings"
-      );
+      toast.error(mutationErrorMessage(error, "Failed to load settings"));
       setLoading(false);
     }
   }, [workspaceId, applyMembersPayload]);
@@ -151,15 +156,13 @@ export function Settings() {
     if (!workspaceId) return;
     let cancelled = false;
 
-    void listWorkspaceMembers(workspaceId)
+    void unwrapMutation(listWorkspaceMembers(workspaceId))
       .then((payload) => {
         if (!cancelled) applyMembersPayload(payload);
       })
       .catch((error) => {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : "Failed to load settings"
-          );
+          toast.error(mutationErrorMessage(error, "Failed to load settings"));
           setLoading(false);
         }
       });

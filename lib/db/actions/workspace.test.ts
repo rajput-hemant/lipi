@@ -7,9 +7,10 @@ const mocks = vi.hoisted(() => ({
   requireAuthenticatedUser: vi.fn(),
   assertUserCanCreateWorkspace: vi.fn(),
   returning: vi.fn(),
+  revalidateTag: vi.fn(),
 }));
 
-vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidateTag: mocks.revalidateTag }));
 vi.mock("@/lib/billing/enforce-quotas", () => ({
   assertUserCanCreateWorkspace: mocks.assertUserCanCreateWorkspace,
 }));
@@ -68,6 +69,49 @@ describe("createWorkspace", () => {
       ok: false,
       code: "UNAUTHORIZED",
     });
+  });
+
+  it("revalidates workspace list tags for the authenticated user only, ignoring forged owner IDs", async () => {
+    mocks.returning.mockResolvedValue([{ id: "w1", ...workspace }]);
+
+    await createWorkspace({
+      title: "Team",
+      iconId: "x",
+      // @ts-expect-error intentionally testing runtime resistance to forged owner input
+      workspaceOwnerId: "forged-victim-id",
+    });
+
+    expect(mocks.revalidateTag).toHaveBeenCalledWith(
+      "get_private_workspaces_u1",
+      "max"
+    );
+    expect(mocks.revalidateTag).toHaveBeenCalledWith(
+      "get_collaborating_workspaces_u1",
+      "max"
+    );
+    expect(mocks.revalidateTag).toHaveBeenCalledWith(
+      "get_shared_workspaces_u1",
+      "max"
+    );
+    expect(mocks.revalidateTag).not.toHaveBeenCalledWith(
+      expect.stringContaining("forged-victim-id"),
+      expect.anything()
+    );
+  });
+
+  it("does not revalidate any cache tags when workspace creation fails", async () => {
+    mocks.assertUserCanCreateWorkspace.mockRejectedValue(
+      new PlanQuotaError("workspace", "Free plan allows one workspace.")
+    );
+
+    await createWorkspace({
+      title: "Team",
+      iconId: "x",
+      // @ts-expect-error intentionally testing runtime resistance to forged owner input
+      workspaceOwnerId: "forged-victim-id",
+    });
+
+    expect(mocks.revalidateTag).not.toHaveBeenCalled();
   });
 
   it("still throws a generic error for unexpected failures", async () => {

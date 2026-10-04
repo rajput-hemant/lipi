@@ -46,7 +46,11 @@ import {
   resolveTreeKeyAction,
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
-import { isMutationDenied, unwrapMutation } from "@/lib/db/mutation-result";
+import {
+  isMutationDenied,
+  mutationErrorMessage,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
@@ -127,14 +131,14 @@ function DocumentTreeItem({
 
     setIsRenaming(false);
 
-    toast.promise(updateDocument({ id: node.id, title }), {
+    toast.promise(unwrapMutation(updateDocument({ id: node.id, title })), {
       loading: "Renaming...",
       success: (updated) => {
         updateDocumentState(updated);
         notifyPageChanges();
         return "Page renamed.";
       },
-      error: "Could not rename page.",
+      error: (error) => mutationErrorMessage(error, "Could not rename page."),
     });
   }
 

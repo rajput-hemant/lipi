@@ -202,10 +202,11 @@ export async function updateDocument(input: unknown) {
         .where(eq(documents.id, id))
         .returning(documentSummaryColumns);
 
-      return data;
+      return { ok: true, data } as const;
     });
   } catch (e) {
-    rethrowKnownErrors(e);
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     return failDocumentMutation("Failed to update document", e);
   } finally {
     if (workspaceIdForRevalidate) {
@@ -238,8 +239,8 @@ export async function softDeleteDocumentTree(documentId: string) {
 
     return { ok: true, data: count } as const;
   } catch (e) {
-    const denied = forbiddenResult(e);
-    if (denied) return denied;
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     return failDocumentMutation("Failed to move document to trash", e);
   } finally {
     if (workspaceIdForRevalidate) {

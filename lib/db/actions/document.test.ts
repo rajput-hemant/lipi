@@ -182,7 +182,10 @@ describe("updateDocument root page quota", () => {
   it("rejects moving a subpage to the root past the free limit", async () => {
     await expect(
       updateDocument({ id: DOCUMENT_ID, parentId: null })
-    ).rejects.toThrow("Root page limit reached");
+    ).resolves.toMatchObject({
+      ok: false,
+      message: expect.stringContaining("Root page limit reached"),
+    });
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.workspaceOwnerHasProPlanEntitlement).toHaveBeenCalledWith(
       WORKSPACE_ID
@@ -201,7 +204,10 @@ describe("updateDocument root page quota", () => {
 
     await expect(
       updateDocument({ id: DOCUMENT_ID, parentId: null })
-    ).resolves.toMatchObject({ id: DOCUMENT_ID, parentId: null });
+    ).resolves.toMatchObject({
+      ok: true,
+      data: { id: DOCUMENT_ID, parentId: null },
+    });
   });
 });
 
