@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { alertBlockConfig } from "./alert-block-config";
 
-export const alertTypes = [
+const alertTypes = [
   {
     title: "Warning",
     value: "warning",
@@ -41,8 +41,6 @@ export const alertTypes = [
     icon: CheckmarkCircle02Icon,
   },
 ] as const;
-
-export type AlertType = (typeof alertTypes)[number]["value"];
 
 export const createCalloutBlock = createReactBlockSpec(alertBlockConfig, {
   render: (props) => {
