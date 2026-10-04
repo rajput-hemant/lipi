@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAppState } from "@/hooks/use-app-state";
+import { readableTextColor } from "@/lib/realtime/readable-text-color";
 
 function initials(name: string) {
   return name
@@ -36,8 +37,11 @@ export function DocumentCollaborators() {
             alt={collaborator.name}
           />
           <AvatarFallback
-            className="text-xs text-white"
-            style={{ backgroundColor: collaborator.color }}
+            className="text-xs"
+            style={{
+              backgroundColor: collaborator.color,
+              color: readableTextColor(collaborator.color),
+            }}
           >
             {initials(collaborator.name)}
           </AvatarFallback>
