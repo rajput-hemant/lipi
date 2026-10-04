@@ -26,8 +26,8 @@ export default async function WorkspaceSetupPage({
   const { invite } = await searchParams;
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <section className="dark relative hidden min-h-screen w-full items-center justify-center lg:flex">
+    <div className="flex min-h-dvh items-center justify-center">
+      <section className="dark relative hidden min-h-dvh w-full items-center justify-center lg:flex">
         <div className="absolute inset-0 bg-zinc-900" />
 
         <Image
