@@ -71,7 +71,6 @@ export function createAuth(
     },
     database: drizzleAdapter(database, {
       provider: "pg",
-      usePlural: false,
       schema: {
         user: users,
         account: betterAuthAccounts,
@@ -89,7 +88,6 @@ export function createAuth(
 
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: false,
       resetPasswordTokenExpiresIn: RESET_PASSWORD_TOKEN_TTL_SECONDS,
       revokeSessionsOnPasswordReset: true,
       sendResetPassword: ({ user, url }) =>
@@ -121,9 +119,6 @@ export function createAuth(
     session: {
       expiresIn: 60 * 60 * 24 * 30,
       updateAge: 60 * 60 * 24,
-      cookieCache: {
-        enabled: false,
-      },
     },
 
     account: {
@@ -149,18 +144,16 @@ export function createAuth(
       },
     },
 
+    // Relies on Better Auth defaults: httpOnly cookies, no cross-subdomain cookies,
+    // no session cookie cache, no email verification requirement.
     advanced: {
       backgroundTasks: { handler: runInBackground },
       defaultCookieAttributes: {
         sameSite: "lax",
         secure: env.NODE_ENV === "production",
-        httpOnly: true,
       },
       database: {
         generateId: "uuid",
-      },
-      crossSubDomainCookies: {
-        enabled: false,
       },
     },
 
