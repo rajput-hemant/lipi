@@ -71,7 +71,8 @@ const inviteSchema = z.object({
 type SettingsForm = z.infer<typeof settingsSchema>;
 type InviteForm = z.infer<typeof inviteSchema>;
 
-type MembersPayload = Awaited<ReturnType<typeof listWorkspaceMembers>>;
+type MembersResult = Awaited<ReturnType<typeof listWorkspaceMembers>>;
+type MembersPayload = Extract<MembersResult, { ok: true }>["data"];
 
 export function Settings() {
   const pathname = usePathname();
@@ -134,32 +135,39 @@ export function Settings() {
     [settingsForm]
   );
 
+  const applyMembersResult = React.useCallback(
+    (result: MembersResult) => {
+      if (result.ok) {
+        applyMembersPayload(result.data);
+      } else {
+        toast.error(result.message);
+        setLoading(false);
+      }
+    },
+    [applyMembersPayload]
+  );
+
   const refresh = React.useCallback(async () => {
     if (!workspaceId) return;
     try {
-      const payload = await listWorkspaceMembers(workspaceId);
-      applyMembersPayload(payload);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to load settings"
-      );
+      applyMembersResult(await listWorkspaceMembers(workspaceId));
+    } catch {
+      toast.error("Failed to load settings");
       setLoading(false);
     }
-  }, [workspaceId, applyMembersPayload]);
+  }, [workspaceId, applyMembersResult]);
 
   React.useEffect(() => {
     if (!workspaceId) return;
     let cancelled = false;
 
     void listWorkspaceMembers(workspaceId)
-      .then((payload) => {
-        if (!cancelled) applyMembersPayload(payload);
+      .then((result) => {
+        if (!cancelled) applyMembersResult(result);
       })
-      .catch((error) => {
+      .catch(() => {
         if (!cancelled) {
-          toast.error(
-            error instanceof Error ? error.message : "Failed to load settings"
-          );
+          toast.error("Failed to load settings");
           setLoading(false);
         }
       });
@@ -167,7 +175,7 @@ export function Settings() {
     return () => {
       cancelled = true;
     };
-  }, [workspaceId, applyMembersPayload]);
+  }, [workspaceId, applyMembersResult]);
 
   function afterMutation() {
     router.refresh();

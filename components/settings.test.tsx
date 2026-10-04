@@ -124,7 +124,7 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  mocks.listWorkspaceMembers.mockResolvedValue(payload);
+  mocks.listWorkspaceMembers.mockResolvedValue({ ok: true, data: payload });
   for (const action of [
     mocks.updateWorkspaceSettings,
     mocks.createWorkspaceCollaboratorInvite,
@@ -247,5 +247,14 @@ describe("Settings mutation failures", () => {
       Promise<unknown>,
     ];
     await expect(promise).resolves.toEqual({});
+  });
+
+  it("shows the server message when loading members is denied", async () => {
+    mocks.listWorkspaceMembers.mockResolvedValue(denied);
+    await act(async () => {
+      render();
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(denied.message);
   });
 });

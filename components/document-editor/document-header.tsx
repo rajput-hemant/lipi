@@ -27,6 +27,11 @@ import {
 } from "@/lib/block-editor/cover-presets";
 import { useDebouncedCallback } from "@/lib/block-editor/use-debounced-callback";
 import { updateDocument } from "@/lib/db/actions/document";
+import {
+  isMutationDenied,
+  mutationErrorMessage,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import { uploadImage } from "@/lib/uploadthing";
 import { cn } from "@/lib/utils";
 
@@ -50,10 +55,9 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
       bannerUrl?: string | null;
     }) => {
       try {
-        const updated = await updateDocument({
-          id: document.id,
-          ...patch,
-        });
+        const updated = await unwrapMutation(
+          updateDocument({ id: document.id, ...patch })
+        );
         updateDocumentState(updated);
         if (patch.title !== undefined || patch.icon !== undefined) {
           notifyPageChanges();
@@ -61,8 +65,12 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
         if (updated.title) {
           savedTitleRef.current = updated.title;
         }
-      } catch {
-        toast.error("Could not save document details.");
+      } catch (error) {
+        toast.error(
+          isMutationDenied(error) ?
+            "You do not have permission to edit this page."
+          : mutationErrorMessage(error, "Could not save document details.")
+        );
       }
     },
     500
