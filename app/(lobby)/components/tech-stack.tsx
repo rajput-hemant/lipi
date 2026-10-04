@@ -24,13 +24,13 @@ const techs: Tech[] = [
     icon: Nextjs,
   },
   {
-    title: "React 18",
+    title: "React 19",
     description: "Server and Client Components. Use hook.",
     icon: Reactjs,
   },
   {
     title: "Database",
-    description: "ORM using Drizzle and deployed on Subabase.",
+    description: "ORM using Drizzle and deployed on Supabase.",
     icon: Supabase,
   },
   {

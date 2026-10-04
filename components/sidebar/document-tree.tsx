@@ -709,7 +709,9 @@ export function DocumentTree() {
             <p className="text-center text-sm">
               {canEdit ?
                 "No pages yet. Create your first page."
-              : "No pages yet. Only editors and the owner can add pages."}
+              : access === "view" ?
+                "No pages yet. Only editors and the owner can add pages."
+              : "No pages yet."}
             </p>
           </div>
         }

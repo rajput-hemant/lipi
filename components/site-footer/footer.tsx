@@ -8,24 +8,17 @@ import { ThemeToggleGroup } from "./theme-toggle-group";
 
 const footerLinks = [
   {
-    title: "Product",
-    links: ["Wikis", "Projects", "Docs", "AI", "What's new"],
-  },
-  {
-    title: "Download",
-    links: ["iOS & Android", "Mac & Windows", "Web Clipper"],
-  },
-  {
     title: "Policies",
-    links: ["Privacy", "Terms of use", "Cookie Preferences"],
+    links: [
+      { label: "Privacy", href: "/privacy" },
+      { label: "Terms of use", href: "/terms" },
+    ],
   },
-  { title: "Support", links: ["Contact us", "FAQs"] },
 ];
 
 export async function SiteFooter() {
   await connection();
   const year = new Date().getFullYear();
-  const githubUrl = siteConfig.links.github;
 
   return (
     <footer className="border-t py-10">
@@ -72,15 +65,13 @@ export async function SiteFooter() {
               </h2>
 
               {section.links.map((link) => (
-                <a
-                  key={link}
-                  href={githubUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <Link
+                  key={link.href}
+                  href={link.href}
                   className="text-sm text-muted-foreground duration-200 hover:text-foreground"
                 >
-                  {link}
-                </a>
+                  {link.label}
+                </Link>
               ))}
             </div>
           ))}
