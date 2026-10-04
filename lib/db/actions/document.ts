@@ -168,7 +168,7 @@ export async function updateDocument(input: unknown) {
 
     const { id, ...patch } = parsed;
 
-    return await db.transaction(async (tx) => {
+    const data = await db.transaction(async (tx) => {
       const workspaceDocs = await loadWorkspaceDocuments(
         existing.workspaceId,
         tx
@@ -199,8 +199,11 @@ export async function updateDocument(input: unknown) {
 
       return data;
     });
+
+    return { ok: true, data } as const;
   } catch (e) {
-    rethrowKnownErrors(e);
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     return failDocumentMutation("Failed to update document", e);
   } finally {
     if (workspaceIdForRevalidate) {
@@ -233,8 +236,8 @@ export async function softDeleteDocumentTree(documentId: string) {
 
     return { ok: true, data: count } as const;
   } catch (e) {
-    const denied = forbiddenResult(e);
-    if (denied) return denied;
+    const failure = mutationFailure(e);
+    if (failure) return failure;
     return failDocumentMutation("Failed to move document to trash", e);
   } finally {
     if (workspaceIdForRevalidate) {

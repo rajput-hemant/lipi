@@ -33,6 +33,7 @@ const {
   duplicateDocument,
   restoreDocument,
   softDeleteDocumentTree,
+  updateDocument,
 } = await import("./document");
 
 const forbidden = () => new MutationAuthError("Forbidden", "FORBIDDEN");
@@ -77,6 +78,26 @@ describe("document mutations for a forbidden caller", () => {
     await expect(softDeleteDocumentTree("doc-1")).resolves.toEqual(denied);
   });
 
+  it("returns a FORBIDDEN result from updateDocument", async () => {
+    authorizeDocumentMutation.mockRejectedValue(forbidden());
+
+    await expect(
+      updateDocument({ id: crypto.randomUUID(), title: "New" })
+    ).resolves.toEqual(denied);
+  });
+
+  it("returns other expected auth failures as typed results", async () => {
+    authorizeDocumentMutation.mockRejectedValue(
+      new MutationAuthError("Document not found")
+    );
+
+    await expect(softDeleteDocumentTree("doc-1")).resolves.toEqual({
+      ok: false,
+      code: "INVALID",
+      message: "Document not found",
+    });
+  });
+
   it("returns a FORBIDDEN result from restoreDocument", async () => {
     authorizeDocumentMutation.mockRejectedValue(forbidden());
 
@@ -95,6 +116,9 @@ describe("document mutations for a forbidden caller", () => {
     await expect(softDeleteDocumentTree("doc-1")).rejects.toThrow(
       "Failed to move document to trash"
     );
+    await expect(
+      updateDocument({ id: crypto.randomUUID(), title: "New" })
+    ).rejects.toThrow("Failed to update document");
     await expect(restoreDocument("doc-1")).rejects.toThrow(
       "Failed to restore document"
     );

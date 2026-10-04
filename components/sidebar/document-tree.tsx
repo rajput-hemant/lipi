@@ -127,14 +127,17 @@ function DocumentTreeItem({
 
     setIsRenaming(false);
 
-    toast.promise(updateDocument({ id: node.id, title }), {
+    toast.promise(unwrapMutation(updateDocument({ id: node.id, title })), {
       loading: "Renaming...",
       success: (updated) => {
         updateDocumentState(updated);
         notifyPageChanges();
         return "Page renamed.";
       },
-      error: "Could not rename page.",
+      error: (error) =>
+        isMutationDenied(error) ?
+          "You do not have permission to rename this page."
+        : "Could not rename page.",
     });
   }
 
