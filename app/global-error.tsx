@@ -15,7 +15,7 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col items-center justify-center bg-white p-4 font-sans text-neutral-900 antialiased [@media(prefers-color-scheme:dark)]:bg-neutral-950 [@media(prefers-color-scheme:dark)]:text-neutral-100">
+      <body className="flex min-h-dvh flex-col items-center justify-center bg-white p-4 font-sans text-neutral-900 antialiased [@media(prefers-color-scheme:dark)]:bg-neutral-950 [@media(prefers-color-scheme:dark)]:text-neutral-100">
         <div className="mx-auto flex max-w-md flex-col items-center space-y-4 text-center">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 [@media(prefers-color-scheme:dark)]:bg-red-950/50 [@media(prefers-color-scheme:dark)]:text-red-400">
             <svg
