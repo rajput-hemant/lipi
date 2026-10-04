@@ -1,7 +1,7 @@
 import type { Config } from "drizzle-kit";
 
 /**
- * E2E-only Drizzle Kit config for the auth tables (user, account, better_auth_*).
+ * E2E-only Drizzle Kit config for the auth tables (user, better_auth_*).
  * The main drizzle.config.ts filters to lipi_*.
  */
 export default {

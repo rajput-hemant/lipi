@@ -3,16 +3,9 @@ import { and, eq, isNull, lt, sql } from "drizzle-orm";
 import type Stripe from "stripe";
 import type { Subscription } from "@/types/db";
 
-import { catalogRowsFromStripePrice } from "@/lib/stripe/catalog-sync";
 import { subscriptionRowFromStripe } from "@/lib/stripe/subscription-sync";
 import { db } from "..";
-import {
-  customers,
-  prices,
-  products,
-  stripeWebhookEvents,
-  subscriptions,
-} from "../schema";
+import { customers, stripeWebhookEvents, subscriptions } from "../schema";
 
 type BillingTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type DbClient = typeof db | BillingTx;
@@ -37,41 +30,6 @@ export async function upsertStripeCustomer(
     });
 }
 
-export async function upsertProductRow(
-  row: typeof products.$inferInsert,
-  client: DbClient = db
-) {
-  const { id: _id, ...rest } = row;
-  await client.insert(products).values(row).onConflictDoUpdate({
-    target: products.id,
-    set: rest,
-  });
-}
-
-export async function upsertPriceRow(
-  row: typeof prices.$inferInsert,
-  client: DbClient = db
-) {
-  const { id: _id, ...rest } = row;
-  await client.insert(prices).values(row).onConflictDoUpdate({
-    target: prices.id,
-    set: rest,
-  });
-}
-
-export async function upsertCatalogFromStripePrice(
-  stripePrice: Stripe.Price,
-  client: DbClient = db
-) {
-  const { product, price } = catalogRowsFromStripePrice(stripePrice);
-  if (product) {
-    await upsertProductRow(product, client);
-  }
-  if (price) {
-    await upsertPriceRow(price, client);
-  }
-}
-
 export async function upsertSubscriptionRow(
   row: Subscription,
   client: DbClient = db
@@ -87,17 +45,9 @@ export async function syncSubscriptionFromStripe(
   stripeSubscription: Stripe.Subscription,
   userId: string
 ) {
-  await db.transaction(async (tx) => {
-    for (const item of stripeSubscription.items.data) {
-      const stripePrice = item.price;
-      if (stripePrice && typeof stripePrice !== "string") {
-        await upsertCatalogFromStripePrice(stripePrice, tx);
-      }
-    }
-
-    const row = subscriptionRowFromStripe(stripeSubscription, userId);
-    await upsertSubscriptionRow(row, tx);
-  });
+  await upsertSubscriptionRow(
+    subscriptionRowFromStripe(stripeSubscription, userId)
+  );
 }
 
 export type StripeWebhookClaimResult =

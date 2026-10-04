@@ -35,7 +35,6 @@ async function seed() {
         email: user.email,
         name: user.name,
         betterAuthName: user.name,
-        emailVerified: new Date(),
         emailVerifiedBoolean: true,
       })
       .onConflictDoNothing();

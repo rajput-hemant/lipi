@@ -1,6 +1,5 @@
-import { relations, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
-  bigint,
   boolean,
   customType,
   foreignKey,
@@ -15,12 +14,7 @@ import {
 
 import { createTable } from "../table-creator";
 import { users } from "./auth";
-import {
-  pricingPlanInterval,
-  pricingType,
-  subscriptionStatus,
-  workspaceCollaboratorRole,
-} from "./enums";
+import { subscriptionStatus, workspaceCollaboratorRole } from "./enums";
 
 const timestampTz = (name: string) =>
   timestamp(name, { withTimezone: true, mode: "string" });
@@ -92,42 +86,9 @@ export const realtimeDocuments = createTable("realtime_documents", {
   updatedAt: timestampTz("updated_at").defaultNow().notNull(),
 });
 
-export const billingAccounts = createTable("accounts", {
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id),
-  billingAddress: jsonb("billing_address"),
-  updatedAt: timestampTz("updated_at"),
-  paymentMethod: jsonb("payment_method"),
-});
-
 export const customers = createTable("customers", {
   id: uuid("id").primaryKey().notNull(),
   stripeCustomerId: text("stripe_customer_id"),
-});
-
-export const prices = createTable("prices", {
-  id: text("id").primaryKey().notNull(),
-  productId: text("product_id").references(() => products.id),
-  active: boolean("active"),
-  description: text("description"),
-  // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-  unitAmount: bigint("unit_amount", { mode: "number" }),
-  currency: text("currency"),
-  type: pricingType("type"),
-  interval: pricingPlanInterval("interval"),
-  intervalCount: integer("interval_count"),
-  trialPeriodDays: integer("trial_period_days"),
-  metadata: jsonb("metadata"),
-});
-
-export const products = createTable("products", {
-  id: text("id").primaryKey().notNull(),
-  active: boolean("active"),
-  name: text("name"),
-  description: text("description"),
-  image: text("image"),
-  metadata: jsonb("metadata"),
 });
 
 export const subscriptions = createTable("subscriptions", {
@@ -135,7 +96,7 @@ export const subscriptions = createTable("subscriptions", {
   userId: uuid("user_id").notNull(),
   status: subscriptionStatus("status"),
   metadata: jsonb("metadata"),
-  priceId: text("price_id").references(() => prices.id),
+  priceId: text("price_id"),
   quantity: integer("quantity"),
   cancelAtPeriodEnd: boolean("cancel_at_period_end"),
   created: timestampTz("created").defaultNow().notNull(),
@@ -194,14 +155,3 @@ export const workspaceInvites = createTable(
     ).on(table.workspaceId, table.email),
   })
 );
-
-export const productsRelations = relations(products, ({ many }) => ({
-  prices: many(prices),
-}));
-
-export const pricesRelations = relations(prices, ({ one }) => ({
-  product: one(products, {
-    fields: [prices.productId],
-    references: [products.id],
-  }),
-}));

@@ -7,19 +7,16 @@ import { handleStripeWebhookEvent } from "./webhook-handlers";
 const billingMocks = vi.hoisted(() => ({
   getCustomerByUserId: vi.fn(),
   syncSubscriptionFromStripe: vi.fn(),
-  upsertCatalogFromStripePrice: vi.fn(),
 }));
 
 const stripeMocks = vi.hoisted(() => ({
   retrieve: vi.fn(),
-  pricesRetrieve: vi.fn(),
 }));
 
 vi.mock("@/lib/db/data/billing", () => billingMocks);
 vi.mock("@/lib/stripe/client", () => ({
   getStripe: () => ({
     subscriptions: { retrieve: stripeMocks.retrieve },
-    prices: { retrieve: stripeMocks.pricesRetrieve },
   }),
 }));
 
@@ -32,7 +29,7 @@ describe("handleStripeWebhookEvent", () => {
     });
   });
 
-  it("syncs checkout.session.completed with expanded subscription retrieve", async () => {
+  it("syncs checkout.session.completed from the retrieved subscription", async () => {
     stripeMocks.retrieve.mockResolvedValue({
       id: "sub_1",
       status: "active",
@@ -53,10 +50,19 @@ describe("handleStripeWebhookEvent", () => {
     } as Stripe.Event);
 
     expect(billingMocks.getCustomerByUserId).toHaveBeenCalledWith("user-1");
-    expect(stripeMocks.retrieve).toHaveBeenCalledWith("sub_1", {
-      expand: ["items.data.price.product"],
-    });
+    expect(stripeMocks.retrieve).toHaveBeenCalledWith("sub_1");
     expect(billingMocks.syncSubscriptionFromStripe).toHaveBeenCalled();
+  });
+
+  it("ignores catalog events", async () => {
+    await handleStripeWebhookEvent({
+      id: "evt_price",
+      type: "price.updated",
+      data: { object: { id: "price_1" } },
+    } as Stripe.Event);
+
+    expect(stripeMocks.retrieve).not.toHaveBeenCalled();
+    expect(billingMocks.syncSubscriptionFromStripe).not.toHaveBeenCalled();
   });
 
   it("rejects a completed checkout from a different Stripe customer", async () => {
