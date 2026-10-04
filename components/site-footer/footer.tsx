@@ -14,7 +14,7 @@ const footerLinks = [
       { label: "Terms of use", href: "/terms" },
     ],
   },
-];
+] as const;
 
 export async function SiteFooter() {
   await connection();
