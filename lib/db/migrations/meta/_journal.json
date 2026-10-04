@@ -99,6 +99,13 @@
       "when": 1791037871889,
       "tag": "0013_documents_trigram_search",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791080219074,
+      "tag": "0014_drop_stripe_catalog_tables",
+      "breakpoints": true
     }
   ]
 }
