@@ -11,6 +11,8 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [x] Free/Pro quotas and Stripe checkout/portal/webhook - `lib/billing/plan-quotas.ts`, `app/api/stripe/`, `tests/e2e/stripe-checkout.spec.ts`
 - [x] Product requirements and portfolio showcase scope - [requirements](./requirements.md)
 - [x] Trash controls and empty-state polish - `components/trash.tsx`, `components/trash.test.tsx`
+- [x] Remove unsupported newsletter subscription and success claims - `components/site-footer/footer.tsx`; deleted `components/site-footer/newsletter-subscription-form.tsx` on 2026-10-04, source-only (LIP-V006)
+- [x] Add realtime and UploadThing examples and correct the validation flag example - `.env.example`, `lib/env.ts`, `realtime/server.ts`, `lib/realtime/client.ts`; completed on 2026-10-04, source-only (LIP-V018)
 
 ## Open
 
@@ -22,6 +24,7 @@ Canonical task index. Checked items cite implementation, test, or documentation 
 - [x] Source-grounded DRAFT verification skill and feature map - [.agents/skills/verify](../.agents/skills/verify/SKILL.md), symlinked at `.claude/skills/verify`
 - [x] Single issue ledger with confirmed issues, hypotheses and gaps - [checks/verification-issues.md](./checks/verification-issues.md)
 - [x] Non-browser gates re-run on 2026-10-02: `bun run type-check`, `bun run lint`, `bun run test` (62 files, 225 tests)
-- [ ] Run the skill live (launch, doctor, drive, evidence, cleanup) once the user-selected browser skill is available; update each feature's `Last live proof`
+- [x] Partial live skill run on 2026-10-02 - `fe10171` records launch, doctor, browser evidence, cleanup, and harness corrections; remaining coverage stays open in [checks/verification-issues.md](./checks/verification-issues.md)
+- [ ] Complete the live skill coverage and update each feature's `Last live proof`, including billing and uploads with no live proof (LIP-V012)
 - [ ] Re-prove sign-up/login/reset, role and anonymous access, workspaces and invites, editor, trash, search, realtime with two sessions, and UI quality in a browser (LIP-V007 to V013)
-- [ ] Triage the confirmed items for later ships: `db:migrate` on an empty database (LIP-V001), newsletter stub (LIP-V006), `.env.example` gaps (LIP-V018)
+- [x] Triage the confirmed fixes - `c081bfe` fixes the empty-database migration (LIP-V001), invite acceptance, search UI, mobile header, and trash navigation; the 2026-10-04 source edits remove the newsletter stub (LIP-V006) and fill `.env.example` gaps (LIP-V018). These latest edits have no new live proof.

@@ -4,13 +4,13 @@ Status: PARTIAL live proof (home, pricing, terms and privacy render and titles c
 Ledger: [verification-issues.md](../../../../docs/checks/verification-issues.md) (this file lists IDs only).
 Related ledger IDs: LIP-V006, LIP-V013
 
-Public marketing site: `/` (hero, features, tech stack, testimonials, open source), `/pricing`, `/terms`, `/privacy`, 404/error pages, footer newsletter form, theme toggle, robots/sitemap/manifest.
+Public marketing site: `/` (hero, features, tech stack, testimonials, open source), `/pricing`, `/terms`, `/privacy`, 404/error pages, footer links, theme toggle, robots/sitemap/manifest.
 
 ## Sub-features
 
 - [ ] `/` renders sections, nav links, `Toggle Dark Mode` / `Light` / `System`.
 - [x] `/terms`, `/privacy` render with layout; `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` respond. - live: `/`, `/pricing`, `/terms`, `/privacy` loaded anonymously with correct titles; screenshots only; robots/sitemap/manifest NOT exercised.
-- [ ] Footer newsletter form (stub, LIP-V006).
+- [ ] Footer links and theme controls render after newsletter removal (LIP-V006, source-only fix on 2026-10-04).
 - [ ] Unknown route shows the not-found page; error boundaries (`app/error.tsx`).
 - [ ] Mobile navigation `Open navigation menu`.
 
@@ -22,7 +22,7 @@ Open the site root as an anonymous visitor.
 
 1. 390 px and 1280 px, light and dark: capture `/`, `/pricing`, `/terms`, `/privacy`, a bad URL.
 2. `curl -I` for robots, sitemap, manifest.
-3. Newsletter: submit an email; note that success appears without persistence (LIP-V006).
+3. Check footer links and theme controls. Confirm the removed newsletter form and its success message are absent (LIP-V006).
 
 ## Gotchas
 

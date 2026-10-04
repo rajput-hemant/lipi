@@ -85,11 +85,11 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V006 Newsletter form reports success without subscribing
 
-- Class: CONFIRMED (deterministic source). Severity: low. State: open.
+- Class: CONFIRMED (deterministic source). Severity: low. State: fixed (2026-10-04, source-only).
 - Surface: footer newsletter form.
-- Evidence: `components/site-footer/newsletter-subscription-form.tsx:32` `// TODO: Add newsletter subscription logic here.`; the action returns `subscribed: true` after a timed toast `You have successfully subscribed to our newsletter.`. Re-run: `sed -n 28,42p components/site-footer/newsletter-subscription-form.tsx`.
-- Expected: either a real subscription or no success claim. Actual: success toast, nothing stored or sent.
-- Follow-up: remove the form or implement; showcase decision.
+- Evidence before removal: `components/site-footer/newsletter-subscription-form.tsx:32` `// TODO: Add newsletter subscription logic here.`; the action returns `subscribed: true` after a timed toast `You have successfully subscribed to our newsletter.`. Original source command: `sed -n 28,42p components/site-footer/newsletter-subscription-form.tsx`.
+- Expected: either a real subscription or no success claim. Actual before removal: success toast, nothing stored or sent.
+- Fix 2026-10-04: removed the newsletter section and its import from `components/site-footer/footer.tsx`, the only caller, and deleted `components/site-footer/newsletter-subscription-form.tsx`. Lipi no longer offers the unsupported subscription or claims success. No new live proof; footer layout remains unexercised after removal.
 
 ### LIP-V007 Auth flows partly exercised in a browser
 
@@ -159,10 +159,10 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V018 `.env.example` omits realtime and UploadThing variables
 
-- Class: CONFIRMED. Severity: low. State: open.
-- Evidence: `grep -cE "UPLOADTHING|REALTIME" .env.example` prints `0`, while `lib/env.ts:85-87` declares `UPLOADTHING_TOKEN`, `UPLOADTHING_SECRET`, `UPLOADTHING_APP_ID` and the realtime server requires `LIPI_REALTIME_PORT`/`LIPI_REALTIME_ALLOWED_ORIGINS` (`realtime/server.ts`) and the app reads `NEXT_PUBLIC_LIPI_REALTIME_URL`.
-- Expected: the example env lists everything needed to run editor and uploads. Actual: someone following the README gets no hint about the realtime process or its variables.
-- Follow-up: docs/config ship.
+- Class: CONFIRMED. Severity: low. State: fixed (2026-10-04, source-only).
+- Evidence before fix: `grep -cE "UPLOADTHING|REALTIME" .env.example` prints `0`, while `lib/env.ts:85-87` declares `UPLOADTHING_TOKEN`, `UPLOADTHING_SECRET`, `UPLOADTHING_APP_ID` and the realtime server reads `LIPI_REALTIME_PORT` and `LIPI_REALTIME_ALLOWED_ORIGINS` (`realtime/server.ts`) and the app reads `NEXT_PUBLIC_LIPI_REALTIME_URL`.
+- Expected: the example env lists everything needed to run editor and uploads. Actual before fix: someone following the README gets no hint about the realtime process or its variables.
+- Fix 2026-10-04: `.env.example` now lists `NEXT_PUBLIC_LIPI_REALTIME_URL`, `LIPI_REALTIME_PORT`, `LIPI_REALTIME_ADDRESS`, and `LIPI_REALTIME_ALLOWED_ORIGINS` with development defaults documented from `lib/realtime/client.ts` and `realtime/server.ts`. The public URL and origins are blank so production still requires explicit configuration. It documents production `wss://` and exact browser origins without choosing a deployment. `docs/realtime.md` explains that the standalone Node process needs exported variables or `--env-file=.env.local`; it does not load that file automatically. It also lists a blank `UPLOADTHING_TOKEN`, which the installed SDK requires, and marks `UPLOADTHING_SECRET` and `UPLOADTHING_APP_ID` as optional legacy values declared in `lib/env.ts`. The example leaves `SKIP_ENV_VALIDATION` empty because `lib/env.ts` uses `!!process.env.SKIP_ENV_VALIDATION`, so even `false` skips schema validation; separate production database and auth guards bypass only on the exact value `true`. No runtime env behavior changed. No new live proof; realtime startup and binary uploads remain open verification gaps.
 
 ### LIP-V019 Accepting an invite lands on `?invite=invalid`
 
