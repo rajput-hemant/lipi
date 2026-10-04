@@ -64,7 +64,7 @@ export function createAuth(
   }
 
   return betterAuth({
-    secret: env.BETTER_AUTH_SECRET || env.AUTH_SECRET,
+    secret: env.BETTER_AUTH_SECRET,
     baseURL: resolveAuthBaseURL(),
     rateLimit: {
       enabled: resolveAuthRateLimitEnabled(),

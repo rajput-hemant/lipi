@@ -21,6 +21,14 @@ describe("resolveAuthBaseURL", () => {
     expect(resolveAuthBaseURL()).toBe("https://auth.example");
   });
 
+  it("ignores the legacy AUTH_URL name", () => {
+    mocks.env.AUTH_URL = "https://legacy.example";
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SKIP_ENV_VALIDATION", "false");
+
+    expect(() => resolveAuthBaseURL()).toThrow(/BETTER_AUTH_URL/);
+  });
+
   it("prefixes VERCEL_URL with https when no explicit auth URL is set", () => {
     mocks.env.VERCEL_URL = "lipi-preview.vercel.app";
     vi.stubEnv("SKIP_ENV_VALIDATION", "true");
@@ -32,7 +40,7 @@ describe("resolveAuthBaseURL", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SKIP_ENV_VALIDATION", "false");
 
-    expect(() => resolveAuthBaseURL()).toThrow(/AUTH_URL/);
+    expect(() => resolveAuthBaseURL()).toThrow(/BETTER_AUTH_URL/);
   });
 
   it("allows localhost fallback in non-production", () => {

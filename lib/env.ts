@@ -1,7 +1,6 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
-import { ensureHttpsUrl } from "./auth/ensure-https-url";
 import { isEnvValidationSkipped } from "./env-flags";
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -18,17 +17,11 @@ export const env = createEnv({
       .enum(["development", "test", "production"])
       .default("development"),
 
-    AUTH_SECRET:
+    BETTER_AUTH_SECRET:
       isProduction ?
         z.string().min(1, { message: "Auth secret is invalid or missing" })
       : z.string().optional(),
 
-    AUTH_URL: z.preprocess(
-      (str) => ensureHttpsUrl(process.env.VERCEL_URL) ?? str,
-      process.env.VERCEL ? z.string() : z.string().url().optional()
-    ),
-
-    BETTER_AUTH_SECRET: z.string().optional(),
     BETTER_AUTH_URL: z.string().url().optional(),
 
     GOOGLE_CLIENT_ID: requiredInProduction(

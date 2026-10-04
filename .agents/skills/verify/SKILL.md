@@ -50,9 +50,8 @@ Throwaway env (export in the shell that starts both processes; values are fake a
 ```sh
 export DATABASE_URL=postgresql://postgres:test@127.0.0.1:5561/postgres
 export SKIP_ENV_VALIDATION=true
-export AUTH_SECRET=verify-local-auth-secret-min-32-characters-long
-export BETTER_AUTH_SECRET=$AUTH_SECRET
-export AUTH_URL=http://127.0.0.1:3161 BETTER_AUTH_URL=http://127.0.0.1:3161
+export BETTER_AUTH_SECRET=verify-local-auth-secret-min-32-characters-long
+export BETTER_AUTH_URL=http://127.0.0.1:3161
 export NEXT_PUBLIC_APP_URL=http://127.0.0.1:3161
 export NEXT_PUBLIC_LIPI_REALTIME_URL=ws://127.0.0.1:1261
 export LIPI_REALTIME_PORT=1261 LIPI_REALTIME_ADDRESS=127.0.0.1
