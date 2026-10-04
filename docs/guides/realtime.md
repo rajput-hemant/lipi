@@ -10,8 +10,7 @@ list of exact browser origins. `LIPI_REALTIME_PORT` defaults to `1234` and
 
 This implementation pins Hocuspocus server, provider, and database extension
 to `4.7.0`, with Yjs `13.6.33`, `y-protocols` `1.0.7`, and `y-prosemirror`
-`1.3.7`. The [research note](../research/realtime-collaboration.md) links the
-official Hocuspocus, BlockNote, and Better Auth guidance used for this setup.
+`1.3.7`.
 
 For a separate realtime host, terminate TLS at a WebSocket-capable reverse
 proxy and set `NEXT_PUBLIC_LIPI_REALTIME_URL` to its `wss://` endpoint. Bind the
@@ -28,6 +27,11 @@ removed so another server path cannot overwrite the snapshot independently.
 Document duplicate reads the same authoritative snapshot via
 `loadAuthoritativeDocumentContentBySourceIds` so copies are not limited to
 debounced `documents.content`.
+
+The Better Auth session cookie is host-only (cross-subdomain cookies are off), so
+a separate realtime hostname never receives it. That is why the app mints the
+room token and the realtime process validates it instead of reading the cookie.
+Keep that auth configuration stable across deployments.
 
 The app checks the Better Auth session and workspace role before issuing a
 60-second signed token scoped to one document or workspace room. The editor
