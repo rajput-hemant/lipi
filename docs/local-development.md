@@ -47,7 +47,7 @@ Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password
 | Command                              | Does                                                                                                                                                     |
 | :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `bun run db:up` / `db:down`          | `docker compose up -d --wait` / `docker compose down`. `down` keeps the named volumes.                                                                   |
-| `bun run db:auth`                    | Create the auth tables (`user`, `better_auth_*`, legacy `account`, `verificationToken`) from `lib/db/auth-migrations`. Loopback only, idempotent.        |
+| `bun run db:auth`                    | Create the auth tables (`user`, `better_auth_*`) from `lib/db/auth-migrations`. Loopback only, idempotent.                                               |
 | `bun run db:migrate`                 | `drizzle-kit migrate` for the `lipi_*` tables. History goes to `drizzle.__lipi_migrations` when `DATABASE_URL` is loopback, otherwise the default table. |
 | `bun run db:seed`                    | Idempotent local seed: the local user, a credential account, one workspace with three pages.                                                             |
 | `bun run db:setup`                   | `db:auth`, `db:migrate`, `db:seed`.                                                                                                                      |
@@ -86,7 +86,7 @@ Redis is only used for rate limiting, which is off locally (`ENABLE_RATE_LIMITIN
 
 ## Tables and prefixes
 
-- Auth tables are unprefixed: `user`, `account`, `verificationToken`, `better_auth_account`, `better_auth_session`, `better_auth_verification`. Sign-in is email and password only.
+- Auth tables are unprefixed: `user`, `better_auth_account`, `better_auth_session`, `better_auth_verification`. Sign-in is email and password only.
 - Application tables are prefixed `lipi_`; `drizzle.config.ts` filters on `lipi_*`, so `db:generate` never emits auth tables. The auth baseline is generated separately with `drizzle.auth.config.ts`.
 - Production keeps the auth tables it already has: `db:auth` refuses non-loopback URLs and `db:migrate` keeps the default history table there.
 
