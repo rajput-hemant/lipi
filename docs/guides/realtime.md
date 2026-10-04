@@ -3,7 +3,7 @@
 The BlockNote editor connects to the standalone Hocuspocus process through
 `NEXT_PUBLIC_LIPI_REALTIME_URL`. Run it with `bun run realtime:start` on an
 always-on Node.js 22 host. Configure the Next.js app and realtime process with
-the same `DATABASE_URL` and `BETTER_AUTH_SECRET` (or `AUTH_SECRET`). The
+the same `DATABASE_URL` and `BETTER_AUTH_SECRET`. The
 realtime process also needs `LIPI_REALTIME_ALLOWED_ORIGINS`, a comma-separated
 list of exact browser origins. `LIPI_REALTIME_PORT` defaults to `1234` and
 `LIPI_REALTIME_ADDRESS` defaults to `127.0.0.1`.

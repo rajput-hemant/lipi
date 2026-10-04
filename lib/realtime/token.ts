@@ -19,7 +19,7 @@ function signature(payload: string, secret: string) {
 export function getRealtimeTokenSecret() {
   // process.env on purpose: shared with the standalone realtime process, which
   // cannot load t3-env (see lib/env.ts).
-  const secret = process.env.BETTER_AUTH_SECRET || process.env.AUTH_SECRET;
+  const secret = process.env.BETTER_AUTH_SECRET;
 
   if (secret) return secret;
   if (process.env.NODE_ENV === "production") {

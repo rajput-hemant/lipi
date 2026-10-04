@@ -36,7 +36,7 @@ bun run db:setup
 bun run dev
 ```
 
-`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user documented in `fixtures/local-dev-credentials.json` (`local@example.test`, `LocalDev123!`). On dev server startup these credentials are logged to the terminal (only when `DATABASE_URL` points to loopback).
+`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user documented in `fixtures/local-dev-credentials.json` (`local@example.test`, `LocalDev123!`). On dev server startup the email and the masked database URL are logged to the terminal (only when `DATABASE_URL` points to loopback); the password is not logged.
 
 Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password?" on the login form logs the email, reset link included, to the dev server terminal outside production (`lib/email/send-email.ts`); open that link at `/reset-password?token=...`. With the key, set `EMAIL_FROM` too. Signed-in users change their password at `/dashboard/change-password` (sidebar account popover).
 
@@ -62,7 +62,7 @@ Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password
 | Group         | Variables                                                                                                       | Local default                                             |
 | :------------ | :-------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
 | App           | `NEXT_PUBLIC_APP_URL`, `SKIP_ENV_VALIDATION`                                                                    | `http://localhost:3000`, `false`                          |
-| Auth          | `AUTH_URL`, `AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                                              | local URL and a 32+ character dev secret                  |
+| Auth          | `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                                                                         | local URL and a 32+ character dev secret                  |
 | OAuth         | `GOOGLE_CLIENT_ID/SECRET`, `GITHUB_CLIENT_ID/SECRET`                                                            | empty (buttons render, round trip fails)                  |
 | Database      | `DATABASE_URL`                                                                                                  | loopback Postgres                                         |
 | Redis         | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`                                                            | REST adapter on 8079                                      |
@@ -76,7 +76,7 @@ Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password
 
 | Service            | Port | Env                                                   |
 | :----------------- | :--- | :---------------------------------------------------- |
-| App                | 3000 | `AUTH_URL`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`  |
+| App                | 3000 | `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`              |
 | PostgreSQL         | 5432 | `DATABASE_URL`                                        |
 | Redis              | 6379 | not used directly by Lipi                             |
 | Redis REST adapter | 8079 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`  |

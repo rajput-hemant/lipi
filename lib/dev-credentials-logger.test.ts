@@ -9,7 +9,7 @@ describe("logLocalDevCredentials", () => {
     vi.restoreAllMocks();
   });
 
-  it("logs the fixture user for a loopback database", () => {
+  it("logs the fixture email, never the password, for a loopback database", () => {
     vi.stubEnv("DATABASE_URL", "postgresql://u:p@127.0.0.1:5432/db");
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
@@ -17,7 +17,7 @@ describe("logLocalDevCredentials", () => {
 
     const output = log.mock.calls.flat().join("\n");
     expect(output).toContain(credentials.user.email);
-    expect(output).toContain(credentials.user.password);
+    expect(output).not.toContain(credentials.user.password);
     expect(output).toContain(`:********@${credentials.database.host}`);
   });
 

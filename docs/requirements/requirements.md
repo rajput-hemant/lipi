@@ -50,7 +50,7 @@ Checklist items below are evidence-backed. Items marked `[x]` cite concrete impl
 ### 3.1 Authentication & Session Management
 
 - [x] **Database Authentication:** Better Auth email and password sign-in against PostgreSQL; the auth tables (`user`, `better_auth_*`) are created by `bun run db:auth` locally (`lib/auth/create-auth.ts`, `lib/auth/create-auth.test.ts`, `lib/db/auth-migrations/`).
-- [x] **Credential Accounts:** bcrypt password hashing for email sign-in and credential account lookup (`lib/auth/create-auth.ts`, `lib/auth/credential-account.ts`, `lib/auth/credential-account.test.ts`).
+- [x] **Credential Accounts:** bcrypt password hashing for email sign-in and the credential account filter (`lib/auth/create-auth.ts`, `lib/auth/credential-account.ts`, `lib/auth/credential-account.test.ts`).
 - [x] **Password Recovery:** Emailed forgotten-password flow through Resend (`/forgot-password`, then the emailed link to `/reset-password?token=`), plus signed-in change password at `/dashboard/change-password` that revokes other sessions (`app/(auth)/components/forgot-password-form.tsx`, `app/(auth)/components/reset-password-form.tsx`, `app/dashboard/change-password/`, `lib/email/send-email.ts`). Not exercised in a browser or against Resend.
 - [x] **Auth Rate Limiting:** Protects sign-in and sign-up endpoints against brute force using Upstash Redis rate limiters (`lib/auth/auth-rate-limit.ts`, `lib/auth/auth-rate-limit.test.ts`).
 - [x] **Session & Navigation Flow:** Verified end-to-end sign-up, sign-out, sign-in, and initial workspace redirect flow (`tests/e2e/auth-workspace.spec.ts`).
