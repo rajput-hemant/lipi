@@ -7,11 +7,11 @@ import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realt
 import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
 import { getCurrentUser } from "@/lib/auth";
 import { isSidebarOpen, SIDEBAR_COOKIE } from "@/lib/dashboard/sidebar-cookie";
-import { getDocuments } from "@/lib/db/actions/document";
 import {
-  getWorkspaceMembershipRole,
-  MutationAuthError,
-} from "@/lib/db/data/mutation-auth";
+  getRequestDocuments,
+  getRequestMembership,
+} from "@/lib/dashboard/workspace-request";
+import { MutationAuthError } from "@/lib/db/data/mutation-auth";
 import { WorkspaceShell } from "../components/workspace-shell";
 
 export const instant = false;
@@ -27,7 +27,7 @@ export const WorkspaceLayout: React.FCC<{
 
   let membership;
   try {
-    membership = await getWorkspaceMembershipRole(user.id, workspaceId);
+    membership = await getRequestMembership(user.id, workspaceId);
   } catch (error) {
     // A removed member's open session lands here; production strips thrown
     // messages, so render the state instead of letting the boundary show it.
@@ -42,7 +42,7 @@ export const WorkspaceLayout: React.FCC<{
 
   const defaultOpen = isSidebarOpen(cookieStore.get(SIDEBAR_COOKIE)?.value);
 
-  const documents = await getDocuments(workspaceId);
+  const documents = await getRequestDocuments(workspaceId);
 
   return (
     <AppStateProvider

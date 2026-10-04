@@ -13,11 +13,11 @@ import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth";
-import { getDocuments } from "@/lib/db/actions/document";
 import {
-  assertWorkspaceAccess,
-  getWorkspaceMembershipRole,
-} from "@/lib/db/data/mutation-auth";
+  getRequestDocuments,
+  getRequestMembership,
+} from "@/lib/dashboard/workspace-request";
+import { assertWorkspaceAccess } from "@/lib/db/data/mutation-auth";
 import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 import { InviteNotice, isInvalidInvite } from "../../invite-notice";
 import { UpdatedDate } from "./updated-date";
@@ -61,14 +61,14 @@ export default async function WorkspacePage({
 
   let membership;
   try {
-    membership = await getWorkspaceMembershipRole(user.id, workspaceId);
+    membership = await getRequestMembership(user.id, workspaceId);
   } catch {
     notFound();
   }
   const { workspace, role } = membership;
   const canEdit = hasWorkspacePermission(role, "document:write");
 
-  const documents = await getDocuments(workspaceId);
+  const documents = await getRequestDocuments(workspaceId);
   const activeDocuments = withParentTitles(
     sortByRecentlyUpdated(documents.filter((doc) => !doc.inTrash))
   );
