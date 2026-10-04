@@ -93,3 +93,13 @@ jobs:
         with:
           fetch-depth: 0
       - uses: wagoid/commitlint-github-action@v6
+
+  build-gate:
+    name: Run Type Check, Linters & Tests
+    if: always()
+    needs: [type-check, lint, test, build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all checks to pass
+        run: |
+          [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "false" ]
