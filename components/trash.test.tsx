@@ -95,8 +95,10 @@ describe("Trash", () => {
 
   it("labels row controls by page title", () => {
     render();
-    expect(byLabel("Restore Alpha")).toBeTruthy();
-    expect(byLabel("Delete Beta permanently")).toBeTruthy();
+    expect(byLabel("Restore Alpha")).toBeInstanceOf(HTMLButtonElement);
+    expect(byLabel("Delete Beta permanently")).toBeInstanceOf(
+      HTMLButtonElement
+    );
   });
 
   it("dispatches restore and updates the store", async () => {

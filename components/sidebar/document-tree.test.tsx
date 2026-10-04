@@ -120,11 +120,11 @@ afterEach(() => {
 describe("DocumentTree viewer gating", () => {
   it("shows New page and no badge for editors", () => {
     render("editor");
-    expect(newPageButton()).toBeTruthy();
+    expect(newPageButton()).toBeInstanceOf(HTMLButtonElement);
     expect(document.body.textContent).not.toContain("View only");
     expect(
       document.querySelector('[data-slot="context-menu-trigger"]')
-    ).toBeTruthy();
+    ).not.toBeNull();
   });
 
   it("hides New page and context menus and shows the badge for viewers", () => {

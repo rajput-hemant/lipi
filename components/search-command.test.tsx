@@ -51,7 +51,6 @@ describe("SearchCommand", () => {
     });
 
     const trigger = container.querySelector("button");
-    expect(trigger).toBeTruthy();
     expect(trigger?.textContent).toContain("Search");
     expect(trigger?.textContent).toContain("⌘K");
   });
@@ -80,7 +79,6 @@ describe("SearchCommand", () => {
     });
 
     const alert = document.querySelector('[role="alert"]');
-    expect(alert).toBeTruthy();
     expect(alert?.textContent).toContain(
       "Failed to search documents. Please try again."
     );
@@ -130,7 +128,7 @@ describe("SearchCommand", () => {
     });
 
     const trigger = container.querySelector("button");
-    expect(trigger).toBeTruthy();
+    expect(trigger).not.toBeNull();
 
     act(() => {
       trigger?.focus();
@@ -138,11 +136,13 @@ describe("SearchCommand", () => {
     });
 
     // Verify dialog opened
-    expect(document.querySelector('[data-slot="dialog-content"]')).toBeTruthy();
+    expect(
+      document.querySelector('[data-slot="dialog-content"]')
+    ).not.toBeNull();
 
     // Close via escape on the active input
     const input = document.querySelector('input[role="combobox"]');
-    expect(input).toBeTruthy();
+    expect(input).not.toBeNull();
 
     act(() => {
       const event = new KeyboardEvent("keydown", {
@@ -189,7 +189,7 @@ describe("SearchCommand", () => {
     press();
     expect(
       document.querySelector('[data-slot="dialog-content"][data-open]')
-    ).toBeTruthy();
+    ).not.toBeNull();
 
     press();
     expect(
@@ -198,6 +198,7 @@ describe("SearchCommand", () => {
   });
 
   it("navigates on select and restores focus to the element focused before Cmd+K", async () => {
+    vi.useFakeTimers();
     mockSearchDocuments.mockResolvedValue([
       { id: "doc-9", title: "Roadmap", icon: null, snippet: "" },
     ]);
@@ -230,7 +231,7 @@ describe("SearchCommand", () => {
     });
 
     await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 250));
+      await vi.advanceTimersByTimeAsync(250);
     });
 
     const item = document.querySelector<HTMLElement>(
@@ -248,7 +249,7 @@ describe("SearchCommand", () => {
     ).toBeNull();
 
     await act(async () => {
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await vi.advanceTimersByTimeAsync(16);
     });
     expect(document.activeElement).toBe(before);
   });
