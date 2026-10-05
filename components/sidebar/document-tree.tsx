@@ -49,6 +49,7 @@ import { collectDescendantIds } from "@/lib/db/documents-tree";
 import {
   isMutationDenied,
   mutationErrorMessage,
+  runMutationToast,
   unwrapMutation,
 } from "@/lib/db/mutation-result";
 import { cn } from "@/lib/utils";
@@ -131,17 +132,15 @@ function DocumentTreeItem({
 
     setIsRenaming(false);
 
-    toast.promise(unwrapMutation(updateDocument({ id: node.id, title })), {
+    runMutationToast(updateDocument({ id: node.id, title }), {
       loading: "Renaming...",
       success: (updated) => {
         updateDocumentState(updated);
         notifyPageChanges();
         return "Page renamed.";
       },
-      error: (error) =>
-        isMutationDenied(error) ?
-          "You do not have permission to rename this page."
-        : mutationErrorMessage(error, "Could not rename page."),
+      failed: "Could not rename page.",
+      denied: "You do not have permission to rename this page.",
     });
   }
 

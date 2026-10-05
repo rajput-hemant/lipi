@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import { z } from "zod";
 
 import { EmojiPicker } from "@/components/emoji-picker";
@@ -22,7 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { createWorkspace } from "@/lib/db/actions/workspace";
-import { mutationErrorMessage, unwrapMutation } from "@/lib/db/mutation-result";
+import { runMutationToast } from "@/lib/db/mutation-result";
 
 const workspaceSchema = z.object({
   name: z.string().min(3, "Workspace name must be at least 3 characters long"),
@@ -43,17 +42,14 @@ export function WorkspaceForm() {
   });
 
   async function submitHandler({ name }: FormData) {
-    toast.promise(
-      unwrapMutation(createWorkspace({ title: name, iconId: selectedEmoji })),
-      {
-        loading: `Creating your workspace "${name}"`,
-        success: (data) => {
-          router.replace(`/dashboard/${data.id}`);
-          return `Your workspace "${name}" was created successfully.`;
-        },
-        error: (e) => mutationErrorMessage(e, "Failed to create workspace."),
-      }
-    );
+    runMutationToast(createWorkspace({ title: name, iconId: selectedEmoji }), {
+      loading: `Creating your workspace "${name}"`,
+      success: (data) => {
+        router.replace(`/dashboard/${data.id}`);
+        return `Your workspace "${name}" was created successfully.`;
+      },
+      failed: "Failed to create workspace.",
+    });
   }
 
   return (
