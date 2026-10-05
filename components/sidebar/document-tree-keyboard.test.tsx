@@ -72,28 +72,45 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+function renderTree() {
+  const container = document.createElement("div");
+  document.body.append(container);
+  const root = createRoot(container);
+  roots.push(root);
+  act(() => {
+    root.render(
+      <SidebarProvider>
+        <DocumentTree />
+      </SidebarProvider>
+    );
+  });
+  const link = document.getElementById("document-tree-item-doc-1");
+  const row = link?.closest('[role="treeitem"]');
+  return { link, row };
+}
+
+function pressOnLink(
+  link: HTMLElement | null | undefined,
+  init: KeyboardEventInit
+) {
+  const event = new KeyboardEvent("keydown", {
+    bubbles: true,
+    cancelable: true,
+    ...init,
+  });
+  act(() => {
+    link?.focus();
+    link?.dispatchEvent(event);
+  });
+  return event;
+}
+
 describe("DocumentTree Keyboard Context Menu", () => {
   it("dispatches contextmenu event when Shift+F10 is pressed on tree row", () => {
-    const container = document.createElement("div");
-    document.body.append(container);
-    const root = createRoot(container);
-    roots.push(root);
-
-    act(() => {
-      root.render(
-        <SidebarProvider>
-          <DocumentTree />
-        </SidebarProvider>
-      );
-    });
-
-    const link = document.getElementById("document-tree-item-doc-1");
+    const { link, row } = renderTree();
     expect(link).not.toBeNull();
     expect(link?.getAttribute("href")).toBe("/dashboard/ws-1/doc-1");
     expect(link?.textContent).toContain("Getting Started");
-
-    const row = link?.closest('[role="treeitem"]');
-    expect(row).not.toBeNull();
     expect(row?.getAttribute("role")).toBe("treeitem");
 
     let contextMenuFired = false;
@@ -101,17 +118,35 @@ describe("DocumentTree Keyboard Context Menu", () => {
       contextMenuFired = true;
     });
 
-    act(() => {
-      link?.focus();
-      const event = new KeyboardEvent("keydown", {
-        key: "F10",
-        shiftKey: true,
-        bubbles: true,
-        cancelable: true,
-      });
-      link?.dispatchEvent(event);
-    });
+    const event = pressOnLink(link, { key: "F10", shiftKey: true });
 
     expect(contextMenuFired).toBe(true);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it("dispatches contextmenu event when the ContextMenu key is pressed", () => {
+    const { link, row } = renderTree();
+    let contextMenuFired = false;
+    row?.addEventListener("contextmenu", () => {
+      contextMenuFired = true;
+    });
+
+    const event = pressOnLink(link, { key: "ContextMenu" });
+
+    expect(contextMenuFired).toBe(true);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it("ignores F10 without Shift", () => {
+    const { link, row } = renderTree();
+    let contextMenuFired = false;
+    row?.addEventListener("contextmenu", () => {
+      contextMenuFired = true;
+    });
+
+    const event = pressOnLink(link, { key: "F10" });
+
+    expect(contextMenuFired).toBe(false);
+    expect(event.defaultPrevented).toBe(false);
   });
 });
