@@ -10,6 +10,8 @@ import {
 } from "./plan-quotas";
 import { userHasProPlanEntitlement } from "./quota-entitlement";
 
+type QuotaDatabase = Pick<typeof db, "select">;
+
 export type PendingInviteRef = { workspaceId: string; email: string };
 
 export async function countOwnedWorkspaces(userId: string): Promise<number> {
@@ -27,9 +29,10 @@ export async function countOwnedWorkspaces(userId: string): Promise<number> {
 }
 
 export async function countCollaboratorsForOwner(
-  userId: string
+  userId: string,
+  database: QuotaDatabase = db
 ): Promise<number> {
-  const [row] = await db
+  const [row] = await database
     .select({ value: count() })
     .from(collaborators)
     .innerJoin(workspaces, eq(collaborators.workspaceId, workspaces.id))
@@ -40,9 +43,10 @@ export async function countCollaboratorsForOwner(
 
 async function countPendingInvitesForOwner(
   userId: string,
-  excluding: PendingInviteRef
+  excluding: PendingInviteRef,
+  database: QuotaDatabase = db
 ): Promise<number> {
-  const [row] = await db
+  const [row] = await database
     .select({ value: count() })
     .from(workspaceInvites)
     .innerJoin(workspaces, eq(workspaceInvites.workspaceId, workspaces.id))
@@ -82,12 +86,15 @@ export async function assertUserCanCreateWorkspace(
  */
 export async function assertUserCanAddCollaborator(
   userId: string,
-  invite?: PendingInviteRef
+  invite?: PendingInviteRef,
+  options: { database?: QuotaDatabase; isPro?: boolean } = {}
 ): Promise<void> {
-  const isPro = await userHasProPlanEntitlement(userId);
+  const isPro = options.isPro ?? (await userHasProPlanEntitlement(userId));
   const collaboratorCount =
-    (await countCollaboratorsForOwner(userId)) +
-    (invite ? await countPendingInvitesForOwner(userId, invite) : 0);
+    (await countCollaboratorsForOwner(userId, options.database)) +
+    (invite ?
+      await countPendingInvitesForOwner(userId, invite, options.database)
+    : 0);
 
   if (!canAddCollaborator({ isPro, collaboratorCount })) {
     throw new PlanQuotaError(

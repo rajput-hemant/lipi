@@ -40,6 +40,25 @@ describe("buildDocumentTree", () => {
     expect(tree[0]?.children[0]?.id).toBe("b");
     expect(tree[0]?.children[0]?.children[0]?.id).toBe("c");
   });
+
+  it("preserves database order for siblings when updates happen out of order", () => {
+    const tree = buildDocumentTree([
+      doc({
+        id: "first",
+        title: "First",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        updatedAt: "2026-01-03T00:00:00.000Z",
+      }),
+      doc({
+        id: "second",
+        title: "Second",
+        createdAt: "2026-01-02T00:00:00.000Z",
+        updatedAt: "2026-01-02T00:00:00.000Z",
+      }),
+    ]);
+
+    expect(tree.map(({ id }) => id)).toEqual(["first", "second"]);
+  });
 });
 
 describe("getDocumentAncestors", () => {
