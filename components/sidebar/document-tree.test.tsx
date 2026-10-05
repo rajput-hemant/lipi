@@ -16,11 +16,13 @@ import { DocumentTree } from "./document-tree";
 const {
   createDocument,
   softDeleteDocumentTree,
+  updateDocument,
   errorMessages,
   pendingPromises,
 } = vi.hoisted(() => ({
   createDocument: vi.fn(),
   softDeleteDocumentTree: vi.fn(),
+  updateDocument: vi.fn(),
   errorMessages: [] as unknown[],
   pendingPromises: [] as Promise<unknown>[],
 }));
@@ -39,7 +41,7 @@ vi.mock("@/lib/db/actions/document", () => ({
   createDocument,
   softDeleteDocumentTree,
   duplicateDocument: vi.fn(),
-  updateDocument: vi.fn(),
+  updateDocument,
 }));
 // Run the rejection callback the way sonner does.
 vi.mock("sonner", () => ({
@@ -311,5 +313,62 @@ describe("DocumentTree optimistic rollback", () => {
     expect(errorMessages).toEqual([
       "You do not have permission to move this page to trash.",
     ]);
+  });
+
+  async function renameFirstPage(title: string) {
+    const trigger = document
+      .getElementById("document-tree-item-a")!
+      .closest('[data-slot="context-menu-trigger"]')!;
+    act(() => {
+      trigger.dispatchEvent(
+        new MouseEvent("contextmenu", {
+          bubbles: true,
+          cancelable: true,
+          clientX: 5,
+          clientY: 5,
+        })
+      );
+    });
+    const item = [
+      ...document.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+    ].find((el) => el.textContent?.includes("Rename"));
+    act(() => item?.click());
+    const input = document.querySelector<HTMLInputElement>("form input")!;
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      )!.set!.call(input, title);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      document
+        .querySelector("form")!
+        .dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true })
+        );
+    });
+    await flush();
+  }
+
+  it("shows a permission message when renaming is denied", async () => {
+    updateDocument.mockResolvedValue({ ok: false, code: "FORBIDDEN" });
+    render("editor");
+
+    await renameFirstPage("Renamed");
+
+    expect(updateDocument).toHaveBeenCalledWith({ id: "a", title: "Renamed" });
+    expect(errorMessages).toEqual([
+      "You do not have permission to rename this page.",
+    ]);
+  });
+
+  it("keeps the generic message when renaming fails unexpectedly", async () => {
+    updateDocument.mockRejectedValue(new Error("boom"));
+    render("editor");
+
+    await renameFirstPage("Renamed");
+
+    expect(errorMessages).toEqual(["Could not rename page."]);
   });
 });
