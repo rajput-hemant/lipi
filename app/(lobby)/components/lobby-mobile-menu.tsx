@@ -22,7 +22,7 @@ export function LobbyMobileMenu() {
             size="icon"
             variant="ghost"
             aria-label="Open navigation menu"
-            className="md:hidden"
+            className="md:hidden pointer-coarse:size-11"
           >
             <HugeiconsIcon icon={Menu01Icon} strokeWidth={2} />
           </Button>
