@@ -22,7 +22,7 @@ import {
   getWorkspaceOwnerId,
   revalidateWorkspaceLists,
 } from "../data/workspace-list-tags";
-import { ensureOwnerCollaboratorQuota } from "../data/workspace-member-quota";
+import { withOwnerCollaboratorLock } from "../data/workspace-member-quota";
 import { collaborators, users, workspaceInvites, workspaces } from "../schema";
 
 const inviteRoleSchema = z.enum(["editor", "viewer"]);
@@ -139,35 +139,36 @@ export async function createWorkspaceCollaboratorInvite(input: unknown) {
       throw new MutationAuthError("This user is already a collaborator");
     }
 
-    await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId, {
-      workspaceId: parsed.workspaceId,
-      email,
-    });
-
     const token = randomUUID();
     const expiresAt = new Date(
       Date.now() + 7 * 24 * 60 * 60 * 1000
     ).toISOString();
 
-    await db
-      .insert(workspaceInvites)
-      .values({
-        workspaceId: parsed.workspaceId,
-        email,
-        role: parsed.role,
-        token,
-        invitedByUserId: user.id,
-        expiresAt,
-      })
-      .onConflictDoUpdate({
-        target: [workspaceInvites.workspaceId, workspaceInvites.email],
-        set: {
-          role: parsed.role,
-          token,
-          invitedByUserId: user.id,
-          expiresAt,
-        },
-      });
+    await withOwnerCollaboratorLock(
+      workspace.workspaceOwnerId,
+      async (transaction, assertQuota) => {
+        await assertQuota({ workspaceId: parsed.workspaceId, email });
+        await transaction
+          .insert(workspaceInvites)
+          .values({
+            workspaceId: parsed.workspaceId,
+            email,
+            role: parsed.role,
+            token,
+            invitedByUserId: user.id,
+            expiresAt,
+          })
+          .onConflictDoUpdate({
+            target: [workspaceInvites.workspaceId, workspaceInvites.email],
+            set: {
+              role: parsed.role,
+              token,
+              invitedByUserId: user.id,
+              expiresAt,
+            },
+          });
+      }
+    );
 
     const baseUrl = resolveAuthBaseURL();
     const acceptUrl = `${baseUrl}/invite/${token}`;
@@ -266,24 +267,30 @@ export async function acceptWorkspaceInvite(token: string) {
 
   const workspace = await getWorkspaceOrThrow(invite.workspaceId);
 
-  const existing = await db.query.collaborators.findFirst({
-    where: and(
-      eq(collaborators.workspaceId, invite.workspaceId),
-      eq(collaborators.userId, user.id)
-    ),
-  });
+  await withOwnerCollaboratorLock(
+    workspace.workspaceOwnerId,
+    async (transaction, assertQuota) => {
+      const existing = await transaction.query.collaborators.findFirst({
+        where: and(
+          eq(collaborators.workspaceId, invite.workspaceId),
+          eq(collaborators.userId, user.id)
+        ),
+      });
 
-  if (!existing) {
-    await ensureOwnerCollaboratorQuota(workspace.workspaceOwnerId);
+      if (!existing) {
+        await assertQuota();
+        await transaction.insert(collaborators).values({
+          workspaceId: invite.workspaceId,
+          userId: user.id,
+          role: invite.role,
+        });
+      }
 
-    await db.insert(collaborators).values({
-      workspaceId: invite.workspaceId,
-      userId: user.id,
-      role: invite.role,
-    });
-  }
-
-  await db.delete(workspaceInvites).where(eq(workspaceInvites.id, invite.id));
+      await transaction
+        .delete(workspaceInvites)
+        .where(eq(workspaceInvites.id, invite.id));
+    }
+  );
 
   revalidateWorkspaceLists([user.id, workspace.workspaceOwnerId]);
 

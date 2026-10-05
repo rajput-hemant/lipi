@@ -6,17 +6,31 @@ import {
 } from "./workspace-members";
 
 const mocks = vi.hoisted(() => ({
-  ensureOwnerCollaboratorQuota: vi.fn(),
+  assertQuota: vi.fn(),
   authorizeWorkspaceMemberManagement: vi.fn(),
   requireAuthenticatedUser: vi.fn(),
   findWorkspace: vi.fn(),
   findInvite: vi.fn(),
   findUser: vi.fn(),
   findCollaborator: vi.fn(),
+  transaction: {
+    query: { collaborators: { findFirst: vi.fn() } },
+    insert: vi.fn(() => ({
+      values: vi.fn(() => ({
+        onConflictDoUpdate: vi.fn().mockResolvedValue(undefined),
+      })),
+    })),
+    delete: vi.fn(() => ({ where: vi.fn().mockResolvedValue(undefined) })),
+  },
 }));
 
 vi.mock("../data/workspace-member-quota", () => ({
-  ensureOwnerCollaboratorQuota: mocks.ensureOwnerCollaboratorQuota,
+  withOwnerCollaboratorLock: vi.fn(
+    (
+      _ownerId: string,
+      work: (transaction: unknown, assertQuota: () => void) => unknown
+    ) => work(mocks.transaction, mocks.assertQuota)
+  ),
 }));
 
 vi.mock("../data/mutation-auth", async (importOriginal) => ({
@@ -83,7 +97,10 @@ describe("workspace member invite quota enforcement", () => {
       id: "owner-1",
     });
     mocks.requireAuthenticatedUser.mockResolvedValue({ id: "invitee-1" });
-    mocks.ensureOwnerCollaboratorQuota.mockResolvedValue(undefined);
+    mocks.assertQuota.mockResolvedValue(undefined);
+    mocks.transaction.query.collaborators.findFirst.mockResolvedValue(
+      undefined
+    );
     mocks.findWorkspace.mockResolvedValue({
       id: workspaceId,
       workspaceOwnerId: "owner-1",
@@ -109,7 +126,7 @@ describe("workspace member invite quota enforcement", () => {
       })
     ).resolves.toMatchObject({ ok: true });
 
-    expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1", {
+    expect(mocks.assertQuota).toHaveBeenCalledWith({
       workspaceId,
       email: "new@example.com",
     });
@@ -118,12 +135,12 @@ describe("workspace member invite quota enforcement", () => {
   it("checks owner quota before accepting an invite", async () => {
     await acceptWorkspaceInvite("token-1");
 
-    expect(mocks.ensureOwnerCollaboratorQuota).toHaveBeenCalledWith("owner-1");
+    expect(mocks.assertQuota).toHaveBeenCalledWith();
   });
 
   it("returns quota errors when creating an invite", async () => {
     const { MutationAuthError } = await import("../data/mutation-auth");
-    mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
+    mocks.assertQuota.mockRejectedValue(
       new MutationAuthError("Free plan allows two collaborators.")
     );
 
@@ -142,7 +159,7 @@ describe("workspace member invite quota enforcement", () => {
 
   it("surfaces quota errors when accepting an invite", async () => {
     const { MutationAuthError } = await import("../data/mutation-auth");
-    mocks.ensureOwnerCollaboratorQuota.mockRejectedValue(
+    mocks.assertQuota.mockRejectedValue(
       new MutationAuthError("Free plan allows two collaborators.")
     );
 

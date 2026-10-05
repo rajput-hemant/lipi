@@ -1,50 +1,74 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlanQuotaError } from "@/lib/billing/errors";
 import { MutationAuthError } from "./mutation-auth";
-import { ensureOwnerCollaboratorQuota } from "./workspace-member-quota";
+import { withOwnerCollaboratorLock } from "./workspace-member-quota";
 
-const assertUserCanAddCollaborator = vi.fn();
-
-vi.mock("@/lib/billing/enforce-quotas", () => ({
-  assertUserCanAddCollaborator: (...args: unknown[]) =>
-    assertUserCanAddCollaborator(...args),
+const mocks = vi.hoisted(() => ({
+  transaction: {
+    execute: vi.fn().mockResolvedValue(undefined),
+  },
+  runTransaction: vi.fn(),
+  assertUserCanAddCollaborator: vi.fn(),
+  userHasProPlanEntitlement: vi.fn(),
 }));
 
-describe("ensureOwnerCollaboratorQuota", () => {
-  it("forwards the invite so pending invites are counted", async () => {
-    assertUserCanAddCollaborator.mockResolvedValue(undefined);
+vi.mock("@/lib/db", () => ({
+  db: {
+    transaction: mocks.runTransaction,
+  },
+}));
+
+vi.mock("@/lib/billing/enforce-quotas", () => ({
+  assertUserCanAddCollaborator: mocks.assertUserCanAddCollaborator,
+}));
+
+vi.mock("@/lib/billing/quota-entitlement", () => ({
+  userHasProPlanEntitlement: mocks.userHasProPlanEntitlement,
+}));
+
+describe("withOwnerCollaboratorLock", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.runTransaction.mockImplementation((work) => work(mocks.transaction));
+    mocks.userHasProPlanEntitlement.mockResolvedValue(false);
+    mocks.assertUserCanAddCollaborator.mockResolvedValue(undefined);
+  });
+
+  it("locks the owner and checks quota in the same transaction as the write", async () => {
     const invite = { workspaceId: "w1", email: "a@b.c" };
+    const write = vi.fn().mockResolvedValue("written");
 
-    await ensureOwnerCollaboratorQuota("owner-1", invite);
-
-    expect(assertUserCanAddCollaborator).toHaveBeenCalledWith(
+    const result = await withOwnerCollaboratorLock(
       "owner-1",
-      invite
+      async (tx, assertQuota) => {
+        await assertQuota(invite);
+        return write(tx);
+      }
     );
+
+    expect(mocks.transaction.execute).toHaveBeenCalledOnce();
+    expect(mocks.assertUserCanAddCollaborator).toHaveBeenCalledWith(
+      "owner-1",
+      invite,
+      { database: mocks.transaction, isPro: false }
+    );
+    expect(write).toHaveBeenCalledWith(mocks.transaction);
+    expect(result).toBe("written");
   });
 
-  it("delegates to billing enforcement for the workspace owner", async () => {
-    assertUserCanAddCollaborator.mockResolvedValue(undefined);
-
-    await ensureOwnerCollaboratorQuota("owner-1");
-
-    expect(assertUserCanAddCollaborator).toHaveBeenCalledWith(
-      "owner-1",
-      undefined
-    );
-  });
-
-  it("maps collaborator plan quota errors to mutation auth errors", async () => {
-    assertUserCanAddCollaborator.mockRejectedValue(
+  it("maps quota errors without running the write", async () => {
+    mocks.assertUserCanAddCollaborator.mockRejectedValue(
       new PlanQuotaError("collaborator", "Free plan allows two collaborators.")
     );
+    const write = vi.fn();
 
-    await expect(ensureOwnerCollaboratorQuota("owner-1")).rejects.toThrow(
-      MutationAuthError
-    );
-    await expect(ensureOwnerCollaboratorQuota("owner-1")).rejects.toThrow(
-      "Free plan allows two collaborators."
-    );
+    await expect(
+      withOwnerCollaboratorLock("owner-1", async (_tx, assertQuota) => {
+        await assertQuota();
+        write();
+      })
+    ).rejects.toThrow(MutationAuthError);
+    expect(write).not.toHaveBeenCalled();
   });
 });
