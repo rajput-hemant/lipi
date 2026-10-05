@@ -148,7 +148,7 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V022 Trashed page stays open at its URL
 
-- State: CONFIRMED, low. Fixed in `c081bfe`: `Move to trash` navigates to the workspace root when the open page or a descendant is trashed; verified live. Direct-URL editing of a trashed page was not tested.
+- State: CONFIRMED, low. Fixed in `c081bfe`: `Move to trash` navigates to the workspace root when the open page or a descendant is trashed; verified live. Update 2026-10-05: direct-URL editing of a trashed page was possible for the header metadata (title, icon, cover); the body was already blocked by the realtime server. Fixed: the page returns not-found for trashed pages and `updateDocument` rejects them (`[fileId]/page.test.tsx`, `document.forbidden.test.ts`); driven live.
 
 ### LIP-V023 Tree context menu not opened by keyboard
 
@@ -164,7 +164,7 @@ Not re-run here and not counted as new verification:
 
 ### LIP-V026 Workspace title and member role could go stale in open sessions
 
-- State: HYPOTHESIS about base, low. Fixed in `ef68580`: Settings save, role change and transfer refresh the store and send `pages:changed`; verified live for title and role. Gap: member removal only notifies, the removed user's open session was not driven.
+- State: HYPOTHESIS about base, low. Fixed in `ef68580`: Settings save, role change and transfer refresh the store and send `pages:changed`; verified live for title and role. Update 2026-10-05: the removed user's open session was driven live; it swapped to the access-revoked view within 1 s without navigation.
 
 ### LIP-V027 Failed root page creation is not rolled back
 

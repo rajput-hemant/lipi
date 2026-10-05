@@ -86,6 +86,20 @@ describe("document mutations for a forbidden caller", () => {
     ).resolves.toEqual(denied);
   });
 
+  it("rejects updateDocument for a page in the trash", async () => {
+    authorizeDocumentMutation.mockResolvedValue({
+      document: { workspaceId: "ws-1", parentId: null, inTrash: true },
+    });
+
+    await expect(
+      updateDocument({ id: crypto.randomUUID(), title: "New" })
+    ).resolves.toEqual({
+      ok: false,
+      code: "INVALID",
+      message: "Document not found",
+    });
+  });
+
   it("returns other expected auth failures as typed results", async () => {
     authorizeDocumentMutation.mockRejectedValue(
       new MutationAuthError("Document not found")

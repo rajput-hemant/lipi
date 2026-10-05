@@ -165,6 +165,7 @@ export async function updateDocument(input: unknown) {
   try {
     const { document: existing } = await authorizeDocumentMutation(parsed.id);
     workspaceIdForRevalidate = existing.workspaceId;
+    if (existing.inTrash) throw new MutationAuthError("Document not found");
     const movesToRoot = parsed.parentId === null && !!existing.parentId;
     const hasProEntitlement =
       movesToRoot ?
