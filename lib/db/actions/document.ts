@@ -202,7 +202,7 @@ export async function updateDocument(input: unknown) {
         .where(eq(documents.id, id))
         .returning(documentSummaryColumns);
 
-      return { ok: true, data } as const;
+      return data;
     });
 
     return { ok: true, data } as const;
