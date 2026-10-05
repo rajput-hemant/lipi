@@ -46,7 +46,11 @@ import {
   resolveTreeKeyAction,
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
-import { isMutationDenied, unwrapMutation } from "@/lib/db/mutation-result";
+import {
+  isMutationDenied,
+  mutationErrorMessage,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
@@ -137,7 +141,7 @@ function DocumentTreeItem({
       error: (error) =>
         isMutationDenied(error) ?
           "You do not have permission to rename this page."
-        : "Could not rename page.",
+        : mutationErrorMessage(error, "Could not rename page."),
     });
   }
 
@@ -711,7 +715,9 @@ export function DocumentTree() {
             <p className="text-center text-sm">
               {canEdit ?
                 "No pages yet. Create your first page."
-              : "No pages yet. Only editors and the owner can add pages."}
+              : access === "view" ?
+                "No pages yet. Only editors and the owner can add pages."
+              : "No pages yet."}
             </p>
           </div>
         }

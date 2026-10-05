@@ -4,6 +4,12 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { proxy } from "./proxy";
 
 describe("proxy auth routes", () => {
+  const originalEnv = {
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
+  };
+
   beforeAll(() => {
     vi.stubEnv(
       "BETTER_AUTH_SECRET",
@@ -15,6 +21,13 @@ describe("proxy auth routes", () => {
 
   afterAll(() => {
     vi.unstubAllEnvs();
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   it("does not redirect /login when only a session cookie is present", async () => {

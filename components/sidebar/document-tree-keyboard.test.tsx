@@ -88,10 +88,13 @@ describe("DocumentTree Keyboard Context Menu", () => {
     });
 
     const link = document.getElementById("document-tree-item-doc-1");
+    expect(link).not.toBeNull();
+    expect(link?.getAttribute("href")).toBe("/dashboard/ws-1/doc-1");
     expect(link?.textContent).toContain("Getting Started");
 
     const row = link?.closest('[role="treeitem"]');
     expect(row).not.toBeNull();
+    expect(row?.getAttribute("role")).toBe("treeitem");
 
     let contextMenuFired = false;
     row?.addEventListener("contextmenu", () => {

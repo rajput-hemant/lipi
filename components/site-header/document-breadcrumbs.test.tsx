@@ -61,7 +61,8 @@ describe("DocumentBreadcrumbs", () => {
     });
 
     const nav = container.querySelector('nav[aria-label="Breadcrumb"]');
-    expect(nav).toBeTruthy();
+    expect(nav).not.toBeNull();
+    expect(nav?.getAttribute("aria-label")).toBe("Breadcrumb");
     expect(nav?.textContent).toContain("Acme Corp");
   });
 
@@ -94,7 +95,8 @@ describe("DocumentBreadcrumbs", () => {
     });
 
     const nav = container.querySelector('nav[aria-label="Breadcrumb"]');
-    expect(nav).toBeTruthy();
+    expect(nav).not.toBeNull();
+    expect(nav?.getAttribute("aria-label")).toBe("Breadcrumb");
     expect(nav?.textContent).toContain("Engineering");
     expect(nav?.textContent).toContain("Architecture Doc");
   });

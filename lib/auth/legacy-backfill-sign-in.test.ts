@@ -1,5 +1,7 @@
 import { hash } from "bcryptjs";
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+import type { createAuth } from "./create-auth";
 
 import {
   betterAuthAccounts,
@@ -7,7 +9,6 @@ import {
   betterAuthVerifications,
   users,
 } from "@/lib/db/schema";
-import { createAuth } from "./create-auth";
 import { CREDENTIAL_PROVIDER_ID } from "./credential-account";
 
 const TEST_SECRET = vi.hoisted(
@@ -43,8 +44,33 @@ export function backfilledCredentialRow(userId: string, passwordHash: string) {
 }
 
 describe("legacy credential backfill sign-in", () => {
+  const originalEnv = {
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
+  };
+
+  beforeAll(() => {
+    process.env.BETTER_AUTH_SECRET =
+      "test-secret-key-that-is-at-least-32-chars";
+    process.env.BETTER_AUTH_URL = "http://localhost:3000";
+    process.env.SKIP_ENV_VALIDATION = "true";
+  });
+
+  afterAll(() => {
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
   it("accepts bcrypt passwords on backfilled credential accounts", async () => {
-    const auth = createAuth(makeFakeDb());
+    vi.resetModules();
+    const { createAuth: isolatedCreateAuth } = await import("./create-auth");
+    const auth = isolatedCreateAuth(makeFakeDb());
     expect(auth.options.secret).toBe(TEST_SECRET);
     const password = "LegacyPass1!";
     const passwordHash = await hash(password, 10);

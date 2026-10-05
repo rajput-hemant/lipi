@@ -51,6 +51,8 @@ describe("SearchCommand", () => {
     });
 
     const trigger = container.querySelector("button");
+    expect(trigger).not.toBeNull();
+    expect(trigger?.getAttribute("type")).toBe("button");
     expect(trigger?.textContent).toContain("Search");
     expect(trigger?.textContent).toContain("⌘K");
   });
@@ -79,6 +81,8 @@ describe("SearchCommand", () => {
     });
 
     const alert = document.querySelector('[role="alert"]');
+    expect(alert).not.toBeNull();
+    expect(alert?.getAttribute("role")).toBe("alert");
     expect(alert?.textContent).toContain(
       "Failed to search documents. Please try again."
     );
@@ -129,6 +133,7 @@ describe("SearchCommand", () => {
 
     const trigger = container.querySelector("button");
     expect(trigger).not.toBeNull();
+    expect(trigger?.getAttribute("type")).toBe("button");
 
     act(() => {
       trigger?.focus();
@@ -139,10 +144,16 @@ describe("SearchCommand", () => {
     expect(
       document.querySelector('[data-slot="dialog-content"]')
     ).not.toBeNull();
+    const dialog = document.querySelector<HTMLElement>(
+      '[data-slot="dialog-content"]'
+    );
+    expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute("role")).toBe("dialog");
 
     // Close via escape on the active input
     const input = document.querySelector('input[role="combobox"]');
     expect(input).not.toBeNull();
+    expect(input?.getAttribute("role")).toBe("combobox");
 
     act(() => {
       const event = new KeyboardEvent("keydown", {
@@ -190,6 +201,11 @@ describe("SearchCommand", () => {
     expect(
       document.querySelector('[data-slot="dialog-content"][data-open]')
     ).not.toBeNull();
+    const openDialog = document.querySelector<HTMLElement>(
+      '[data-slot="dialog-content"][data-open]'
+    );
+    expect(openDialog).not.toBeNull();
+    expect(openDialog?.hasAttribute("data-open")).toBe(true);
 
     press();
     expect(
@@ -232,11 +248,13 @@ describe("SearchCommand", () => {
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(250);
+      vi.runAllTimers();
     });
 
     const item = document.querySelector<HTMLElement>(
       '[data-slot="combobox-item"]'
     );
+    expect(item).not.toBeNull();
     expect(item?.textContent).toContain("Roadmap");
 
     act(() => {

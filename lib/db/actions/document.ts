@@ -1,5 +1,6 @@
 "use server";
 
+import { cache as reactCache } from "react";
 import { unstable_cache as cache, revalidatePath, updateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { v4 as uuid, validate as validateUuid } from "uuid";
@@ -125,7 +126,7 @@ export async function createDocument(input: unknown) {
   }
 }
 
-export async function getDocuments(workspaceId: string) {
+const getDocumentsCached = reactCache(async (workspaceId: string) => {
   if (!validateUuid(workspaceId)) {
     throw new Error("Invalid workspace ID");
   }
@@ -151,6 +152,10 @@ export async function getDocuments(workspaceId: string) {
     ["get_documents", workspaceId],
     { tags: [documentsCacheTag(workspaceId)] }
   )();
+});
+
+export async function getDocuments(workspaceId: string) {
+  return getDocumentsCached(workspaceId);
 }
 
 export async function updateDocument(input: unknown) {
@@ -197,7 +202,7 @@ export async function updateDocument(input: unknown) {
         .where(eq(documents.id, id))
         .returning(documentSummaryColumns);
 
-      return data;
+      return { ok: true, data } as const;
     });
 
     return { ok: true, data } as const;

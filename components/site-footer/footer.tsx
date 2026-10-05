@@ -37,7 +37,18 @@ const footerLinks = [
       },
     ],
   },
-];
+  {
+    title: "Project",
+    links: [
+      { label: "GitHub", href: siteConfig.links.github, external: true },
+      {
+        label: "Report an issue",
+        href: `${siteConfig.links.github}/issues`,
+        external: true,
+      },
+    ],
+  },
+] as const;
 
 export async function SiteFooter() {
   await connection();

@@ -145,6 +145,18 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+describe("Settings member load failures", () => {
+  it("shows the server message when loading members is denied", async () => {
+    vi.mocked(toast.error).mockClear();
+    mocks.listWorkspaceMembers.mockResolvedValue(denied);
+    await act(async () => {
+      render();
+    });
+
+    expect(toast.error).toHaveBeenCalledWith(denied.message);
+  });
+});
+
 describe("Settings mutation failures", () => {
   it("shows the permission message when saving is denied", async () => {
     await click(button("Save changes"));

@@ -4,12 +4,15 @@ import { describe, expect, it } from "vitest";
 import NewWorkspaceLoading from "./loading";
 
 describe("NewWorkspaceLoading", () => {
-  it("renders a form-shaped skeleton without the editor shell", () => {
+  it("renders a setup-shaped skeleton without the editor shell", () => {
     const html = renderToStaticMarkup(<NewWorkspaceLoading />);
 
     expect(html).toContain("min-h-dvh");
-    expect(html).not.toContain("h-screen");
+    expect(html).not.toMatch(/h-screen|min-h-screen/);
+    expect(html).toContain('role="status"');
+    expect(html).toContain("Loading workspace setup");
     expect(html).not.toContain("w-64");
+    expect(html).not.toContain("max-w-3xl");
     expect(html).toContain('data-slot="skeleton"');
   });
 });

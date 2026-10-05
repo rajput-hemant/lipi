@@ -19,7 +19,11 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button size="icon" variant="ghost">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="pointer-coarse:size-11"
+          >
             <HugeiconsIcon
               icon={Sun01Icon}
               strokeWidth={2}

@@ -22,6 +22,7 @@ type SubscriptionModalContext = {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   subscription: Subscription | null;
   hasProEntitlement: boolean;
+  hasErrored: boolean;
 };
 
 const SubscriptionModalContext = React.createContext<SubscriptionModalContext>({
@@ -29,6 +30,7 @@ const SubscriptionModalContext = React.createContext<SubscriptionModalContext>({
   setOpen: () => {},
   subscription: null,
   hasProEntitlement: false,
+  hasErrored: false,
 });
 
 export const useSubscriptionModal = () => {
@@ -76,7 +78,13 @@ export const SubscriptionModalProvider = (props: Props) => {
 
   return (
     <SubscriptionModalContext.Provider
-      value={{ open, setOpen, subscription, hasProEntitlement }}
+      value={{
+        open,
+        setOpen,
+        subscription,
+        hasProEntitlement,
+        hasErrored: !!hasErrored,
+      }}
     >
       {children}
 

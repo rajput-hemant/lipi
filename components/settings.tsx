@@ -55,7 +55,11 @@ import {
   transferWorkspaceOwnership,
   updateWorkspaceSettings,
 } from "@/lib/db/actions/workspace-settings";
-import { runMutationToast } from "@/lib/db/mutation-result";
+import {
+  mutationErrorMessage,
+  runMutationToast,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import { uploadImage } from "@/lib/uploadthing";
 
 const settingsSchema = z.object({
@@ -151,8 +155,8 @@ export function Settings() {
     if (!workspaceId) return;
     try {
       applyMembersResult(await listWorkspaceMembers(workspaceId));
-    } catch {
-      toast.error("Failed to load settings");
+    } catch (error) {
+      toast.error(mutationErrorMessage(error, "Failed to load settings"));
       setLoading(false);
     }
   }, [workspaceId, applyMembersResult]);
@@ -165,9 +169,9 @@ export function Settings() {
       .then((result) => {
         if (!cancelled) applyMembersResult(result);
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!cancelled) {
-          toast.error("Failed to load settings");
+          toast.error(mutationErrorMessage(error, "Failed to load settings"));
           setLoading(false);
         }
       });

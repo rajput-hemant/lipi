@@ -187,13 +187,35 @@ describe("Hocuspocus realtime server", () => {
       viewer.document
         .getText("content")
         .insert(viewer.document.getText("content").length, " viewer edit");
-      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      editor.document
+        .getText("content")
+        .insert(editor.document.getText("content").length, " editor barrier");
+      await waitUntil(
+        () =>
+          Boolean(
+            server.hocuspocus.documents
+              .get(documentRoom)
+              ?.getText("content")
+              .toString()
+              .includes("editor barrier") &&
+            owner.document
+              .getText("content")
+              .toString()
+              .includes("editor barrier")
+          ),
+        "sync barrier after viewer edit attempt"
+      );
+
       expect(
         server.hocuspocus.documents
           .get(documentRoom)
           ?.getText("content")
           .toString()
       ).not.toContain("viewer edit");
+      expect(owner.document.getText("content").toString()).not.toContain(
+        "viewer edit"
+      );
 
       const forgedRoom = "document:66666666-6666-4666-8666-666666666666";
       const forgedFailure = new Promise<string>((resolve) => {
@@ -203,7 +225,7 @@ describe("Hocuspocus realtime server", () => {
           )
         );
       });
-      await expect(forgedFailure).resolves.toBeTruthy();
+      await expect(forgedFailure).resolves.toBe("permission-denied");
 
       await server.hocuspocus.debouncer.executeNow(
         `onStoreDocument-${documentRoom}`

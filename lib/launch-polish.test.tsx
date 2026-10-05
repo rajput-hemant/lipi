@@ -46,8 +46,10 @@ describe("Launch Polish Constants & Messaging", () => {
     expect(LOBBY_CAPABILITIES.length).toBeGreaterThan(0);
 
     for (const item of LOBBY_CAPABILITIES) {
-      expect(item.title).toBeTruthy();
-      expect(item.description).toBeTruthy();
+      expect(typeof item.title).toBe("string");
+      expect(item.title.trim().length).toBeGreaterThan(0);
+      expect(typeof item.description).toBe("string");
+      expect(item.description.trim().length).toBeGreaterThan(0);
       expect(item.description.toLowerCase()).not.toContain(
         "end-to-end testing"
       );
@@ -130,7 +132,8 @@ describe("Error Boundaries & Not Found Components", () => {
 
     expect(container.textContent).toContain("Something went wrong");
     const retryBtn = container.querySelector("button");
-    expect(retryBtn).toBeTruthy();
+    expect(retryBtn).not.toBeNull();
+    expect(retryBtn?.textContent).toContain("Try again");
     act(() => {
       retryBtn?.click();
     });

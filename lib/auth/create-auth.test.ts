@@ -1,5 +1,5 @@
 import { compare, hash } from "bcryptjs";
-import { describe, expect, it, vi } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
   betterAuthAccounts,
@@ -32,6 +32,30 @@ function makeFakeDb() {
 }
 
 describe("Better Auth configuration", () => {
+  const originalEnv = {
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    SKIP_ENV_VALIDATION: process.env.SKIP_ENV_VALIDATION,
+    DISABLE_AUTH_RATE_LIMIT: process.env.DISABLE_AUTH_RATE_LIMIT,
+  };
+
+  beforeAll(() => {
+    process.env.BETTER_AUTH_SECRET = TEST_SECRET;
+    process.env.BETTER_AUTH_URL = "http://localhost:3000";
+    process.env.SKIP_ENV_VALIDATION = "true";
+    process.env.DISABLE_AUTH_RATE_LIMIT = "true";
+  });
+
+  afterAll(() => {
+    for (const [key, value] of Object.entries(originalEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
+
   it("signs with the validated env secret", () => {
     expect(createAuth(makeFakeDb()).options.secret).toBe(TEST_SECRET);
   });
@@ -83,5 +107,24 @@ describe("Better Auth configuration", () => {
       await passwordConfig!.verify!({ password: "wrong", hash: hashed })
     ).toBe(false);
     expect(await compare("hunter2", hashed)).toBe(true);
+  });
+
+  it("proves import-time BETTER_AUTH_SECRET wiring using isolated modules", async () => {
+    const customSecret = "isolated-test-secret-key-32-chars-long";
+    const priorSecret = process.env.BETTER_AUTH_SECRET;
+    try {
+      process.env.BETTER_AUTH_SECRET = customSecret;
+      vi.resetModules();
+      const { createAuth: isolatedCreateAuth } = await import("./create-auth");
+      const auth = isolatedCreateAuth(makeFakeDb());
+      expect(auth.options.secret).toBe(customSecret);
+    } finally {
+      if (priorSecret === undefined) {
+        delete process.env.BETTER_AUTH_SECRET;
+      } else {
+        process.env.BETTER_AUTH_SECRET = priorSecret;
+      }
+      vi.resetModules();
+    }
   });
 });

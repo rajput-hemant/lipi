@@ -12,16 +12,18 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 function UserDetails() {
   const { user } = useAppState();
-  const { hasProEntitlement } = useSubscriptionModal();
+  const { hasProEntitlement, hasErrored } = useSubscriptionModal();
 
   return (
     <div className="min-w-0 flex-1 font-medium">
       <p className="line-clamp-1 text-sm">
         {user?.name ?? "Update your profile"}
       </p>
-      <p className="line-clamp-1 text-xs text-muted-foreground">
-        {hasProEntitlement ? "Pro plan" : "Free plan"}
-      </p>
+      {!hasErrored && (
+        <p className="line-clamp-1 text-xs text-muted-foreground">
+          {hasProEntitlement ? "Pro plan" : "Free plan"}
+        </p>
+      )}
       <Link
         href="/dashboard/change-password"
         className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:underline focus-visible:outline-none"

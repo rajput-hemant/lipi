@@ -115,10 +115,18 @@ describe("app sidebar", () => {
     expect(
       container.querySelector('[data-testid="document-tree-collapsed"]')
     ).not.toBeNull();
+    const collapsedTree = container.querySelector(
+      '[data-testid="document-tree-collapsed"]'
+    );
+    expect(collapsedTree?.getAttribute("data-testid")).toBe(
+      "document-tree-collapsed"
+    );
     expect(container.querySelector('[data-testid="document-tree"]')).toBeNull();
-    expect(
-      container.querySelector('[data-testid="account-trigger"]')
-    ).not.toBeNull();
+    const accountTrigger = container.querySelector(
+      '[data-testid="account-trigger"]'
+    );
+    expect(accountTrigger).not.toBeNull();
+    expect(accountTrigger?.getAttribute("data-testid")).toBe("account-trigger");
   });
 
   it("shows the full tree and user card when expanded", () => {
@@ -132,6 +140,9 @@ describe("app sidebar", () => {
     expect(
       container.querySelector('[data-testid="document-tree"]')
     ).not.toBeNull();
+    const fullTree = container.querySelector('[data-testid="document-tree"]');
+    expect(fullTree).not.toBeNull();
+    expect(fullTree?.getAttribute("data-testid")).toBe("document-tree");
     expect(
       container.querySelector('[data-testid="account-trigger"]')
     ).toBeNull();
@@ -195,6 +206,10 @@ describe("app sidebar", () => {
     expect(
       sheet?.querySelector('[data-testid="document-tree"]')
     ).not.toBeNull();
+    expect(sheet?.getAttribute("data-mobile")).toBe("true");
+    const sheetTree = sheet?.querySelector('[data-testid="document-tree"]');
+    expect(sheetTree).not.toBeNull();
+    expect(sheetTree?.getAttribute("data-testid")).toBe("document-tree");
     expect(
       sheet?.querySelector('[data-testid="document-tree-collapsed"]')
     ).toBeNull();

@@ -95,9 +95,16 @@ describe("Trash", () => {
 
   it("labels row controls by page title", () => {
     render();
-    expect(byLabel("Restore Alpha")).toBeInstanceOf(HTMLButtonElement);
-    expect(byLabel("Delete Beta permanently")).toBeInstanceOf(
-      HTMLButtonElement
+    const restoreAlpha = byLabel("Restore Alpha");
+    expect(restoreAlpha).not.toBeNull();
+    expect(restoreAlpha).toBeInstanceOf(HTMLButtonElement);
+    expect(restoreAlpha?.getAttribute("aria-label")).toBe("Restore Alpha");
+
+    const deleteBeta = byLabel("Delete Beta permanently");
+    expect(deleteBeta).not.toBeNull();
+    expect(deleteBeta).toBeInstanceOf(HTMLButtonElement);
+    expect(deleteBeta?.getAttribute("aria-label")).toBe(
+      "Delete Beta permanently"
     );
   });
 
@@ -136,7 +143,14 @@ describe("Trash", () => {
 
   it("keeps restore and delete controls for editors", () => {
     render(undefined, "editor");
-    expect(byLabel("Restore Alpha")).toBeTruthy();
+    const restoreAlpha = byLabel("Restore Alpha");
+    expect(restoreAlpha).not.toBeNull();
+    expect(restoreAlpha?.getAttribute("aria-label")).toBe("Restore Alpha");
+    const deleteAlpha = byLabel("Delete Alpha permanently");
+    expect(deleteAlpha).not.toBeNull();
+    expect(deleteAlpha?.getAttribute("aria-label")).toBe(
+      "Delete Alpha permanently"
+    );
   });
 
   describe("failed results", () => {

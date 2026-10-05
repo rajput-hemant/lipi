@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-import { env } from "@/lib/env";
+import { env } from "../env";
 
 const tokenResponseSchema = z.object({
   token: z.string().min(1),

@@ -39,7 +39,7 @@ export function LobbyNavbar() {
             href="/login"
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "hidden h-8 rounded-full px-5 font-semibold transition-all duration-200 hover:ring-2 hover:ring-border hover:ring-offset-2 hover:ring-offset-background sm:inline-flex"
+              "hidden h-8 rounded-full px-5 pointer-coarse:h-11 font-semibold transition-all duration-200 hover:ring-2 hover:ring-border hover:ring-offset-2 hover:ring-offset-background sm:inline-flex"
             )}
           >
             Login
@@ -49,7 +49,7 @@ export function LobbyNavbar() {
             href="/signup"
             className={cn(
               buttonVariants(),
-              "h-8 rounded-full px-3 font-semibold transition-all duration-200 hover:ring-2 hover:ring-foreground hover:ring-offset-2 hover:ring-offset-background"
+              "h-8 rounded-full px-3 pointer-coarse:h-11 font-semibold transition-all duration-200 hover:ring-2 hover:ring-foreground hover:ring-offset-2 hover:ring-offset-background"
             )}
           >
             Sign Up

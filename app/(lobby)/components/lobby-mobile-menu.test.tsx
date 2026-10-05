@@ -38,7 +38,8 @@ describe("LobbyMobileMenu", () => {
     const trigger = container.querySelector(
       'button[aria-label="Open navigation menu"]'
     );
-    expect(trigger).toBeTruthy();
+    expect(trigger).not.toBeNull();
+    expect(trigger?.getAttribute("aria-label")).toBe("Open navigation menu");
     expect(trigger?.className).toContain("md:hidden");
   });
 });
