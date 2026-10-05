@@ -13,9 +13,16 @@ const TEST_SECRET = vi.hoisted(
   () => "test-secret-key-that-is-at-least-32-chars"
 );
 
-vi.mock("@/lib/env", () => ({
-  env: { BETTER_AUTH_SECRET: TEST_SECRET, DISABLE_AUTH_RATE_LIMIT: "true" },
-}));
+vi.mock("@/lib/env", () => {
+  return {
+    env: {
+      get BETTER_AUTH_SECRET() {
+        return process.env.BETTER_AUTH_SECRET || TEST_SECRET;
+      },
+      DISABLE_AUTH_RATE_LIMIT: process.env.DISABLE_AUTH_RATE_LIMIT || "true",
+    },
+  };
+});
 
 function makeFakeDb() {
   const query: Record<string, unknown> = {
