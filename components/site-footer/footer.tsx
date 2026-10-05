@@ -6,7 +6,7 @@ import { GitHub, Logo, X } from "../icons";
 import { Separator } from "../ui/separator";
 import { ThemeToggleGroup } from "./theme-toggle-group";
 
-const footerLinks = [
+export const footerLinks = [
   {
     title: "Product",
     links: [
@@ -23,17 +23,6 @@ const footerLinks = [
       {
         label: "Cookies",
         href: "/privacy#cookies-and-tracking-technologies",
-      },
-    ],
-  },
-  {
-    title: "Project",
-    links: [
-      { label: "GitHub", href: siteConfig.links.github, external: true },
-      {
-        label: "Report an issue",
-        href: `${siteConfig.links.github}/issues`,
-        external: true,
       },
     ],
   },
