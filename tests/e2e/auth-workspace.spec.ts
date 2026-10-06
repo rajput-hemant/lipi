@@ -12,8 +12,6 @@ test.describe("authentication and workspace", () => {
     await logIn(page, user);
 
     await createWorkspace(page, "E2E Notes");
-    await expect(
-      page.getByRole("paragraph").filter({ hasText: /^Pages$/ })
-    ).toBeVisible();
+    await expect(page.getByText("Pages", { exact: true })).toBeVisible();
   });
 });
