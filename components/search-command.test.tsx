@@ -57,6 +57,21 @@ describe("SearchCommand", () => {
     expect(trigger?.textContent).toContain("⌘K");
   });
 
+  it("keeps the shortcut hint readable instead of the low-contrast muted text", () => {
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(<SearchCommand />);
+    });
+
+    const hint = container.querySelector("kbd");
+    expect(hint?.className).toContain("text-foreground");
+    expect(hint?.className).not.toContain("text-muted-foreground");
+  });
+
   it("surfaces error state when search query throws an error", async () => {
     vi.useFakeTimers();
     mockSearchDocuments.mockRejectedValue(new Error("Database offline"));

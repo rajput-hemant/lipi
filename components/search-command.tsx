@@ -169,7 +169,7 @@ export function SearchCommand({
               />
               Search
             </span>
-            <Kbd className="text-[10px]">⌘K</Kbd>
+            <Kbd className="text-[10px] text-foreground">⌘K</Kbd>
           </Button>
 
       : <Button
@@ -192,7 +192,9 @@ export function SearchCommand({
             />
             <span className="hidden sm:inline">Search documents...</span>
           </span>
-          <Kbd className="hidden sm:inline-flex text-[10px]">⌘K</Kbd>
+          <Kbd className="hidden sm:inline-flex text-[10px] text-foreground">
+            ⌘K
+          </Kbd>
         </Button>
       }
 
