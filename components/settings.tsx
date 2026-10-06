@@ -78,6 +78,34 @@ type InviteForm = z.infer<typeof inviteSchema>;
 type MembersResult = Awaited<ReturnType<typeof listWorkspaceMembers>>;
 type MembersPayload = Extract<MembersResult, { ok: true }>["data"];
 
+function PersonRow({
+  person,
+  children,
+}: {
+  person?: { name: string | null; email: string; image: string | null } | null;
+  children: React.ReactNode;
+}) {
+  const label = person?.name ?? person?.email;
+
+  return (
+    <div className="flex items-center gap-3">
+      <Avatar>
+        <AvatarImage src={person?.image ?? undefined} />
+        <AvatarFallback>
+          {(label ?? "O").slice(0, 1).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium">{label}</p>
+        <p className="truncate text-xs text-muted-foreground">
+          {person?.email}
+        </p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export function Settings() {
   const pathname = usePathname();
   const router = useRouter();
@@ -444,42 +472,12 @@ export function Settings() {
         </div>
 
         <div className="space-y-3 rounded-lg border p-3">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src={data.owner?.image ?? undefined} />
-              <AvatarFallback>
-                {(data.owner?.name ?? data.owner?.email ?? "O")
-                  .slice(0, 1)
-                  .toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">
-                {data.owner?.name ?? data.owner?.email}
-              </p>
-              <p className="truncate text-xs text-muted-foreground">
-                {data.owner?.email}
-              </p>
-            </div>
+          <PersonRow person={data.owner}>
             <Badge>Owner</Badge>
-          </div>
+          </PersonRow>
 
           {data.members.map((member) => (
-            <div key={member.id} className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src={member.image ?? undefined} />
-                <AvatarFallback>
-                  {(member.name ?? member.email).slice(0, 1).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">
-                  {member.name ?? member.email}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  {member.email}
-                </p>
-              </div>
+            <PersonRow key={member.id} person={member}>
               {canManageMembers ?
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -517,7 +515,7 @@ export function Settings() {
                   {member.role}
                 </Badge>
               }
-            </div>
+            </PersonRow>
           ))}
 
           {data.pendingInvites.length > 0 && (

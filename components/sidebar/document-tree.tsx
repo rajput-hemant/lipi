@@ -46,11 +46,7 @@ import {
   resolveTreeKeyAction,
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
-import {
-  isMutationDenied,
-  mutationErrorMessage,
-  unwrapMutation,
-} from "@/lib/db/mutation-result";
+import { runMutationToast } from "@/lib/db/mutation-result";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
@@ -131,17 +127,15 @@ function DocumentTreeItem({
 
     setIsRenaming(false);
 
-    toast.promise(unwrapMutation(updateDocument({ id: node.id, title })), {
+    runMutationToast(updateDocument({ id: node.id, title }), {
       loading: "Renaming...",
       success: (updated) => {
         updateDocumentState(updated);
         notifyPageChanges();
         return "Page renamed.";
       },
-      error: (error) =>
-        isMutationDenied(error) ?
-          "You do not have permission to rename this page."
-        : mutationErrorMessage(error, "Could not rename page."),
+      failed: "Could not rename page.",
+      denied: "You do not have permission to rename this page.",
     });
   }
 
@@ -171,18 +165,15 @@ function DocumentTreeItem({
     setChildTitle("Untitled");
     setChildIcon("");
 
-    toast.promise(unwrapMutation(createDocument(newDocument)), {
+    runMutationToast(createDocument(newDocument), {
       loading: "Creating page...",
       success: () => {
         notifyPageChanges();
         return "Page created.";
       },
-      error: (error) => {
-        deleteDocument(newDocument.id);
-        return isMutationDenied(error) ?
-            "You do not have permission to create pages."
-          : "Could not create page.";
-      },
+      failed: "Could not create page.",
+      denied: "You do not have permission to create pages.",
+      onError: () => deleteDocument(newDocument.id),
     });
   }
 
@@ -202,24 +193,20 @@ function DocumentTreeItem({
       addDocument(copy);
     }
 
-    toast.promise(
-      unwrapMutation(duplicateDocument({ sourceId: node.id, newId })),
-      {
-        loading: "Duplicating...",
-        success: () => {
-          notifyPageChanges();
-          return "Page duplicated.";
-        },
-        error: (error) => {
-          for (const copy of copies) {
-            deleteDocument(copy.id);
-          }
-          return isMutationDenied(error) ?
-              "You do not have permission to duplicate this page."
-            : "Could not duplicate page.";
-        },
-      }
-    );
+    runMutationToast(duplicateDocument({ sourceId: node.id, newId }), {
+      loading: "Duplicating...",
+      success: () => {
+        notifyPageChanges();
+        return "Page duplicated.";
+      },
+      failed: "Could not duplicate page.",
+      denied: "You do not have permission to duplicate this page.",
+      onError: () => {
+        for (const copy of copies) {
+          deleteDocument(copy.id);
+        }
+      },
+    });
   }
 
   async function moveToTrash() {
@@ -239,7 +226,7 @@ function DocumentTreeItem({
       updateDocumentState({ ...document, inTrash: true });
     }
 
-    toast.promise(unwrapMutation(softDeleteDocumentTree(node.id)), {
+    runMutationToast(softDeleteDocumentTree(node.id), {
       loading: "Moving to trash...",
       success: () => {
         const openDocumentId = pathname.split("/")[3];
@@ -249,13 +236,12 @@ function DocumentTreeItem({
         notifyPageChanges();
         return "Moved to trash.";
       },
-      error: (error) => {
+      failed: "Could not move to trash.",
+      denied: "You do not have permission to move this page to trash.",
+      onError: () => {
         for (const document of previous) {
           updateDocumentState({ ...document });
         }
-        return isMutationDenied(error) ?
-            "You do not have permission to move this page to trash."
-          : "Could not move to trash.";
       },
     });
   }
@@ -592,18 +578,15 @@ export function DocumentTree() {
     setRootTitle("Untitled");
     setRootIcon("");
 
-    toast.promise(unwrapMutation(createDocument(newDocument)), {
+    runMutationToast(createDocument(newDocument), {
       loading: "Creating page...",
       success: () => {
         notifyPageChanges();
         return "Page created.";
       },
-      error: (error) => {
-        deleteDocument(newDocument.id);
-        return isMutationDenied(error) ?
-            "You do not have permission to create pages."
-          : "Could not create page.";
-      },
+      failed: "Could not create page.",
+      denied: "You do not have permission to create pages.",
+      onError: () => deleteDocument(newDocument.id),
     });
   }
 
