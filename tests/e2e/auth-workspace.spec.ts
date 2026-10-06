@@ -13,7 +13,7 @@ test.describe("authentication and workspace", () => {
 
     await createWorkspace(page, "E2E Notes");
     await expect(
-      page.getByRole("paragraph").filter({ hasText: /^Pages$/ })
+      page.getByRole("heading", { name: "Pages", exact: true })
     ).toBeVisible();
   });
 });
