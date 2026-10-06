@@ -1,5 +1,6 @@
 import type { DocumentRecord } from "./documents-tree";
 
+import { PlanQuotaError } from "@/lib/billing/errors";
 import { collectDescendantIds } from "./documents-tree";
 
 export class DocumentOperationError extends Error {
@@ -76,7 +77,10 @@ export function assertRootPageQuota(
     countActiveRootPages(documents, workspaceId) >=
     FREE_WORKSPACE_ROOT_PAGE_LIMIT
   ) {
-    throw new DocumentOperationError("Root page limit reached");
+    throw new PlanQuotaError(
+      "root-page",
+      `Free plan allows ${FREE_WORKSPACE_ROOT_PAGE_LIMIT} root pages. Upgrade to Pro for unlimited root pages.`
+    );
   }
 }
 

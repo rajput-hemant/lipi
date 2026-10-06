@@ -27,6 +27,16 @@ describe("stripe checkout route", () => {
     expect(mocks.createSession).not.toHaveBeenCalled();
   });
 
+  it("returns 401 when logged out", async () => {
+    mocks.getCurrentUser.mockResolvedValue(null);
+
+    const response = await POST();
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ error: "Unauthorized" });
+    expect(mocks.createSession).not.toHaveBeenCalled();
+  });
+
   it("returns the checkout url", async () => {
     mocks.getCurrentUser.mockResolvedValue({ id: "u1", email: "a@b.co" });
     mocks.createSession.mockResolvedValue("https://stripe.test/c");

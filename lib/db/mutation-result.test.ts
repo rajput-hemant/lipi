@@ -95,6 +95,9 @@ describe("runMutationToast", () => {
     );
     expect(message).toBe("Not allowed.");
     expect(onError).toHaveBeenCalledOnce();
+    expect(onError).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "FORBIDDEN" })
+    );
   });
 
   it("uses the server message for other failures, else the fallback", async () => {

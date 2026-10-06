@@ -2,6 +2,7 @@
 
 import { act } from "react";
 import { createRoot } from "react-dom/client";
+import { toast } from "sonner";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceRecord } from "@/hooks/use-app-state";
@@ -18,12 +19,18 @@ const {
   softDeleteDocumentTree,
   errorMessages,
   pendingPromises,
+  setModalOpen,
+  roots,
+  proEntitlement,
 } = vi.hoisted(() => ({
   createDocument: vi.fn(),
   duplicateDocument: vi.fn(),
   softDeleteDocumentTree: vi.fn(),
   errorMessages: [] as unknown[],
   pendingPromises: [] as Promise<unknown>[],
+  setModalOpen: vi.fn(),
+  roots: [] as { unmount: () => void }[],
+  proEntitlement: { value: true },
 }));
 
 vi.mock("next/navigation", () => ({
@@ -34,7 +41,10 @@ vi.mock("@/components/realtime/workspace-realtime-provider", () => ({
   useNotifyWorkspacePageChanges: () => vi.fn(),
 }));
 vi.mock("../subscription-modal-provider", () => ({
-  useSubscriptionModal: () => ({ setOpen: vi.fn(), hasProEntitlement: true }),
+  useSubscriptionModal: () => ({
+    setOpen: setModalOpen,
+    hasProEntitlement: proEntitlement.value,
+  }),
 }));
 vi.mock("@/lib/db/actions/document", () => ({
   createDocument,
@@ -46,6 +56,7 @@ vi.mock("sonner", () => ({
   toast: {
     warning: vi.fn(),
     error: vi.fn(),
+    info: vi.fn(),
     promise: (
       promise: Promise<unknown>,
       opts: { error: (e: unknown) => unknown }
@@ -73,16 +84,20 @@ function doc(id: string, parentId: string | null = null): DocumentSummary {
   };
 }
 
-function render(documents = [doc("a"), doc("b")]) {
+function render(
+  documents = [doc("a"), doc("b")],
+  role: "owner" | "editor" = "editor"
+) {
   const store = createAppStore({
     user: null,
     workspace: { id: "ws-1" } as WorkspaceRecord,
     documents,
-    role: "editor",
+    role,
   });
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
+  roots.push(root);
   act(() => {
     root.render(
       <AppStateContext.Provider value={store}>
@@ -144,7 +159,11 @@ beforeAll(() => {
 
 afterEach(() => {
   errorMessages.length = 0;
+  proEntitlement.value = true;
   pendingPromises.length = 0;
+  act(() => {
+    for (const root of roots.splice(0)) root.unmount();
+  });
   document.body.replaceChildren();
   vi.clearAllMocks();
 });
@@ -218,23 +237,28 @@ describe("trash and root quota toasts", () => {
       code: "INVALID",
       message: "Document not found",
     });
-    const store = render();
+    const trashedChild = { ...doc("a2", "a"), inTrash: true };
+    const store = render([doc("a"), doc("a1", "a"), trashedChild, doc("b")]);
+    const flags = () =>
+      Object.fromEntries(store.documents.map((d) => [d.id, d.inTrash]));
+    const original = flags();
 
     const item = openMenuItem("Move to trash");
     await act(async () => item.click());
     await flush();
 
-    expect(store.documents.every((d) => !d.inTrash)).toBe(true);
+    expect(flags()).toEqual({ a: false, a1: false, a2: true, b: false });
+    expect(flags()).toEqual(original);
     expect(errorMessages).toEqual(["Document not found"]);
   });
 
-  it("shows the server message and rolls back when the root page limit is reached", async () => {
+  it("shows the server message, rolls back and opens the upgrade modal for the owner when the root page limit is reached", async () => {
     createDocument.mockResolvedValue({
       ok: false,
-      code: "INVALID",
-      message: "Root page limit reached",
+      code: "QUOTA_EXCEEDED",
+      message: "Upgrade for root pages.",
     });
-    const store = render();
+    const store = render([doc("a"), doc("b")], "owner");
 
     act(() =>
       document
@@ -244,6 +268,77 @@ describe("trash and root quota toasts", () => {
     await submitForm();
 
     expect(ids(store)).toEqual(["a", "b"]);
-    expect(errorMessages).toEqual(["Root page limit reached"]);
+    expect(errorMessages).toEqual(["Upgrade for root pages."]);
+    expect(setModalOpen).toHaveBeenCalledExactlyOnceWith(true);
+  });
+
+  it("tells a non-owner to ask the owner and leaves the upgrade modal closed on a server quota failure", async () => {
+    createDocument.mockResolvedValue({
+      ok: false,
+      code: "QUOTA_EXCEEDED",
+      message: "Upgrade for root pages.",
+    });
+    const store = render([doc("a"), doc("b")], "editor");
+
+    act(() =>
+      document
+        .querySelector<HTMLButtonElement>('button[aria-label="New page"]')!
+        .click()
+    );
+    await submitForm();
+
+    expect(ids(store)).toEqual(["a", "b"]);
+    expect(toast.info).toHaveBeenCalledExactlyOnceWith(
+      "Ask the workspace owner to upgrade to Pro."
+    );
+    expect(setModalOpen).not.toHaveBeenCalled();
+  });
+
+  it("opens the upgrade modal for the owner at the client limit", () => {
+    proEntitlement.value = false;
+    render([doc("a"), doc("b"), doc("c")], "owner");
+
+    act(() =>
+      document
+        .querySelector<HTMLButtonElement>('button[aria-label="New page"]')!
+        .click()
+    );
+
+    expect(setModalOpen).toHaveBeenCalledExactlyOnceWith(true);
+    expect(toast.info).not.toHaveBeenCalled();
+  });
+
+  it("tells a non-owner to ask the owner and leaves the upgrade modal closed at the client limit", () => {
+    proEntitlement.value = false;
+    render([doc("a"), doc("b"), doc("c")], "editor");
+
+    act(() =>
+      document
+        .querySelector<HTMLButtonElement>('button[aria-label="New page"]')!
+        .click()
+    );
+
+    expect(toast.info).toHaveBeenCalledExactlyOnceWith(
+      "Ask the workspace owner to upgrade to Pro."
+    );
+    expect(setModalOpen).not.toHaveBeenCalled();
+  });
+
+  it("does not open the upgrade modal for other root page failures", async () => {
+    createDocument.mockResolvedValue({
+      ok: false,
+      code: "INVALID",
+      message: "Document not found",
+    });
+    render();
+
+    act(() =>
+      document
+        .querySelector<HTMLButtonElement>('button[aria-label="New page"]')!
+        .click()
+    );
+    await submitForm();
+
+    expect(setModalOpen).not.toHaveBeenCalled();
   });
 });

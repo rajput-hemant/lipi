@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import type { DocumentRecord } from "./documents-tree";
 
+import { PlanQuotaError } from "@/lib/billing/errors";
 import {
   assertPermanentDeleteAllowed,
   assertRootPageQuota,
   collectRestoreTargetIds,
+  FREE_WORKSPACE_ROOT_PAGE_LIMIT,
   planDeepDuplicate,
   validateParentAssignment,
 } from "./document-operations";
@@ -74,7 +76,18 @@ describe("assertRootPageQuota", () => {
     ];
 
     expect(() => assertRootPageQuota(documents, "ws-1", false, null)).toThrow(
-      /limit/
+      PlanQuotaError
+    );
+  });
+
+  it("names the configured limit in the message", () => {
+    const documents = Array.from(
+      { length: FREE_WORKSPACE_ROOT_PAGE_LIMIT },
+      (_, i) => doc({ id: String(i), title: String(i) })
+    );
+
+    expect(() => assertRootPageQuota(documents, "ws-1", false, null)).toThrow(
+      `Free plan allows ${FREE_WORKSPACE_ROOT_PAGE_LIMIT} root pages.`
     );
   });
 });
