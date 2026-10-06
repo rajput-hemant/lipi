@@ -27,6 +27,24 @@ const doneItems = [
   "Command+K workspace full-text document search",
 ];
 
+const windowDots = ["bg-[#ef4444]", "bg-[#f59e0b]", "bg-[#10b981]"];
+
+const collaborators = [
+  { initials: "HR", ring: "ring-emerald-500", bg: "bg-emerald-500" },
+  { initials: "AS", ring: "ring-violet-500", bg: "bg-violet-500" },
+];
+
+const insertBlocks = [
+  { lead: "H1", leadClassName: "font-bold", label: "Heading 1", active: true },
+  { lead: "\u2022", label: "Bulleted list", active: false },
+  {
+    lead: "</>",
+    leadClassName: "font-mono",
+    label: "Code block",
+    active: false,
+  },
+];
+
 export function Features() {
   return (
     <section id="features" className="space-y-8">
@@ -44,9 +62,9 @@ export function Features() {
       <div className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-2xl">
         <div className="flex h-11 items-center justify-between border-b border-border bg-muted/50 px-4">
           <div className="flex items-center gap-2">
-            <span className="size-3 rounded-full bg-[#ef4444]" />
-            <span className="size-3 rounded-full bg-[#f59e0b]" />
-            <span className="size-3 rounded-full bg-[#10b981]" />
+            {windowDots.map((dot) => (
+              <span key={dot} className={`size-3 rounded-full ${dot}`} />
+            ))}
             <span className="ml-2 text-xs font-semibold text-muted-foreground">
               🚀 Acme Workspace
             </span>
@@ -64,16 +82,16 @@ export function Features() {
 
           <div className="flex items-center gap-2">
             <div className="flex -space-x-1.5">
-              <Avatar className="size-6 border-2 border-background ring-1 ring-emerald-500">
-                <AvatarFallback className="bg-emerald-500 text-[10px] text-white">
-                  HR
-                </AvatarFallback>
-              </Avatar>
-              <Avatar className="size-6 border-2 border-background ring-1 ring-violet-500">
-                <AvatarFallback className="bg-violet-500 text-[10px] text-white">
-                  AS
-                </AvatarFallback>
-              </Avatar>
+              {collaborators.map(({ initials, ring, bg }) => (
+                <Avatar
+                  key={initials}
+                  className={`size-6 border-2 border-background ring-1 ${ring}`}
+                >
+                  <AvatarFallback className={`${bg} text-[10px] text-white`}>
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
             </div>
 
             <Badge
@@ -220,18 +238,21 @@ export function Features() {
                   <div className="px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
                     Insert Block
                   </div>
-                  <div className="flex items-center gap-2 rounded-md bg-accent px-2.5 py-1 font-medium text-accent-foreground">
-                    <span className="font-bold">H1</span>
-                    <span>Heading 1</span>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-md px-2.5 py-1 text-muted-foreground hover:bg-muted">
-                    <span>•</span>
-                    <span>Bulleted list</span>
-                  </div>
-                  <div className="flex items-center gap-2 rounded-md px-2.5 py-1 text-muted-foreground hover:bg-muted">
-                    <span className="font-mono">{"</>"}</span>
-                    <span>Code block</span>
-                  </div>
+                  {insertBlocks.map(
+                    ({ lead, leadClassName, label, active }) => (
+                      <div
+                        key={label}
+                        className={
+                          active ?
+                            "flex items-center gap-2 rounded-md bg-accent px-2.5 py-1 font-medium text-accent-foreground"
+                          : "flex items-center gap-2 rounded-md px-2.5 py-1 text-muted-foreground hover:bg-muted"
+                        }
+                      >
+                        <span className={leadClassName}>{lead}</span>
+                        <span>{label}</span>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
             </div>
