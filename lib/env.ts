@@ -19,7 +19,10 @@ export const env = createEnv({
 
     BETTER_AUTH_SECRET:
       isProduction ?
-        z.string().min(1, { message: "Auth secret is invalid or missing" })
+        z.string().min(1, {
+          message:
+            "BETTER_AUTH_SECRET is invalid or missing (renamed from AUTH_SECRET: rename the variable and keep the same value)",
+        })
       : z.string().optional(),
 
     BETTER_AUTH_URL: z.string().url().optional(),
