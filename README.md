@@ -30,7 +30,7 @@ bun run dev
 
 ### Deploy Your Own
 
-The button below clones the repository into Vercel and prompts for the core variables (auth, database, Redis). It deploys the Next.js app only, so the result is not complete on its own:
+The button below clones the repository into Vercel and prompts for the production-required variables (auth, OAuth providers, and database). It deploys the Next.js app only, so the result is not complete on its own:
 
 - Real-time collaboration needs the standalone Hocuspocus process (`bun run realtime:start`) on an always-on Node.js host. It is not a Vercel function. Set `NEXT_PUBLIC_LIPI_REALTIME_URL` and `LIPI_REALTIME_ALLOWED_ORIGINS` as described in [docs/guides/realtime.md](docs/guides/realtime.md). Without them the editor has no realtime endpoint in production.
 - Password recovery email needs `RESEND_API_KEY` and `EMAIL_FROM` in production; locally the reset link is logged to the terminal instead.
@@ -45,4 +45,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 [ci]: https://github.com/rajput-hemant/lipi/actions/workflows/ci.yml/badge.svg
 [site]: https://lipi.rajputhemant.me
-[deploy]: https://vercel.com/new/clone?repository-url=https://github.com/rajput-hemant/lipi&project-name=lipi&repo-name=lipi&env=BETTER_AUTH_SECRET,BETTER_AUTH_URL,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,DATABASE_URL,UPSTASH_REDIS_REST_URL,UPSTASH_REDIS_REST_TOKEN,ENABLE_RATE_LIMITING,RATE_LIMITING_REQUESTS_PER_SECOND
+[deploy]: https://vercel.com/new/clone?repository-url=https://github.com/rajput-hemant/lipi&project-name=lipi&repo-name=lipi&env=BETTER_AUTH_SECRET,GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET,GITHUB_CLIENT_ID,GITHUB_CLIENT_SECRET,DATABASE_URL
