@@ -37,6 +37,18 @@ export async function getWorkspaceOrThrow(workspaceId: string) {
   return workspace;
 }
 
+async function getDocumentOrThrow(documentId: string) {
+  const document = await db.query.documents.findFirst({
+    where: eq(documents.id, documentId),
+  });
+
+  if (!document) {
+    throw new MutationAuthError("Document not found");
+  }
+
+  return document;
+}
+
 export const getWorkspaceMembershipRole = cache(
   async (
     userId: string,
@@ -113,13 +125,7 @@ export async function assertWorkspaceAccess(
 }
 
 export async function assertDocumentAccess(userId: string, documentId: string) {
-  const document = await db.query.documents.findFirst({
-    where: eq(documents.id, documentId),
-  });
-
-  if (!document) {
-    throw new MutationAuthError("Document not found");
-  }
+  const document = await getDocumentOrThrow(documentId);
 
   await assertWorkspaceAccess(userId, document.workspaceId);
   return document;
@@ -127,13 +133,7 @@ export async function assertDocumentAccess(userId: string, documentId: string) {
 
 export async function authorizeDocumentMutation(documentId: string) {
   const user = await requireAuthenticatedUser();
-  const document = await db.query.documents.findFirst({
-    where: eq(documents.id, documentId),
-  });
-
-  if (!document) {
-    throw new MutationAuthError("Document not found");
-  }
+  const document = await getDocumentOrThrow(documentId);
 
   await requireWorkspacePermission(
     user.id,
