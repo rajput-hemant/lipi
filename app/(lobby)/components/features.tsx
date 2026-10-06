@@ -65,12 +65,12 @@ export function Features() {
           <div className="flex items-center gap-2">
             <div className="flex -space-x-1.5">
               <Avatar className="size-6 border-2 border-background ring-1 ring-emerald-500">
-                <AvatarFallback className="bg-emerald-500 text-[10px] text-white">
+                <AvatarFallback className="bg-emerald-700 text-[10px] text-white">
                   HR
                 </AvatarFallback>
               </Avatar>
               <Avatar className="size-6 border-2 border-background ring-1 ring-violet-500">
-                <AvatarFallback className="bg-violet-500 text-[10px] text-white">
+                <AvatarFallback className="bg-violet-700 text-[10px] text-white">
                   AS
                 </AvatarFallback>
               </Avatar>
@@ -78,7 +78,7 @@ export function Features() {
 
             <Badge
               variant="outline"
-              className="hidden gap-1 text-[11px] font-normal text-emerald-600 dark:text-emerald-400 sm:inline-flex"
+              className="hidden gap-1 text-[11px] font-normal text-emerald-700 dark:text-emerald-400 sm:inline-flex"
             >
               <HugeiconsIcon
                 icon={Tick02Icon}
@@ -194,6 +194,7 @@ export function Features() {
                         type="checkbox"
                         defaultChecked
                         readOnly
+                        aria-label={item}
                         className="size-4 rounded border-input accent-primary"
                       />
                       <span className="text-muted-foreground line-through">
@@ -205,6 +206,7 @@ export function Features() {
                     <input
                       type="checkbox"
                       readOnly
+                      aria-label="Finalize production launch polish and SEO metadata"
                       className="size-4 rounded border-input accent-primary"
                     />
                     <span className="text-foreground">

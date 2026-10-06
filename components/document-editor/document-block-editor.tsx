@@ -211,6 +211,7 @@ function DocumentBlockEditorConnected({
     withCollaboration({
       schema: blockEditorSchema,
       uploadFile,
+      domAttributes: { editor: { "aria-label": "Page content" } },
       collaboration: {
         provider: { awareness: provider.awareness ?? undefined },
         fragment: provider.document.getXmlFragment(BLOCKNOTE_FRAGMENT),
