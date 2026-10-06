@@ -1,12 +1,12 @@
 # UI quality pass (cross-cutting)
 
-Status: PARTIAL live proof (dark theme, 390 px layout, console cleanliness on exercised pages). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/ui-quality/` (private task data dir, not in the repo).
+Status: PARTIAL live proof (dark theme, 390 px layout, console cleanliness on exercised pages). Last live proof: 2026-10-06, base `278bb27` (axe-core 4.10.2 on lobby, auth, dashboard, editor and dialogs; see `docs/TODO.md` F-UI-1), earlier 2026-10-02 commit `815ceda`. Evidence is in private task data dirs, not in the repo.
 
 Checklist applied per feature screen once drivable; not a separate route.
 
 ## Sub-features
 
-- [x] Light and dark themes: contrast, borders, editor and dialogs. - live: editor page in light and dark (`Toggle theme` > `Dark`); contrast spot-checked by screenshot only.
+- [x] Light and dark themes: contrast, borders, editor and dialogs. - live: editor page in light and dark (`Toggle theme` > `Dark`); contrast now also axe-checked (2026-10-06): zero violations in dark on lobby, pricing, editor and Settings; light still flags the stock `muted-foreground` on `muted` pair (4.39:1).
 - [x] 390 px and 1280 px (and a tablet width): no horizontal overflow, collapsible sidebar and mobile sheet usable. - live: no horizontal overflow at 390 px on the editor page; collaborator avatar overlaps the search button there (LIP-V021). Tablet width NOT exercised.
 - [ ] Empty, loading (`app/loading.tsx`, `app/dashboard/loading.tsx`), error (`app/error.tsx`, `app/global-error.tsx`) and long-content states (long page titles, many pages, many collaborators).
 - [ ] Keyboard: tab order through auth forms, sidebar tree, dialogs, ⌘K; visible focus; Escape closes dialogs.

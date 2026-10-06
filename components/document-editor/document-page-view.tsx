@@ -29,9 +29,9 @@ type DocumentPageViewProps = {
 
 export function DocumentPageView({ document }: DocumentPageViewProps) {
   return (
-    <div className="min-h-full">
-      <DocumentHeader key={document.id} document={document} />
-      <DocumentBlockEditor key={document.id} document={document} />
+    <div key={document.id} className="min-h-full">
+      <DocumentHeader document={document} />
+      <DocumentBlockEditor document={document} />
     </div>
   );
 }

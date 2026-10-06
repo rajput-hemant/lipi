@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
           />
         </div>
 
-        <div className="z-10 ml-auto text-muted-foreground">
+        <div className="z-10 ml-auto text-zinc-400">
           <p className="text-sm">
             Illustrations by{" "}
             <a

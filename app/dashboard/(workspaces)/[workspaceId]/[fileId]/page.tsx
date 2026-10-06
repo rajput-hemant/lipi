@@ -21,7 +21,9 @@ export async function generateMetadata({
 
   try {
     const document = await assertDocumentAccess(user.id, fileId);
-    if (document.workspaceId !== workspaceId) return { title: "Document" };
+    if (document.workspaceId !== workspaceId || document.inTrash) {
+      return { title: "Document" };
+    }
     return {
       title: document.title || "Untitled Document",
     };
@@ -45,7 +47,7 @@ export default async function FilePage({ params }: FilePageProps) {
     notFound();
   }
 
-  if (document.workspaceId !== workspaceId) {
+  if (document.workspaceId !== workspaceId || document.inTrash) {
     notFound();
   }
 

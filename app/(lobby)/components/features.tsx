@@ -30,8 +30,8 @@ const doneItems = [
 const windowDots = ["bg-[#ef4444]", "bg-[#f59e0b]", "bg-[#10b981]"];
 
 const collaborators = [
-  { initials: "HR", ring: "ring-emerald-500", bg: "bg-emerald-500" },
-  { initials: "AS", ring: "ring-violet-500", bg: "bg-violet-500" },
+  { initials: "HR", ring: "ring-emerald-500", bg: "bg-emerald-700" },
+  { initials: "AS", ring: "ring-violet-500", bg: "bg-violet-700" },
 ];
 
 const insertBlocks = [
@@ -96,7 +96,7 @@ export function Features() {
 
             <Badge
               variant="outline"
-              className="hidden gap-1 text-[11px] font-normal text-emerald-600 dark:text-emerald-400 sm:inline-flex"
+              className="hidden gap-1 text-[11px] font-normal text-emerald-700 dark:text-emerald-400 sm:inline-flex"
             >
               <HugeiconsIcon
                 icon={Tick02Icon}
@@ -212,6 +212,7 @@ export function Features() {
                         type="checkbox"
                         defaultChecked
                         readOnly
+                        aria-label={item}
                         className="size-4 rounded border-input accent-primary"
                       />
                       <span className="text-muted-foreground line-through">
@@ -223,6 +224,7 @@ export function Features() {
                     <input
                       type="checkbox"
                       readOnly
+                      aria-label="Finalize production launch polish and SEO metadata"
                       className="size-4 rounded border-input accent-primary"
                     />
                     <span className="text-foreground">
