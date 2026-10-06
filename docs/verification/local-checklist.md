@@ -4,7 +4,7 @@ Runnable steps for the items in [TODO](../TODO.md) section "Needs local environm
 
 ## 0. Setup
 
-1. `cp .env.example .env.local`, then set `AUTH_SECRET` and `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), `DATABASE_URL` for your test database, and optionally `RESEND_API_KEY` and `EMAIL_FROM`.
+1. `cp .env.example .env.local`, then set `BETTER_AUTH_SECRET` (`openssl rand -base64 32`), `DATABASE_URL` for your test database, and optionally `RESEND_API_KEY` and `EMAIL_FROM`.
 2. `bun i`, then `bun run db:setup` (auth tables, `lipi_*` migrations, seed). `db:auth` and `db:seed` refuse a non-loopback `DATABASE_URL`, so use a local or tunnelled database for them. Check that `db:migrate` ends with no error: this proves LIP-V001 on an empty database.
 3. Terminal 1: `bun run dev`. Terminal 2 (Node 22): `bun run realtime:dev`. Sign in as the seeded user (`fixtures/local-dev-credentials.json`, also logged at dev startup).
 4. Create two more users (sign-up) for owner, editor and viewer roles; use separate browser profiles per user.
