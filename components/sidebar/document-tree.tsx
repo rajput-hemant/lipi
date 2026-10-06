@@ -46,7 +46,10 @@ import {
   resolveTreeKeyAction,
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
-import { runMutationToast } from "@/lib/db/mutation-result";
+import {
+  isMutationQuotaExceeded,
+  runMutationToast,
+} from "@/lib/db/mutation-result";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
 import { useSubscriptionModal } from "../subscription-modal-provider";
@@ -586,7 +589,10 @@ export function DocumentTree() {
       },
       failed: "Could not create page.",
       denied: "You do not have permission to create pages.",
-      onError: () => deleteDocument(newDocument.id),
+      onError: (error) => {
+        deleteDocument(newDocument.id);
+        if (isMutationQuotaExceeded(error)) setOpen(true);
+      },
     });
   }
 

@@ -7,6 +7,7 @@ import { v4 as uuid, validate as validateUuid } from "uuid";
 
 import type { MutationFailure } from "@/lib/db/mutation-result";
 
+import { PlanQuotaError } from "@/lib/billing/errors";
 import { workspaceOwnerHasProPlanEntitlement } from "@/lib/billing/quota-entitlement";
 import {
   assertPermanentDeleteAllowed,
@@ -72,8 +73,8 @@ async function runDocumentMutation<T>(
     return { ok: true, data: await action((...args) => (pending = args)) };
   } catch (e) {
     if (throwKnownErrors) {
-      const denied = forbiddenResult(e);
-      if (denied) return denied;
+      const known = quotaOrForbiddenResult(e);
+      if (known) return known;
       rethrowKnownErrors(e);
     } else {
       const failure = mutationFailure(e);
@@ -86,8 +87,11 @@ async function runDocumentMutation<T>(
   }
 }
 
-function forbiddenResult(error: unknown) {
-  if (error instanceof MutationAuthError && error.code === "FORBIDDEN") {
+function quotaOrForbiddenResult(error: unknown) {
+  if (
+    error instanceof PlanQuotaError ||
+    (error instanceof MutationAuthError && error.code === "FORBIDDEN")
+  ) {
     return mutationFailure(error);
   }
 }

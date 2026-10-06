@@ -15,13 +15,23 @@ describe("mutationFailure", () => {
     ).toEqual({ ok: false, code: "QUOTA_EXCEEDED", message: "Upgrade." });
   });
 
+  it("maps a root page quota error to QUOTA_EXCEEDED", () => {
+    expect(
+      mutationFailure(new PlanQuotaError("root-page", "Upgrade for pages."))
+    ).toEqual({
+      ok: false,
+      code: "QUOTA_EXCEEDED",
+      message: "Upgrade for pages.",
+    });
+  });
+
   it("maps document operation errors to INVALID", () => {
     expect(
-      mutationFailure(new DocumentOperationError("Root page limit reached"))
+      mutationFailure(new DocumentOperationError("Document not found"))
     ).toEqual({
       ok: false,
       code: "INVALID",
-      message: "Root page limit reached",
+      message: "Document not found",
     });
   });
 

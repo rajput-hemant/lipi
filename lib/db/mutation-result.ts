@@ -40,6 +40,12 @@ export function isMutationDenied(error: unknown) {
   return error instanceof MutationFailureError && error.code === "FORBIDDEN";
 }
 
+export function isMutationQuotaExceeded(error: unknown) {
+  return (
+    error instanceof MutationFailureError && error.code === "QUOTA_EXCEEDED"
+  );
+}
+
 /** The server's user-facing message for a failed result, else `fallback`. */
 export function mutationErrorMessage(error: unknown, fallback: string) {
   return error instanceof MutationFailureError ? error.message : fallback;
@@ -47,8 +53,8 @@ export function mutationErrorMessage(error: unknown, fallback: string) {
 
 /**
  * Shows a loading/success/error toast for a server action result. `denied`
- * replaces the message of a permission failure; `onError` runs first so
- * callers can roll back optimistic state.
+ * replaces the message of a permission failure; `onError` runs first with
+ * the error so callers can roll back optimistic state.
  */
 export function runMutationToast<T>(
   pending: Promise<MutationResult<T>>,
@@ -57,14 +63,14 @@ export function runMutationToast<T>(
     success: string | ((data: T) => string);
     failed: string;
     denied?: string;
-    onError?: () => void;
+    onError?: (error: unknown) => void;
   }
 ) {
   return toast.promise(unwrapMutation(pending), {
     loading: options.loading,
     success: options.success,
     error: (error) => {
-      options.onError?.();
+      options.onError?.(error);
       return options.denied && isMutationDenied(error) ?
           options.denied
         : mutationErrorMessage(error, options.failed);

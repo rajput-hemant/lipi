@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { DocumentRecord } from "./documents-tree";
 
+import { PlanQuotaError } from "@/lib/billing/errors";
 import {
   assertPermanentDeleteAllowed,
   assertRootPageQuota,
@@ -74,7 +75,7 @@ describe("assertRootPageQuota", () => {
     ];
 
     expect(() => assertRootPageQuota(documents, "ws-1", false, null)).toThrow(
-      /limit/
+      PlanQuotaError
     );
   });
 });

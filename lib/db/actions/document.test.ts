@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MutationAuthError } from "../data/mutation-auth";
 import {
+  createDocument,
   deleteDocumentPermanently,
   duplicateDocument,
   getDocuments,
@@ -16,6 +17,7 @@ const DOCUMENT_ID = "22222222-2222-4222-8222-222222222222";
 const mocks = vi.hoisted(() => ({
   assertWorkspaceAccess: vi.fn(),
   authorizeDocumentMutation: vi.fn(),
+  authorizeWorkspaceMutation: vi.fn(),
   requireAuthenticatedUser: vi.fn(),
   workspaceOwnerHasProPlanEntitlement: vi.fn(),
   loadAuthoritativeContent: vi.fn(),
@@ -46,6 +48,7 @@ vi.mock("../data/mutation-auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../data/mutation-auth")>()),
   assertWorkspaceAccess: mocks.assertWorkspaceAccess,
   authorizeDocumentMutation: mocks.authorizeDocumentMutation,
+  authorizeWorkspaceMutation: mocks.authorizeWorkspaceMutation,
   requireAuthenticatedUser: mocks.requireAuthenticatedUser,
 }));
 
@@ -165,6 +168,33 @@ describe("duplicateDocument", () => {
   });
 });
 
+describe("createDocument root page quota", () => {
+  it("returns QUOTA_EXCEEDED instead of throwing past the free limit", async () => {
+    mocks.authorizeWorkspaceMutation.mockResolvedValue({
+      user: { id: "user-1" },
+    });
+    mocks.selectRows.mockResolvedValue([
+      row("a", null),
+      row("b", null),
+      row("c", null),
+    ]);
+
+    await expect(
+      createDocument({
+        id: DOCUMENT_ID,
+        workspaceId: WORKSPACE_ID,
+        parentId: null,
+        title: "Fourth",
+      })
+    ).resolves.toMatchObject({
+      ok: false,
+      code: "QUOTA_EXCEEDED",
+      message: expect.stringContaining("root pages"),
+    });
+    expect(mocks.insert).not.toHaveBeenCalled();
+  });
+});
+
 describe("updateDocument root page quota", () => {
   beforeEach(() => {
     mocks.authorizeDocumentMutation.mockResolvedValue({
@@ -184,8 +214,8 @@ describe("updateDocument root page quota", () => {
       updateDocument({ id: DOCUMENT_ID, parentId: null })
     ).resolves.toMatchObject({
       ok: false,
-      code: "INVALID",
-      message: expect.stringContaining("Root page limit reached"),
+      code: "QUOTA_EXCEEDED",
+      message: expect.stringContaining("root pages"),
     });
     expect(mocks.update).not.toHaveBeenCalled();
     expect(mocks.workspaceOwnerHasProPlanEntitlement).toHaveBeenCalledWith(
@@ -231,8 +261,8 @@ describe("restoreDocument root page quota", () => {
   it("rejects restoring a root page past the owner's free limit", async () => {
     await expect(restoreDocument("t")).resolves.toMatchObject({
       ok: false,
-      code: "INVALID",
-      message: expect.stringContaining("Root page limit reached"),
+      code: "QUOTA_EXCEEDED",
+      message: expect.stringContaining("root pages"),
     });
     expect(mocks.update).not.toHaveBeenCalled();
   });

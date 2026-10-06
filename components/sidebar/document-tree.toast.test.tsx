@@ -18,12 +18,16 @@ const {
   softDeleteDocumentTree,
   errorMessages,
   pendingPromises,
+  setModalOpen,
+  roots,
 } = vi.hoisted(() => ({
   createDocument: vi.fn(),
   duplicateDocument: vi.fn(),
   softDeleteDocumentTree: vi.fn(),
   errorMessages: [] as unknown[],
   pendingPromises: [] as Promise<unknown>[],
+  setModalOpen: vi.fn(),
+  roots: [] as { unmount: () => void }[],
 }));
 
 vi.mock("next/navigation", () => ({
@@ -34,7 +38,10 @@ vi.mock("@/components/realtime/workspace-realtime-provider", () => ({
   useNotifyWorkspacePageChanges: () => vi.fn(),
 }));
 vi.mock("../subscription-modal-provider", () => ({
-  useSubscriptionModal: () => ({ setOpen: vi.fn(), hasProEntitlement: true }),
+  useSubscriptionModal: () => ({
+    setOpen: setModalOpen,
+    hasProEntitlement: true,
+  }),
 }));
 vi.mock("@/lib/db/actions/document", () => ({
   createDocument,
@@ -83,6 +90,7 @@ function render(documents = [doc("a"), doc("b")]) {
   const container = document.createElement("div");
   document.body.append(container);
   const root = createRoot(container);
+  roots.push(root);
   act(() => {
     root.render(
       <AppStateContext.Provider value={store}>
@@ -145,6 +153,9 @@ beforeAll(() => {
 afterEach(() => {
   errorMessages.length = 0;
   pendingPromises.length = 0;
+  act(() => {
+    for (const root of roots.splice(0)) root.unmount();
+  });
   document.body.replaceChildren();
   vi.clearAllMocks();
 });
@@ -218,21 +229,26 @@ describe("trash and root quota toasts", () => {
       code: "INVALID",
       message: "Document not found",
     });
-    const store = render();
+    const trashedChild = { ...doc("a2", "a"), inTrash: true };
+    const store = render([doc("a"), doc("a1", "a"), trashedChild, doc("b")]);
+    const flags = () =>
+      Object.fromEntries(store.documents.map((d) => [d.id, d.inTrash]));
+    const original = flags();
 
     const item = openMenuItem("Move to trash");
     await act(async () => item.click());
     await flush();
 
-    expect(store.documents.every((d) => !d.inTrash)).toBe(true);
+    expect(flags()).toEqual({ a: false, a1: false, a2: true, b: false });
+    expect(flags()).toEqual(original);
     expect(errorMessages).toEqual(["Document not found"]);
   });
 
-  it("shows the server message and rolls back when the root page limit is reached", async () => {
+  it("shows the server message, rolls back and opens the upgrade modal when the root page limit is reached", async () => {
     createDocument.mockResolvedValue({
       ok: false,
-      code: "INVALID",
-      message: "Root page limit reached",
+      code: "QUOTA_EXCEEDED",
+      message: "Upgrade for root pages.",
     });
     const store = render();
 
@@ -244,6 +260,25 @@ describe("trash and root quota toasts", () => {
     await submitForm();
 
     expect(ids(store)).toEqual(["a", "b"]);
-    expect(errorMessages).toEqual(["Root page limit reached"]);
+    expect(errorMessages).toEqual(["Upgrade for root pages."]);
+    expect(setModalOpen).toHaveBeenCalledExactlyOnceWith(true);
+  });
+
+  it("does not open the upgrade modal for other root page failures", async () => {
+    createDocument.mockResolvedValue({
+      ok: false,
+      code: "INVALID",
+      message: "Document not found",
+    });
+    render();
+
+    act(() =>
+      document
+        .querySelector<HTMLButtonElement>('button[aria-label="New page"]')!
+        .click()
+    );
+    await submitForm();
+
+    expect(setModalOpen).not.toHaveBeenCalled();
   });
 });
