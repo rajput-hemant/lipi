@@ -1,10 +1,13 @@
 import { Database } from "@hocuspocus/extension-database";
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { describe, expect, it } from "vitest";
+import { messageYjsUpdate } from "y-protocols/sync";
 import * as Y from "yjs";
 
 import type { RealtimeRoomAccess } from "./context";
+import type { onCloseParameters } from "@hocuspocus/provider";
 
+import { PlanQuotaError } from "@/lib/billing/errors";
 import { RealtimeAuthorizationError } from "./context";
 import { parseRealtimeRoomName } from "./rooms";
 import { createRealtimeServer } from "./server-factory";
@@ -78,7 +81,10 @@ function createPeer(
   return { document, provider, synced };
 }
 
-function createTestServer(states: Map<string, Uint8Array>) {
+function createTestServer(
+  states: Map<string, Uint8Array>,
+  quotaGuard?: Parameters<typeof createRealtimeServer>[0]["quotaGuard"]
+) {
   const roles = new Map<string, RealtimeRoomAccess["role"]>([
     [ownerId, "owner"],
     [editorId, "editor"],
@@ -130,10 +136,40 @@ function createTestServer(states: Map<string, Uint8Array>) {
     debounce: 10,
     maxDebounce: 25,
     secret,
+    quotaGuard,
   });
 }
 
 describe("Hocuspocus realtime server", () => {
+  it("delivers a block quota rejection reason to the editing client", async () => {
+    const server = createTestServer(new Map(), {
+      beforeSync: async ({ type }) => {
+        if (type === messageYjsUpdate) throw new PlanQuotaError("block");
+      },
+      release: () => {},
+    });
+    let peer: Peer | undefined;
+    try {
+      await server.listen();
+      peer = createPeer(
+        `ws://127.0.0.1:${server.address.port}`,
+        editorId,
+        "Editor"
+      );
+      await peer.synced;
+      let reason = "";
+      peer.provider.on("close", ({ event }: onCloseParameters) => {
+        reason = event.reason;
+      });
+      peer.document.getText("content").insert(0, "rejected edit");
+      await waitUntil(() => Boolean(reason), "quota close notification");
+      expect(reason).toBe("plan-quota-exceeded:block");
+    } finally {
+      peer?.provider.destroy();
+      await server.destroy();
+    }
+  });
+
   it("syncs concurrent edits, enforces roles and forged ids, and restores after reconnect", async () => {
     const states = new Map<string, Uint8Array>();
     const servers: ReturnType<typeof createTestServer>[] = [];

@@ -1,6 +1,10 @@
 export class PlanQuotaError extends Error {
   readonly code: "workspace" | "collaborator" | "block" | "root-page";
 
+  get reason() {
+    return `plan-quota-exceeded:${this.code}`;
+  }
+
   constructor(code: PlanQuotaError["code"], message?: string) {
     super(message ?? `Plan quota exceeded: ${code}`);
     this.name = "PlanQuotaError";

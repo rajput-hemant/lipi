@@ -21,6 +21,7 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
+import type { onCloseParameters } from "@hocuspocus/provider";
 import type { Document } from "@/types/db";
 
 import { useAppActions, useAppState } from "@/hooks/use-app-state";
@@ -155,6 +156,7 @@ function DocumentBlockEditorConnected({
     : "connecting"
   );
   const [isSynced, setIsSynced] = React.useState(() => provider.synced);
+  const [blockQuotaExceeded, setBlockQuotaExceeded] = React.useState(false);
 
   React.useEffect(() => {
     const onStatus = ({ status }: { status: string }) => {
@@ -162,6 +164,11 @@ function DocumentBlockEditorConnected({
       if (status !== "connected") setIsSynced(false);
     };
     const onSynced = ({ state }: { state: boolean }) => setIsSynced(state);
+    const onClose = ({ event }: onCloseParameters) => {
+      if (event.reason === "plan-quota-exceeded:block") {
+        setBlockQuotaExceeded(true);
+      }
+    };
     const refreshToken = () => void provider.sendToken();
     const awareness = provider.awareness;
     const updateCollaborators = () => {
@@ -174,6 +181,7 @@ function DocumentBlockEditorConnected({
 
     provider.on("status", onStatus);
     provider.on("synced", onSynced);
+    provider.on("close", onClose);
     awareness?.on("change", updateCollaborators);
     updateCollaborators();
 
@@ -183,6 +191,7 @@ function DocumentBlockEditorConnected({
       window.clearInterval(refreshInterval);
       provider.off("status", onStatus);
       provider.off("synced", onSynced);
+      provider.off("close", onClose);
       awareness?.off("change", updateCollaborators);
       setCollaborators([]);
     };
@@ -225,10 +234,21 @@ function DocumentBlockEditorConnected({
   );
 
   const editorTheme = resolvedTheme === "dark" ? "dark" : "light";
-  const editable = connectionStatus === "connected" && isSynced && !isReadOnly;
+  const editable =
+    connectionStatus === "connected" &&
+    isSynced &&
+    !isReadOnly &&
+    !blockQuotaExceeded;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-6 pb-24">
+      {blockQuotaExceeded ?
+        <p className="py-2 text-sm text-destructive" role="alert">
+          Free plan allows up to 500 blocks. Your latest changes were not saved.
+          Reload to restore the saved page, or upgrade to Pro for unlimited
+          blocks.
+        </p>
+      : null}
       {connectionStatus !== "connected" || !isSynced || isReadOnly ?
         <p className="py-2 text-sm text-muted-foreground" role="status">
           {connectionStatus !== "connected" ?
