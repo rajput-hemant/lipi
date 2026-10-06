@@ -21,7 +21,9 @@ export function WorkspaceAccessRevoked() {
           you again to regain access.
         </p>
 
-        <Button render={<Link href="/dashboard" />}>Back to workspaces</Button>
+        <Button nativeButton={false} render={<Link href="/dashboard" />}>
+          Back to workspaces
+        </Button>
       </div>
     </div>
   );
