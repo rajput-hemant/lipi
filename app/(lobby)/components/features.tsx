@@ -132,7 +132,7 @@ export function Features() {
                 />
                 Search...
               </span>
-              <Kbd className="text-[10px]">⌘K</Kbd>
+              <Kbd className="text-[10px] text-foreground">⌘K</Kbd>
             </div>
 
             <div className="space-y-1 text-xs">

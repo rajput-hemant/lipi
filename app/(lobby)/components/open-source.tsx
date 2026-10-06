@@ -14,7 +14,7 @@ export async function OpenSource() {
           Proudly Open Source
         </h2>
 
-        <p className="max-w-[85%] text-muted-foreground sm:text-lg">
+        <p className="max-w-[85%] text-foreground sm:text-lg">
           {siteConfig.name} is open source and powered by open source software.{" "}
           <br /> The code is available on{" "}
           <a
