@@ -12,16 +12,29 @@ import {
   vi,
 } from "vitest";
 
+import type { DocumentSummary } from "@/types/db";
+
 import { DocumentBreadcrumbs } from "./document-breadcrumbs";
 
+type MockWorkspace = {
+  id: string;
+  title: string;
+  iconId: string | null;
+};
+
+type MockAppState = {
+  documents: DocumentSummary[];
+  workspace: MockWorkspace | null;
+};
+
 let mockPathname = "/dashboard/ws-1";
-let mockAppState = {
-  documents: [] as any[],
+let mockAppState: MockAppState = {
+  documents: [],
   workspace: {
     id: "ws-1",
     title: "Acme Corp",
     iconId: "💼",
-  } as any,
+  },
 };
 
 vi.mock("next/navigation", () => ({
@@ -75,7 +88,7 @@ describe("DocumentBreadcrumbs", () => {
           workspaceId: "ws-1",
           parentId: null,
           title: "Architecture Doc",
-          icon: null,
+          icon: "",
           bannerUrl: null,
           inTrash: false,
           createdAt: new Date().toISOString(),
