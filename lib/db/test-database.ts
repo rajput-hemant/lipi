@@ -1,23 +1,51 @@
 import postgres from "postgres";
 
-import { isLoopbackDatabaseUrl } from "./database-url";
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+const URL_PATTERN =
+  /^postgres(?:ql)?:\/\/(?:([^@/?#,]*)@)?(localhost|127\.0\.0\.1|\[::1\])(?::(\d+))?(\/[^/?#]*)?(?:\?([^#]*))?$/i;
+const HOST_OVERRIDE_PARAMS = new Set(["host", "hostaddr", "port", "path"]);
+
+/**
+ * Postgres.js and WHATWG URL disagree on exotic authorities, so the guard
+ * re-parses the raw string strictly and returns a URL rebuilt from the
+ * validated parts. That string is the only one tests may connect with.
+ */
+export function canonicalTestDatabaseUrl(url: string | undefined) {
+  const match = url ? URL_PATTERN.exec(url) : null;
+  if (!match) return null;
+  const [, userinfo, host, port, path = "", query = ""] = match;
+  if (!LOOPBACK_HOSTS.has(host.toLowerCase())) return null;
+  for (const pair of query.split("&")) {
+    const rawKey = pair.split("=")[0] ?? "";
+    let key: string;
+    try {
+      key = decodeURIComponent(rawKey).toLowerCase();
+    } catch {
+      return null;
+    }
+    if (HOST_OVERRIDE_PARAMS.has(key)) return null;
+  }
+  const auth = userinfo === undefined ? "" : `${userinfo}@`;
+  return `postgresql://${auth}${host.toLowerCase()}${port ? `:${port}` : ""}${path}`;
+}
 
 /**
  * Loopback database named by TEST_DATABASE_URL that already has the Lipi
  * schema (`bun run db:setup`), or null so DB-backed suites skip themselves.
+ * Resolves to the canonical URL, never the raw environment string.
  */
 export async function resolveTestDatabaseUrl(): Promise<string | null> {
-  const url = process.env.TEST_DATABASE_URL;
-  if (!url || !isLoopbackDatabaseUrl(url)) return null;
-
-  const client = postgres(url, { max: 1, connect_timeout: 3 });
+  let client: ReturnType<typeof postgres> | undefined;
   try {
+    const url = canonicalTestDatabaseUrl(process.env.TEST_DATABASE_URL);
+    if (!url) return null;
+    client = postgres(url, { max: 1, connect_timeout: 3 });
     await client`select 1 from lipi_documents limit 0`;
     return url;
   } catch {
     return null;
   } finally {
-    await client.end({ timeout: 1 });
+    await client?.end({ timeout: 1 });
   }
 }
 

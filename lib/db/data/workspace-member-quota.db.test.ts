@@ -1,4 +1,3 @@
-import { sql as sqlTag } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
@@ -29,6 +28,15 @@ async function loadInstance(): Promise<Instance> {
     import("@/lib/db"),
   ]);
   return { lock: lock.withOwnerCollaboratorLock, quotas, schema, db };
+}
+
+function createBarrier(parties: number) {
+  let arrived = 0;
+  const open = Promise.withResolvers<void>();
+  return () => {
+    if (++arrived === parties) open.resolve();
+    return open.promise;
+  };
 }
 
 describe.skipIf(!testDatabaseUrl)("owner collaborator advisory lock", () => {
@@ -62,25 +70,55 @@ describe.skipIf(!testDatabaseUrl)("owner collaborator advisory lock", () => {
     return row.value as number;
   }
 
+  async function untilAdvisoryLockWaiter() {
+    for (;;) {
+      const waiting = await sql`
+        select 1 from pg_locks where locktype = 'advisory' and not granted`;
+      if (waiting.length) return;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+  }
+
   it("lets two instances race to fill the last free seat only once", async () => {
     const { owner, workspace } = await ownerWithOneCollaborator();
+    const [firstInvitee, secondInvitee] = [
+      await fixtures.user("invitee"),
+      await fixtures.user("invitee"),
+    ];
+    const holderChecked = Promise.withResolvers<void>();
+    const releaseHolder = Promise.withResolvers<void>();
 
-    const attempt = async ({ lock, schema }: Instance) => {
-      const newUser = await fixtures.user("invitee");
-      return lock(owner, async (transaction, assertQuota) => {
+    const holder = instances[0].lock(
+      owner,
+      async (transaction, assertQuota) => {
         await assertQuota();
-        await transaction.execute(sqlTag`select pg_sleep(0.4)`);
+        holderChecked.resolve();
+        await releaseHolder.promise;
         await transaction
-          .insert(schema.collaborators)
-          .values({ workspaceId: workspace, userId: newUser });
-      });
-    };
+          .insert(instances[0].schema.collaborators)
+          .values({ workspaceId: workspace, userId: firstInvitee });
+      }
+    );
+    await holderChecked.promise;
 
-    const results = await Promise.allSettled(instances.map(attempt));
+    const contender = instances[1].lock(
+      owner,
+      async (transaction, assertQuota) => {
+        await assertQuota();
+        await transaction
+          .insert(instances[1].schema.collaborators)
+          .values({ workspaceId: workspace, userId: secondInvitee });
+      }
+    );
+    await untilAdvisoryLockWaiter();
+    releaseHolder.resolve();
+
+    const results = await Promise.allSettled([holder, contender]);
 
     expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(1);
-    const rejected = results.find((r) => r.status === "rejected");
-    expect(rejected).toMatchObject({
+    expect(results[0].status).toBe("fulfilled");
+    expect(results[1]).toMatchObject({
+      status: "rejected",
       reason: { name: "MutationAuthError" },
     });
     expect(await collaboratorCount(workspace)).toBe(2);
@@ -88,22 +126,26 @@ describe.skipIf(!testDatabaseUrl)("owner collaborator advisory lock", () => {
 
   it("overshoots the free limit when the same race runs without the lock", async () => {
     const { owner, workspace } = await ownerWithOneCollaborator();
+    const invitees = [
+      await fixtures.user("invitee"),
+      await fixtures.user("invitee"),
+    ];
+    const bothChecked = createBarrier(2);
 
-    const attempt = async ({ db, quotas, schema }: Instance) => {
-      const newUser = await fixtures.user("invitee");
-      return db.transaction(async (transaction) => {
-        await quotas.assertUserCanAddCollaborator(owner, undefined, {
-          database: transaction,
-          isPro: false,
-        });
-        await transaction.execute(sqlTag`select pg_sleep(0.4)`);
-        await transaction
-          .insert(schema.collaborators)
-          .values({ workspaceId: workspace, userId: newUser });
-      });
-    };
-
-    const results = await Promise.allSettled(instances.map(attempt));
+    const results = await Promise.allSettled(
+      instances.map(({ db, quotas, schema }, index) =>
+        db.transaction(async (transaction) => {
+          await quotas.assertUserCanAddCollaborator(owner, undefined, {
+            database: transaction,
+            isPro: false,
+          });
+          await bothChecked();
+          await transaction
+            .insert(schema.collaborators)
+            .values({ workspaceId: workspace, userId: invitees[index] });
+        })
+      )
+    );
 
     expect(results.every((r) => r.status === "fulfilled")).toBe(true);
     expect(await collaboratorCount(workspace)).toBe(3);
@@ -112,20 +154,14 @@ describe.skipIf(!testDatabaseUrl)("owner collaborator advisory lock", () => {
   it("does not serialize owners against each other", async () => {
     const first = await ownerWithOneCollaborator();
     const second = await ownerWithOneCollaborator();
-    const windows: { start: number; end: number }[] = [];
+    const bothInside = createBarrier(2);
 
     await Promise.all(
       [first, second].map(({ owner }, index) =>
-        instances[index].lock(owner, async (transaction) => {
-          const start = Date.now();
-          await transaction.execute(sqlTag`select pg_sleep(0.5)`);
-          windows.push({ start, end: Date.now() });
+        instances[index].lock(owner, async () => {
+          await bothInside();
         })
       )
     );
-
-    const [a, b] = windows;
-    expect(a.start).toBeLessThan(b.end);
-    expect(b.start).toBeLessThan(a.end);
   });
 });
