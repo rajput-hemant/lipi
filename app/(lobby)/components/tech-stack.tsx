@@ -62,7 +62,7 @@ export function TechStack() {
           Tech Stack
         </h2>
 
-        <p className="max-w-[85%] text-muted-foreground sm:text-lg">
+        <p className="max-w-[85%] text-foreground sm:text-lg">
           This project is an experiment to see how a modern app, with features
           like auth, subscriptions, API routes, and static pages would work in
           Next.js app dir.
