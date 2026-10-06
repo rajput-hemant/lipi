@@ -41,6 +41,7 @@ import {
   updateDocument,
 } from "@/lib/db/actions/document";
 import { buildOptimisticDuplicateDocuments } from "@/lib/db/client-document-state";
+import { FREE_WORKSPACE_ROOT_PAGE_LIMIT } from "@/lib/db/document-operations";
 import {
   flattenVisibleTreeNodes,
   resolveTreeKeyAction,
@@ -472,8 +473,10 @@ function DocumentTreeItem({
 export function DocumentTree() {
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
-  const { workspace, documents, addDocument, deleteDocument } = useAppState();
+  const { workspace, role, documents, addDocument, deleteDocument } =
+    useAppState();
   const workspaceId = workspace?.id ?? "";
+  const isOwner = role === "owner";
   const access = usePageAccess();
   const canEdit = access === "edit";
 
@@ -544,13 +547,21 @@ export function DocumentTree() {
     }
   };
 
+  function promptUpgrade() {
+    if (isOwner) {
+      setOpen(true);
+      return;
+    }
+    toast.info("Ask the workspace owner to upgrade to Pro.");
+  }
+
   function createRootToggle() {
     const rootCount = countChildren(documents, null);
-    if (!hasProEntitlement && rootCount >= 3) {
+    if (!hasProEntitlement && rootCount >= FREE_WORKSPACE_ROOT_PAGE_LIMIT) {
       toast.error("Something went wrong", {
         description: "You have reached the maximum number of root pages.",
       });
-      setOpen(true);
+      promptUpgrade();
       return;
     }
     setIsCreatingRoot((prev) => !prev);
@@ -591,7 +602,7 @@ export function DocumentTree() {
       denied: "You do not have permission to create pages.",
       onError: (error) => {
         deleteDocument(newDocument.id);
-        if (isMutationQuotaExceeded(error)) setOpen(true);
+        if (isMutationQuotaExceeded(error)) promptUpgrade();
       },
     });
   }

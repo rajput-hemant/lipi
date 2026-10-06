@@ -79,7 +79,7 @@ export function assertRootPageQuota(
   ) {
     throw new PlanQuotaError(
       "root-page",
-      "Free plan allows three root pages. Upgrade to Pro for unlimited root pages."
+      `Free plan allows ${FREE_WORKSPACE_ROOT_PAGE_LIMIT} root pages. Upgrade to Pro for unlimited root pages.`
     );
   }
 }
