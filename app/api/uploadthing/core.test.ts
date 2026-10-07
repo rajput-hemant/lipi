@@ -41,7 +41,7 @@ describe("UploadThing core router", () => {
           req: new Request("http://localhost"),
           files: [],
         })
-      ).rejects.toThrow("Unauthorized");
+      ).rejects.toMatchObject({ code: "FORBIDDEN", message: "Unauthorized" });
     });
 
     it("rejects when user lacks document:write permission", async () => {
@@ -54,7 +54,10 @@ describe("UploadThing core router", () => {
           req: new Request("http://localhost"),
           files: [],
         })
-      ).rejects.toThrow("Forbidden: insufficient workspace permissions");
+      ).rejects.toMatchObject({
+        code: "FORBIDDEN",
+        message: "Forbidden: insufficient workspace permissions",
+      });
 
       expect(mockRequireWorkspacePermission).toHaveBeenCalledWith(
         "user-viewer",
