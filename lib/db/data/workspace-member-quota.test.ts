@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PlanQuotaError } from "@/lib/billing/errors";
-import { MutationAuthError } from "./mutation-auth";
 import { withOwnerCollaboratorLock } from "./workspace-member-quota";
 
 const mocks = vi.hoisted(() => ({
@@ -57,7 +56,7 @@ describe("withOwnerCollaboratorLock", () => {
     expect(result).toBe("written");
   });
 
-  it("maps quota errors without running the write", async () => {
+  it("propagates quota errors without running the write", async () => {
     mocks.assertUserCanAddCollaborator.mockRejectedValue(
       new PlanQuotaError("collaborator", "Free plan allows two collaborators.")
     );
@@ -68,7 +67,7 @@ describe("withOwnerCollaboratorLock", () => {
         await assertQuota();
         write();
       })
-    ).rejects.toThrow(MutationAuthError);
+    ).rejects.toThrow(PlanQuotaError);
     expect(write).not.toHaveBeenCalled();
   });
 });
