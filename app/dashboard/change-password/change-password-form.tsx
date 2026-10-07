@@ -46,7 +46,11 @@ export function ChangePasswordForm() {
       });
 
       if (result.error) {
-        toast.error(result.error.message ?? "Something went wrong.");
+        toast.error(
+          result.error.message === "Credential account not found" ?
+            "Use Forgot password to set a password"
+          : (result.error.message ?? "Something went wrong.")
+        );
         return;
       }
 

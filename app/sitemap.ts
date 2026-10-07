@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 import { siteConfig } from "@/config/site";
+import { env } from "@/lib/env";
 
 type Entry = [
   path: string,
@@ -19,7 +20,7 @@ const entries: Entry[] = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return entries.map(([path, changeFrequency, priority]) => ({
-    url: `${siteConfig.url}${path}`,
+    url: `${env.NEXT_PUBLIC_APP_URL ?? siteConfig.url}${path}`,
     lastModified: new Date(),
     changeFrequency,
     priority,
