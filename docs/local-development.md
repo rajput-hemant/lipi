@@ -44,16 +44,16 @@ Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password
 
 ## Commands
 
-| Command                              | Does                                                                                                                                                     |
-| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `bun run db:up` / `db:down`          | `docker compose up -d --wait` / `docker compose down`. `down` keeps the named volumes.                                                                   |
-| `bun run db:auth`                    | Create the auth tables (`user`, `better_auth_*`) from `lib/db/auth-migrations`. Loopback only, idempotent.                                               |
-| `bun run db:migrate`                 | `drizzle-kit migrate` for the `lipi_*` tables. History goes to `drizzle.__lipi_migrations` when `DATABASE_URL` is loopback, otherwise the default table. |
-| `bun run db:seed`                    | Idempotent local seed: the local user, a credential account, one workspace with three pages.                                                             |
-| `bun run db:setup`                   | `db:auth`, `db:migrate`, `db:seed`.                                                                                                                      |
-| `bun run dev`                        | Next.js dev server on the host.                                                                                                                          |
-| `bun run realtime:dev`               | Hocuspocus server on Node (optional, only for live collaboration).                                                                                       |
-| `bun run test`, `type-check`, `lint` | Unit tests (Vitest), TypeScript, ESLint. `bun run test:e2e` starts its own throwaway database.                                                           |
+| Command                              | Does                                                                                                                     |
+| :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `bun run db:up` / `db:down`          | `docker compose up -d --wait` / `docker compose down`. `down` keeps the named volumes.                                   |
+| `bun run db:auth`                    | Create the auth tables (`user`, `better_auth_*`) from `lib/db/auth-migrations`. Loopback only, idempotent.               |
+| `bun run db:migrate`                 | `drizzle-kit migrate` for the `lipi_*` tables. History always goes to `drizzle.__lipi_migrations`, in every environment. |
+| `bun run db:seed`                    | Idempotent local seed: the local user, a credential account, one workspace with three pages.                             |
+| `bun run db:setup`                   | `db:auth`, `db:migrate`, `db:seed`.                                                                                      |
+| `bun run dev`                        | Next.js dev server on the host.                                                                                          |
+| `bun run realtime:dev`               | Hocuspocus server on Node (optional, only for live collaboration).                                                       |
+| `bun run test`, `type-check`, `lint` | Unit tests (Vitest), TypeScript, ESLint. `bun run test:e2e` starts its own throwaway database.                           |
 
 ## Environment
 
@@ -88,7 +88,7 @@ Redis is only used for rate limiting, which is off locally (`ENABLE_RATE_LIMITIN
 
 - Auth tables are unprefixed: `user`, `better_auth_account`, `better_auth_session`, `better_auth_verification`. Sign-in is email and password only.
 - Application tables are prefixed `lipi_`; `drizzle.config.ts` filters on `lipi_*`, so `db:generate` never emits auth tables. The auth baseline is generated separately with `drizzle.auth.config.ts`.
-- Production keeps the auth tables it already has: `db:auth` refuses non-loopback URLs and `db:migrate` keeps the default history table there.
+- Production keeps the auth tables it already has: `db:auth` refuses non-loopback URLs and `db:migrate` there uses `drizzle.__lipi_migrations` like everywhere else (see the one-time switch below).
 
 ## Code layout
 
@@ -113,3 +113,16 @@ The dashboard sidebar (shadcn `SidebarProvider`) stores its open state in the `s
 - `bun run db:down` stops the containers and keeps the data volumes.
 - To start Lipi data over without touching other data in the database, drop the `lipi_*` tables and `drizzle.__lipi_migrations`, then rerun `db:setup`.
 - To wipe everything, run `docker compose down -v` (deletes both volumes), then `bun run db:up` and `bun run db:setup`.
+
+## Production: one-time switch to `drizzle.__lipi_migrations`
+
+Owner step, not automated. An existing production database recorded its history in the default `drizzle.__drizzle_migrations`. `drizzle.__lipi_migrations` starts empty, so the first `db:migrate` would re-run `0000` to the latest against a schema that already has them.
+
+Before the first production `db:migrate` after this change:
+
+1. Back up the database, then rehearse on a restored copy with `bun run db:migrate`.
+2. Create `drizzle.__lipi_migrations` with the same shape as the default table (`id serial primary key`, `hash text not null`, `created_at bigint`) and insert one row per already-applied migration: `hash` is the sha256 hex of the migration's `.sql` file, `created_at` is its `when` value in `lib/db/migrations/meta/_journal.json`. Copying only the Lipi rows from `__drizzle_migrations` also works.
+3. Seed only migrations that are really applied. If production never applied `0014`, leave it out so `db:migrate` runs it.
+4. Run `bun run db:migrate`; it should report nothing to apply (or only the unseeded migrations).
+
+Leave `drizzle.__drizzle_migrations` alone: another app may share it.
