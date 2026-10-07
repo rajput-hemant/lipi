@@ -3,10 +3,7 @@ import { loadEnvConfig } from "@next/env";
 
 import type { Config } from "drizzle-kit";
 
-import {
-  isLoopbackDatabaseUrl,
-  requireDatabaseUrl,
-} from "@/lib/db/database-url";
+import { requireDatabaseUrl } from "@/lib/db/database-url";
 import { LIPI_TABLE_PREFIX } from "@/lib/db/table-prefix";
 
 loadEnvConfig(cwd());
@@ -20,7 +17,5 @@ export default {
   verbose: true,
   dbCredentials: { url },
   tablesFilter: [`${LIPI_TABLE_PREFIX}_*`],
-  ...(isLoopbackDatabaseUrl(url) && {
-    migrations: { table: "__lipi_migrations", schema: "drizzle" },
-  }),
+  migrations: { table: "__lipi_migrations", schema: "drizzle" },
 } satisfies Config;
