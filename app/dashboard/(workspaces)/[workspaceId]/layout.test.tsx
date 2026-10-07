@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
@@ -12,7 +13,12 @@ const { getCurrentUser, getWorkspaceMembershipRole } = vi.hoisted(() => ({
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => undefined }),
 }));
-vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(),
+  notFound: vi.fn(() => {
+    throw new Error("NEXT_HTTP_ERROR_FALLBACK;404");
+  }),
+}));
 vi.mock("@/lib/auth", () => ({ getCurrentUser }));
 vi.mock("@/lib/db/actions/document", () => ({
   getDocuments: vi.fn(async () => []),
@@ -54,9 +60,22 @@ describe("WorkspaceLayout for a removed member", () => {
   });
 
   it("rethrows other membership errors to the error boundary", async () => {
-    const error = new MutationAuthError("Workspace not found");
+    const error = new MutationAuthError("Something else", "INVALID");
     getWorkspaceMembershipRole.mockRejectedValue(error);
 
     await expect(renderLayout()).rejects.toBe(error);
+  });
+});
+
+describe("WorkspaceLayout for a nonexistent workspace", () => {
+  it("returns a 404", async () => {
+    getWorkspaceMembershipRole.mockRejectedValue(
+      new MutationAuthError("Workspace not found")
+    );
+
+    await expect(renderLayout()).rejects.toThrow(
+      "NEXT_HTTP_ERROR_FALLBACK;404"
+    );
+    expect(notFound).toHaveBeenCalled();
   });
 });
