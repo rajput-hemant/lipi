@@ -16,15 +16,21 @@ async function joinAs(
   user: TestUser,
   workspaceUrl: string
 ): Promise<Page> {
-  const page = await (await browser.newContext()).newPage();
-  await signUp(page, user);
-  const token = await getWorkspaceInviteToken(user.email);
-  await page.goto(`/invite/${token}`);
-  await expect(page).toHaveURL(/\/dashboard\/[0-9a-f-]{36}/, {
-    timeout: 60_000,
-  });
-  await page.goto(workspaceUrl);
-  return page;
+  const context = await browser.newContext();
+  try {
+    const page = await context.newPage();
+    await signUp(page, user);
+    const token = await getWorkspaceInviteToken(user.email);
+    await page.goto(`/invite/${token}`);
+    await expect(page).toHaveURL(/\/dashboard\/[0-9a-f-]{36}/, {
+      timeout: 60_000,
+    });
+    await page.goto(workspaceUrl);
+    return page;
+  } catch (error) {
+    await context.close();
+    throw error;
+  }
 }
 
 async function expectNoOwnerControls(page: Page) {
@@ -33,6 +39,12 @@ async function expectNoOwnerControls(page: Page) {
   await expect(page.getByLabel("Invite by email")).toHaveCount(0);
   await expect(page.getByText("Danger zone")).toHaveCount(0);
   await expect(page.getByLabel("Transfer ownership")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Transfer ownership" })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Delete workspace" })
+  ).toHaveCount(0);
   await closeWorkspaceSettingsIfOpen(page);
 }
 
@@ -57,6 +69,13 @@ test.describe("role-based access", () => {
       await openWorkspaceSettings(page);
       await expect(page.getByLabel("Invite by email")).toBeVisible();
       await expect(page.getByText("Danger zone")).toBeVisible();
+      await expect(page.getByLabel("Transfer ownership")).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Transfer ownership" })
+      ).toBeDisabled();
+      await expect(
+        page.getByRole("button", { name: "Delete workspace" })
+      ).toBeEnabled();
       await closeWorkspaceSettingsIfOpen(page);
 
       await inviteMember(page, editor.email, "editor");
@@ -78,7 +97,9 @@ test.describe("role-based access", () => {
       await editorPage.keyboard.press("Escape");
       await expectNoOwnerControls(editorPage);
 
-      await expect(viewerPage.getByText("View only").first()).toBeVisible();
+      await expect(
+        viewerPage.locator("p").filter({ hasText: "View only" })
+      ).toBeVisible();
       await expect(
         viewerPage.getByRole("button", { name: "New page" })
       ).toHaveCount(0);
