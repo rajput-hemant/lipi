@@ -60,6 +60,7 @@ async function editTitle(title: string) {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(600);
   });
+  return container;
 }
 
 beforeAll(() => {
@@ -99,5 +100,16 @@ describe("DocumentHeader save failures", () => {
     expect(toast.error).toHaveBeenCalledWith(
       "Could not save document details."
     );
+  });
+
+  it("renders a hidden h1 that follows the title", async () => {
+    vi.useFakeTimers();
+    updateDocument.mockResolvedValue({ ok: true, document: page });
+
+    const container = await editTitle("Renamed");
+
+    const h1 = container.querySelector("h1")!;
+    expect(h1.className).toContain("sr-only");
+    expect(h1.textContent).toBe("Renamed");
   });
 });

@@ -243,6 +243,7 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
             {icon || "📄"}
           </EmojiPicker>
 
+          <h1 className="sr-only">{title || "Untitled"}</h1>
           <Textarea
             value={title}
             onChange={onTitleChange}
