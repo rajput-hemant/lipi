@@ -231,7 +231,7 @@ describe("duplicate page toasts", () => {
 });
 
 describe("trash and root quota toasts", () => {
-  it("shows the server message for an invalid trash request and restores the page", async () => {
+  it("shows a fixed message for an invalid trash request and restores the page", async () => {
     softDeleteDocumentTree.mockResolvedValue({
       ok: false,
       code: "INVALID",
@@ -249,7 +249,7 @@ describe("trash and root quota toasts", () => {
 
     expect(flags()).toEqual({ a: false, a1: false, a2: true, b: false });
     expect(flags()).toEqual(original);
-    expect(errorMessages).toEqual(["Document not found"]);
+    expect(errorMessages).toEqual(["Could not move to trash."]);
   });
 
   it("shows the server message, rolls back and opens the upgrade modal for the owner when the root page limit is reached", async () => {
@@ -288,9 +288,10 @@ describe("trash and root quota toasts", () => {
     await submitForm();
 
     expect(ids(store)).toEqual(["a", "b"]);
-    expect(toast.info).toHaveBeenCalledExactlyOnceWith(
-      "Ask the workspace owner to upgrade to Pro."
-    );
+    expect(errorMessages).toEqual([
+      "Ask the workspace owner to upgrade to Pro.",
+    ]);
+    expect(toast.info).not.toHaveBeenCalled();
     expect(setModalOpen).not.toHaveBeenCalled();
   });
 
@@ -321,6 +322,7 @@ describe("trash and root quota toasts", () => {
     expect(toast.info).toHaveBeenCalledExactlyOnceWith(
       "Ask the workspace owner to upgrade to Pro."
     );
+    expect(toast.error).not.toHaveBeenCalled();
     expect(setModalOpen).not.toHaveBeenCalled();
   });
 

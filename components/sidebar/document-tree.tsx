@@ -230,7 +230,13 @@ function DocumentTreeItem({
       updateDocumentState({ ...document, inTrash: true });
     }
 
-    runMutationToast(softDeleteDocumentTree(node.id), {
+    const pending = softDeleteDocumentTree(node.id).then((result) =>
+      !result.ok && result.code === "INVALID" ?
+        { ...result, message: "Could not move to trash." }
+      : result
+    );
+
+    runMutationToast(pending, {
       loading: "Moving to trash...",
       success: () => {
         const openDocumentId = pathname.split("/")[3];
@@ -470,6 +476,8 @@ function DocumentTreeItem({
   );
 }
 
+const ASK_OWNER_TO_UPGRADE = "Ask the workspace owner to upgrade to Pro.";
+
 export function DocumentTree() {
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
@@ -552,15 +560,17 @@ export function DocumentTree() {
       setOpen(true);
       return;
     }
-    toast.info("Ask the workspace owner to upgrade to Pro.");
+    toast.info(ASK_OWNER_TO_UPGRADE);
   }
 
   function createRootToggle() {
     const rootCount = countChildren(documents, null);
     if (!hasProEntitlement && rootCount >= FREE_WORKSPACE_ROOT_PAGE_LIMIT) {
-      toast.error("Something went wrong", {
-        description: "You have reached the maximum number of root pages.",
-      });
+      if (isOwner) {
+        toast.error("Something went wrong", {
+          description: "You have reached the maximum number of root pages.",
+        });
+      }
       promptUpgrade();
       return;
     }
@@ -592,7 +602,13 @@ export function DocumentTree() {
     setRootTitle("Untitled");
     setRootIcon("");
 
-    runMutationToast(createDocument(newDocument), {
+    const pending = createDocument(newDocument).then((result) =>
+      !isOwner && !result.ok && result.code === "QUOTA_EXCEEDED" ?
+        { ...result, message: ASK_OWNER_TO_UPGRADE }
+      : result
+    );
+
+    runMutationToast(pending, {
       loading: "Creating page...",
       success: () => {
         notifyPageChanges();
@@ -602,7 +618,7 @@ export function DocumentTree() {
       denied: "You do not have permission to create pages.",
       onError: (error) => {
         deleteDocument(newDocument.id);
-        if (isMutationQuotaExceeded(error)) promptUpgrade();
+        if (isOwner && isMutationQuotaExceeded(error)) setOpen(true);
       },
     });
   }
