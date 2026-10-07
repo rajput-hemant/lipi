@@ -139,9 +139,9 @@ describe("workspace member invite quota enforcement", () => {
   });
 
   it("returns quota errors when creating an invite", async () => {
-    const { MutationAuthError } = await import("../data/mutation-auth");
+    const { PlanQuotaError } = await import("@/lib/billing/errors");
     mocks.assertQuota.mockRejectedValue(
-      new MutationAuthError("Free plan allows two collaborators.")
+      new PlanQuotaError("collaborator", "Free plan allows two collaborators.")
     );
 
     await expect(
@@ -152,15 +152,15 @@ describe("workspace member invite quota enforcement", () => {
       })
     ).resolves.toEqual({
       ok: false,
-      code: "INVALID",
+      code: "QUOTA_EXCEEDED",
       message: "Free plan allows two collaborators.",
     });
   });
 
   it("surfaces quota errors when accepting an invite", async () => {
-    const { MutationAuthError } = await import("../data/mutation-auth");
+    const { PlanQuotaError } = await import("@/lib/billing/errors");
     mocks.assertQuota.mockRejectedValue(
-      new MutationAuthError("Free plan allows two collaborators.")
+      new PlanQuotaError("collaborator", "Free plan allows two collaborators.")
     );
 
     await expect(acceptWorkspaceInvite("token-1")).rejects.toThrow(
