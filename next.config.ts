@@ -28,6 +28,7 @@ const securityHeaders = [
 const config: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
+  serverExternalPackages: ["yjs"],
   reactCompiler: true,
   typedRoutes: true,
   images: {
