@@ -286,4 +286,53 @@ describe("SearchCommand", () => {
     });
     expect(document.activeElement).toBe(before);
   });
+
+  it("clears the query when the dialog closes", async () => {
+    mockSearchDocuments.mockResolvedValue([]);
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(<SearchCommand />);
+    });
+
+    const trigger = container.querySelector("button");
+    act(() => {
+      trigger?.click();
+    });
+
+    const getInput = () =>
+      document.querySelector<HTMLInputElement>('input[role="combobox"]')!;
+    const setter = Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value"
+    )!.set!;
+    act(() => {
+      setter.call(getInput(), "roadmap");
+      getInput().dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(getInput().value).toBe("roadmap");
+
+    act(() => {
+      getInput().dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Escape",
+          code: "Escape",
+          keyCode: 27,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]')
+    ).toBeNull();
+
+    act(() => {
+      trigger?.click();
+    });
+    expect(getInput().value).toBe("");
+  });
 });

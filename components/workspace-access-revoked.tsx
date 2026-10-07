@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LockIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export function WorkspaceAccessRevoked() {
   return (
@@ -21,9 +21,9 @@ export function WorkspaceAccessRevoked() {
           you again to regain access.
         </p>
 
-        <Button nativeButton={false} render={<Link href="/dashboard" />}>
+        <Link href="/dashboard" className={buttonVariants()}>
           Back to workspaces
-        </Button>
+        </Link>
       </div>
     </div>
   );

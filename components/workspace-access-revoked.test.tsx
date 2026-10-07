@@ -20,9 +20,9 @@ describe("WorkspaceAccessRevoked", () => {
       expect(container.textContent).toContain(
         "You no longer have access to this workspace"
       );
-      expect(container.querySelector("a")?.getAttribute("href")).toBe(
-        "/dashboard"
-      );
+      const link = container.querySelector("a");
+      expect(link?.getAttribute("href")).toBe("/dashboard");
+      expect(link?.hasAttribute("role")).toBe(false);
       expect(consoleError).not.toHaveBeenCalled();
     } finally {
       act(() => root.unmount());

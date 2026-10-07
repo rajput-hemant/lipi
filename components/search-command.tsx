@@ -54,6 +54,11 @@ export function SearchCommand({
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const lastFocusedElementRef = React.useRef<HTMLElement | null>(null);
 
+  const handleOpenChange = React.useCallback((next: boolean) => {
+    setOpen(next);
+    if (!next) setQuery("");
+  }, []);
+
   const handleOpen = React.useCallback(() => {
     lastFocusedElementRef.current =
       (document.activeElement as HTMLElement) || triggerRef.current;
@@ -78,14 +83,14 @@ export function SearchCommand({
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        if (open) setOpen(false);
+        if (open) handleOpenChange(false);
         else handleOpen();
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, handleOpen]);
+  }, [open, handleOpen, handleOpenChange]);
 
   React.useEffect(() => {
     if (!open || !workspaceId) return;
@@ -198,7 +203,7 @@ export function SearchCommand({
         </Button>
       }
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="overflow-hidden p-0 sm:max-w-xl">
           <DialogHeader className="sr-only">
             <DialogTitle>Search documents</DialogTitle>
@@ -207,7 +212,7 @@ export function SearchCommand({
           <Combobox
             open={true}
             onOpenChange={(next) => {
-              if (!next) setOpen(false);
+              if (!next) handleOpenChange(false);
             }}
             value={null}
             onValueChange={(val) => {
