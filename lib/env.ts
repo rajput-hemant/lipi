@@ -101,6 +101,7 @@ export const env = createEnv({
   },
 
   client: {
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
     NEXT_PUBLIC_LIPI_REALTIME_URL: z.string().optional(),
     NEXT_PUBLIC_VERCEL_ENV: z.string().optional(),
     NEXT_PUBLIC_VERCEL_BRANCH_URL: z.string().optional(),
@@ -108,6 +109,7 @@ export const env = createEnv({
 
   // Client variables must be referenced literally so Next inlines them.
   experimental__runtimeEnv: {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_LIPI_REALTIME_URL: process.env.NEXT_PUBLIC_LIPI_REALTIME_URL,
     NEXT_PUBLIC_VERCEL_ENV: process.env.NEXT_PUBLIC_VERCEL_ENV,
     NEXT_PUBLIC_VERCEL_BRANCH_URL: process.env.NEXT_PUBLIC_VERCEL_BRANCH_URL,
