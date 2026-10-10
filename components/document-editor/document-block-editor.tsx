@@ -21,7 +21,6 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 
-import type { onCloseParameters } from "@hocuspocus/provider";
 import type { Document } from "@/types/db";
 
 import { useAppActions, useAppState } from "@/hooks/use-app-state";
@@ -36,6 +35,7 @@ import { BLOCKNOTE_FRAGMENT } from "@/lib/realtime/constants";
 import { readCollaboratorPresence } from "@/lib/realtime/presence";
 import { documentRoomName } from "@/lib/realtime/rooms";
 import { uploadImage } from "@/lib/uploadthing";
+import { useBlockQuotaLock } from "./use-block-quota-lock";
 
 type DocumentBlockEditorProps = {
   document: Document;
@@ -156,7 +156,7 @@ function DocumentBlockEditorConnected({
     : "connecting"
   );
   const [isSynced, setIsSynced] = React.useState(() => provider.synced);
-  const [blockQuotaExceeded, setBlockQuotaExceeded] = React.useState(false);
+  const blockQuotaExceeded = useBlockQuotaLock(provider);
 
   React.useEffect(() => {
     const onStatus = ({ status }: { status: string }) => {
@@ -164,11 +164,6 @@ function DocumentBlockEditorConnected({
       if (status !== "connected") setIsSynced(false);
     };
     const onSynced = ({ state }: { state: boolean }) => setIsSynced(state);
-    const onClose = ({ event }: onCloseParameters) => {
-      if (event.reason === "plan-quota-exceeded:block") {
-        setBlockQuotaExceeded(true);
-      }
-    };
     const refreshToken = () => void provider.sendToken();
     const awareness = provider.awareness;
     const updateCollaborators = () => {
@@ -181,7 +176,6 @@ function DocumentBlockEditorConnected({
 
     provider.on("status", onStatus);
     provider.on("synced", onSynced);
-    provider.on("close", onClose);
     awareness?.on("change", updateCollaborators);
     updateCollaborators();
 
@@ -191,7 +185,6 @@ function DocumentBlockEditorConnected({
       window.clearInterval(refreshInterval);
       provider.off("status", onStatus);
       provider.off("synced", onSynced);
-      provider.off("close", onClose);
       awareness?.off("change", updateCollaborators);
       setCollaborators([]);
     };
