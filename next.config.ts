@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 import "./lib/env";
 
 import { getRealtimeUrl } from "./lib/realtime/client";
-import { buildCsp, CSP_REPORT_ONLY_HEADER } from "./lib/security/csp";
+import { buildCsp, CSP_HEADER } from "./lib/security/csp";
 
 const isDocker = process.env.IS_DOCKER === "true";
 
@@ -17,7 +17,7 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=()",
   },
   {
-    key: CSP_REPORT_ONLY_HEADER,
+    key: CSP_HEADER,
     value: buildCsp({
       isDev: process.env.NODE_ENV === "development",
       realtimeUrl: getRealtimeUrl(),

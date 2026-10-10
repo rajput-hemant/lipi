@@ -70,3 +70,12 @@ Could not verify: a deleted page disconnecting readers, how long an idle socket 
 ## Cleanup
 
 All four browser sessions stopped, `next start` and realtime killed by port owner, container `lipi-r4sec-pg` removed; ports 3113, 1253 and 55453 are free. Containers `sv-pg-20261007`, `local-platforms-redis` and the repo's own stack were not touched. The `next.config.ts` experiment was reverted.
+
+## Enforcing CSP follow-up (branch `task/r4-csp2`)
+
+- Zod's `Function("")` probe: `z.config({ jitless: true })` (Zod 4.6.5 skips the probe when `jitless` is set) now runs at module load in `components/providers.tsx`, the client module the root layout renders on every route, with a unit test (`components/providers.test.tsx`).
+- The header is now the enforcing `Content-Security-Policy` (`CSP_HEADER` in `lib/security/csp.ts`, used by `next.config.ts`). `curl -I` on the production build returned the same policy text under that name.
+- Production build (`bun run build`, `next start` on `127.0.0.1:3118`, realtime `node realtime/bootstrap.mjs` on `1258`, private Postgres on `55458`, browser session `r4-csp2`). Zero CSP console messages per route on fresh page loads: `/`, `/login`, `/signup`, `/pricing` (the billing surface), `/dashboard/new-workspace`, `/dashboard/<ws>`, `/dashboard/<ws>/<doc>`, `/dashboard/change-password`, and the Settings dialog. Only unrelated Chrome issue notes appeared (lazy image dimensions, label/autocomplete hints).
+- Emoji picker (new-workspace form and Settings dialog): 65 of 65 jsdelivr images loaded, no violation. GitHub avatar rendered (`naturalWidth` 460). Sign-up through the form succeeded with the eval probe gone, so validation still works jitless.
+- Editor: typed text into the document, reload showed it persisted, four established connections to the realtime port, no `connect-src` violation.
+- Not covered: Stripe, UploadThing, OAuth, Resend and Vercel analytics hosts (no credentials, nothing requested); Google avatar host was not re-run.

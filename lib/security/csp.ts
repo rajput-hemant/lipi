@@ -5,12 +5,12 @@
  * which conflicts with `cacheComponents`. The trade-off is `'unsafe-inline'`
  * for scripts and styles, so this policy limits where resources load from and
  * blocks plugins, framing and base-URI tampering, but does not stop inline
- * script injection. It is only ever sent in report-only mode for now.
+ * script injection.
  *
  * @see node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md
  */
 
-export const CSP_REPORT_ONLY_HEADER = "Content-Security-Policy-Report-Only";
+export const CSP_HEADER = "Content-Security-Policy";
 
 const STRIPE_SCRIPT = ["https://js.stripe.com"];
 const STRIPE_CONNECT = ["https://api.stripe.com", "https://hooks.stripe.com"];
