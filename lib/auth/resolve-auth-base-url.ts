@@ -14,3 +14,13 @@ export function resolveAuthBaseURL() {
 
   return "http://localhost:3000";
 }
+
+const DEV_LOOPBACK_ORIGINS = ["http://localhost:*", "http://127.0.0.1:*"];
+
+/**
+ * Better Auth trusts only the base URL origin by default, so a dev server on
+ * another port, or opened via 127.0.0.1, fails with "Invalid origin".
+ */
+export function resolveTrustedOrigins() {
+  return process.env.NODE_ENV === "production" ? [] : DEV_LOOPBACK_ORIGINS;
+}

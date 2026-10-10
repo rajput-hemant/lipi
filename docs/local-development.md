@@ -36,7 +36,7 @@ bun run db:setup
 bun run dev
 ```
 
-`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user documented in `fixtures/local-dev-credentials.json` (`local@example.test`, `LocalDev123!`). On dev server startup the email and the masked database URL are logged to the terminal (only when `DATABASE_URL` points to loopback); the password is not logged.
+`db:setup` runs `db:auth`, `db:migrate` and `db:seed` in order. Sign in at `http://localhost:3000/login` with the local user documented in `fixtures/local-dev-credentials.json` (`local@example.test`, `LocalDev123!`). On dev server startup the email, the password and the masked database URL are logged to the terminal, only when `DATABASE_URL` points to loopback and `NODE_ENV` is not `production` (`lib/dev-credentials-logger.ts`).
 
 Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password?" on the login form logs the email, reset link included, to the dev server terminal outside production (`lib/email/send-email.ts`); open that link at `/reset-password?token=...`. With the key, set `EMAIL_FROM` too. Signed-in users change their password at `/dashboard/change-password` (sidebar account popover).
 
@@ -84,11 +84,86 @@ Sign in with email and password only. Without `RESEND_API_KEY`, "Forgot password
 
 Redis is only used for rate limiting, which is off locally (`ENABLE_RATE_LIMITING=false`).
 
+## Invalid origin on login
+
+Better Auth trusts only the origin of `BETTER_AUTH_URL` (fallback `http://localhost:3000`) and rejects other request origins and absolute `callbackURL`s with `Invalid origin` or `Invalid callbackURL`. Outside production Lipi also trusts `http://localhost:*` and `http://127.0.0.1:*` (`resolveTrustedOrigins` in `lib/auth/resolve-auth-base-url.ts`), so a stale port in `BETTER_AUTH_URL`, `localhost` versus `127.0.0.1`, or Next moving to another port no longer breaks sign-in. In production only the `BETTER_AUTH_URL` origin is trusted.
+
+Keep `BETTER_AUTH_URL` and `NEXT_PUBLIC_APP_URL` equal to the URL you open: password-reset and invite links, and `absoluteUrl`, are built from them.
+
 ## Tables and prefixes
 
 - Auth tables are unprefixed: `user`, `better_auth_account`, `better_auth_session`, `better_auth_verification`. Sign-in is email and password only.
+- The auth tables are shared with Infinitunes (see [Shared database](#shared-database-with-infinitunes)).
 - Application tables are prefixed `lipi_`; `drizzle.config.ts` filters on `lipi_*`, so `db:generate` never emits auth tables. The auth baseline is generated separately with `drizzle.auth.config.ts`.
 - Production keeps the auth tables it already has: `db:auth` refuses non-loopback URLs and `db:migrate` there uses `drizzle.__lipi_migrations` like everywhere else (see the one-time switch below).
+
+## Shared database with Infinitunes
+
+Lipi and Infinitunes use one Postgres database (`local_platforms`, compose project `local-platforms`) and one set of user accounts. Auth tables are unprefixed and shared; each app owns only its prefixed tables (`lipi_*` here, `infinitunes_*` there).
+
+- `drizzle.config.ts` filters on `lipi_*` and keeps history in `drizzle.__lipi_migrations`. `drizzle.auth.config.ts` keeps history in `drizzle.__lipi_auth_migrations`. Neither touches `infinitunes_*` tables or the other app's history tables.
+- `db:auth` runs `lib/db/auth-migrations/0000_local_auth_baseline.sql`: only `CREATE TABLE IF NOT EXISTS`, `CREATE UNIQUE INDEX IF NOT EXISTS` and foreign keys guarded by `duplicate_object`. It never drops or alters, so it is a no-op when Infinitunes created the tables first. Verified on a scratch database holding an Infinitunes-style `user` table plus `infinitunes_*` tables: `db:setup` twice left their schema and rows identical.
+- `db:seed` seeds the same user as Infinitunes (`local@example.test`, id `a0000000-0000-4000-8000-000000000001`, `LocalDev123!`, name `Local Developer`), so a single login works in both apps. Both seeds use `ON CONFLICT DO NOTHING`, so the second one to run leaves the first one's rows alone.
+
+### Shared auth table contract
+
+Better Auth runs with `advanced.database.generateId: "uuid"`, so every id is a `uuid` (default `gen_random_uuid()`). All timestamps are `timestamp without time zone`, mapped as JS `Date`. Better Auth field mapping: `user.name` is stored in `betterAuthName` and `user.emailVerified` in `emailVerifiedBoolean`.
+
+`user`
+
+| Column                 | Type        | Null | Default             | Notes                                                                                                                 |
+| :--------------------- | :---------- | :--- | :------------------ | :-------------------------------------------------------------------------------------------------------------------- |
+| `id`                   | `uuid`      | no   | `gen_random_uuid()` | primary key                                                                                                           |
+| `name`                 | `text`      | yes  |                     | Lipi mirrors `betterAuthName` here and reads it for member lists (falls back to email); Infinitunes need not write it |
+| `email`                | `text`      | no   |                     | unique (`user_email_unique`)                                                                                          |
+| `password`             | `text`      | yes  |                     | legacy bcrypt hash mirrored from the credential account; Lipi writes it, others may leave it null                     |
+| `image`                | `text`      | yes  |                     |                                                                                                                       |
+| `betterAuthName`       | `text`      | no   | `''`                | display name used by Better Auth                                                                                      |
+| `emailVerifiedBoolean` | `boolean`   | no   | `false`             | email verified flag used by Better Auth                                                                               |
+| `createdAt`            | `timestamp` | no   | `now()`             |                                                                                                                       |
+| `updatedAt`            | `timestamp` | no   | `now()`             |                                                                                                                       |
+
+Existing databases may also carry legacy nullable columns (`emailVerified timestamp`, `username`, `displayUsername`). Neither app declares them, so they must stay nullable.
+
+`better_auth_account`
+
+| Column                                            | Type        | Null | Default             | Notes                                                            |
+| :------------------------------------------------ | :---------- | :--- | :------------------ | :--------------------------------------------------------------- |
+| `id`                                              | `uuid`      | no   | `gen_random_uuid()` | primary key                                                      |
+| `userId`                                          | `uuid`      | no   |                     | FK to `user.id`, `ON DELETE CASCADE`                             |
+| `accountId`                                       | `text`      | no   |                     | for `credential` accounts, the user id                           |
+| `providerId`                                      | `text`      | no   |                     | `credential`, `google`, `github`                                 |
+| `accessToken`, `refreshToken`, `scope`, `idToken` | `text`      | yes  |                     |                                                                  |
+| `accessTokenExpiresAt`, `refreshTokenExpiresAt`   | `timestamp` | yes  |                     |                                                                  |
+| `password`                                        | `text`      | yes  |                     | bcrypt hash (`bcryptjs`, cost 10), only on `credential` accounts |
+| `createdAt`, `updatedAt`                          | `timestamp` | no   | `now()`             |                                                                  |
+
+Unique index `better_auth_account_provider_account_unique` on (`providerId`, `accountId`).
+
+`better_auth_session`
+
+| Column                   | Type        | Null | Default             | Notes                                       |
+| :----------------------- | :---------- | :--- | :------------------ | :------------------------------------------ |
+| `id`                     | `uuid`      | no   | `gen_random_uuid()` | primary key                                 |
+| `userId`                 | `uuid`      | no   |                     | FK to `user.id`, `ON DELETE CASCADE`        |
+| `token`                  | `text`      | no   |                     | unique (`better_auth_session_token_unique`) |
+| `expiresAt`              | `timestamp` | no   |                     |                                             |
+| `ipAddress`, `userAgent` | `text`      | yes  |                     |                                             |
+| `createdAt`, `updatedAt` | `timestamp` | no   | `now()`             |                                             |
+
+`better_auth_verification`
+
+| Column                   | Type        | Null | Default             | Notes       |
+| :----------------------- | :---------- | :--- | :------------------ | :---------- |
+| `id`                     | `uuid`      | no   | `gen_random_uuid()` | primary key |
+| `identifier`             | `text`      | no   |                     |             |
+| `value`                  | `text`      | no   |                     |             |
+| `expiresAt`              | `timestamp` | no   |                     |             |
+| `createdAt`, `updatedAt` | `timestamp` | no   | `now()`             |             |
+
+Rules for both apps: do not rename or drop these columns, add new auth columns only as nullable or defaulted, create the tables with `IF NOT EXISTS` so either app can run first, and keep per-app auth extras (rate limits, passkeys) in prefixed tables.
+
+Cookies are not port-isolated on `localhost`, so two apps on different ports overwrite each other's `better-auth.session_token`. Give both the same `BETTER_AUTH_SECRET` (sessions are then valid in both) or set distinct cookie prefixes.
 
 ## Code layout
 

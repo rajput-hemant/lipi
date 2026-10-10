@@ -116,6 +116,38 @@ describe("Better Auth configuration", () => {
     expect(await compare("hunter2", hashed)).toBe(true);
   });
 
+  it.each(["http://localhost:3101", "http://127.0.0.1:3000"])(
+    "trusts dev loopback origin %s that differs from the base URL",
+    async (origin) => {
+      const context = await createAuth(makeFakeDb()).$context;
+
+      expect(context.isTrustedOrigin(origin)).toBe(true);
+      expect(context.isTrustedOrigin(`${origin}/dashboard`)).toBe(true);
+    }
+  );
+
+  it("does not trust other origins", async () => {
+    const context = await createAuth(makeFakeDb()).$context;
+
+    expect(context.isTrustedOrigin("https://evil.example")).toBe(false);
+    expect(context.isTrustedOrigin("http://localhost.evil.example:3000")).toBe(
+      false
+    );
+  });
+
+  it("trusts only the base URL in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const context = await createAuth(makeFakeDb()).$context;
+
+      expect(context.isTrustedOrigin("http://localhost:3000")).toBe(true);
+      expect(context.isTrustedOrigin("http://localhost:3101")).toBe(false);
+      expect(context.isTrustedOrigin("http://127.0.0.1:3000")).toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("proves import-time BETTER_AUTH_SECRET wiring using isolated modules", async () => {
     const customSecret = "isolated-test-secret-key-32-chars-long";
     const priorSecret = process.env.BETTER_AUTH_SECRET;

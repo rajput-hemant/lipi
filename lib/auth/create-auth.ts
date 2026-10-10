@@ -18,7 +18,10 @@ import { sendEmail } from "@/lib/email/send-email";
 import { env } from "@/lib/env";
 import { resolveAuthRateLimitEnabled } from "./auth-rate-limit";
 import { credentialAccountWhere } from "./credential-account";
-import { resolveAuthBaseURL } from "./resolve-auth-base-url";
+import {
+  resolveAuthBaseURL,
+  resolveTrustedOrigins,
+} from "./resolve-auth-base-url";
 
 const RESET_PASSWORD_TOKEN_TTL_SECONDS = 60 * 60;
 
@@ -66,6 +69,7 @@ export function createAuth(
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET,
     baseURL: resolveAuthBaseURL(),
+    trustedOrigins: resolveTrustedOrigins(),
     rateLimit: {
       enabled: resolveAuthRateLimitEnabled(),
     },
