@@ -21,11 +21,6 @@ const UPLOADTHING = [
   "https://uploadthing.com",
   "https://*.uploadthing.com",
 ];
-const AVATAR_IMAGES = [
-  "https://lh3.googleusercontent.com",
-  "https://avatars.githubusercontent.com",
-];
-const EMOJI_IMAGES = ["https://cdn.jsdelivr.net/npm/emoji-datasource-apple/"];
 const VERCEL_ANALYTICS_SCRIPT = ["https://va.vercel-scripts.com"];
 const VERCEL_ANALYTICS_CONNECT = ["https://vitals.vercel-insights.com"];
 
@@ -64,14 +59,9 @@ export function buildCsp({ isDev = false, realtimeUrl }: CspOptions = {}) {
       ...VERCEL_ANALYTICS_SCRIPT,
     ],
     "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": [
-      "'self'",
-      "blob:",
-      "data:",
-      ...AVATAR_IMAGES,
-      ...EMOJI_IMAGES,
-      ...UPLOADTHING,
-    ],
+    // https: allows user-supplied image URLs (workspace logos, BlockNote embeds).
+    "img-src": ["'self'", "https:", "blob:", "data:"],
+    "media-src": ["'self'", "https:", "blob:", "data:"],
     "font-src": ["'self'", "data:"],
     "connect-src": [
       "'self'",

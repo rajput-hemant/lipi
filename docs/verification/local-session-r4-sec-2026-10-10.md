@@ -79,3 +79,8 @@ All four browser sessions stopped, `next start` and realtime killed by port owne
 - Emoji picker (new-workspace form and Settings dialog): 65 of 65 jsdelivr images loaded, no violation. GitHub avatar rendered (`naturalWidth` 460). Sign-up through the form succeeded with the eval probe gone, so validation still works jitless.
 - Editor: typed text into the document, reload showed it persisted, four established connections to the realtime port, no `connect-src` violation.
 - Not covered: Stripe, UploadThing, OAuth, Resend and Vercel analytics hosts (no credentials, nothing requested); Google avatar host was not re-run.
+
+## Review follow-up (branch `task/r4-csp3`)
+
+- `img-src` now allows `https:` (keeping `'self'`, `blob:` and `data:`; the narrow per-host allowlist it subsumes was removed): workspace logo URLs and BlockNote image embeds accept arbitrary external URLs, which the host list blocked.
+- Added `media-src 'self' https: blob: data:`: BlockNote audio/video embeds (arbitrary URLs, UploadThing files) fell back to `default-src 'self'` and were blocked.
