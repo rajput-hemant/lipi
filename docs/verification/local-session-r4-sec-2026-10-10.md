@@ -84,3 +84,16 @@ All four browser sessions stopped, `next start` and realtime killed by port owne
 
 - `img-src` now allows `https:` (keeping `'self'`, `blob:` and `data:`; the narrow per-host allowlist it subsumes was removed): workspace logo URLs and BlockNote image embeds accept arbitrary external URLs, which the host list blocked.
 - Added `media-src 'self' https: blob: data:`: BlockNote audio/video embeds (arbitrary URLs, UploadThing files) fell back to `default-src 'self'` and were blocked.
+
+## Zod jitless from `instrumentation-client.ts` (branch `task/r4-fix-a`)
+
+`z.config({ jitless: true })` moved from `components/providers.tsx` to a root `instrumentation-client.ts`, which Next loads before any app chunk, so it runs before any schema is created. Production build (`bun run build`, `next start`, enforcing `Content-Security-Policy` header), browser `chrome-devtools-axi` session `task-r4-fix-a`, private DB `127.0.0.1:55461`, app `3121`, realtime `1261`, one fresh load per route, console read after each load.
+
+| Route                                      | Console CSP / `eval` messages |
+| :----------------------------------------- | :---------------------------- |
+| `/`, `/login`, `/signup`                   | none                          |
+| `/dashboard/<ws>` (after sign-in)          | none                          |
+| editor documents (`Welcome`, `Scratchpad`) | none; editor mounted          |
+| `/dashboard/change-password`               | none                          |
+
+Negative control: with `instrumentation-client.ts` temporarily removed and rebuilt, `/signup` logged `Content Security Policy of your site blocks the use of eval in JavaScript (count: 1)`. The file was restored and the build repeated with zero violations.
