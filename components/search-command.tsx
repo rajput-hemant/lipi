@@ -56,7 +56,10 @@ export function SearchCommand({
 
   const handleOpenChange = React.useCallback((next: boolean) => {
     setOpen(next);
-    if (!next) setQuery("");
+    if (!next) {
+      setQuery("");
+      setError(null);
+    }
   }, []);
 
   const handleOpen = React.useCallback(() => {
@@ -122,12 +125,10 @@ export function SearchCommand({
   const onSelectDocument = React.useCallback(
     (documentId: string | null) => {
       if (!documentId || !workspaceId) return;
-      setOpen(false);
-      setQuery("");
-      setError(null);
+      handleOpenChange(false);
       router.push(`/dashboard/${workspaceId}/${documentId}`);
     },
-    [router, workspaceId]
+    [handleOpenChange, router, workspaceId]
   );
 
   if (!workspaceId) {
