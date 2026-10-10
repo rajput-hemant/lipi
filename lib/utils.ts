@@ -6,7 +6,8 @@ export { cn } from "cn";
 
 export function absoluteUrl(path: string) {
   if (env.NEXT_PUBLIC_APP_URL) {
-    return `${env.NEXT_PUBLIC_APP_URL}${path}`;
+    const base = env.NEXT_PUBLIC_APP_URL.replace(/\/+$/, "");
+    return `${base}${path.startsWith("/") ? path : `/${path}`}`;
   }
   if (env.VERCEL) {
     switch (env.NEXT_PUBLIC_VERCEL_ENV) {

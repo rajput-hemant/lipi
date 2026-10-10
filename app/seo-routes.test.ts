@@ -25,6 +25,13 @@ describe("robots and sitemap host", () => {
     ).toBe(true);
   });
 
+  it("trims a trailing slash from the configured base", async () => {
+    const { robots, sitemap } = await load("https://custom.example.com/");
+
+    expect(robots.sitemap).toBe("https://custom.example.com/sitemap.xml");
+    expect(sitemap[1].url).toBe("https://custom.example.com/pricing");
+  });
+
   it("falls back to the site host when unset", async () => {
     const { robots, sitemap, siteConfig } = await load(undefined);
 
