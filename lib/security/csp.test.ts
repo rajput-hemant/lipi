@@ -17,7 +17,7 @@ describe("buildCsp", () => {
     expect(directive(policy, "form-action")).toEqual(["'self'"]);
   });
 
-  it("allowlists Stripe, UploadThing and avatar hosts", () => {
+  it("allowlists Stripe and UploadThing hosts", () => {
     const policy = buildCsp();
     expect(directive(policy, "script-src")).toContain("https://js.stripe.com");
     expect(directive(policy, "connect-src")).toEqual(
@@ -29,15 +29,15 @@ describe("buildCsp", () => {
         "https://uploadthing.com",
       ])
     );
+  });
+
+  it("allows images and media from any https origin", () => {
+    const policy = buildCsp();
     expect(directive(policy, "img-src")).toEqual(
-      expect.arrayContaining([
-        "blob:",
-        "data:",
-        "https://lh3.googleusercontent.com",
-        "https://avatars.githubusercontent.com",
-        "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/",
-        "https://utfs.io",
-      ])
+      expect.arrayContaining(["'self'", "https:", "blob:", "data:"])
+    );
+    expect(directive(policy, "media-src")).toEqual(
+      expect.arrayContaining(["'self'", "https:", "blob:", "data:"])
     );
   });
 

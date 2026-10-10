@@ -42,7 +42,7 @@ Gates first: `bun run type-check && bun run lint && bun run test` (expect 100 fi
 ## 5. Browser and production-build checks
 
 - `bun run build` then `bun run start` (the cloud sandbox crashed Bun at the end of `next build`; check it on your machine). Check lobby, auth and dashboard pages, `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest`, a 404 (must return HTTP 404), error boundaries, and that no credentials are printed on production start.
-- Content-Security-Policy is report-only: open the console on lobby, auth, dashboard and editor routes, an avatar, an upload, Stripe redirects and the realtime socket, and note every violation, then decide whether to enforce (TODO F-SEC-2).
+- Content-Security-Policy is enforcing: open the console on lobby, auth, dashboard and editor routes, an avatar, an upload, Stripe redirects and the realtime socket, and note every violation.
 - Light and dark on dialogs and auth pages, reduced motion (OS setting), 320, 768, 1280 and 1920 px, more than four collaborators in the header, collapsed rail popover with a long tree, Safari and Firefox.
 - Contrast on collaborator cursor colours and presence avatars; run an axe scan if available.
 

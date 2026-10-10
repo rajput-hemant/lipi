@@ -42,4 +42,4 @@ Anonymous visitor: `/signup` or `/login` from the lobby navbar; `/forgot-passwor
 ## Recipe notes (2026-10-10)
 
 - With `chrome-devtools-axi`, `fill` the email first, take a fresh `snapshot`, then `fillform @<pw1>=... @<pw2>=...` for the two password boxes; refs go stale after each action. A form that does not submit with `ERR_CONNECTION_REFUSED` in the console means the app process died (see realtime recipe notes).
-- Every page that loads Zod's client chunk logs one CSP `unsafe-eval` message (`Function("")` probe, report-only); with an enforcing header sign-up still worked.
+- Every page that loads Zod's client chunk logs one CSP `unsafe-eval` message (`Function("")` probe) unless Zod runs jitless (set in components/providers.tsx).
