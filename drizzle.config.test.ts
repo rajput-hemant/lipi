@@ -20,4 +20,9 @@ describe("drizzle.config", () => {
   ])("uses the Lipi history table for %s", async (url) => {
     expect((await loadConfig(url)).migrations).toEqual(HISTORY);
   });
+
+  it("only manages lipi_* tables so other apps' tables are left alone", async () => {
+    const config = await loadConfig("postgresql://u:p@127.0.0.1:5432/lipi");
+    expect(config.tablesFilter).toEqual(["lipi_*"]);
+  });
 });
