@@ -1,6 +1,6 @@
 # Lobby, legal pages and footer
 
-Status: PARTIAL live proof (home, pricing, terms and privacy render and titles correct, no console errors). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/lobby-legal-public/` (private task data dir, not in the repo).
+Status: PARTIAL live proof (home, pricing, terms and privacy render and titles correct, no console errors). Last live proof: 2026-10-10 (2026-10-10, branch `task/r4-sec` on `71b665e` (production build, `next start`; enforcing-CSP experiment build), evidence [local-session-r4-sec-2026-10-10.md](../../../../docs/verification/local-session-r4-sec-2026-10-10.md); `/`, `/pricing`, `/terms`, `/privacy`, `/login`, `/signup`, `/forgot-password`, `/reset-password` loaded anonymously on a production build and were checked for console violations only; no sub-feature newly ticked). Earlier proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/lobby-legal-public/` (private task data dir, not in the repo).
 
 Public marketing site: `/` (hero, features, tech stack, testimonials, open source), `/pricing`, `/terms`, `/privacy`, 404/error pages, footer links, theme toggle, robots/sitemap/manifest.
 
