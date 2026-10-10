@@ -89,6 +89,7 @@ describe("plan quota enforcement", () => {
     await expect(
       assertUserCanAddCollaborator("u1", { workspaceId: "w1", email: "a@b.c" })
     ).rejects.toBeInstanceOf(PlanQuotaError);
+    expect(mocks.rows).toHaveLength(0);
   });
 
   it("allows an invite when members plus pending invites stay under the limit", async () => {
@@ -105,6 +106,7 @@ describe("plan quota enforcement", () => {
     mocks.rows = [[{ value: 1 }], [{ value: 5 }]];
 
     await expect(assertUserCanAddCollaborator("u1")).resolves.toBeUndefined();
+    expect(mocks.rows).toHaveLength(1);
   });
 
   it("treats a pro subscription as free when the pro price is unconfigured", async () => {
@@ -165,6 +167,7 @@ describe("plan quota enforcement", () => {
       await expect(
         assertUserCanReceiveWorkspaceTransfer("u2", "w1")
       ).resolves.toBeUndefined();
+      expect(mocks.rows).toHaveLength(2);
     });
   });
 });

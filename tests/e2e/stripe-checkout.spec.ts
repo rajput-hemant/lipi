@@ -20,7 +20,9 @@ test.describe("Stripe checkout redirect", () => {
           typeof input === "string" ? input
           : input instanceof URL ? input.href
           : input.url;
-        if (href.includes("/api/stripe/checkout") && init?.method === "POST") {
+        const method =
+          init?.method ?? (input instanceof Request ? input.method : "GET");
+        if (href.includes("/api/stripe/checkout") && method === "POST") {
           window.__e2eCheckoutRedirect = mockUrl;
           return new Response(JSON.stringify({ url: mockUrl }), {
             status: 200,
@@ -28,9 +30,6 @@ test.describe("Stripe checkout redirect", () => {
           });
         }
         return originalFetch(input, init);
-      };
-      window.location.assign = (target: string | URL) => {
-        window.__e2eCheckoutRedirect = String(target);
       };
     }, checkoutUrl);
 

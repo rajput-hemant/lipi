@@ -74,7 +74,16 @@ test.describe("real-time collaboration", () => {
 
       await viewerPage.locator(".bn-editor").first().click();
       await viewerPage.keyboard.type("blocked viewer edit");
+      await expect(viewerPage.locator(".bn-editor")).toContainText(livePhrase, {
+        timeout: 60_000,
+      });
       await expect(viewerPage.locator(".bn-editor")).not.toContainText(
+        "blocked viewer edit"
+      );
+      await expect(ownerPage.locator(".bn-editor")).not.toContainText(
+        "blocked viewer edit"
+      );
+      await expect(editorPage.locator(".bn-editor")).not.toContainText(
         "blocked viewer edit"
       );
 
