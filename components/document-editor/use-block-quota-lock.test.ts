@@ -23,7 +23,7 @@ class FakeProvider extends EventEmitter {
 }
 
 describe("useBlockQuotaLock", () => {
-  it("locks on a block quota close and unlocks when the provider reconnects", () => {
+  it("locks on a block quota close and unlocks only once the server acknowledges the reconnect sync", () => {
     const provider = new FakeProvider();
     function Probe() {
       const locked = useBlockQuotaLock(
@@ -51,6 +51,12 @@ describe("useBlockQuotaLock", () => {
 
     act(() => {
       provider.emit("status", { status: "connected" });
+      provider.emit("unsyncedChanges", { number: 1 });
+    });
+    expect(locked()).toBe(true);
+
+    act(() => {
+      provider.emit("unsyncedChanges", { number: 0 });
     });
     expect(locked()).toBe(false);
 
