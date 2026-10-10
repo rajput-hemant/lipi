@@ -1,7 +1,8 @@
-export const E2E_PG_CONTAINER = "lipi-p9-e2e-pg";
-export const E2E_PG_PORT = 5544;
-export const E2E_APP_PORT = 3100;
-export const E2E_REALTIME_PORT = 1235;
+export const E2E_PG_CONTAINER =
+  process.env.E2E_PG_CONTAINER ?? "lipi-p9-e2e-pg";
+export const E2E_PG_PORT = Number(process.env.E2E_PG_PORT ?? 5544);
+export const E2E_APP_PORT = Number(process.env.E2E_APP_PORT ?? 3100);
+export const E2E_REALTIME_PORT = Number(process.env.E2E_REALTIME_PORT ?? 1235);
 
 export const E2E_DATABASE_URL = `postgresql://postgres:test@127.0.0.1:${E2E_PG_PORT}/postgres`;
 

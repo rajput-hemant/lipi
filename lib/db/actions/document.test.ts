@@ -27,7 +27,17 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   delete: vi.fn(),
   transaction: vi.fn(),
+  whereConditions: [] as unknown[],
 }));
+
+vi.mock("drizzle-orm", async (importOriginal) => {
+  const original = await importOriginal<typeof import("drizzle-orm")>();
+  return {
+    ...original,
+    eq: (...args: unknown[]) => ({ __eqArgs: args }),
+    inArray: (...args: unknown[]) => ({ __inArrayArgs: args }),
+  };
+});
 
 vi.mock("next/cache", () => ({
   unstable_cache: (fn: () => unknown) => fn,
@@ -56,7 +66,10 @@ vi.mock("..", () => {
   const query = () => {
     const rows = () => Promise.resolve().then(() => mocks.selectRows());
     return Object.assign(rows(), {
-      where: () => Object.assign(rows(), { orderBy: rows }),
+      where: (...args: unknown[]) => {
+        mocks.whereConditions.push(args[0]);
+        return Object.assign(rows(), { orderBy: rows });
+      },
     });
   };
   const tx = {
@@ -95,6 +108,7 @@ function row(id: string, parentId: string | null) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.whereConditions.length = 0;
   mocks.requireAuthenticatedUser.mockResolvedValue({ id: "user-1" });
   mocks.assertWorkspaceAccess.mockResolvedValue({});
   mocks.selectRows.mockResolvedValue([]);
@@ -109,6 +123,17 @@ describe("getDocuments", () => {
 
     await expect(getDocuments(WORKSPACE_ID)).rejects.toThrow("Forbidden");
     expect(mocks.selectRows).not.toHaveBeenCalled();
+  });
+
+  it("scopes the document read to the requested workspace", async () => {
+    await getDocuments(WORKSPACE_ID);
+
+    expect(mocks.whereConditions).toHaveLength(1);
+    expect(mocks.whereConditions[0]).toEqual(
+      expect.objectContaining({
+        __eqArgs: expect.arrayContaining([WORKSPACE_ID]),
+      })
+    );
   });
 });
 
@@ -299,6 +324,10 @@ describe("multi-row mutations run in a transaction", () => {
     expect(mocks.transaction).toHaveBeenCalledOnce();
     expect(mocks.delete).toHaveBeenCalledOnce();
     expect(where).toHaveBeenCalledOnce();
+    const [[condition]] = where.mock.calls as [[{ __inArrayArgs: unknown[] }]];
+    expect(condition.__inArrayArgs[1]).toEqual(
+      expect.arrayContaining(["t", "u"])
+    );
   });
 
   it("does not delete when the tree read inside the transaction has active descendants", async () => {
@@ -314,13 +343,19 @@ describe("multi-row mutations run in a transaction", () => {
   });
 
   it("trashes the subtree in one transaction", async () => {
-    mocks.update.mockReturnValue({ set: () => ({ where: () => undefined }) });
+    const where = vi.fn();
+    mocks.update.mockReturnValue({ set: () => ({ where }) });
 
     await expect(softDeleteDocumentTree("t")).resolves.toEqual({
       ok: true,
       data: 2,
     });
     expect(mocks.transaction).toHaveBeenCalledOnce();
+    expect(where).toHaveBeenCalledOnce();
+    const [[condition]] = where.mock.calls as [[{ __inArrayArgs: unknown[] }]];
+    expect(condition.__inArrayArgs[1]).toEqual(
+      expect.arrayContaining(["t", "u"])
+    );
   });
 
   it("passes the transaction executor to the authoritative content loader", async () => {

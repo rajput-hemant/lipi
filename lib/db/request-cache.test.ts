@@ -4,18 +4,18 @@ const mocks = vi.hoisted(() => {
   const cacheMap = new Map<Function, Map<string, unknown>>();
   return {
     reactCache: vi.fn((fn: Function) => {
-      let fnCache = cacheMap.get(fn);
-      if (!fnCache) {
-        fnCache = new Map();
-        cacheMap.set(fn, fnCache);
-      }
       return (...args: unknown[]) => {
+        let fnCache = cacheMap.get(fn);
+        if (!fnCache) {
+          fnCache = new Map();
+          cacheMap.set(fn, fnCache);
+        }
         const key = JSON.stringify(args);
-        if (fnCache!.has(key)) {
-          return fnCache!.get(key);
+        if (fnCache.has(key)) {
+          return fnCache.get(key);
         }
         const result = fn(...args);
-        fnCache!.set(key, result);
+        fnCache.set(key, result);
         return result;
       };
     }),
@@ -93,6 +93,20 @@ describe("request-scoped React cache deduplication (F-PERF-5)", () => {
     });
     expect(role2).toBe(role1);
     expect(mocks.findWorkspace).toHaveBeenCalledTimes(1);
+  });
+
+  it("queries again for a different workspace instead of sharing the entry", async () => {
+    const { getWorkspaceMembershipRole } = await import("./data/mutation-auth");
+
+    mocks.findWorkspace.mockImplementation(async () => ({
+      id: "ws-1",
+      workspaceOwnerId: "owner-1",
+    }));
+
+    await getWorkspaceMembershipRole("owner-1", "ws-1");
+    await getWorkspaceMembershipRole("owner-1", "ws-2");
+
+    expect(mocks.findWorkspace).toHaveBeenCalledTimes(2);
   });
 
   it("deduplicates getDocuments calls within the same request", async () => {

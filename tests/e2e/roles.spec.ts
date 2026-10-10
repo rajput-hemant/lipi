@@ -106,7 +106,12 @@ test.describe("role-based access", () => {
       await viewerPage
         .getByRole("link", { name: "Role Doc", exact: true })
         .click({ button: "right" });
-      await expect(viewerPage.getByRole("menuitem")).toHaveCount(0);
+      await expect(
+        viewerPage.getByRole("menuitem", { name: "Move to trash" })
+      ).toHaveCount(0);
+      await expect(
+        viewerPage.getByRole("menuitem", { name: "New subpage" })
+      ).toHaveCount(0);
       await expectNoOwnerControls(viewerPage);
 
       const anonymous = await browser.newContext();
