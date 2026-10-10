@@ -3,6 +3,7 @@ import * as React from "react";
 import type {
   HocuspocusProvider,
   onCloseParameters,
+  onUnsyncedChangesParameters,
 } from "@hocuspocus/provider";
 
 export function useBlockQuotaLock(provider: HocuspocusProvider) {
@@ -12,15 +13,16 @@ export function useBlockQuotaLock(provider: HocuspocusProvider) {
     const onClose = ({ event }: onCloseParameters) => {
       if (event.reason === "plan-quota-exceeded:block") setExceeded(true);
     };
-    const onStatus = ({ status }: { status: string }) => {
-      if (status === "connected") setExceeded(false);
+    // The server acknowledges the reconnect handshake only after its quota check passes.
+    const onUnsyncedChanges = ({ number }: onUnsyncedChangesParameters) => {
+      if (number === 0) setExceeded(false);
     };
 
     provider.on("close", onClose);
-    provider.on("status", onStatus);
+    provider.on("unsyncedChanges", onUnsyncedChanges);
     return () => {
       provider.off("close", onClose);
-      provider.off("status", onStatus);
+      provider.off("unsyncedChanges", onUnsyncedChanges);
     };
   }, [provider]);
 
