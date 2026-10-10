@@ -2,13 +2,19 @@ import { notFound } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorkspaceAccessRevoked } from "@/components/workspace-access-revoked";
-import { MutationAuthError } from "@/lib/db/data/mutation-auth";
+import {
+  getWorkspaceOrThrow,
+  MutationAuthError,
+  WorkspaceNotFoundError,
+} from "@/lib/db/data/mutation-auth";
 import { WorkspaceLayout } from "./layout";
 
-const { getCurrentUser, getWorkspaceMembershipRole } = vi.hoisted(() => ({
-  getCurrentUser: vi.fn(),
-  getWorkspaceMembershipRole: vi.fn(),
-}));
+const { findWorkspace, getCurrentUser, getWorkspaceMembershipRole } =
+  vi.hoisted(() => ({
+    findWorkspace: vi.fn(),
+    getCurrentUser: vi.fn(),
+    getWorkspaceMembershipRole: vi.fn(),
+  }));
 
 vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => undefined }),
@@ -20,6 +26,9 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 vi.mock("@/lib/auth", () => ({ getCurrentUser }));
+vi.mock("@/lib/db", () => ({
+  db: { query: { workspaces: { findFirst: findWorkspace } } },
+}));
 vi.mock("@/lib/db/actions/document", () => ({
   getDocuments: vi.fn(async () => []),
 }));
@@ -68,14 +77,30 @@ describe("WorkspaceLayout for a removed member", () => {
 });
 
 describe("WorkspaceLayout for a nonexistent workspace", () => {
-  it("returns a 404", async () => {
-    getWorkspaceMembershipRole.mockRejectedValue(
-      new MutationAuthError("Workspace not found")
+  it("gets a typed error from an absent workspace row", async () => {
+    findWorkspace.mockResolvedValue(undefined);
+
+    await expect(getWorkspaceOrThrow("ws-missing")).rejects.toBeInstanceOf(
+      WorkspaceNotFoundError
     );
+  });
+
+  it("invokes the not-found boundary for the typed missing-workspace error", async () => {
+    const error = new WorkspaceNotFoundError();
+    error.message = "The workspace no longer exists";
+    getWorkspaceMembershipRole.mockRejectedValue(error);
 
     await expect(renderLayout()).rejects.toThrow(
       "NEXT_HTTP_ERROR_FALLBACK;404"
     );
-    expect(notFound).toHaveBeenCalled();
+    expect(notFound).toHaveBeenCalledOnce();
+  });
+
+  it("does not classify an unrelated error by its message", async () => {
+    const error = new MutationAuthError("Workspace not found");
+    getWorkspaceMembershipRole.mockRejectedValue(error);
+
+    await expect(renderLayout()).rejects.toBe(error);
+    expect(notFound).not.toHaveBeenCalled();
   });
 });

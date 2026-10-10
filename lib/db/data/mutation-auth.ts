@@ -25,13 +25,20 @@ export class MutationAuthError extends Error {
   }
 }
 
+export class WorkspaceNotFoundError extends MutationAuthError {
+  constructor() {
+    super("Workspace not found");
+    this.name = "WorkspaceNotFoundError";
+  }
+}
+
 export async function getWorkspaceOrThrow(workspaceId: string) {
   const workspace = await db.query.workspaces.findFirst({
     where: eq(workspaces.id, workspaceId),
   });
 
   if (!workspace) {
-    throw new MutationAuthError("Workspace not found");
+    throw new WorkspaceNotFoundError();
   }
 
   return workspace;

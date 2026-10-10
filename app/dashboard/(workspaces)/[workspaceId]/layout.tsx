@@ -11,7 +11,10 @@ import {
   getRequestDocuments,
   getRequestMembership,
 } from "@/lib/dashboard/workspace-request";
-import { MutationAuthError } from "@/lib/db/data/mutation-auth";
+import {
+  MutationAuthError,
+  WorkspaceNotFoundError,
+} from "@/lib/db/data/mutation-auth";
 import { WorkspaceShell } from "../components/workspace-shell";
 
 export const instant = false;
@@ -34,11 +37,7 @@ export const WorkspaceLayout: React.FCC<{
     if (error instanceof MutationAuthError && error.code === "FORBIDDEN") {
       return <WorkspaceAccessRevoked />;
     }
-    if (
-      error instanceof MutationAuthError &&
-      error.code === "INVALID" &&
-      error.message === "Workspace not found"
-    ) {
+    if (error instanceof WorkspaceNotFoundError) {
       notFound();
     }
     throw error;
