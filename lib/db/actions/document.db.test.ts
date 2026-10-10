@@ -79,13 +79,16 @@ describe.skipIf(!testDatabaseUrl)("document actions against Postgres", () => {
       await fixtures.document(workspace, { title });
     }
 
-    await expect(
-      actions.createDocument({
-        id: crypto.randomUUID(),
-        workspaceId: workspace,
-        title: "d",
-      })
-    ).rejects.toThrow("Root page limit reached");
+    const fourth = await actions.createDocument({
+      id: crypto.randomUUID(),
+      workspaceId: workspace,
+      title: "d",
+    });
+    expect(fourth).toMatchObject({
+      ok: false,
+      code: "QUOTA_EXCEEDED",
+      message: expect.stringContaining("root pages"),
+    });
 
     const [parent] =
       await sql`select id from lipi_documents where workspace_id = ${workspace} limit 1`;
