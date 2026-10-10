@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AlertCircleIcon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function DashboardError({
   error,
@@ -53,9 +53,12 @@ export default function DashboardError({
             Try again
           </Button>
 
-          <Button variant="outline" render={<Link href="/dashboard" />}>
+          <Link
+            href="/dashboard"
+            className={buttonVariants({ variant: "outline" })}
+          >
             Workspaces
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

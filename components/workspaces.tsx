@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import type { Workspace } from "@/types/db";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { listWorkspacesForCurrentUser } from "@/lib/db/actions/workspace";
 import { cn } from "@/lib/utils";
@@ -173,9 +173,9 @@ export function Workspaces() {
       )}
 
       <div className="flex justify-end">
-        <Button render={<Link href="/dashboard/new-workspace" />}>
+        <Link href="/dashboard/new-workspace" className={buttonVariants()}>
           New workspace
-        </Button>
+        </Link>
       </div>
     </div>
   );
