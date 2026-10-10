@@ -71,7 +71,9 @@ export async function waitForEditableEditor(page: Page) {
 }
 
 export async function waitForViewOnlyEditor(page: Page) {
-  await expect(page.getByText("View only")).toBeVisible({ timeout: 60_000 });
+  await expect(
+    page.locator('p[role="status"]').getByText("View only", { exact: true })
+  ).toBeVisible({ timeout: 60_000 });
   await expect(page.getByText("Reconnecting to collaborators...")).toBeHidden({
     timeout: 60_000,
   });
