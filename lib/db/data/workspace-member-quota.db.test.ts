@@ -119,7 +119,7 @@ describe.skipIf(!testDatabaseUrl)("owner collaborator advisory lock", () => {
     expect(results[0].status).toBe("fulfilled");
     expect(results[1]).toMatchObject({
       status: "rejected",
-      reason: { name: "MutationAuthError" },
+      reason: { name: "PlanQuotaError" },
     });
     expect(await collaboratorCount(workspace)).toBe(2);
   });
