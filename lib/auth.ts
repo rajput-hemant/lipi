@@ -32,6 +32,7 @@ function isValidatedProduction(): boolean {
 
 export const getSession = cache(async () => {
   try {
+    // Read request headers first: under cacheComponents getAuth() may read time or random values.
     const requestHeaders = await headers();
     const session = await getAuth().api.getSession({
       headers: requestHeaders,
