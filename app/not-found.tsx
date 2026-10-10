@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowLeft02Icon, Home01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function NotFound() {
   return (
@@ -22,9 +23,9 @@ export default function NotFound() {
         </p>
 
         <div className="flex items-center gap-3 pt-4">
-          <Button
-            variant="outline"
-            render={<Link href="/" className="gap-2" />}
+          <Link
+            href="/"
+            className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
           >
             <HugeiconsIcon
               icon={ArrowLeft02Icon}
@@ -32,16 +33,16 @@ export default function NotFound() {
               className="size-4"
             />
             Back to Home
-          </Button>
+          </Link>
 
-          <Button render={<Link href="/dashboard" className="gap-2" />}>
+          <Link href="/dashboard" className={cn(buttonVariants(), "gap-2")}>
             <HugeiconsIcon
               icon={Home01Icon}
               strokeWidth={2}
               className="size-4"
             />
             Dashboard
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -32,8 +32,9 @@ function isValidatedProduction(): boolean {
 
 export const getSession = cache(async () => {
   try {
+    const requestHeaders = await headers();
     const session = await getAuth().api.getSession({
-      headers: await headers(),
+      headers: requestHeaders,
     });
     return session ?? null;
   } catch (error) {
