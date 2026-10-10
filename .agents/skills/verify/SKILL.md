@@ -14,7 +14,7 @@ Invoke it standalone:
 - Codex: `$verify` where the skill is discovered; otherwise explicitly read and follow `.agents/skills/verify/SKILL.md`.
 - Any other agent: read and follow this file explicitly.
 
-**Status: partially live-proven.** Launch, doctor, auth, workspace, document, trash, invite, realtime, viewer, theme and mobile-layout flows were driven in a real browser on 2026-10-02 at commit `815ceda` (plus these docs). Browser authorization for that run came from the task brief; a new run needs a fresh explicit request. Per-feature status and evidence are in [features/README.md](features/README.md); only features with a `Last live proof:` date were exercised, and only the sub-features ticked in their files. Do not write PASS for anything not exercised in a run.
+**Status: partially live-proven.** Launch, doctor, auth, workspace, document, trash, invite, realtime, viewer, theme and mobile-layout flows were driven in a real browser on 2026-10-02 at commit `815ceda`; the 2026-10-10 sessions in `docs/verification/` (`r4-sec`, `r4-ui`, and the `r4-vskill` run that re-drove this skill's launch, doctor, drive, evidence and cleanup steps at `37e892b`) added CSP, three-user realtime, search, uploads (no credentials), billing (no credentials) and public-route proof. Browser authorization for those runs came from task briefs; a new run needs a fresh explicit request. Per-feature status and evidence are in [features/README.md](features/README.md); only features with a `Last live proof:` date were exercised, and only the sub-features ticked in their files. Do not write PASS for anything not exercised in a run.
 
 Read `AGENTS.md` first: this is a breaking-changes Next.js 16; read the relevant guide in `node_modules/next/dist/docs/` before changing app code. This skill does not change product code.
 
@@ -26,7 +26,7 @@ Primary surface is the web UI (Next.js App Router, port 3000 by default; 3161 in
 
 ## Prerequisites
 
-- `bun`, `docker` (disposable Postgres only), a free set of ports (below), Node for `realtime/bootstrap.mjs` (Hocuspocus does not run under Bun).
+- `bun`, `docker` (disposable Postgres only), a free set of ports (below), Node 22 for `realtime/bootstrap.mjs` (Hocuspocus does not run under Bun; Node 24 also worked in the `r4-sec` run).
 - Dependencies installed (`bun i`). `node_modules` is not shared between worktrees.
 - No real credentials are needed or allowed. Use the throwaway env block below. OAuth (Google/GitHub), Stripe, UploadThing and Upstash need real credentials and are therefore GAPs, not drive targets.
 - Never point `DATABASE_URL` at the shared local development database or any production database.
@@ -45,7 +45,7 @@ Lipi's own e2e uses fixed names (`lipi-p9-e2e-pg`, ports 5544/3100/1235; see `te
 
 `$SCRATCH` is the agent's per-session scratch directory (create `$SCRATCH/lipi-verify/evidence` before launch). One dev/prod server per task. If any of those ports is already taken, stop and pick the next free triple; never kill a process you did not start.
 
-Throwaway env (export in the shell that starts both processes; values are fake and local-only):
+Throwaway env. Put it in a file (for example `$SCRATCH/lipi-verify/env.sh`) and start every process as `env -i PATH="$PATH" HOME="$HOME" bash -c 'source <file>; exec <command>'` so no `DATABASE_URL` or other variable from the calling shell can leak in (an earlier run started Next with a shared database that way). Values are fake and local-only:
 
 ```sh
 export DATABASE_URL=postgresql://postgres:test@127.0.0.1:5561/postgres
@@ -69,13 +69,12 @@ Do this once per run. Steps are the documented e2e path adapted to isolated name
 1. Database container:
    ```sh
    docker run -d --rm --name lipi-verify-pg -e POSTGRES_PASSWORD=test \
-     -p 127.0.0.1:5561:5432 --tmpfs /var/lib/postgresql postgres:18
+     -p 127.0.0.1:5561:5432 --tmpfs /var/lib/postgresql postgres:18.6-alpine
    until docker exec lipi-verify-pg pg_isready -U postgres -h 127.0.0.1; do sleep 1; done
    ```
-2. Schema. The throwaway database is loopback, so the local migration scripts apply on an empty database:
+2. Schema. The throwaway database is loopback, so the local scripts apply on an empty database. `db:setup` runs `db:auth`, `db:migrate` and `db:seed` (the seed creates `local@example.test`, one workspace and a few pages; use it, or the sign-up form for fresh users):
    ```sh
-   bun run db:auth
-   bun run db:migrate
+   bun run db:setup
    ```
    Push alternative (auth tables first, then `lipi_*`; this is what the e2e suite uses):
    ```sh
@@ -83,17 +82,18 @@ Do this once per run. Steps are the documented e2e path adapted to isolated name
    bunx drizzle-kit push --force --config tests/e2e/drizzle-lipi.config.ts
    ```
    (`tests/e2e/apply-auth-database.ts` / `apply-lipi-database.ts` document these.)
-3. Realtime server (background, log to the scratch dir). `bun run` forks a node child that owns the port; record both PIDs:
+3. Realtime server, log to the scratch dir. Start it as its own backgrounded harness task (the tool's background-run option), not a trailing `&` inside a shell call that returns: the child dies when the call returns and the browser then shows `ERR_CONNECTION_REFUSED` on form submits. Command: `env -i ... bash -c 'source env.sh; exec bun run realtime:start' > "$SCRATCH/lipi-verify/realtime.log" 2>&1`. The port owner is the pid record:
    ```sh
-   bun run realtime:start > "$SCRATCH/lipi-verify/realtime.log" 2>&1 &
-   echo $! > "$SCRATCH/lipi-verify/realtime.pid"
-   sleep 3; echo "$(cat "$SCRATCH/lipi-verify/realtime.pid") $(lsof -tiTCP:1261 -sTCP:LISTEN)" > "$SCRATCH/lipi-verify/realtime.pids"
+   sleep 3; lsof -tiTCP:1261 -sTCP:LISTEN > "$SCRATCH/lipi-verify/realtime.pid"
    ```
 4. App. The e2e path uses a production build; a dev server also works but is slower per route and logs extra dev warnings that must not be counted as product console errors.
    ```sh
-   bun run build && (bunx next start --port 3161 --hostname 127.0.0.1 > "$SCRATCH/lipi-verify/app.log" 2>&1 &)
+   env -i PATH="$PATH" HOME="$HOME" bash -c 'source env.sh; bun run build'
+   # separate backgrounded task, same env.sh:
+   env -i PATH="$PATH" HOME="$HOME" bash -c 'source env.sh; exec bunx next start --port 3161 --hostname 127.0.0.1' > "$SCRATCH/lipi-verify/app.log" 2>&1
    sleep 6; lsof -tiTCP:3161 -sTCP:LISTEN > "$SCRATCH/lipi-verify/app.pid"
    ```
+   `SKIP_ENV_VALIDATION=true` from the env block is enough for the build; no real credentials are needed.
    Dev alternative: `bunx next dev --turbopack --port 3161 --hostname 127.0.0.1` (the package `dev` script has no port flag).
 
 **Ready when:** `curl -fsS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3161/` prints `200` **and** `nc -z 127.0.0.1 1261` succeeds. For the build path, the app log shows `Ready`.
@@ -105,8 +105,9 @@ Run first whenever anything looks off. It changes nothing.
 ```sh
 docker ps --filter name=lipi-verify-pg                                          # our container, port 5561
 docker exec lipi-verify-pg psql -U postgres -tAc "select count(*) from information_schema.tables where table_name like 'lipi_%'"   # > 0
-kill -0 "$(cat $SCRATCH/lipi-verify/app.pid)" && kill -0 $(cat $SCRATCH/lipi-verify/realtime.pids)   # both are ours
+kill -0 "$(cat $SCRATCH/lipi-verify/app.pid)" && kill -0 "$(cat $SCRATCH/lipi-verify/realtime.pid)"   # both are ours
 lsof -nP -iTCP:3161 -sTCP:LISTEN | grep "$(cat $SCRATCH/lipi-verify/app.pid)"                # port owned by us
+nc -z 127.0.0.1 1261                                                                           # realtime listening
 curl -fsS -o /dev/null -w '%{http_code}\n' http://127.0.0.1:3161/pricing                        # 200, public route
 curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' http://127.0.0.1:3161/dashboard       # 307 -> /login?from=%2Fdashboard (proxy gate)
 curl -s -X POST -H 'content-type: application/json' -d '{"roomName":"x"}' \
@@ -121,12 +122,16 @@ Browser tool: `chrome-devtools-axi` (read `chrome-devtools-axi --help` first). P
 
 ```sh
 export CHROME_DEVTOOLS_AXI_SESSION=lipi-browser-verification-<role>
-export CHROME_DEVTOOLS_AXI_MCP_PATH="$(readlink -f "$(which chrome-devtools-mcp)" | sed 's#/build/.*##')/build/src/bin/chrome-devtools-mcp.js"   # avoids the npx bootstrap
+export CHROME_DEVTOOLS_AXI_MCP_PATH="$(command ls -d ~/.npm/_npx/*/node_modules/chrome-devtools-mcp | head -1)/build/src/bin/chrome-devtools-mcp.js"   # optional: skips the npx bootstrap; verify with `ls`, and leave it unset if the path does not exist
 unset CHROME_DEVTOOLS_AXI_AUTO_CONNECT CHROME_DEVTOOLS_AXI_USER_DATA_DIR CHROME_DEVTOOLS_AXI_BROWSER_URL   # never attach to the user's browser
 chrome-devtools-axi open http://127.0.0.1:3161/signup
 ```
 
-Tool behaviors learned live: element refs (`@g1:1_20`) go stale after every action, so re-run `snapshot` and pick the fresh ref before each `click`/`fill`; wrap that in a tiny shell helper that greps the snapshot line by role and name and acts on its `uid`. `fill` replaces a field's value, `type` appends to the focused element. There is no right-click: open the sidebar tree context menu by dispatching a `contextmenu` MouseEvent on the `[id^=document-tree-item]` link via `eval` (state this when citing it; hardware-keyboard `Shift+F10` is unproven). `screenshot <path>`, `console --type error` and `network` give evidence; `resize 390 844` emulates mobile.
+Do not wrap `chrome-devtools-axi` in a CPU-throttling wrapper (a `heavy`-style queue): the bridge then exits with `BRIDGE_NOT_READY` before Chrome is up. `chrome-devtools-mcp` is not on `PATH` in a typical setup, so a `which`-derived `CHROME_DEVTOOLS_AXI_MCP_PATH` is an empty path and fails the same way.
+
+Tool behaviors learned live: element refs (`@g1:1_20`) go stale after every action, so re-run `snapshot` and pick the fresh ref before each `click`/`fill`; wrap that in a tiny shell helper that greps the snapshot line by role and name and acts on its `uid`. `fill` replaces a field's value, `type` appends to the focused element. There is no right-click: open the sidebar tree context menu by dispatching a `contextmenu` MouseEvent on the `[id^=document-tree-item]` link via `eval` (state this when citing it; hardware-keyboard `Shift+F10` is unproven). The accessibility snapshot does not list the ⌘K search results (`listbox` shows no options): read them with `eval "() => document.querySelector('[role=dialog]').innerText"`; open the dialog with `press Meta+k`, set the query with `fill` on the `combobox`. `screenshot <path>`, `console --type error` and `network` give evidence; `resize 390 844` emulates mobile.
+
+A fresh-ref helper pattern that worked (`act.sh click|fill '<grep pattern>' [text]`): run `chrome-devtools-axi snapshot`, `grep -m1 -E "$pattern"`, extract `uid=` as `@uid`, then call the action. For fields that share a name (the two `••••••••••` password boxes on `/signup`) take the nth match.
 
 Stable handles, confirmed live unless marked otherwise:
 
@@ -135,9 +140,10 @@ Stable handles, confirmed live unless marked otherwise:
 - Sidebar: `aria-label="Workspace pages"`, tree role `tree`, button `New page` / `Cancel new page`, link by page title, context menu item `New subpage`, toast `Page created.`.
 - Editor: `.bn-editor`, text `Syncing page...`, `Reconnecting to collaborators...`, `View only` (viewer), `aria-label="Page collaborators"`, `aria-label="Breadcrumb"`, `aria-label="Choose page icon"`.
 - Search: `aria-label="Search documents"`, `title="Search (⌘K)"`, shortcut Cmd/Ctrl+K, input placeholder `Type to search pages or body text...`.
+- Search results are only in the DOM text (see above); zero-result copy `No pages match “<query>”.`.
 - Trash: `Trash` dialog, empty text `Nothing in the trash`, buttons `Restore <title>` and `Delete <title> permanently`, then alertdialog `Delete permanently?` with `Cancel` / `Delete permanently`; context menu items `New subpage`, `Rename`, `Duplicate`, `Move to trash`; toasts `Moved to trash.`, `Page deleted permanently.`.
 - Settings dialog: button `Settings`, field `Invite by email`, role `<select>` (`editor`/`viewer`), button `Invite`, toast `Invite created`, section `Danger zone`, `Transfer ownership`, `Delete workspace`.
-- Pricing: button `Go Pro` on `/pricing`.
+- Pricing: signed in, button `Go Pro` (toast `Billing unavailable` / `Stripe billing is not configured` without Stripe env); signed out, link `Sign in to upgrade` to `/login` and `Get Started` on the Free card. Footer theme toggle buttons are `Toggle Light Mode` / `Toggle Dark Mode` / `Toggle System Mode`.
 - Theme: button `Toggle theme` opens menu items `Light` / `Dark` / `System` (`html` class becomes `dark`).
 - Mobile nav: `aria-label="Open navigation menu"` (appears at 390 px). In the dashboard the sidebar trigger is `Toggle Sidebar` (sheet below 768 px, icon rail on desktop, cookie `sidebar_state`).
 - Settings members: row role button (`Editor`) opens menu `Editor` / `Viewer` / `Remove`.
@@ -170,11 +176,12 @@ Update the feature file's `Last live proof:` with date, commit, and evidence pat
 Tear down only what this run started, in this order. Evidence under `$SCRATCH/lipi-verify/evidence/` is preserved.
 
 ```sh
-kill "$(cat $SCRATCH/lipi-verify/app.pid)" $(cat $SCRATCH/lipi-verify/realtime.pids)
-for r in a b anon; do CHROME_DEVTOOLS_AXI_SESSION=lipi-browser-verification-$r chrome-devtools-axi stop; done   # one bridge per role
+kill "$(cat $SCRATCH/lipi-verify/app.pid)" "$(cat $SCRATCH/lipi-verify/realtime.pid)"
+for r in a b anon; do CHROME_DEVTOOLS_AXI_SESSION=lipi-browser-verification-$r chrome-devtools-axi stop; done   # one bridge per role you opened
 docker rm -f lipi-verify-pg
 docker ps -a --filter name=lipi-verify     # confirms nothing is left
-rm -f "$SCRATCH/lipi-verify/"*.pid*         # keep *.log and evidence/
+rm -f "$SCRATCH/lipi-verify/"*.pid*         # keep *.log, env.sh and evidence/
+lsof -nP -iTCP:3161 -iTCP:1261 -iTCP:5561 -sTCP:LISTEN   # prints nothing when every port is free
 ```
 
 Never `pkill node`, `killall bun`, or kill by process name. If a pid file is missing, find the owner with `lsof -nP -iTCP:3161 -sTCP:LISTEN` and confirm it is yours before stopping it. Remove `.next` only if this run created it.
