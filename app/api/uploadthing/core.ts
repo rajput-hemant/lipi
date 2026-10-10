@@ -5,7 +5,11 @@ import { z } from "zod";
 import type { FileRouter } from "uploadthing/next";
 
 import { getCurrentUser } from "@/lib/auth";
-import { requireWorkspacePermission } from "@/lib/db/data/mutation-auth";
+import {
+  MutationAuthError,
+  requireWorkspacePermission,
+  WorkspaceNotFoundError,
+} from "@/lib/db/data/mutation-auth";
 
 const f = createUploadthing();
 
@@ -37,11 +41,20 @@ function workspaceImageUpload({
           input.workspaceId,
           permission
         );
-      } catch {
-        throw new UploadThingError({
-          code: "FORBIDDEN",
-          message: "Forbidden: insufficient workspace permissions",
-        });
+      } catch (error) {
+        if (error instanceof WorkspaceNotFoundError) {
+          throw new UploadThingError({
+            code: "NOT_FOUND",
+            message: "Workspace not found",
+          });
+        }
+        if (error instanceof MutationAuthError) {
+          throw new UploadThingError({
+            code: "FORBIDDEN",
+            message: "Forbidden: insufficient workspace permissions",
+          });
+        }
+        throw error;
       }
 
       return { userId: user.id, workspaceId: input.workspaceId };
