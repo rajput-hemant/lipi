@@ -6,13 +6,13 @@ Checklist applied per feature screen once drivable; not a separate route.
 
 ## Sub-features
 
-- [x] Light and dark themes: contrast, borders, editor and dialogs. - live: editor page in light and dark (`Toggle theme` > `Dark`); contrast now also axe-checked (2026-10-06): zero violations in dark on lobby, pricing, editor and Settings; light still flags the stock `muted-foreground` on `muted` pair (4.39:1).
+- [x] Light and dark themes: contrast, borders, editor and dialogs. - live: editor page in light and dark (`Toggle theme` > `Dark`); contrast now also axe-checked (2026-10-06): zero violations in dark on lobby, pricing, editor and Settings; light flagged the stock `muted-foreground` on `muted` pair (4.39:1) then; `docs/TODO.md` records zero `color-contrast` findings after later fixes (not re-run here).
 - [x] 390 px and 1280 px (and a tablet width): no horizontal overflow, collapsible sidebar and mobile sheet usable. - live: no horizontal overflow at 390 px on the editor page; collaborator avatar overlaps the search button there (LIP-V021). Tablet width NOT exercised.
 - [ ] Empty, loading (`app/loading.tsx`, `app/dashboard/loading.tsx`), error (`app/error.tsx`, `app/global-error.tsx`) and long-content states (long page titles, many pages, many collaborators).
 - [ ] Keyboard: tab order through auth forms, sidebar tree, dialogs, ⌘K; visible focus; Escape closes dialogs.
 - [ ] Accessible names (aria labels listed in SKILL.md), toasts announced.
 - [ ] Reduced motion and no layout shift while the editor boots.
-- [x] Console free of errors/warnings (the e2e fixtures already fail on any console error). - live: `console --type error` was empty on every exercised page (only devtools issues for missing autocomplete/label attributes).
+- [x] Console free of errors/warnings (the e2e fixtures already fail on any console error). - live: `console --type error` was empty on the pages exercised on 2026-10-02; the r3 session saw two Base UI `nativeButton` errors on the not-found pages, so re-check there.
 
 ## How to get to it (user POV)
 
@@ -20,7 +20,7 @@ Everywhere.
 
 ## Driving it with the browser skill (pending)
 
-For each screen from the other feature files: capture the six states above with the browser skill, list defects in the ledger as CONFIRMED with screenshot paths, and keep the product code unchanged during verification.
+For each screen from the other feature files: capture the states above with the browser skill, list defects in the ledger as CONFIRMED with screenshot paths, and keep the product code unchanged during verification.
 
 ## Gotchas
 

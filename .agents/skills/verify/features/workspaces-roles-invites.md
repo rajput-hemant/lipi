@@ -1,6 +1,6 @@
 # Workspaces, roles and invites
 
-Status: PARTIAL live proof (create, invite, accept, viewer role). Invite acceptance has a confirmed bug, LIP-V019. Last live proof: 2026-10-10 (2026-10-10, branch `task/r4-sec` on `71b665e` (production build, `next start`; enforcing-CSP experiment build), evidence [local-session-r4-sec-2026-10-10.md](../../../../docs/verification/local-session-r4-sec-2026-10-10.md); invite as editor and as viewer through the settings form, both accepted at `/invite/<token>`, member removal; sub-features still unticked below were not exercised). Earlier proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/workspaces-roles-invites/` (private task data dir, not in the repo).
+Status: PARTIAL live proof (create, invite, accept, viewer role). Invite acceptance has a confirmed bug, LIP-V019. Last live proof: 2026-10-10 (branch `task/r4-sec` on `71b665e` (production build, `next start`; enforcing-CSP experiment build), evidence [local-session-r4-sec-2026-10-10.md](../../../../docs/verification/local-session-r4-sec-2026-10-10.md); invite as editor and as viewer through the settings form, both accepted at `/invite/<token>`, member removal; sub-features still unticked below were not exercised). Earlier proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/workspaces-roles-invites/` (private task data dir, not in the repo).
 
 Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts`), email-token invites (`lib/workspace/workspace-invites.ts`, `app/invite/[token]/route.ts`), settings dialog (`components/settings.tsx`), ownership transfer and workspace deletion.
 
@@ -8,7 +8,7 @@ Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts
 
 - [x] Create workspace (`/dashboard/new-workspace`, `Workspace name`, `Create workspace`). Free plan allows 1 owned workspace (`lib/billing/plan-quotas.ts`). - live: `Alpha Space` created; toast `Your workspace "Alpha Space" was created successfully.`; second-workspace limit NOT exercised.
 - [ ] Settings dialog: rename, logo, members list with `Owner` badge.
-- [x] Invite by email as `editor` or `viewer`; toast `Invite created`; duplicate active invite rejected. - live: editor invite for user B; toast `Invite created`, `PENDING INVITES` shown; duplicate-invite rejection NOT exercised.
+- [x] Invite by email as `editor` or `viewer`; toast `Invite created`; a repeated invite for the same email refreshes the token, role and expiry (`onConflictDoUpdate`); only an existing collaborator is rejected (`This user is already a collaborator`). - live: editor invite for user B; toast `Invite created`, `PENDING INVITES` shown; repeat-invite refresh NOT exercised.
 - [ ] Accept invite at `/invite/<token>` as a signed-in user; lands on `/dashboard/<workspaceId>`.
 - [ ] Role effects: editor edits; viewer sees `View only` and cannot edit; only owner sees invite form, `Transfer ownership`, `Delete workspace`.
 - [ ] Collaborator quota (Free: 2) shown or enforced when inviting.
@@ -32,7 +32,7 @@ Signed-in user with no workspace is sent to `/dashboard/new-workspace`; settings
 
 - No mailer locally; the token comes from the DB.
 - Free plan limits one owned workspace: create a second one only to prove the quota message, using the same owner.
-- Invalid tokens redirect to `/dashboard?invite=invalid`, which no component reads (LIP-V005).
+- Invalid tokens redirect to `/dashboard?invite=invalid`; `app/dashboard/invite-notice.tsx` now reads it and shows `This invite is invalid or has expired.` (source-checked, not re-driven; LIP-V005).
 
 ## Recipe notes (2026-10-10)
 

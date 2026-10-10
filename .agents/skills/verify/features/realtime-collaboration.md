@@ -18,7 +18,7 @@ Hocuspocus 4.7 + Yjs server (`realtime/server.ts`, `realtime/bootstrap.mjs`, `li
 
 Any shared page opened by two members at once.
 
-## Driving it with the browser skill (pending)
+## Driving it with the browser skill
 
 1. Three separate browser contexts: owner, editor, viewer (invite flow above).
 2. Owner opens `Shared Doc`, types a unique phrase; expect it in the editor and viewer contexts within a few seconds.
