@@ -2,7 +2,8 @@ import Link from "next/link";
 import { File01Icon, Home01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function DocumentNotFound() {
   return (
@@ -22,9 +23,9 @@ export default function DocumentNotFound() {
         </p>
 
         <div className="pt-2">
-          <Button
-            variant="outline"
-            render={<Link href="/dashboard" className="gap-2" />}
+          <Link
+            href="/dashboard"
+            className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
           >
             <HugeiconsIcon
               icon={Home01Icon}
@@ -32,7 +33,7 @@ export default function DocumentNotFound() {
               className="size-4"
             />
             Dashboard
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

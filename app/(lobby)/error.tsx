@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AlertCircleIcon, RefreshIcon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function LobbyError({
   error,
@@ -53,9 +53,9 @@ export default function LobbyError({
             Try again
           </Button>
 
-          <Button variant="outline" render={<Link href="/" />}>
+          <Link href="/" className={buttonVariants({ variant: "outline" })}>
             Home
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

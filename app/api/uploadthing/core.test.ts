@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import {
+  MutationAuthError,
+  WorkspaceNotFoundError,
+} from "@/lib/db/data/mutation-auth";
 import { ourFileRouter } from "./core";
 
 const { mockGetCurrentUser, mockRequireWorkspacePermission } = vi.hoisted(
@@ -13,9 +17,14 @@ vi.mock("@/lib/auth", () => ({
   getCurrentUser: mockGetCurrentUser,
 }));
 
-vi.mock("@/lib/db/data/mutation-auth", () => ({
-  requireWorkspacePermission: mockRequireWorkspacePermission,
-}));
+vi.mock("@/lib/db/data/mutation-auth", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/db/data/mutation-auth")>();
+  return {
+    ...actual,
+    requireWorkspacePermission: mockRequireWorkspacePermission,
+  };
+});
 
 describe("UploadThing core router", () => {
   const validWorkspaceId = "123e4567-e89b-12d3-a456-426614174000";
@@ -46,7 +55,9 @@ describe("UploadThing core router", () => {
 
     it("rejects when user lacks document:write permission", async () => {
       mockGetCurrentUser.mockResolvedValue({ id: "user-viewer" });
-      mockRequireWorkspacePermission.mockRejectedValue(new Error("Forbidden"));
+      mockRequireWorkspacePermission.mockRejectedValue(
+        new MutationAuthError("Forbidden", "FORBIDDEN")
+      );
 
       await expect(
         ourFileRouter.documentImage.middleware({
@@ -80,6 +91,39 @@ describe("UploadThing core router", () => {
         userId: "user-editor",
         workspaceId: validWorkspaceId,
       });
+    });
+
+    it("maps a missing workspace to NOT_FOUND", async () => {
+      mockGetCurrentUser.mockResolvedValue({ id: "user-editor" });
+      mockRequireWorkspacePermission.mockRejectedValue(
+        new WorkspaceNotFoundError()
+      );
+
+      await expect(
+        ourFileRouter.documentImage.middleware({
+          input: { workspaceId: validWorkspaceId },
+          req: new Request("http://localhost"),
+          files: [],
+        })
+      ).rejects.toMatchObject({
+        code: "NOT_FOUND",
+        message: "Workspace not found",
+      });
+    });
+
+    it("rethrows unexpected failures instead of mapping to FORBIDDEN", async () => {
+      mockGetCurrentUser.mockResolvedValue({ id: "user-editor" });
+      mockRequireWorkspacePermission.mockRejectedValue(
+        new Error("Database offline")
+      );
+
+      await expect(
+        ourFileRouter.documentImage.middleware({
+          input: { workspaceId: validWorkspaceId },
+          req: new Request("http://localhost"),
+          files: [],
+        })
+      ).rejects.toThrow("Database offline");
     });
   });
 
@@ -130,7 +174,9 @@ describe("UploadThing core router", () => {
 
     it("rejects non-owners without workspace:settings permission", async () => {
       mockGetCurrentUser.mockResolvedValue({ id: "user-editor" });
-      mockRequireWorkspacePermission.mockRejectedValue(new Error("Forbidden"));
+      mockRequireWorkspacePermission.mockRejectedValue(
+        new MutationAuthError("Forbidden", "FORBIDDEN")
+      );
 
       await expect(
         ourFileRouter.workspaceLogo.middleware({

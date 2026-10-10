@@ -335,4 +335,50 @@ describe("SearchCommand", () => {
     });
     expect(getInput().value).toBe("");
   });
+
+  it("clears a stale error when the dialog closes", async () => {
+    vi.useFakeTimers();
+    mockSearchDocuments.mockRejectedValue(new Error("Database offline"));
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+
+    act(() => {
+      root.render(<SearchCommand />);
+    });
+
+    const trigger = container.querySelector("button");
+    act(() => {
+      trigger?.click();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(document.querySelector('[role="alert"]')).not.toBeNull();
+
+    const getInput = () =>
+      document.querySelector<HTMLInputElement>('input[role="combobox"]')!;
+    act(() => {
+      getInput().dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Escape",
+          code: "Escape",
+          keyCode: 27,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    expect(
+      document.querySelector('[data-slot="dialog-content"][data-open]')
+    ).toBeNull();
+
+    mockSearchDocuments.mockResolvedValue([]);
+    act(() => {
+      trigger?.click();
+    });
+    expect(document.querySelector('[role="alert"]')).toBeNull();
+  });
 });

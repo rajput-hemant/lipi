@@ -5,6 +5,9 @@ import { env } from "./env";
 export { cn } from "cn";
 
 export function absoluteUrl(path: string) {
+  if (env.NEXT_PUBLIC_APP_URL) {
+    return `${env.NEXT_PUBLIC_APP_URL}${path}`;
+  }
   if (env.VERCEL) {
     switch (env.NEXT_PUBLIC_VERCEL_ENV) {
       case "production":

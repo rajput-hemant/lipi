@@ -78,6 +78,8 @@ import {
   toDocumentRecords,
 } from "./document-tree-utils";
 
+const ASK_OWNER_TO_UPGRADE = "Ask the workspace owner to upgrade to Pro.";
+
 type DocumentTreeItemProps = {
   node: DocumentTreeNode;
   depth: number;
@@ -475,8 +477,6 @@ function DocumentTreeItem({
     </Item>
   );
 }
-
-const ASK_OWNER_TO_UPGRADE = "Ask the workspace owner to upgrade to Pro.";
 
 export function DocumentTree() {
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
