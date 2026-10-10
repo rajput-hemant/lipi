@@ -1,6 +1,6 @@
 # Documents, page tree and editor
 
-Status: PARTIAL live proof (create page, edit, persistence, not-found page). Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/documents-editor/` (private task data dir, not in the repo).
+Status: PARTIAL live proof (create page, edit, persistence, not-found page). Last live proof: 2026-10-10 (2026-10-10, branch `task/r4-sec` on `71b665e` (production build, `next start`; enforcing-CSP experiment build), evidence [local-session-r4-sec-2026-10-10.md](../../../../docs/verification/local-session-r4-sec-2026-10-10.md); re-proved the open-page, type and reload-persistence sub-feature on a production build; `New page` was driven through the inline input and `Create page` button, the toast was not captured). Earlier proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/documents-editor/` (private task data dir, not in the repo).
 
 Nested pages in the sidebar tree and the BlockNote editor (`components/sidebar/`, `components/document-editor/`, `lib/db/documents-tree.ts`, route `app/dashboard/(workspaces)/[workspaceId]/[fileId]/page.tsx`).
 
@@ -32,3 +32,8 @@ Workspace dashboard, sidebar `Workspace pages` tree.
 - Editing needs the realtime server running; otherwise the editor never becomes ready.
 - The sidebar link href is the stable way to open a page (the e2e helper reads it).
 - Prior e2e proof exists in `tests/e2e/documents-editor.spec.ts` (not re-run here).
+
+## Recipe notes (2026-10-10)
+
+- The emoji picker (Settings, `Choose emoji`, and the page icon control) loads about 130 images from `https://cdn.jsdelivr.net/npm/emoji-datasource-apple/`; it needs network access and an `img-src` entry in `lib/security/csp.ts`.
+- Editor text for assertions: `document.querySelector(".bn-editor").innerText`; collaborator cursor labels add the user name to that text.

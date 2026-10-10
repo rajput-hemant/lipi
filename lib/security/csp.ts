@@ -25,6 +25,7 @@ const AVATAR_IMAGES = [
   "https://lh3.googleusercontent.com",
   "https://avatars.githubusercontent.com",
 ];
+const EMOJI_IMAGES = ["https://cdn.jsdelivr.net/npm/emoji-datasource-apple/"];
 const VERCEL_ANALYTICS_SCRIPT = ["https://va.vercel-scripts.com"];
 const VERCEL_ANALYTICS_CONNECT = ["https://vitals.vercel-insights.com"];
 
@@ -63,7 +64,14 @@ export function buildCsp({ isDev = false, realtimeUrl }: CspOptions = {}) {
       ...VERCEL_ANALYTICS_SCRIPT,
     ],
     "style-src": ["'self'", "'unsafe-inline'"],
-    "img-src": ["'self'", "blob:", "data:", ...AVATAR_IMAGES, ...UPLOADTHING],
+    "img-src": [
+      "'self'",
+      "blob:",
+      "data:",
+      ...AVATAR_IMAGES,
+      ...EMOJI_IMAGES,
+      ...UPLOADTHING,
+    ],
     "font-src": ["'self'", "data:"],
     "connect-src": [
       "'self'",

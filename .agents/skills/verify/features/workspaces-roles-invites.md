@@ -1,6 +1,6 @@
 # Workspaces, roles and invites
 
-Status: PARTIAL live proof (create, invite, accept, viewer role). Invite acceptance has a confirmed bug, LIP-V019. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/workspaces-roles-invites/` (private task data dir, not in the repo).
+Status: PARTIAL live proof (create, invite, accept, viewer role). Invite acceptance has a confirmed bug, LIP-V019. Last live proof: 2026-10-10 (2026-10-10, branch `task/r4-sec` on `71b665e` (production build, `next start`; enforcing-CSP experiment build), evidence [local-session-r4-sec-2026-10-10.md](../../../../docs/verification/local-session-r4-sec-2026-10-10.md); invite as editor and as viewer through the settings form, both accepted at `/invite/<token>`, member removal; sub-features still unticked below were not exercised). Earlier proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/workspaces-roles-invites/` (private task data dir, not in the repo).
 
 Workspace creation, the owner/editor/viewer model (`lib/workspace/permissions.ts`), email-token invites (`lib/workspace/workspace-invites.ts`, `app/invite/[token]/route.ts`), settings dialog (`components/settings.tsx`), ownership transfer and workspace deletion.
 
@@ -33,3 +33,8 @@ Signed-in user with no workspace is sent to `/dashboard/new-workspace`; settings
 - No mailer locally; the token comes from the DB.
 - Free plan limits one owned workspace: create a second one only to prove the quota message, using the same owner.
 - Invalid tokens redirect to `/dashboard?invite=invalid`, which no component reads (LIP-V005).
+
+## Recipe notes (2026-10-10)
+
+- Settings dialog member rows: button `Change role for <name>` opens menu items `Editor`, `Viewer`, `Remove`. The invite role is the combobox `Role` (option `Viewer`), set before clicking `Invite`.
+- Both invites were created from the UI (`lipi_workspace_invites` rows `editor` and `viewer`); acceptance used the token read from that table. Landing page after accept was not recorded, so the accept sub-feature stays unticked.

@@ -1,6 +1,6 @@
 # Authentication and session
 
-Status: PARTIAL live proof (email/password sign-up, sign-in, sign-out, wrong password, gating). Unexercised sub-features stay unticked. Last live proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/auth-session/` (private task data dir, not in the repo).
+Status: PARTIAL live proof (email/password sign-up, sign-in, sign-out, wrong password, gating). Unexercised sub-features stay unticked. Last live proof: 2026-10-10 (2026-10-10, branch `task/r4-sec` on `71b665e` (production build, `next start`; enforcing-CSP experiment build), evidence [local-session-r4-sec-2026-10-10.md](../../../../docs/verification/local-session-r4-sec-2026-10-10.md); the valid sign-up path was re-proved for three users on a production build and the enforcing-CSP experiment build; no other sub-feature re-run). Earlier proof: 2026-10-02, commit `815ceda`, evidence `lipi-browser-verification/evidence/auth-session/` (private task data dir, not in the repo).
 
 Email/password sign-up, sign-in, sign-out, emailed password recovery and signed-in password change on Better Auth with a bcrypt hash against the local database. Pages live in `app/(auth)/{login,signup,forgot-password,reset-password}` and `app/dashboard/change-password`; the API is `app/api/auth/[...all]/route.ts`; auth wiring is `lib/auth/create-auth.ts`.
 
@@ -38,3 +38,8 @@ Anonymous visitor: `/signup` or `/login` from the lobby navbar; `/forgot-passwor
 - OAuth and passkeys cannot be proved without real credentials/origins; do not mark them verified.
 - Recovery is the Better Auth emailed flow (`b04d298`); the old unauthenticated server action is gone (LIP-V003).
 - A passing `lib/auth/*.test.ts` run does not prove any of these UI flows.
+
+## Recipe notes (2026-10-10)
+
+- With `chrome-devtools-axi`, `fill` the email first, take a fresh `snapshot`, then `fillform @<pw1>=... @<pw2>=...` for the two password boxes; refs go stale after each action. A form that does not submit with `ERR_CONNECTION_REFUSED` in the console means the app process died (see realtime recipe notes).
+- Every page that loads Zod's client chunk logs one CSP `unsafe-eval` message (`Function("")` probe, report-only); with an enforcing header sign-up still worked.
