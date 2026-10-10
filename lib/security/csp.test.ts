@@ -35,6 +35,7 @@ describe("buildCsp", () => {
         "data:",
         "https://lh3.googleusercontent.com",
         "https://avatars.githubusercontent.com",
+        "https://cdn.jsdelivr.net/npm/emoji-datasource-apple/",
         "https://utfs.io",
       ])
     );
