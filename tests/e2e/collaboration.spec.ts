@@ -80,6 +80,9 @@ test.describe("real-time collaboration", () => {
       await expect(viewerPage.locator(".bn-editor")).not.toContainText(
         "blocked viewer edit"
       );
+      const syncMarker = `Editor sync ${Date.now()}`;
+      await typeInEditor(editorPage, syncMarker);
+      await expectEditorContains(ownerPage, syncMarker);
       await expect(ownerPage.locator(".bn-editor")).not.toContainText(
         "blocked viewer edit"
       );

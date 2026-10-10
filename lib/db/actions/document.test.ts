@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MutationAuthError } from "../data/mutation-auth";
+import { documents } from "../schema";
 import {
   createDocument,
   deleteDocumentPermanently,
@@ -129,11 +130,9 @@ describe("getDocuments", () => {
     await getDocuments(WORKSPACE_ID);
 
     expect(mocks.whereConditions).toHaveLength(1);
-    expect(mocks.whereConditions[0]).toEqual(
-      expect.objectContaining({
-        __eqArgs: expect.arrayContaining([WORKSPACE_ID]),
-      })
-    );
+    const [condition] = mocks.whereConditions as [{ __eqArgs: unknown[] }];
+    expect(condition.__eqArgs[0]).toBe(documents.workspaceId);
+    expect(condition.__eqArgs[1]).toBe(WORKSPACE_ID);
   });
 });
 
