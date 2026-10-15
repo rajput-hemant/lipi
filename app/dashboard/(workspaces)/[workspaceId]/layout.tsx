@@ -1,6 +1,6 @@
 import React from "react";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { AppStateProvider } from "@/components/app-state-provider";
 import { WorkspaceRealtimeProvider } from "@/components/realtime/workspace-realtime-provider";
@@ -33,6 +33,9 @@ export const WorkspaceLayout: React.FCC<{
     // messages, so render the state instead of letting the boundary show it.
     if (error instanceof MutationAuthError && error.code === "FORBIDDEN") {
       return <WorkspaceAccessRevoked />;
+    }
+    if (error instanceof MutationAuthError && error.code === "INVALID") {
+      notFound();
     }
     throw error;
   }
