@@ -23,6 +23,7 @@ describe("WorkspaceAccessRevoked", () => {
       expect(container.querySelector("a")?.getAttribute("href")).toBe(
         "/dashboard"
       );
+      expect(container.querySelector("[role=button]")).toBeNull();
       expect(consoleError).not.toHaveBeenCalled();
     } finally {
       act(() => root.unmount());
