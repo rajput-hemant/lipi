@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { siteConfig } from "@/config/site";
+import { absoluteUrl } from "@/lib/utils";
 
 type Entry = [
   path: string,
@@ -19,7 +19,7 @@ const entries: Entry[] = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return entries.map(([path, changeFrequency, priority]) => ({
-    url: `${siteConfig.url}${path}`,
+    url: absoluteUrl(path),
     lastModified: new Date(),
     changeFrequency,
     priority,

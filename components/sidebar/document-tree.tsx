@@ -547,21 +547,22 @@ export function DocumentTree() {
     }
   };
 
-  function promptUpgrade() {
-    if (isOwner) {
-      setOpen(true);
-      return;
-    }
-    toast.info("Ask the workspace owner to upgrade to Pro.");
+  /** Owners get the upgrade modal; everyone else is told to ask one. */
+  function withUpgradeHint(message: string) {
+    return isOwner ? message : (
+        `${message} Ask the workspace owner to upgrade to Pro.`
+      );
   }
 
   function createRootToggle() {
     const rootCount = countChildren(documents, null);
     if (!hasProEntitlement && rootCount >= FREE_WORKSPACE_ROOT_PAGE_LIMIT) {
       toast.error("Something went wrong", {
-        description: "You have reached the maximum number of root pages.",
+        description: withUpgradeHint(
+          "You have reached the maximum number of root pages."
+        ),
       });
-      promptUpgrade();
+      if (isOwner) setOpen(true);
       return;
     }
     setIsCreatingRoot((prev) => !prev);
@@ -600,9 +601,10 @@ export function DocumentTree() {
       },
       failed: "Could not create page.",
       denied: "You do not have permission to create pages.",
+      quota: withUpgradeHint,
       onError: (error) => {
         deleteDocument(newDocument.id);
-        if (isMutationQuotaExceeded(error)) promptUpgrade();
+        if (isOwner && isMutationQuotaExceeded(error)) setOpen(true);
       },
     });
   }
