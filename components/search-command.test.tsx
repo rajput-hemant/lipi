@@ -189,6 +189,44 @@ describe("SearchCommand", () => {
     expect(document.activeElement).toBe(trigger);
   });
 
+  it("clears the query after Escape so a reopened dialog starts empty", async () => {
+    mockSearchDocuments.mockResolvedValue([]);
+    const container = document.createElement("div");
+    document.body.append(container);
+    const root = createRoot(container);
+    roots.push(root);
+    act(() => root.render(<SearchCommand />));
+    const trigger = container.querySelector("button");
+
+    act(() => trigger?.click());
+    const input = () =>
+      document.querySelector<HTMLInputElement>('input[role="combobox"]')!;
+    act(() => {
+      const setValue = Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value"
+      )!.set!;
+      setValue.call(input(), "roadmap");
+      input().dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(input().value).toBe("roadmap");
+
+    act(() => {
+      input().dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Escape",
+          code: "Escape",
+          keyCode: 27,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+
+    act(() => trigger?.click());
+    expect(input().value).toBe("");
+  });
+
   it("opens with Cmd+K and toggles closed on a second press", () => {
     const container = document.createElement("div");
     document.body.append(container);

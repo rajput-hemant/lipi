@@ -60,6 +60,15 @@ export function SearchCommand({
     setOpen(true);
   }, []);
 
+  const handleOpenChange = React.useCallback((next: boolean) => {
+    setOpen(next);
+    if (!next) {
+      setQuery("");
+      setResults([]);
+      setError(null);
+    }
+  }, []);
+
   const prevOpenRef = React.useRef(open);
   React.useEffect(() => {
     if (prevOpenRef.current && !open) {
@@ -78,14 +87,14 @@ export function SearchCommand({
     const onKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        if (open) setOpen(false);
+        if (open) handleOpenChange(false);
         else handleOpen();
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open, handleOpen]);
+  }, [open, handleOpen, handleOpenChange]);
 
   React.useEffect(() => {
     if (!open || !workspaceId) return;
@@ -117,12 +126,10 @@ export function SearchCommand({
   const onSelectDocument = React.useCallback(
     (documentId: string | null) => {
       if (!documentId || !workspaceId) return;
-      setOpen(false);
-      setQuery("");
-      setError(null);
+      handleOpenChange(false);
       router.push(`/dashboard/${workspaceId}/${documentId}`);
     },
-    [router, workspaceId]
+    [router, workspaceId, handleOpenChange]
   );
 
   if (!workspaceId) {
@@ -198,7 +205,7 @@ export function SearchCommand({
         </Button>
       }
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="overflow-hidden p-0 sm:max-w-xl">
           <DialogHeader className="sr-only">
             <DialogTitle>Search documents</DialogTitle>
@@ -207,7 +214,7 @@ export function SearchCommand({
           <Combobox
             open={true}
             onOpenChange={(next) => {
-              if (!next) setOpen(false);
+              if (!next) handleOpenChange(false);
             }}
             value={null}
             onValueChange={(val) => {
