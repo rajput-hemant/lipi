@@ -99,6 +99,19 @@ describe("ChangePasswordForm", () => {
     expect(currentInput.value).toBe("Wrong-pass1!");
   });
 
+  it("points users without a password to Forgot password", async () => {
+    mocks.changePassword.mockResolvedValue({
+      data: null,
+      error: { message: "Credential account not found" },
+    });
+
+    await submit("Wrong-pass1!", "Another-pass2!");
+
+    expect(mocks.toast.error).toHaveBeenCalledWith(
+      expect.stringContaining("Forgot password")
+    );
+  });
+
   it("does not call the API when the new password breaks the rules", async () => {
     await submit("Current-pass1!", "weak");
 

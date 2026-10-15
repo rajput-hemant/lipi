@@ -25,7 +25,11 @@ function workspaceImageUpload({
     .middleware(async ({ input }) => {
       const user = await getCurrentUser();
       if (!user) {
-        throw new UploadThingError("Unauthorized");
+        // UploadThing has no UNAUTHORIZED code; FORBIDDEN maps to HTTP 403
+        throw new UploadThingError({
+          code: "FORBIDDEN",
+          message: "Unauthorized",
+        });
       }
 
       try {
@@ -35,9 +39,10 @@ function workspaceImageUpload({
           permission
         );
       } catch {
-        throw new UploadThingError(
-          "Forbidden: insufficient workspace permissions"
-        );
+        throw new UploadThingError({
+          code: "FORBIDDEN",
+          message: "Forbidden: insufficient workspace permissions",
+        });
       }
 
       return { userId: user.id, workspaceId: input.workspaceId };
