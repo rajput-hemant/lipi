@@ -53,7 +53,8 @@ export function mutationErrorMessage(error: unknown, fallback: string) {
 
 /**
  * Shows a loading/success/error toast for a server action result. `denied`
- * replaces the message of a permission failure; `onError` runs first with
+ * replaces the message of a permission failure and `quota` rewrites the
+ * server message of a quota failure; `onError` runs first with
  * the error so callers can roll back optimistic state.
  */
 export function runMutationToast<T>(
@@ -63,6 +64,7 @@ export function runMutationToast<T>(
     success: string | ((data: T) => string);
     failed: string;
     denied?: string;
+    quota?: (message: string) => string;
     onError?: (error: unknown) => void;
   }
 ) {
@@ -71,9 +73,11 @@ export function runMutationToast<T>(
     success: options.success,
     error: (error) => {
       options.onError?.(error);
-      return options.denied && isMutationDenied(error) ?
-          options.denied
-        : mutationErrorMessage(error, options.failed);
+      if (options.denied && isMutationDenied(error)) return options.denied;
+      const message = mutationErrorMessage(error, options.failed);
+      return options.quota && isMutationQuotaExceeded(error) ?
+          options.quota(message)
+        : message;
     },
   });
 }

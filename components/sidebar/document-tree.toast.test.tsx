@@ -272,7 +272,7 @@ describe("trash and root quota toasts", () => {
     expect(setModalOpen).toHaveBeenCalledExactlyOnceWith(true);
   });
 
-  it("tells a non-owner to ask the owner and leaves the upgrade modal closed on a server quota failure", async () => {
+  it("folds the ask-the-owner hint into the one toast for a non-owner on a server quota failure", async () => {
     createDocument.mockResolvedValue({
       ok: false,
       code: "QUOTA_EXCEEDED",
@@ -288,9 +288,10 @@ describe("trash and root quota toasts", () => {
     await submitForm();
 
     expect(ids(store)).toEqual(["a", "b"]);
-    expect(toast.info).toHaveBeenCalledExactlyOnceWith(
-      "Ask the workspace owner to upgrade to Pro."
-    );
+    expect(errorMessages).toEqual([
+      "Upgrade for root pages. Ask the workspace owner to upgrade to Pro.",
+    ]);
+    expect(toast.info).not.toHaveBeenCalled();
     expect(setModalOpen).not.toHaveBeenCalled();
   });
 
@@ -308,7 +309,7 @@ describe("trash and root quota toasts", () => {
     expect(toast.info).not.toHaveBeenCalled();
   });
 
-  it("tells a non-owner to ask the owner and leaves the upgrade modal closed at the client limit", () => {
+  it("shows one combined toast for a non-owner at the client limit", () => {
     proEntitlement.value = false;
     render([doc("a"), doc("b"), doc("c")], "editor");
 
@@ -318,9 +319,14 @@ describe("trash and root quota toasts", () => {
         .click()
     );
 
-    expect(toast.info).toHaveBeenCalledExactlyOnceWith(
-      "Ask the workspace owner to upgrade to Pro."
+    expect(toast.error).toHaveBeenCalledExactlyOnceWith(
+      "Something went wrong",
+      {
+        description:
+          "You have reached the maximum number of root pages. Ask the workspace owner to upgrade to Pro.",
+      }
     );
+    expect(toast.info).not.toHaveBeenCalled();
     expect(setModalOpen).not.toHaveBeenCalled();
   });
 
