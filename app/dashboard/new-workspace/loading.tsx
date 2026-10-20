@@ -9,8 +9,8 @@ export default function NewWorkspaceLoading() {
     >
       <span className="sr-only">Loading workspace setup</span>
 
-      <section className="relative hidden min-h-dvh w-full items-center justify-center bg-zinc-900 lg:flex">
-        <Skeleton className="size-72 rounded-3xl bg-zinc-800" />
+      <section className="dark relative hidden min-h-dvh w-full items-center justify-center bg-background lg:flex">
+        <Skeleton className="size-72 rounded-3xl bg-muted" />
       </section>
 
       <section className="flex size-full flex-col items-center justify-center gap-14 px-4 py-10">

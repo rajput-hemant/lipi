@@ -28,7 +28,7 @@ export default async function WorkspaceSetupPage({
   return (
     <div className="flex min-h-dvh items-center justify-center">
       <section className="dark relative hidden min-h-dvh w-full items-center justify-center lg:flex">
-        <div className="absolute inset-0 bg-zinc-900" />
+        <div className="absolute inset-0 bg-background" />
 
         <Image
           priority
@@ -43,7 +43,7 @@ export default async function WorkspaceSetupPage({
       <Separator orientation="vertical" />
 
       <section className="flex size-full flex-col items-center justify-center gap-14 px-4 py-10">
-        <h1 className="text-center font-heading text-4xl font-bold [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] sm:text-5xl md:text-6xl">
+        <h1 className="text-center font-heading text-4xl font-bold [text-shadow:_0_4px_0_#e1e1e1] dark:bg-gradient-to-br dark:from-foreground dark:to-muted-foreground dark:bg-clip-text dark:text-transparent dark:[text-shadow:none] sm:text-5xl md:text-6xl">
           Create your first
           <br />
           workspace

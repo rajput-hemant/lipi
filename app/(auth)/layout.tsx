@@ -8,10 +8,10 @@ import { AuthModeToggle } from "./components/auth-mode-toggle";
 export default function AuthLayout({ children }: React.PropsWithChildren) {
   return (
     <div className="container min-h-dvh flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
-      <div className="relative hidden h-full flex-col justify-between border-r p-10 lg:flex">
-        <div className="absolute inset-0 bg-zinc-900" />
+      <div className="dark relative hidden h-full flex-col justify-between border-r p-10 lg:flex">
+        <div className="absolute inset-0 bg-background" />
 
-        <div className="z-10 w-fit font-handwriting text-2xl font-medium lowercase text-background dark:text-foreground">
+        <div className="z-10 w-fit font-handwriting text-2xl font-medium lowercase text-foreground">
           <Link
             aria-label="Go to home page"
             href="/"
@@ -32,12 +32,12 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
           />
         </div>
 
-        <div className="z-10 ml-auto text-zinc-400">
+        <div className="z-10 ml-auto text-muted-foreground">
           <p className="text-sm">
             Illustrations by{" "}
             <a
               href="https://popsy.co/"
-              className="underline underline-offset-4 transition-colors hover:text-background focus-visible:underline focus-visible:outline-none dark:hover:text-foreground"
+              className="underline underline-offset-4 transition-colors hover:text-foreground focus-visible:underline focus-visible:outline-none"
             >
               Popsy
             </a>

@@ -33,15 +33,13 @@ export function EmojiPicker(props: EmojiPickerProps) {
         render={
           <span
             aria-label="Choose emoji"
-            className={cn(
-              "inline-flex cursor-pointer items-center justify-center",
-              className
-            )}
-            {...restProps}
+            className="inline-flex cursor-pointer items-center justify-center"
           />
         }
       >
-        {children}
+        <span className={cn(className)} {...restProps}>
+          {children}
+        </span>
       </PopoverTrigger>
 
       <PopoverContent

@@ -30,8 +30,17 @@ const doneItems = [
 const windowDots = ["bg-[#ef4444]", "bg-[#f59e0b]", "bg-[#10b981]"];
 
 const collaborators = [
-  { initials: "HR", ring: "ring-emerald-500", bg: "bg-emerald-700" },
-  { initials: "AS", ring: "ring-violet-500", bg: "bg-violet-700" },
+  {
+    initials: "HR",
+    avatarClassName:
+      "size-6 border-2 border-background ring-1 ring-emerald-500",
+    fallbackClassName: "bg-emerald-700 text-[10px] text-white",
+  },
+  {
+    initials: "AS",
+    avatarClassName: "size-6 border-2 border-background ring-1 ring-violet-500",
+    fallbackClassName: "bg-violet-700 text-[10px] text-white",
+  },
 ];
 
 const insertBlocks = [
@@ -49,7 +58,7 @@ export function Features() {
   return (
     <section id="features" className="space-y-8">
       <div className="mx-auto flex max-w-3xl flex-col items-center space-y-4 text-center">
-        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
+        <h2 className="font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-foreground dark:to-muted-foreground dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-6xl">
           Everything your team needs in one workspace
         </h2>
 
@@ -82,16 +91,15 @@ export function Features() {
 
           <div className="flex items-center gap-2">
             <div className="flex -space-x-1.5">
-              {collaborators.map(({ initials, ring, bg }) => (
-                <Avatar
-                  key={initials}
-                  className={`size-6 border-2 border-background ring-1 ${ring}`}
-                >
-                  <AvatarFallback className={`${bg} text-[10px] text-white`}>
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
+              {collaborators.map(
+                ({ initials, avatarClassName, fallbackClassName }) => (
+                  <Avatar key={initials} className={avatarClassName}>
+                    <AvatarFallback className={fallbackClassName}>
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                )
+              )}
             </div>
 
             <Badge
