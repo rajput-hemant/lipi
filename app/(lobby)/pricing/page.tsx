@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { Skeleton } from "@/components/bones-skeleton";
 import { siteConfig } from "@/config/site";
 import { getCurrentUser } from "@/lib/auth";
 import { PricingPlans } from "./pricing-plans";
@@ -19,7 +20,7 @@ export default async function PricingPage() {
   return (
     <section className="flex flex-col gap-6 py-8 md:gap-10">
       <div className="flex flex-col gap-4 rounded-3xl bg-muted p-6 md:p-10 lg:p-16 xl:p-20">
-        <h1 className="text-center font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-neutral-200 dark:to-neutral-600 dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-7xl">
+        <h1 className="text-center font-heading text-3xl drop-shadow-xl dark:bg-gradient-to-br dark:from-foreground dark:to-muted-foreground dark:bg-clip-text dark:text-transparent sm:text-3xl md:text-7xl">
           Simple, transparent pricing
         </h1>
         <p className="text-center leading-normal text-muted-foreground sm:text-lg sm:leading-7">
@@ -28,7 +29,9 @@ export default async function PricingPage() {
         </p>
       </div>
 
-      <PricingPlans isAuthenticated={!!user} />
+      <Skeleton name="pricing-plans" loading={false}>
+        <PricingPlans isAuthenticated={!!user} />
+      </Skeleton>
 
       <div className="mx-auto max-w-[58rem] text-muted-foreground">
         <span className="font-handwriting font-semibold lowercase text-foreground">
