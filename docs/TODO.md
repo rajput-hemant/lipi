@@ -27,7 +27,7 @@ Cloud-session gate evidence (2026-10-03, after all merges including the owner de
 
 ## Summary
 
-Counts as of 2026-10-10 (round 5, `task/r5-tidy`): 230 top-level checkbox lines, 210 ticked, 20 unticked (`grep -c "^- \[ \]"`).
+Counts as of 2026-10-20 (round 6): 230 top-level checkbox lines, 212 ticked, 18 unticked (`grep -c "^- \[ \]"`).
 
 ## Decisions needed
 
@@ -197,8 +197,8 @@ Evidence: [verification/local-db-session-2026-10-06.md](./verification/local-db-
 - [ ] **F-NEW-20** Extra findings from the 2026-10-07 local session: the first request on a cold dev server logs a prerender error for `new Date()` from `lib/auth.ts:35`; NotFound logs two Base UI `nativeButton` console errors; and the dev banner prints the fixture DB `127.0.0.1:5432/local_platforms` even though the app connects to `DATABASE_URL` (misleading; an earlier run misread it). Kind: verification gap. Priority: P3. Evidence: [round 3 local session](./verification/local-session-r3-2026-10-07.md). Status: open; first-request and console findings not fixed. **Outcome 2026-10-10 (round 4): partial. (a) cold-start new Date() error fixed (getSession awaits headers() first, curl-verified 1 to 0), (b) not-found page uses plain Link with buttonVariants (code only, console not checked), (c) dev banner comes from lib/dev-credentials-logger.ts, documented, no code change.**
 
 - [x] **F-NEW-21** Two stale DB tests fixed to the current contracts (`document.db.test.ts`, `workspace-member-quota.db.test.ts`). Kind: fix. Priority: P3. **Outcome 2026-10-10 (round 4): done.**
-- [ ] **F-NEW-22** No-body anonymous POST to `/api/uploadthing` returns 400 not 403. Kind: bug (low impact). Priority: P3. Evidence: r4-ui. Status: open.
-- [ ] **F-NEW-23** `chrome-devtools-axi` fails to start under npx when the repo `package.json` overrides are read; workaround `CHROME_DEVTOOLS_AXI_MCP_PATH`. Kind: tooling (low impact). Priority: P3. Status: open.
+- [x] **F-NEW-22** No-body anonymous POST to `/api/uploadthing` returns 400 not 403. Kind: bug (low impact). Priority: P3. Evidence: r4-ui. Status: closed, by design, no code change **Outcome 2026-10-20 (round 6): UploadThing's Next adapter validates the request before route middleware: a body-less POST fails `schemaBodyJson(UploadActionPayload)` (or the `slug` query parse) and maps `ParseError` to HTTP 400 `Invalid input` (`node_modules/uploadthing/dist/upload-builder-BlFOAnsv.js`, `handleUploadAction`), (the `slug` query parse and the `ParseError` to 400 mapping sit in `createRequestHandler`'s POST handler; the body parse is in `handleUploadAction`), so `getCurrentUser` in `app/api/uploadthing/core.ts` never runs. A well-formed body with a malformed `workspaceId` also gets 400 (input parse runs before the middleware). A well-formed anonymous upload request still gets 403 `Unauthorized` (r4-ui live run). Nothing leaks, and a 403 for empty bodies would need a wrapper that duplicates the auth check. Reproduced at handler level (POST with no body, bare and with `actionType=upload&slug=documentImage`: both 400).**
+- [x] **F-NEW-23** `chrome-devtools-axi` fails to start under npx when the repo `package.json` overrides are read; workaround `CHROME_DEVTOOLS_AXI_MCP_PATH`. Kind: tooling (low impact). Priority: P3. Status: closed for this repo: the workaround and the `BRIDGE_NOT_READY` caveats are documented in `.agents/skills/verify/SKILL.md` (around line 125). The failure is in the external tool, so no repo change is possible; revisit if the tool is fixed upstream.
 
 ### Pre-deploy checklist (2026-10-04 changes)
 
