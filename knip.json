@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "realtime/bootstrap.mjs!",
+    "realtime/server.ts!",
+    "lib/db/seed.ts!",
+    "drizzle.auth.config.ts",
+    "next.config.ts!",
+    "tests/**/*.ts"
+  ],
+  "ignore": ["components/ui/**"],
+  "ignoreDependencies": ["sharp"],
+  "ignoreExportsUsedInFile": true
+}
