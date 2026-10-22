@@ -24,7 +24,7 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@auth/core": "^0.37.4",
+    "@auth/core": "^0.41.3",
     "@auth/drizzle-adapter": "^1.7.4",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.1",
