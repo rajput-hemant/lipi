@@ -1,6 +1,9 @@
 {
   "name": "Lipi",
   "short_name": "Lipi",
+  "description": "Open-source collaborative workspace for nested documents and real-time team editing.",
+  "id": "/",
+  "scope": "/",
   "start_url": "/",
   "icons": [
     { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },

@@ -1,8 +1,11 @@
+import { Suspense } from "react";
+
 import type { Metadata } from "next";
 
 import { Skeleton } from "@/components/bones-skeleton";
 import { siteConfig } from "@/config/site";
 import { getCurrentUser } from "@/lib/auth";
+import { pageOpenGraph } from "@/lib/open-graph";
 import { PricingPlans } from "./pricing-plans";
 
 export const metadata: Metadata = {
@@ -10,13 +13,21 @@ export const metadata: Metadata = {
   description:
     "Simple, transparent pricing for individuals and collaborative teams.",
   alternates: { canonical: "/pricing" },
+  openGraph: pageOpenGraph({
+    title: "Pricing",
+    description:
+      "Simple, transparent pricing for individuals and collaborative teams.",
+    url: "/pricing",
+  }),
 };
 
-export const instant = false;
-
-export default async function PricingPage() {
+async function AuthPricingPlans() {
   const user = await getCurrentUser();
 
+  return <PricingPlans isAuthenticated={!!user} />;
+}
+
+export default function PricingPage() {
   return (
     <section className="flex flex-col gap-6 py-8 md:gap-10">
       <div className="flex flex-col gap-4 rounded-3xl bg-muted p-6 md:p-10 lg:p-16 xl:p-20">
@@ -29,9 +40,15 @@ export default async function PricingPage() {
         </p>
       </div>
 
-      <Skeleton name="pricing-plans" loading={false}>
-        <PricingPlans isAuthenticated={!!user} />
-      </Skeleton>
+      <Suspense
+        fallback={
+          <Skeleton name="pricing-plans" loading>
+            <PricingPlans isAuthenticated={false} />
+          </Skeleton>
+        }
+      >
+        <AuthPricingPlans />
+      </Suspense>
 
       <div className="mx-auto max-w-[58rem] text-muted-foreground">
         <span className="font-handwriting font-semibold lowercase text-foreground">

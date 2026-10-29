@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 
 import { Separator } from "@/components/ui/separator";
 import { LEGAL } from "@/lib/constants";
+import { pageOpenGraph } from "@/lib/open-graph";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "Read the Lipi Privacy Policy and learn about data protection and privacy.",
   alternates: { canonical: "/privacy" },
+  openGraph: pageOpenGraph({
+    title: "Privacy Policy",
+    description:
+      "Read the Lipi Privacy Policy and learn about data protection and privacy.",
+    url: "/privacy",
+  }),
 };
 
 export default function PrivacyPage() {

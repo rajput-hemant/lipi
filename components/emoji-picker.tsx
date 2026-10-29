@@ -18,7 +18,15 @@ type EmojiPickerProps = React.HTMLAttributes<HTMLSpanElement> & {
 };
 
 export function EmojiPicker(props: EmojiPickerProps) {
-  const { side, align, getValue, children, className, ...restProps } = props;
+  const {
+    side,
+    align,
+    getValue,
+    children,
+    className,
+    "aria-label": ariaLabel = "Choose emoji",
+    ...restProps
+  } = props;
 
   const { resolvedTheme } = useTheme();
 
@@ -32,7 +40,7 @@ export function EmojiPicker(props: EmojiPickerProps) {
         nativeButton={false}
         render={
           <span
-            aria-label="Choose emoji"
+            aria-label={ariaLabel}
             className="inline-flex cursor-pointer items-center justify-center"
           />
         }

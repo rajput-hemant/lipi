@@ -28,6 +28,8 @@ export const WorkspaceLayout: React.FCC<{
 
   if (!user) redirect("/login");
 
+  const cookiesPromise = cookies();
+
   let membership;
   try {
     membership = await getRequestMembership(user.id, workspaceId);
@@ -44,7 +46,7 @@ export const WorkspaceLayout: React.FCC<{
   }
   const { workspace, role } = membership;
 
-  const cookieStore = await cookies();
+  const cookieStore = await cookiesPromise;
 
   const defaultOpen = isSidebarOpen(cookieStore.get(SIDEBAR_COOKIE)?.value);
 

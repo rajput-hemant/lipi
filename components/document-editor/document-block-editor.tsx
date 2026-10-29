@@ -234,7 +234,7 @@ function DocumentBlockEditorConnected({
     !blockQuotaExceeded;
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-6 pb-24">
+    <div className="relative mx-auto w-full max-w-3xl px-6 pb-24">
       {blockQuotaExceeded ?
         <p className="py-2 text-sm text-destructive" role="alert">
           Free plan allows up to 500 blocks. Your latest changes were not saved.
@@ -242,15 +242,18 @@ function DocumentBlockEditorConnected({
           blocks.
         </p>
       : null}
-      {connectionStatus !== "connected" || !isSynced || isReadOnly ?
-        <p className="py-2 text-sm text-muted-foreground" role="status">
-          {connectionStatus !== "connected" ?
-            "Reconnecting to collaborators..."
-          : !isSynced ?
-            "Syncing page..."
-          : "View only"}
-        </p>
-      : null}
+      <p
+        className="pointer-events-none absolute right-6 top-1 text-xs text-muted-foreground"
+        role="status"
+      >
+        {connectionStatus !== "connected" ?
+          "Reconnecting to collaborators..."
+        : !isSynced ?
+          "Syncing page..."
+        : isReadOnly ?
+          "View only"
+        : null}
+      </p>
       <BlockNoteView
         editor={editor}
         editable={editable}

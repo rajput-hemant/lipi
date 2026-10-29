@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import dynamic from "next/dynamic";
 import {
   Delete02Icon,
   GridIcon,
@@ -12,8 +13,6 @@ import type { IconSvgElement } from "@hugeicons/react";
 import { siteConfig } from "@/config/site";
 import { usePageAccess } from "@/hooks/use-app-state";
 import { Logo } from "../icons";
-import { Settings } from "../settings";
-import { Trash } from "../trash";
 import {
   Sidebar,
   SidebarContent,
@@ -37,8 +36,25 @@ type SidebarNavItem = {
   description: string;
   viewerDescription?: string;
   icon: IconSvgElement;
-  content: React.FC;
+  content: React.ComponentType;
 };
+
+// Dialog content only mounts when opened, so keep these out of the initial bundle.
+function DialogBodySkeleton() {
+  return (
+    <div
+      className="h-[min(24rem,50vh)] animate-pulse rounded-md bg-muted/50"
+      aria-hidden="true"
+    />
+  );
+}
+
+const Settings = dynamic(() => import("../settings").then((m) => m.Settings), {
+  loading: DialogBodySkeleton,
+});
+const Trash = dynamic(() => import("../trash").then((m) => m.Trash), {
+  loading: DialogBodySkeleton,
+});
 
 const sidebarNavItems: SidebarNavItem[] = [
   {
