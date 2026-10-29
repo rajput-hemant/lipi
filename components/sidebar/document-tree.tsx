@@ -12,6 +12,7 @@ import {
   Delete02Icon,
   File01Icon,
   FileNotFoundIcon,
+  Link01Icon,
   PlusSignIcon,
   Tick02Icon,
 } from "@hugeicons/core-free-icons";
@@ -37,6 +38,7 @@ import {
 import {
   createDocument,
   duplicateDocument,
+  restoreDocument,
   softDeleteDocumentTree,
   updateDocument,
 } from "@/lib/db/actions/document";
@@ -48,8 +50,10 @@ import {
 } from "@/lib/db/document-tree-navigation";
 import { collectDescendantIds } from "@/lib/db/documents-tree";
 import {
-  isMutationQuotaExceeded,
+  isMutationDenied,
+  mutationErrorMessage,
   runMutationToast,
+  unwrapMutation,
 } from "@/lib/db/mutation-result";
 import { cn } from "@/lib/utils";
 import { EmojiPicker } from "../emoji-picker";
@@ -77,8 +81,11 @@ import {
   getDocumentForest,
   toDocumentRecords,
 } from "./document-tree-utils";
-
-const ASK_OWNER_TO_UPGRADE = "Ask the workspace owner to upgrade to Pro.";
+import {
+  ASK_OWNER_TO_UPGRADE,
+  useCreateRootPage,
+  useGuardedPush,
+} from "./use-create-root-page";
 
 type DocumentTreeItemProps = {
   node: DocumentTreeNode;
@@ -103,6 +110,7 @@ function DocumentTreeItem({
 }: DocumentTreeItemProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const beginPush = useGuardedPush();
   const notifyPageChanges = useNotifyWorkspacePageChanges();
   const {
     addDocument,
@@ -165,6 +173,7 @@ function DocumentTreeItem({
       updatedAt: new Date().toISOString(),
     };
 
+    const push = beginPush();
     addDocument(newDocument);
     expandNode(node.id);
     setCreatingChild(false);
@@ -175,6 +184,7 @@ function DocumentTreeItem({
       loading: "Creating page...",
       success: () => {
         notifyPageChanges();
+        push(`/dashboard/${workspaceId}/${newDocument.id}`);
         return "Page created.";
       },
       failed: "Could not create page.",
@@ -215,6 +225,17 @@ function DocumentTreeItem({
     });
   }
 
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/dashboard/${workspaceId}/${node.id}`
+      );
+      toast.success("Link copied.");
+    } catch {
+      toast.error("Could not copy link.");
+    }
+  }
+
   async function moveToTrash() {
     const records = toDocumentRecords(allDocuments);
     const trashIds = new Set([
@@ -238,22 +259,62 @@ function DocumentTreeItem({
       : result
     );
 
-    runMutationToast(pending, {
+    const rollback = () => {
+      for (const document of previous) {
+        updateDocumentState({ ...document });
+      }
+    };
+
+    let redirectedFrom: string | undefined;
+
+    function undo() {
+      rollback();
+      // Only this operation's pages: server-side restore would otherwise also
+      // bring back descendants the user trashed earlier.
+      const restoredIds = previous
+        .filter((document) => !document.inTrash)
+        .map((document) => document.id);
+      runMutationToast(restoreDocument(node.id, restoredIds), {
+        loading: "Restoring page...",
+        success: () => {
+          notifyPageChanges();
+          if (
+            redirectedFrom &&
+            window.location.pathname === `/dashboard/${workspaceId}`
+          ) {
+            router.push(`/dashboard/${workspaceId}/${redirectedFrom}`);
+          }
+          return "Page restored";
+        },
+        failed: "Failed to restore page",
+        denied: "You do not have permission to restore pages.",
+        onError: () => {
+          for (const document of previous) {
+            updateDocumentState({ ...document, inTrash: true });
+          }
+        },
+      });
+    }
+
+    toast.promise(unwrapMutation(pending), {
       loading: "Moving to trash...",
       success: () => {
         const openDocumentId = pathname.split("/")[3];
         if (openDocumentId && trashIds.has(openDocumentId)) {
+          redirectedFrom = openDocumentId;
           router.push(`/dashboard/${workspaceId}`);
         }
         notifyPageChanges();
-        return "Moved to trash.";
+        return {
+          message: "Moved to trash.",
+          action: { label: "Undo", onClick: undo },
+        };
       },
-      failed: "Could not move to trash.",
-      denied: "You do not have permission to move this page to trash.",
-      onError: () => {
-        for (const document of previous) {
-          updateDocumentState({ ...document });
-        }
+      error: (error) => {
+        rollback();
+        return isMutationDenied(error) ?
+            "You do not have permission to move this page to trash."
+          : mutationErrorMessage(error, "Could not move to trash.");
       },
     });
   }
@@ -404,6 +465,14 @@ function DocumentTreeItem({
               />
               Duplicate
             </ContextMenuItem>
+            <ContextMenuItem className="cursor-pointer" onClick={copyLink}>
+              <HugeiconsIcon
+                icon={Link01Icon}
+                strokeWidth={2}
+                className="mr-2 size-4"
+              />
+              Copy link
+            </ContextMenuItem>
             <ContextMenuItem
               variant="destructive"
               className="cursor-pointer"
@@ -480,10 +549,9 @@ function DocumentTreeItem({
 
 export function DocumentTree() {
   const { setOpen, hasProEntitlement } = useSubscriptionModal();
-  const notifyPageChanges = useNotifyWorkspacePageChanges();
-  const { workspace, role, documents, addDocument, deleteDocument } =
-    useAppState();
+  const { workspace, role, documents } = useAppState();
   const workspaceId = workspace?.id ?? "";
+  const createRootPage = useCreateRootPage(workspaceId);
   const isOwner = role === "owner";
   const access = usePageAccess();
   const canEdit = access === "edit";
@@ -577,7 +645,7 @@ export function DocumentTree() {
     setIsCreatingRoot((prev) => !prev);
   }
 
-  async function createRootPage(e: React.FormEvent) {
+  function submitRootPage(e: React.FormEvent) {
     e.preventDefault();
     const title = rootTitle.trim();
     if (title.length < 1) {
@@ -585,42 +653,10 @@ export function DocumentTree() {
       return;
     }
 
-    const newDocument: DocumentSummary = {
-      id: uuid(),
-      workspaceId,
-      parentId: null,
-      title,
-      icon: rootIcon,
-      bannerUrl: null,
-      inTrash: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    addDocument(newDocument);
+    createRootPage(title, rootIcon);
     setIsCreatingRoot(false);
     setRootTitle("Untitled");
     setRootIcon("");
-
-    const pending = createDocument(newDocument).then((result) =>
-      !isOwner && !result.ok && result.code === "QUOTA_EXCEEDED" ?
-        { ...result, message: ASK_OWNER_TO_UPGRADE }
-      : result
-    );
-
-    runMutationToast(pending, {
-      loading: "Creating page...",
-      success: () => {
-        notifyPageChanges();
-        return "Page created.";
-      },
-      failed: "Could not create page.",
-      denied: "You do not have permission to create pages.",
-      onError: (error) => {
-        deleteDocument(newDocument.id);
-        if (isOwner && isMutationQuotaExceeded(error)) setOpen(true);
-      },
-    });
   }
 
   return (
@@ -664,7 +700,7 @@ export function DocumentTree() {
           >
             {isCreatingRoot && (
               <SidebarMenuItem>
-                <form onSubmit={createRootPage} className="relative mb-1">
+                <form onSubmit={submitRootPage} className="relative mb-1">
                   <EmojiPicker
                     title="Select an emoji"
                     side="right"

@@ -14,6 +14,7 @@ import type { DocumentSummary } from "@/types/db";
 
 import { toAllDocumentRecords } from "@/components/sidebar/document-tree-utils";
 import {
+  useAppActions,
   useAppState,
   useCanEditPages,
   usePageAccess,
@@ -24,7 +25,12 @@ import {
 } from "@/lib/db/actions/document";
 import { patchDocumentsForRestore } from "@/lib/db/client-document-state";
 import { assertPermanentDeleteAllowed } from "@/lib/db/document-operations";
-import { runMutationToast } from "@/lib/db/mutation-result";
+import {
+  isMutationDenied,
+  mutationErrorMessage,
+  runMutationToast,
+  unwrapMutation,
+} from "@/lib/db/mutation-result";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,9 +54,12 @@ function cloneDocuments(
 
 export function Trash() {
   const { documents, replaceDocuments } = useAppState();
+  const { addDocument } = useAppActions();
   const canEdit = useCanEditPages();
   const isViewer = usePageAccess() === "view";
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [confirmingEmpty, setConfirmingEmpty] = useState(false);
+  const [isEmptying, setIsEmptying] = useState(false);
 
   const trashed = documents.filter((document) => document.inTrash);
   const pendingDocument = trashed.find(
@@ -102,9 +111,97 @@ export function Trash() {
     }
   }
 
+  async function emptyTrash() {
+    setConfirmingEmpty(false);
+    const records = toAllDocumentRecords(documents);
+    const trashedIds = new Set(trashed.map((document) => document.id));
+    const targets: { id: string; deleteIds: string[] }[] = [];
+
+    for (const document of trashed) {
+      if (document.parentId && trashedIds.has(document.parentId)) continue;
+      try {
+        targets.push({
+          id: document.id,
+          deleteIds: assertPermanentDeleteAllowed(records, document.id),
+        });
+      } catch {
+        // Roots with active descendants stay in the trash.
+      }
+    }
+
+    if (!targets.length) {
+      toast.error("Something went wrong", {
+        description: "These pages cannot be deleted permanently.",
+      });
+      return;
+    }
+
+    const previous = cloneDocuments(documents);
+    const removed = new Set(targets.flatMap((target) => target.deleteIds));
+    const skipped = trashed.filter((d) => !removed.has(d.id)).length;
+    replaceDocuments(previous.filter((document) => !removed.has(document.id)));
+    setIsEmptying(true);
+
+    const pending = Promise.allSettled(
+      targets.map((target) =>
+        unwrapMutation(deleteDocumentPermanently(target.id))
+      )
+    )
+      .then((results) => {
+        const failures = results.flatMap((result, index) =>
+          result.status === "rejected" ?
+            [{ target: targets[index], result }]
+          : []
+        );
+        const kept = new Set(failures.flatMap((f) => f.target.deleteIds));
+        // Re-add only the failed rows so edits made meanwhile are not lost.
+        for (const document of previous) {
+          if (kept.has(document.id)) addDocument(document);
+        }
+        if (failures.length === targets.length) throw failures[0].result.reason;
+        return failures.length;
+      })
+      .finally(() => setIsEmptying(false));
+
+    toast.promise(pending, {
+      loading: "Emptying trash...",
+      success: (failed) => {
+        const count = (n: number) => `${n} ${n === 1 ? "page" : "pages"}`;
+        const notes = [
+          failed && `${count(failed)} could not be deleted`,
+          skipped &&
+            `${count(skipped)} still ${skipped === 1 ? "contains" : "contain"} pages outside the trash`,
+        ].filter(Boolean);
+        return notes.length ?
+            `Trash emptied, but ${notes.join(" and ")}.`
+          : "Trash emptied.";
+      },
+      error: (error) =>
+        isMutationDenied(error) ?
+          "You do not have permission to delete pages."
+        : mutationErrorMessage(
+            error,
+            "Something went wrong! Unable to empty trash."
+          ),
+    });
+  }
+
   return (
     <div className="flex h-full flex-col gap-2">
-      <p className="px-4 text-sm font-medium text-muted-foreground">Trash</p>
+      <div className="flex items-center justify-between gap-2 px-4">
+        <p className="text-sm font-medium text-muted-foreground">Trash</p>
+        {canEdit && trashed.length > 0 && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-destructive"
+            disabled={isEmptying}
+            onClick={() => setConfirmingEmpty(true)}
+          >
+            {isEmptying ? "Emptying..." : "Empty trash"}
+          </Button>
+        )}
+      </div>
       {isViewer && trashed.length > 0 && (
         <p className="px-4 text-xs text-muted-foreground">
           You have view-only access. Ask an editor or the owner to restore or
@@ -224,6 +321,24 @@ export function Trash() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmPermanentDelete}>
               Delete permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmingEmpty} onOpenChange={setConfirmingEmpty}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Empty trash?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This cannot be undone. Trashed pages will be removed forever,
+              except any that still contain pages outside the trash.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={emptyTrash}>
+              Empty trash
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -31,7 +31,7 @@ function doc(id: string, title: string) {
   return {
     id,
     workspaceId: "w",
-    parentId: null,
+    parentId: null as string | null,
     title,
     icon: "",
     bannerUrl: null,
@@ -69,6 +69,11 @@ const byText = (text: string) =>
   [...document.querySelectorAll<HTMLButtonElement>("button")].find(
     (b) => b.textContent === text
   );
+// Dialog actions are portalled after the page's own buttons.
+const lastByText = (text: string) =>
+  [...document.querySelectorAll<HTMLButtonElement>("button")]
+    .filter((b) => b.textContent === text)
+    .at(-1);
 
 beforeAll(() => {
   (
@@ -129,6 +134,46 @@ describe("Trash", () => {
     await act(async () => byText("Delete permanently")!.click());
     expect(deleteDocumentPermanently).toHaveBeenCalledWith("a");
     expect(store.documents.map((d) => d.id)).toEqual(["b"]);
+  });
+
+  describe("empty trash", () => {
+    it("confirms, then deletes every trashed root page once", async () => {
+      const child = { ...doc("a1", "Child"), parentId: "a" };
+      const { store } = render([doc("a", "Alpha"), child, doc("b", "Beta")]);
+      await act(async () => byText("Empty trash")!.click());
+      expect(deleteDocumentPermanently).not.toHaveBeenCalled();
+
+      await act(async () => lastByText("Empty trash")!.click());
+      expect(deleteDocumentPermanently).toHaveBeenCalledTimes(2);
+      expect(deleteDocumentPermanently).toHaveBeenCalledWith("a");
+      expect(deleteDocumentPermanently).toHaveBeenCalledWith("b");
+      expect(toast.promise).toHaveBeenCalledTimes(1);
+      expect(store.documents).toHaveLength(0);
+    });
+
+    it("brings back pages whose delete failed", async () => {
+      deleteDocumentPermanently.mockResolvedValueOnce({
+        ok: false,
+        code: "INVALID",
+        message: "nope",
+      } as never);
+      const { store } = render();
+      await act(async () => byText("Empty trash")!.click());
+      await act(async () => lastByText("Empty trash")!.click());
+      await act(async () => {
+        await vi.mocked(toast.promise).mock.calls[0][0];
+      });
+
+      expect(store.documents.map((d) => d.id)).toEqual(["a"]);
+    });
+
+    it("is hidden for viewers and when the trash is empty", () => {
+      render(undefined, "viewer");
+      expect(byText("Empty trash")).toBeUndefined();
+      document.body.innerHTML = "";
+      render([]);
+      expect(byText("Empty trash")).toBeUndefined();
+    });
   });
 
   it("hides restore and delete controls for viewers", () => {

@@ -247,6 +247,18 @@ export function DocumentHeader({ document }: DocumentHeaderProps) {
           <Textarea
             value={title}
             onChange={onTitleChange}
+            onKeyDown={(e) => {
+              // keyCode 229 covers Safari, which ends composition before keydown.
+              if (
+                e.key !== "Enter" ||
+                e.nativeEvent.isComposing ||
+                e.keyCode === 229
+              )
+                return;
+              // Titles are single-line: Enter moves on to the body.
+              e.preventDefault();
+              window.document.querySelector<HTMLElement>(".bn-editor")?.focus();
+            }}
             rows={1}
             aria-label="Page title"
             placeholder="Untitled"

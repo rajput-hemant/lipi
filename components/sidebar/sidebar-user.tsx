@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 function UserDetails() {
   const { user } = useAppState();
-  const { hasProEntitlement, hasErrored } = useSubscriptionModal();
+  const { hasProEntitlement, hasErrored, setOpen } = useSubscriptionModal();
 
   return (
     <div className="min-w-0 flex-1 font-medium">
@@ -20,9 +20,13 @@ function UserDetails() {
         {user?.name ?? "Update your profile"}
       </p>
       {!hasErrored && (
-        <p className="line-clamp-1 text-xs text-muted-foreground">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="line-clamp-1 text-left text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:underline focus-visible:outline-none"
+        >
           {hasProEntitlement ? "Pro plan" : "Free plan"}
-        </p>
+        </button>
       )}
       <Link
         href="/dashboard/change-password"
@@ -39,7 +43,7 @@ function UserAvatar({ className }: { className?: string }) {
 
   return (
     <Avatar className={className}>
-      <AvatarImage src={user?.image ?? undefined} />
+      <AvatarImage src={user?.image ?? undefined} alt={user?.name ?? ""} />
       <AvatarFallback>
         <HugeiconsIcon
           icon={UserIcon}

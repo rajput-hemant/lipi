@@ -31,6 +31,12 @@ describe("SidebarUser plan label", () => {
     expect(render({ hasProEntitlement: false })).toContain("Free plan");
   });
 
+  it("renders the plan as a button that opens the subscription modal", () => {
+    expect(render({ hasProEntitlement: false })).toMatch(
+      /<button type="button"[^>]*>Free plan<\/button>/
+    );
+  });
+
   it("hides the plan when the subscription lookup failed", () => {
     const html = render({ hasProEntitlement: false, hasErrored: true });
     expect(html).not.toContain("Free plan");

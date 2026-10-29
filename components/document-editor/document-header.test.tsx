@@ -113,3 +113,44 @@ describe("DocumentHeader save failures", () => {
     expect(h1.textContent).toBe("Renamed");
   });
 });
+
+describe("DocumentHeader title Enter", () => {
+  it("keeps the title single-line and focuses the editor", async () => {
+    vi.useFakeTimers();
+    updateDocument.mockResolvedValue({ ok: true, document: page });
+    const container = await editTitle("Renamed");
+    const editor = document.createElement("div");
+    editor.className = "bn-editor";
+    editor.tabIndex = 0;
+    document.body.append(editor);
+
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    });
+    await act(async () => {
+      container.querySelector("textarea")!.dispatchEvent(event);
+    });
+
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(editor);
+  });
+
+  it("leaves other keys alone", async () => {
+    vi.useFakeTimers();
+    updateDocument.mockResolvedValue({ ok: true, document: page });
+    const container = await editTitle("Renamed");
+
+    const event = new KeyboardEvent("keydown", {
+      key: "a",
+      bubbles: true,
+      cancelable: true,
+    });
+    await act(async () => {
+      container.querySelector("textarea")!.dispatchEvent(event);
+    });
+
+    expect(event.defaultPrevented).toBe(false);
+  });
+});

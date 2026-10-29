@@ -16,7 +16,10 @@ import { DocumentTree } from "./document-tree";
 const {
   createDocument,
   duplicateDocument,
+  restoreDocument,
   softDeleteDocumentTree,
+  push,
+  successResults,
   errorMessages,
   pendingPromises,
   setModalOpen,
@@ -25,7 +28,10 @@ const {
 } = vi.hoisted(() => ({
   createDocument: vi.fn(),
   duplicateDocument: vi.fn(),
+  restoreDocument: vi.fn(),
   softDeleteDocumentTree: vi.fn(),
+  push: vi.fn(),
+  successResults: [] as unknown[],
   errorMessages: [] as unknown[],
   pendingPromises: [] as Promise<unknown>[],
   setModalOpen: vi.fn(),
@@ -34,8 +40,8 @@ const {
 }));
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
-  usePathname: () => "/dashboard/ws-1",
+  useRouter: () => ({ push }),
+  usePathname: () => window.location.pathname,
 }));
 vi.mock("@/components/realtime/workspace-realtime-provider", () => ({
   useNotifyWorkspacePageChanges: () => vi.fn(),
@@ -49,6 +55,7 @@ vi.mock("../subscription-modal-provider", () => ({
 vi.mock("@/lib/db/actions/document", () => ({
   createDocument,
   duplicateDocument,
+  restoreDocument,
   softDeleteDocumentTree,
   updateDocument: vi.fn(),
 }));
@@ -57,13 +64,21 @@ vi.mock("sonner", () => ({
     warning: vi.fn(),
     error: vi.fn(),
     info: vi.fn(),
+    success: vi.fn(),
     promise: (
       promise: Promise<unknown>,
-      opts: { error: (e: unknown) => unknown }
+      opts: {
+        success: (data: unknown) => unknown;
+        error: (e: unknown) => unknown;
+      }
     ) => {
-      const p = Promise.resolve(promise).catch((e) => {
-        errorMessages.push(opts.error(e));
-      });
+      const p = Promise.resolve(promise)
+        .then((data) => {
+          successResults.push(opts.success(data));
+        })
+        .catch((e) => {
+          errorMessages.push(opts.error(e));
+        });
       pendingPromises.push(p);
       return p;
     },
@@ -139,6 +154,11 @@ function openMenuItem(label: string) {
   )!;
 }
 
+async function clickMenuItem(label: string) {
+  const item = openMenuItem(label);
+  await act(async () => item.click());
+}
+
 async function submitForm() {
   await act(async () => {
     document
@@ -152,13 +172,16 @@ const ids = (store: ReturnType<typeof render>) =>
   store.documents.map((d) => d.id);
 
 beforeAll(() => {
+  history.replaceState({}, "", "/dashboard/ws-1");
   (
     globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
   ).IS_REACT_ACT_ENVIRONMENT = true;
 });
 
 afterEach(() => {
+  history.replaceState({}, "", "/dashboard/ws-1");
   errorMessages.length = 0;
+  successResults.length = 0;
   proEntitlement.value = true;
   pendingPromises.length = 0;
   act(() => {
@@ -342,5 +365,144 @@ describe("trash and root quota toasts", () => {
     await submitForm();
 
     expect(setModalOpen).not.toHaveBeenCalled();
+  });
+});
+
+describe("navigation, undo and copy link", () => {
+  it("opens the new child page after it is created", async () => {
+    createDocument.mockResolvedValue({ ok: true, data: undefined });
+    const store = render();
+
+    await clickMenuItem("New subpage");
+    await submitForm();
+
+    const created = ids(store).find((id) => id !== "a" && id !== "b");
+    expect(push).toHaveBeenCalledExactlyOnceWith(`/dashboard/ws-1/${created}`);
+  });
+
+  it("opens the new root page after it is created", async () => {
+    createDocument.mockResolvedValue({ ok: true, data: undefined });
+    const store = render();
+
+    act(() =>
+      document
+        .querySelector<HTMLButtonElement>('button[aria-label="New page"]')!
+        .click()
+    );
+    await submitForm();
+
+    const created = ids(store).find((id) => id !== "a" && id !== "b");
+    expect(push).toHaveBeenCalledExactlyOnceWith(`/dashboard/ws-1/${created}`);
+  });
+
+  it("does not navigate when creation fails", async () => {
+    createDocument.mockResolvedValue({ ok: false, code: "FORBIDDEN" });
+    render();
+
+    await clickMenuItem("New subpage");
+    await submitForm();
+
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("offers Undo after trashing that restores the page", async () => {
+    softDeleteDocumentTree.mockResolvedValue({ ok: true, data: undefined });
+    restoreDocument.mockResolvedValue({ ok: true, data: undefined });
+    const store = render();
+
+    await clickMenuItem("Move to trash");
+    await flush();
+    expect(store.documents.find((d) => d.id === "a")!.inTrash).toBe(true);
+
+    const result = successResults[0] as {
+      message: string;
+      action: { label: string; onClick: () => void };
+    };
+    expect(result.message).toBe("Moved to trash.");
+    expect(result.action.label).toBe("Undo");
+
+    await act(async () => result.action.onClick());
+    await flush();
+
+    expect(restoreDocument).toHaveBeenCalledExactlyOnceWith("a", ["a"]);
+    expect(store.documents.find((d) => d.id === "a")!.inTrash).toBe(false);
+  });
+
+  it("Undo restores only this operation's pages, not earlier-trashed children", async () => {
+    softDeleteDocumentTree.mockResolvedValue({ ok: true, data: undefined });
+    restoreDocument.mockResolvedValue({ ok: true, data: undefined });
+    const earlier = { ...doc("a1", "a"), inTrash: true };
+    const store = render([doc("a"), doc("a2", "a"), earlier]);
+
+    await clickMenuItem("Move to trash");
+    await flush();
+    const result = successResults[0] as { action: { onClick: () => void } };
+    await act(async () => result.action.onClick());
+    await flush();
+
+    expect(restoreDocument).toHaveBeenCalledExactlyOnceWith("a", ["a", "a2"]);
+    const inTrash = (id: string) =>
+      store.documents.find((d) => d.id === id)!.inTrash;
+    expect([inTrash("a"), inTrash("a2"), inTrash("a1")]).toEqual([
+      false,
+      false,
+      true,
+    ]);
+  });
+
+  it("Undo returns to the page that was open when it was trashed", async () => {
+    history.replaceState({}, "", "/dashboard/ws-1/a");
+    softDeleteDocumentTree.mockResolvedValue({ ok: true, data: undefined });
+    restoreDocument.mockResolvedValue({ ok: true, data: undefined });
+    render();
+
+    await clickMenuItem("Move to trash");
+    await flush();
+    expect(push).toHaveBeenCalledExactlyOnceWith("/dashboard/ws-1");
+    await act(async () => {
+      history.replaceState({}, "", "/dashboard/ws-1");
+    });
+    push.mockClear();
+
+    const result = successResults[0] as { action: { onClick: () => void } };
+    await act(async () => result.action.onClick());
+    await flush();
+
+    expect(push).toHaveBeenCalledExactlyOnceWith("/dashboard/ws-1/a");
+  });
+
+  it("re-trashes the page when Undo fails", async () => {
+    softDeleteDocumentTree.mockResolvedValue({ ok: true, data: undefined });
+    restoreDocument.mockResolvedValue({ ok: false, code: "FORBIDDEN" });
+    const store = render();
+
+    await clickMenuItem("Move to trash");
+    await flush();
+    const { action } = successResults[0] as {
+      action: { onClick: () => void };
+    };
+    await act(async () => action.onClick());
+    await flush();
+
+    expect(store.documents.find((d) => d.id === "a")!.inTrash).toBe(true);
+    expect(errorMessages).toEqual([
+      "You do not have permission to restore pages.",
+    ]);
+  });
+
+  it("copies the absolute page link", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    render();
+
+    await clickMenuItem("Copy link");
+
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(
+      `${window.location.origin}/dashboard/ws-1/a`
+    );
+    expect(toast.success).toHaveBeenCalledWith("Link copied.");
   });
 });

@@ -264,7 +264,12 @@ export async function softDeleteDocumentTree(documentId: string) {
   );
 }
 
-export async function restoreDocument(documentId: string) {
+/**
+ * Restores a trashed page with its trashed ancestors and descendants, or, when
+ * `onlyIds` is given (Undo), exactly those pages: each must be trashed and be
+ * the page itself or one of its descendants in the same workspace.
+ */
+export async function restoreDocument(documentId: string, onlyIds?: string[]) {
   return runDocumentMutation(
     "Failed to restore document",
     async (revalidate) => {
@@ -280,7 +285,10 @@ export async function restoreDocument(documentId: string) {
           existing.workspaceId,
           tx
         );
-        const ids = collectRestoreTargetIds(workspaceDocs, documentId);
+        const ids =
+          onlyIds ?
+            validateExplicitRestoreIds(workspaceDocs, documentId, onlyIds)
+          : collectRestoreTargetIds(workspaceDocs, documentId);
         const topmost = workspaceDocs.find(
           (document) => document.id === ids[0]
         );
@@ -305,6 +313,25 @@ export async function restoreDocument(documentId: string) {
       return count;
     }
   );
+}
+
+function validateExplicitRestoreIds(
+  workspaceDocs: Awaited<ReturnType<typeof loadWorkspaceDocuments>>,
+  documentId: string,
+  onlyIds: string[]
+) {
+  const allowed = new Set([
+    documentId,
+    ...collectDescendantIds(workspaceDocs, documentId),
+  ]);
+  const trashed = new Set(
+    workspaceDocs.filter((document) => document.inTrash).map((d) => d.id)
+  );
+  const ids = [...new Set([documentId, ...onlyIds])];
+  if (!ids.every((id) => allowed.has(id) && trashed.has(id))) {
+    throw new DocumentOperationError("Pages cannot be restored");
+  }
+  return ids;
 }
 
 export async function deleteDocumentPermanently(documentId: string) {

@@ -299,6 +299,48 @@ describe("restoreDocument root page quota", () => {
   });
 });
 
+describe("restoreDocument with explicit ids (Undo)", () => {
+  const t = { ...row("t", null), inTrash: true };
+  const earlier = { ...row("u", "t"), inTrash: true };
+  const now = { ...row("v", "t"), inTrash: true };
+  const live = row("w", "t");
+  const other = { ...row("x", null), inTrash: true };
+
+  beforeEach(() => {
+    mocks.authorizeDocumentMutation.mockResolvedValue({
+      user: { id: "user-1" },
+      document: t,
+    });
+    mocks.workspaceOwnerHasProPlanEntitlement.mockResolvedValue(true);
+    mocks.selectRows.mockResolvedValue([t, earlier, now, live, other]);
+  });
+
+  it("restores only the listed pages, not earlier-trashed descendants", async () => {
+    const where = vi.fn();
+    mocks.update.mockReturnValue({ set: () => ({ where }) });
+
+    await expect(restoreDocument("t", ["t", "v"])).resolves.toEqual({
+      ok: true,
+      data: 2,
+    });
+    const [[condition]] = where.mock.calls as [[{ __inArrayArgs: unknown[] }]];
+    expect(condition.__inArrayArgs[1]).toEqual(["t", "v"]);
+  });
+
+  it.each([
+    ["a live page", ["t", "w"]],
+    ["a page outside the subtree", ["t", "x"]],
+    ["an unknown page", ["t", "nope"]],
+  ])("rejects %s", async (_label, ids) => {
+    mocks.update.mockClear();
+    await expect(restoreDocument("t", ids)).resolves.toMatchObject({
+      ok: false,
+      code: "INVALID",
+    });
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+});
+
 describe("multi-row mutations run in a transaction", () => {
   const trashedRoot = { ...row("t", null), inTrash: true };
   const trashedChild = { ...row("u", "t"), inTrash: true };

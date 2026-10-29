@@ -20,6 +20,7 @@ import {
 import { assertWorkspaceAccess } from "@/lib/db/data/mutation-auth";
 import { hasWorkspacePermission } from "@/lib/workspace/permissions";
 import { InviteNotice, isInvalidInvite } from "../../invite-notice";
+import { NewPageButton } from "./new-page-button";
 import { UpdatedDate } from "./updated-date";
 import { sortByRecentlyUpdated, withParentTitles } from "./workspace-pages";
 
@@ -76,7 +77,9 @@ export default async function WorkspacePage({
   return (
     <div className="flex h-full w-full flex-col overflow-y-auto">
       <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-8">
-        {isInvalidInvite(invite) && <InviteNotice className="mb-6" />}
+        {isInvalidInvite(invite) && (
+          <InviteNotice reason={invite} className="mb-6" />
+        )}
 
         <div className="flex flex-col gap-3 pb-8 border-b">
           <div className="flex items-center gap-3">
@@ -182,10 +185,11 @@ export default async function WorkspacePage({
                 </h3>
                 <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
                   {canEdit ?
-                    "Use the + button next to Pages in the sidebar to start writing, taking notes, and collaborating."
+                    "Create your first page to start writing, taking notes, and collaborating."
                   : "You have view-only access. Pages added by the owner or an editor will show up here."
                   }
                 </p>
+                {canEdit && <NewPageButton workspaceId={workspaceId} />}
               </CardContent>
             </Card>
           }
