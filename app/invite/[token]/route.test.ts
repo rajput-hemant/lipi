@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { InviteError } from "@/lib/db/data/mutation-auth";
 import { GET } from "./route";
 
 const { getCurrentUser, acceptWorkspaceInvite } = vi.hoisted(() => ({
@@ -10,6 +11,17 @@ const { getCurrentUser, acceptWorkspaceInvite } = vi.hoisted(() => ({
 vi.mock("@/lib/auth", () => ({ getCurrentUser }));
 vi.mock("@/lib/db/actions/workspace-members", () => ({
   acceptWorkspaceInvite,
+}));
+
+vi.mock("@/lib/db/data/mutation-auth", () => ({
+  InviteError: class InviteError extends Error {
+    constructor(
+      message: string,
+      readonly reason: string
+    ) {
+      super(message);
+    }
+  },
 }));
 
 vi.mock("next/navigation", () => ({
@@ -49,4 +61,14 @@ describe("GET /invite/[token]", () => {
 
     expect(await call()).toBe("/dashboard?invite=invalid");
   });
+
+  it.each(["expired", "wrong-account"] as const)(
+    "reports a %s invite distinctly",
+    async (reason) => {
+      getCurrentUser.mockResolvedValue({ id: "u" });
+      acceptWorkspaceInvite.mockRejectedValue(new InviteError("x", reason));
+
+      expect(await call()).toBe(`/dashboard?invite=${reason}`);
+    }
+  );
 });

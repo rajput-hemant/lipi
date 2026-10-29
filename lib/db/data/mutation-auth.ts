@@ -25,6 +25,18 @@ export class MutationAuthError extends Error {
   }
 }
 
+export type InviteFailureReason = "invalid" | "expired" | "wrong-account";
+
+export class InviteError extends MutationAuthError {
+  constructor(
+    message: string,
+    readonly reason: InviteFailureReason
+  ) {
+    super(message);
+    this.name = "InviteError";
+  }
+}
+
 export class WorkspaceNotFoundError extends MutationAuthError {
   constructor() {
     super("Workspace not found");

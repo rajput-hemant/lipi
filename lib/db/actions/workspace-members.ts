@@ -13,6 +13,7 @@ import {
   authorizeWorkspaceMemberManagement,
   getWorkspaceMembershipRole,
   getWorkspaceOrThrow,
+  InviteError,
   MutationAuthError,
   requireAuthenticatedUser,
   requireWorkspacePermission,
@@ -247,11 +248,11 @@ export async function acceptWorkspaceInvite(token: string) {
   });
 
   if (!invite) {
-    throw new MutationAuthError("Invite not found");
+    throw new InviteError("Invite not found", "invalid");
   }
 
   if (new Date(invite.expiresAt).getTime() < Date.now()) {
-    throw new MutationAuthError("Invite expired");
+    throw new InviteError("Invite expired", "expired");
   }
 
   const account = await db.query.users.findFirst({
@@ -260,8 +261,9 @@ export async function acceptWorkspaceInvite(token: string) {
   });
 
   if (!account?.email || normalizeEmail(account.email) !== invite.email) {
-    throw new MutationAuthError(
-      "Sign in with the email address that received this invite"
+    throw new InviteError(
+      "Sign in with the email address that received this invite",
+      "wrong-account"
     );
   }
 

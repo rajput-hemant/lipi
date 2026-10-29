@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth";
 import { getDefaultWorkspaceId } from "@/lib/db/data/workspace-lists";
-import { INVALID_INVITE_QUERY, isInvalidInvite } from "./invite-notice";
+import { isInvalidInvite } from "./invite-notice";
 
 export const metadata = {
   title: "Dashboard",
@@ -26,7 +26,7 @@ export default async function DashboardPage({
 
   const { invite } = await searchParams;
   // Forward the flag so the destination can explain the failed invite.
-  const query = isInvalidInvite(invite) ? INVALID_INVITE_QUERY : "";
+  const query = isInvalidInvite(invite) ? `?invite=${invite}` : "";
   const workspaceId = await getDefaultWorkspaceId(user.id);
 
   if (!workspaceId) {

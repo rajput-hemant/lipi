@@ -50,7 +50,7 @@ export default async function WorkspaceSetupPage({
         </h1>
 
         {isInvalidInvite(invite) && (
-          <InviteNotice className="-mt-8 w-full max-w-xl" />
+          <InviteNotice reason={invite} className="-mt-8 w-full max-w-xl" />
         )}
 
         <Card className="z-10 h-fit w-full max-w-xl shadow-lg">

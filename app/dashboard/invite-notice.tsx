@@ -1,12 +1,37 @@
 import { cn } from "@/lib/utils";
 
-export const INVALID_INVITE_QUERY = "?invite=invalid";
+const INVITE_NOTICES = {
+  invalid: {
+    title: "This invite is invalid.",
+    hint: "Ask the workspace owner to send you a new one.",
+  },
+  expired: {
+    title: "This invite has expired.",
+    hint: "Ask the workspace owner to send you a new one.",
+  },
+  "wrong-account": {
+    title: "This invite was sent to a different email address.",
+    hint: "Sign in with the email address that received it.",
+  },
+};
 
-export function isInvalidInvite(invite: string | string[] | undefined) {
-  return invite === "invalid";
+export type InviteReason = keyof typeof INVITE_NOTICES;
+
+export function isInvalidInvite(
+  invite: string | string[] | undefined
+): invite is InviteReason {
+  return typeof invite === "string" && Object.hasOwn(INVITE_NOTICES, invite);
 }
 
-export function InviteNotice({ className }: { className?: string }) {
+export function InviteNotice({
+  className,
+  reason = "invalid",
+}: {
+  className?: string;
+  reason?: InviteReason;
+}) {
+  const { title, hint } = INVITE_NOTICES[reason];
+
   return (
     <div
       role="alert"
@@ -15,10 +40,8 @@ export function InviteNotice({ className }: { className?: string }) {
         className
       )}
     >
-      <p className="font-medium">This invite is invalid or has expired.</p>
-      <p className="mt-0.5 text-destructive/80">
-        Ask the workspace owner to send you a new one.
-      </p>
+      <p className="font-medium">{title}</p>
+      <p className="mt-0.5 text-destructive/80">{hint}</p>
     </div>
   );
 }

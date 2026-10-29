@@ -49,6 +49,14 @@ describe("/dashboard", () => {
     );
   });
 
+  it("forwards the expired and wrong-account flags", async () => {
+    getDefaultWorkspaceId.mockResolvedValue("ws-1");
+
+    expect(await call({ invite: "wrong-account" })).toBe(
+      "/dashboard/ws-1?invite=wrong-account"
+    );
+  });
+
   it("ignores any other invite value", async () => {
     getDefaultWorkspaceId.mockResolvedValue("ws-1");
 
