@@ -1,11 +1,17 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-afterEach(() => {
-  delete process.env.E2E_PG_CONTAINER;
-  delete process.env.E2E_PG_PORT;
-  delete process.env.E2E_APP_PORT;
-  delete process.env.E2E_REALTIME_PORT;
+// stubEnv restores the caller's own E2E_* values after each test.
+beforeEach(() => {
+  for (const name of [
+    "E2E_PG_CONTAINER",
+    "E2E_PG_PORT",
+    "E2E_APP_PORT",
+    "E2E_REALTIME_PORT",
+  ]) {
+    vi.stubEnv(name, undefined);
+  }
 });
+afterEach(() => vi.unstubAllEnvs());
 
 describe("e2e env overrides", () => {
   it("defaults to the checked-in ports", async () => {

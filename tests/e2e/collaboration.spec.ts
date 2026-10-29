@@ -74,21 +74,16 @@ test.describe("real-time collaboration", () => {
 
       await viewerPage.locator(".bn-editor").first().click();
       await viewerPage.keyboard.type("blocked viewer edit");
-      await expect(viewerPage.locator(".bn-editor")).toContainText(livePhrase, {
-        timeout: 60_000,
-      });
-      await expect(viewerPage.locator(".bn-editor")).not.toContainText(
-        "blocked viewer edit"
-      );
+      // Negative checks only mean something after the sync marker round-trips.
       const syncMarker = `Editor sync ${Date.now()}`;
       await typeInEditor(editorPage, syncMarker);
       await expectEditorContains(ownerPage, syncMarker);
-      await expect(ownerPage.locator(".bn-editor")).not.toContainText(
-        "blocked viewer edit"
-      );
-      await expect(editorPage.locator(".bn-editor")).not.toContainText(
-        "blocked viewer edit"
-      );
+      await expectEditorContains(viewerPage, syncMarker);
+      for (const p of [viewerPage, ownerPage, editorPage]) {
+        await expect(p.locator(".bn-editor").first()).not.toContainText(
+          "blocked viewer edit"
+        );
+      }
 
       await expect(async () => {
         const count = await ownerPage

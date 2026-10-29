@@ -2,7 +2,7 @@ import { expect, test } from "./fixtures";
 import { createWorkspace, signUp, uniqueUser } from "./helpers/auth";
 
 test.describe("Stripe checkout redirect", () => {
-  test("attempts redirect to Stripe checkout (mocked billing API, no live payment)", async ({
+  test("redirects to Stripe checkout (mocked billing API, no live payment)", async ({
     page,
   }) => {
     const user = uniqueUser("billing");
@@ -12,41 +12,19 @@ test.describe("Stripe checkout redirect", () => {
     const checkoutUrl =
       "https://checkout.stripe.com/c/pay/cs_test_e2e_mock#e2e-no-payment";
 
-    await page.addInitScript((mockUrl) => {
-      window.__e2eCheckoutRedirect = null;
-      const originalFetch = window.fetch.bind(window);
-      window.fetch = async (input, init) => {
-        const href =
-          typeof input === "string" ? input
-          : input instanceof URL ? input.href
-          : input.url;
-        const method =
-          init?.method ?? (input instanceof Request ? input.method : "GET");
-        if (href.includes("/api/stripe/checkout") && method === "POST") {
-          window.__e2eCheckoutRedirect = mockUrl;
-          return new Response(JSON.stringify({ url: mockUrl }), {
-            status: 200,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-        return originalFetch(input, init);
-      };
-    }, checkoutUrl);
+    await page.route("**/api/stripe/checkout", (route) =>
+      route.fulfill({ json: { url: checkoutUrl } })
+    );
+    // Keep the redirect offline so CI never reaches the real Stripe host.
+    await page.route("https://checkout.stripe.com/**", (route) =>
+      route.fulfill({ status: 200, contentType: "text/html", body: "" })
+    );
 
     await page.goto("/pricing");
 
     await page.getByRole("button", { name: "Go Pro" }).click();
 
-    await expect
-      .poll(async () =>
-        page.evaluate(() => window.__e2eCheckoutRedirect ?? null)
-      )
-      .toBe(checkoutUrl);
+    await page.waitForURL(checkoutUrl);
+    expect(page.url()).toBe(checkoutUrl);
   });
 });
-
-declare global {
-  interface Window {
-    __e2eCheckoutRedirect?: string | null;
-  }
-}
